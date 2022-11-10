@@ -1,0 +1,2333 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <meta charset="UTF-8">
+    <title>Pd Ad2</title>
+</head>
+<body>
+<h1 style="text-align: center">Merge, join, concatenate and compare</h1>
+<p>Pandas provides various facilities for easily combining together Series or DataFrame with various kinds of set logic for the indexes and <br>
+relational algebra functionality in the case of join/ merge type operations.</p>
+<h1 style="color:red">Concatenating Objects</h1>
+    <ul>
+        <li>The concat() function (in the main pandas namespace) does all of the heavy lifting of performing concatenation operations along an<br>
+        axis while performing optional set logic(union or intersection) of the indexes(if any) on the other axes. The 'if any' is only a single<br>
+        possible axis of concatenation for Series.</li>
+        <pre>
+            df1 = pd.DataFrame({'A': ['A0', 'A1', 'A2', 'A3'],
+                                'B': ['B0', 'B1', 'B2', 'B3'],
+                                'C': ['C0', 'C1', 'C2', 'C3'],
+                                'D': ['D0', 'D1', 'D2', 'D3']}, index= np.arange(4))
+            df2 = pd.DataFrame({'A': ['A0', 'A1', 'A2', 'A3'],
+                                'B': ['B0', 'B1', 'B2', 'B3'],
+                                'C': ['C0', 'C1', 'C2', 'C3'],
+                                'D': ['D0', 'D1', 'D2', 'D3']}, index= np.arange(4,8))
+            df3 = pd.DataFrame({'A': ['A0', 'A1', 'A2', 'A3'],
+                                'B': ['B0', 'B1', 'B2', 'B3'],
+                                'C': ['C0', 'C1', 'C2', 'C3'],
+                                'D': ['D0', 'D1', 'D2', 'D3']}, index= np.arange(8,12))
+            pd.concat([df1, df2, df3])
+        </pre>
+        <li>Like its sibling function on ndarrays, numpy.concatenate, pandas.concat takes a list or dict of homogeneously typed objects and <br>
+        concatenates them with some configurable of 'What to do with the other axes'.</li>
+        <pre>
+            pd.concat(objs, axis=0, join='outer', ignore_index=False, keys=None,
+                        levels=None, names=None, verify_integrity=False, copy=True)
+        </pre>
+        <ul>
+            <li><b>objs:</b> a sequence or mapping of Series or DataFrame objects. If a dict is passed, the sorted keys will be used as the keys argument,<br>
+            unless it is passed, in which cases teh values will be selected. Any None objects will be dropped silently unless they are all None in which case<br>
+             a ValueError will be raised.</li>
+            <li><b>axis :{0, 1, ...}, default 0.</b> The axis to concatenate along.</li>
+            <li><b>join: {'inner', 'outer'}, default 'outer'.</b>How to handle indexes on other axis(es). Outer for union and inner for intersection.</li>
+            <li><b>ignore_index: boolean, default False.</b> If True, do not use the index values on the concatenation axis. The resulting axis will<br>
+            be labeled 0, ..., n-1. This is useful if you are concatenating objects where the concatenation axis does not have meaningful indexing information.<br>
+            Note the index values on the other axes are still respected in the join.</li>
+            <li><b>keys: sequence, default None.</b>Construct hierarchical index using the passed keys as the outermost level. If multiple levels passed,<br>
+            should contain tuples.</li>
+            <li><b>levels: list of sequences, default None.</b>Specific level(unique values) to use for constructing a MultiIndex. Otherwise they will be<br>
+            inferred from the keys.</li>
+            <li><b>names: list, default None.</b>Names for the levels in the resulting hierarchical index.</li>
+            <li><b>verify_integrity: boolean, default False.</b>Check whether the new concatenated axis contains duplicates. This can be very expensive <br>
+            relative to the actual data concatenation.</li>
+            <li><b>copy: boolean, default True.</b>If False,do not copy data unnecessarily.</li>
+        </ul>
+        <li>Without a little it of context many of these arguments don't make much sense. Suppose we wanted to associate specific keys with each of the pieces<br>
+        of the chopped up DataFrame. We cn do this using the keys argument:</li>
+        <pre>
+            result = pd.concat([df1, df2, df3], keys=['x', 'y', 'z']) # index df1 as index label x, y for df2, and z for df3
+            result.loc['y']
+        </pre>
+        <li>It is worth noting that concat() (and therefore append()) makes a full copy of the data, and that constantly reusing this function<br>
+        can create a significant performance hit. If you need to use the operation over several datasets, use a list comprehension.</li>
+        <pre>
+            frames = [process_your_file(f) for f in files]
+            pd.concat(frames)
+        </pre>
+        <li>When concatenating DataFrames with named axes, pandas will attempt to preserve these index/column names whenever possible. In the case where<br>
+        all inputs share a common name, this name will be assigned to the result. When the input names do not all agree, the result will be unnamed.<br>
+        The same is true for MultiIndex, but the logic is applied separately on a level-by-level basis.</li>
+<h2 style="color:blue">Set logic on the other axes</h2>
+    <ul>
+        <li>When gluing together multiple DataFrames, you have a choice of how to handle the other axes (other than the one being concatenated).<br>
+        This can be done in two ways:</li>
+        <ul>
+            <li>Take the union of them all, join='outer'. This is default option as it results in zero information loss.</li>
+            <li>Take the intersection, join='inner'.</li>
+        </ul>
+        <pre>
+            df4 = pd.DataFrame({'B': ['B2', 'B3', 'B6', 'B7'],
+                                'D': ['D2', 'D3', 'D6', 'D7'],
+                                'F': ['F2', 'F3', 'F6', 'F7']}, index=[2,3,6,7])
+            result = pd.concat([df1, df4], axis=1) # default, join ='outer', the result consists of all the columns and index in both frames.
+            result = pd.concat([df1, df4], axis=1, join='inner') # the result consists of all columns and just index(2,3) that appear in both frames
+        </pre>
+        <li>Suppose, we just wanted to reuse the exact index from the original DataFrame.</li>
+        <pre>
+            result = pd.concat([df1, df4], axis=1).reindex(df1.index)
+            # The result consists of all the columns of both frames and following index labels of df1
+            # If index labels of df2 exist in df1, the columns will receive the values of df2, else NA
+        </pre>
+        <li>We can also reindex before concat():</li>
+        <pre>
+            result = pd.concat([df1, df4.reindex(df1)], axis=1)
+            # The df4 reindex before concatenating.
+        </pre>
+    </ul>
+<h2 style="color:blue">Concatenating using append</h2>
+    <ul>
+        <li>A useful shortcut to concat() are the append() instance methods on Series and DataFrame. These methods actually predated concat.<br>
+        They concatenate along axis=0, namely the index.</li>
+        <pre>
+            result = df1.append(df2) # the result contains all columns and index of both
+            result = df1.append(df4) # the result contains all columns and index of both
+            result = df1.append(df4, sort=False) # not sort the result
+            result = df1.append([df2, df3])
+        </pre>
+        <li>pandas.append() does not modify df1, it returns its copy with objects(df2, df3, ...) appended.</li>
+    </ul>
+<h2 style="color:blue">Ignoring indexes on the concatenation axis</h2>
+    <ul>
+        <li>For DataFrame objects which don't have a meaningful index, you may want to append them and ignore the fact that they may have overlapping<br>
+        indexes. To do this, use the ignore_index argument.</li>
+        <pre>
+            result = pd.concat([df1, df4], ignore_index=True)
+            # The result with reset_index and df1 data is the above part, df2 is second
+            result = df1.append(df4, ignore_index=True, sort=False)
+            # Similar above, not sort index
+        </pre>
+    </ul>
+<h2 style="color:blue">Concatenating with mixed ndims</h2>
+    <ul>
+        <li>You can concatenate a mix of Series and DataFrame objects. The Series will be transformed to DataFrame with the column name as the <br>
+        name of Series.</li>
+        <pre>
+            s1 = pd.Series(['X0', 'X1', 'X2', 'X3'], name='X')
+            result = pd.concat([df1, s1], axis=1)
+            # The result contains df1 columns and s1 series column with name 'X'
+            # If s1 index labels are differ to df1 index labels, it will append to bottom of df1 with df1 columns NA values, and its columns values
+        </pre>
+        <li>Since we're concatenating a Series to a DataFrame, we could have achieved the same result with DataFrame.assign(). To concatenate an<br>
+        arbitrary number of pandas objects (DataFrame or Series), use concat.</li>
+        <li>If unnamed Series are passed, they will be consecutively.</li>
+        <pre>
+            s2 = pd.Series(['_0', '_1', '_2', '_3'])
+            pd.concat([df1, s2], axis=1)
+            # s2 column in result is 0
+            pd.concat([df1, s2, s2, s2]) # three s2 column in result is consecutive 0, 1, 2
+        </pre>
+        <li>Passing ignore_index = True will drop all name reference.</li>
+        <pre>
+            pd.concat([df1, s1], axis=1, ignore_index=True).rename(columns={0:'col1', 1:'col2', 2:'col3', 3:'col4', 4:'col5'})
+        </pre>
+    </ul>
+<h2 style="color:blue">More concatenating with group keys</h2>
+    <ul>
+        <li>A fairly use of the keys argument is to override the column names when creating a new DataFrame based on existing Series. Notice how <br>
+        the default behaviour consists on letting the resulting DataFrame inherit the parent Series' name, when these existed.</li>
+        <pre>
+            s3 = pd.Series([0, 1, 2, 3], name='foo')
+            s4 = pd.Series([0, 1, 2, 3])
+            s5 = pd.Series([0, 1, 4, 5])
+            pd.concat([s3, s4, s5], axis=1)
+            # DataFrame with column names : foo(s3 values), 0(s4 values), 1(s5 values)
+        </pre>
+        <li>Through the keys argument we can override the existing column names:</li>
+        <pre>
+            pd.concat([s3, s4, s5], keys=['col1', 'col2', 'col3'], axis=1)
+            # DataFrame with column names : col1(s3 values), col2(s4 values), col3(s5 values)
+        </pre>
+        <li>You can also pass a dict to concat in which case the dict keys will be used for the keys argument(unless other keys are specified).</li>
+        <pre>
+            pieces = {'x': df1, 'y': df2, 'z': df3}
+            # assign 'x' index as df1, 'y' index as df2, 'z' index as df3
+            result = pd.concat(pieces) # concat all frames
+            result = pd.concat(pieces, keys=['y', 'z']) # concat 'y', 'z' (meaning frames df2, df3)
+        </pre>
+        <li>The MultiIndex created has levels that are constructed from the passed keys and the index of the DataFrame pieces:</li>
+        <pre>
+            result = pd.concat(pieces, key=['x', 'y', 'z'])
+            result.index.levels
+            Out[]:
+            FrozenList([['z', 'y'], [4, 5, 6, 7, 8, 9, 10, 11]])
+        </pre>
+        <li>If you want to specify other levels (as will occasionally be a case), you can do so using the levels argument.</li>
+        <pre>
+            result = pd.concat(pieces, key=['x', 'y', 'z'], levels=[['z', 'y', 'x', 'w']], names=['group_keys'])
+            result.index.levels
+            Out[]:
+            FrozenList([['z', 'y', 'x', 'w'], [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]])
+        </pre>
+        <li>This is fairly esoteric, but it is actually necessary for implementing things like GroupBy where the order of a categorical variable is meaningful.</li>
+    </ul>
+<h2 style="color:blue">Append rows to a DataFrame</h2>
+    <ul>
+        <li>While not especially efficient (since a new object must be created), you can append a single row to a DataFrame by passing a Series or dict to append,<br>
+        which returns a new DataFrame as above.</li>
+        <li>You should ignore_index with this method to instruct DataFrame to discard its index. If you wish to preserve the index, you should construct<br>
+        an appropriately-indexed DataFrame and append or concatenate those objects.</li>
+        <pre>
+            s2 = pd.Series(['X0', 'X1', 'X2', 'X3'], index=['A', 'B', 'C', 'D'])
+            result = df1.append(s2, ignore_index=True)
+            # append s2 as index label(axis=0) and replace its name as consecutive value
+            dicts = [{'A':1, 'B':2, 'C':3, 'D':4}, {'A':5, 'B':6, 'C':7, 'Y':8}]
+            result = df1.append(dicts, ignore_index=True)
+            # append s2 and consecutive index, not use s2 index
+        </pre>
+    </ul>
+    </ul>
+<h1 style="color:red">Database-style DataFrame or named Series joining/ merging</h1>
+    <ul>
+        <li>pandas has full feature, high-performance in-memory join idiomatically vey similar to relational database like SQL. These methods <br>
+        perform significantly better(in some cases well over an order of magnitude better) than other open source implementations(like base:merge.data.frame<br>
+        in R). The reason for this is careful algorithmic design and the internal layout of the data in DataFrame.</li>
+        <pre>pandas provides a single function, merge(), as the entry point for all standard database join operations between DataFrame or named Series objects.</pre>
+        <pre>
+            pd.merge(left, right, how='inner', on=None, left_on=None, right_on=None,
+                    left_index=False, right_index=False, sort=True, suffixes=('_x, '_y'),
+                    copy=True, indicator=False, validate=None)
+        </pre>
+        <ul>
+            <li><b>left:</b>A dataFrame or named Series object.</li>
+            <li><b>right:</b> Another DataFrame or named Series object.</li>
+            <li><b>on:</b> Column or index level names to join on. Must be found in both left and right DataFrame/ or Series objects. If not passed and <br>
+            left_index, right_index are False, the intersection of the columns in the DataFrame/ Series will be inferred to be the join keys.</li>
+            <li><b>left_on:</b> Columns or index levels from the left DataFrame or Series to use as keys. Can either be column names, index level names<br>
+            or arrays with length equal to the length of DataFrame or Series.</li>
+            <li><b>right_on:</b> Column or index levels from the right DataFrame/ Series to use as keys. Can either be column names, index level names, <br>
+            or arrays with length equal to the length of teh DataFrame/ Series.</li>
+            <li><b>left_index:</b>If True, use the index (row labels) from the left DataFrame/ Series as its join keys(s). In the case of a DataFrame/Series<br>
+            with a MultiIndex(hierarchical), the number of levels must match the number of join keys from the right DataFrame or Series.</li>
+            <li>right_index:<b>Sames usage as left_index for right DataFrame/ Series.</b></li>
+            <li><b>how:One of 'left', 'right', 'inner', 'cross', default 'inner'.</b></li>
+            <li><b>sort:</b> Sort the result by the join keys in lexicographical order. Defaults to True, setting to False will improve performance substantially in many cases.</li>
+            <li><b>suffixes:</b>A tuple of string suffixes to apply to overlapping columns. Default to ('_x', '_y').</li>
+            <li><b>copy:</b>Always copy data (default True) from the passed DataFrame/ Series, even when reindexing is not necessary. Cannot be avoid in many cases<br>
+            but may improve performance/ memory usage. The cases where copying can be avoid are somewhat pathological but this option is provided nonetheless.</li>
+            <li><b>indicator:</b>Add the column to the output DataFrame called _merge with information on the source of each row. _merge is categorical-type and <br>
+            takes on a value of left_only for observations whose merge key only appears in 'left' DataFrame/ Series, eight_only for observations who merge key only<br>
+            appears in 'right' DataFrame/Series, and both if the observation's merge key is found in both.</li>
+            <li><b>validate: string, default None.</b>If specified, checks if merge is of specified type.</li>
+            <ul>
+                <li><b>'one_to_one' or '1:1' : </b>checks if merge keys are unique in both left and right datasets.</li>
+                <li><b>'one_to_many' or '1:m':</b> checks if merge keys are unique in left dataset.</li>
+                <li><b>'many_to_one' or 'm:1' : </b>check if merge keys ae unique in right dataset.</li>
+                <li><b>'many_to_many' or 'm:m':</b>allowed, but does not result in checks.</li>
+            </ul>
+        </ul>
+        <li>The return type will be the same as left. If left is a DataFrame or named Series and right is a subclass of DataFrame, the return type will still be DatFrame.</li>
+        <li>merge is a function in the pandas namespace, and it is also available as a DataFrame instance method merge(), with the calling DataFrame being implicitly<br>
+        considered the left object in the join.</li>
+        <li>The related join() method, uses merge internally for the index-on-index (by default) and column(s)-on-index join. If you are joining on index only, you may<br>
+        want to use DataFrame.join to save yourself some typing.</li>
+<h2 style="color:blue">Brief primer on merge methods (relational algebra)</h2>
+    <ul>
+        <li>Experience users of relational database like SQL will be familiar with the terminology used to describe join operations between 2 SQL-table like structures<br>
+        (DataFrame objects). There are several cases to consider which are very important to understand.</li>
+        <ul>
+            <li><b>one_to_one (1:1) joins :</b>For example when joining 2 DataFrame objects on their indexes(which must contain unique values).</li>
+            <li><b>many_to_one (m:1) joins:</b> For example when joining an index(unique) to one or more columns in a different DataFrame.</li>
+            <li><b>many_to_many (m:m) joins:</b> joining columns on columns.</li>
+        </ul>
+        <li>When joining columns on columns(potentially a many_to_many joins), any indexes on the passed DataFrame objects will be discarded.</li>
+        <pre>
+            left = pd.DataFrame({'key': ['K0', 'K1', 'K2', 'K3'],
+                                'A': ['A0', 'A1', 'A2', 'A3'],
+                                'B': ['B0', 'B1', 'B2', 'B3']})
+            right = pd.DataFrame({'key': ['K0', 'K1', 'K2', 'K3'],
+                                    'C': ['C0', 'C1', 'C2', 'C3'],
+                                    'D': ['D0', 'D1', 'D2', 'D3']}
+            result = pd.merge(left, right, on='key')
+        </pre>
+        <li>Here is a more complicated example with multiple join keys. Only the keys appearing in left and right are present (the intersection), since how='inner' by default.</li>
+        <pre>
+            left = pd.DataFrame({'key1': ['K0', 'K0', 'K1', 'K2'],
+                                'key2': ['K0', 'K1', 'K0', 'K1'],
+                                'A': ['A0', 'A1', 'A2', 'A3'],
+                                'B': ['B0', 'B1', 'B2', 'B3']})
+            right = pd.DataFrame({'key1': ['K0', 'K1', 'K1', 'K2'],
+                                'key2': ['K0', 'K0', 'K0', 'K0'],
+                                'C': ['C0', 'C1', 'C2', 'C3'],
+                                'D': ['D0', 'D1', 'D2', 'D3']})
+            result = pd.merger(left, right, on=['key1', 'key2'])
+        </pre>
+        <li>The how argument to merge specifies how to determine which keys are to be included in the resulting table. If a key combination does not appear in either the <br>
+            left or right tales, the values in the joined table will be NA. Here is a summary of the how options and their SQL equivalent names:</li>
+        <table border="1" class="dataframe">
+            <thead>
+            <tr style="text-align: center; color:blue" >
+              <th>Merge method</th>
+              <th>SQL Join Name</th>
+              <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td>left</td>
+              <td>LEFT OUTER JOIN</td>
+              <td>Use keys from left frame only</td>
+            </tr>
+            <tr>
+              <td>right</td>
+              <td>RIGHT OUTER JOIN</td>
+              <td>Use keys from right frame only</td>
+            </tr>
+            <tr>
+              <td>outer</td>
+              <td>FULL OUTER JOIN</td>
+              <td>Use union of keys from both frames</td>
+            </tr>
+            <tr>
+              <td>inner</td>
+              <td>INNER JOIN</td>
+              <td>Use intersection of keys from both frames</td>
+            </tr>
+            <tr>
+              <td>cross</td>
+              <td>CROSS JOIN</td>
+              <td>Create the cartesian product of rows of both frames</td>
+            </tr>
+            </tbody>
+        </table>
+        <pre>
+            result = pd.merger(left, right, how='left', on=['key1', 'key2'])
+            result = pd.merge(left, right, how='right', on=['key1', 'key2'])
+            result = pd.merge(left, right, how='inner', on=['key1', 'key2'])
+            result = pd.merge(left, right, how='cross')
+        </pre>
+        <li>You can merge a multi-indexed Series and a DataFrame, if the names of the MultiIndex correspond to the columns from the DataFrame.<br>
+        Transform the Series to a DataFrame using Series.reset_index() before merging:</li>
+        <pre>
+            df = pd.DataFrame({'Let': ['A', 'B', 'C'], 'Num': [1,2,3]})
+            ser = pd.Series(list('abcdef'), index=pd.MultiIndex.from_arrays([list('ABC')*2, list(range(1,7)], names=['Let', 'Num']))
+            pd.merge(df, ser.reset_index(), on=['Let', 'Num']) # turn ser index into columns to get the 'on'
+        </pre>
+        <pre>
+            left = pd.DataFrame({'A': [1,2], 'B':[2,2]})
+            right = pd.DataFrame({'A': [4,5,6], 'B': [2,2,2]})
+            result = pd.merge(left, right, on=['A', 'B'])
+        </pre>
+        <li>Joining/ merging on duplicate keys can cause a returned frame that is the multiplication of the row dimensions, which may result in memory<br>
+        overflow. It is the user's responsibility to manage duplicate values in keys before joining large DataFrame.</li>
+    </ul>
+<h2 style="color:blue">Checking for duplicate keys</h2>
+    <ul>
+        <li>Users can use the 'validate' argument to automatically check whether there are unexpected duplicates in their merge keys. Key uniqueness is<br>
+        checked before merge operations and so should protect against memory overflows. Checking key uniqueness is also a good way to ensure user data <br>
+        structures are as expected.</li>
+        <pre>
+            left = pd.DataFrame({'A': [1,2], 'B': [1,2]})
+            right = pd.DataFrame({'A': [4,5,6], 'B': [2,2,2]})
+            pd.merge(left, right, on='B', validate='1:1')
+            pd.merge(left, right, on='B', validate='1:m')
+            pd.merge(left, right, on='B', validate='m:m')
+        </pre>
+    </ul>
+<h2 style="color:blue">The merge indicator</h2>
+    <ul>
+        <li>merge() accepts the argument indicator. If true, a Categorical-type column called _merge will be added to the output object that takes on values:</li>
+        <table border="1" class="dataframe">
+              <thead>
+                <tr style="text-align: center;">
+                  <th>Observation Origin</th>
+                  <th>_merge value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Merge key only in 'left' frame</td>
+                  <td>left_only</td>
+                </tr>
+                <tr>
+                  <td>Merge key only in 'right' frame</td>
+                  <td>right_only</td>
+                </tr>
+                <tr>
+                  <td>Merge key in both frames</td>
+                  <td>both</td>
+                </tr>
+              </tbody>
+        </table>
+        <li>The indicator argument accept string arguments, in which case the indicator function will use the value of the passed string as teh name<br>
+        for the indicator column.</li>
+        <pre>
+            df1 = pd.DataFrame({'col1': [0,1], 'col_lef': ['a', 'b']})
+            df2 = pd.DataFrame({'col1': [1,2,2], 'col_right': [2,2,2]})
+            pd.merge(df1, df2, on='col1', indicator=True) # return _merge column with used values
+            pd.merge(df1, df2, on='col1', how='outer', indicator='indicator_column') # return _merge column as 'indicator_column'
+        </pre>​
+    </ul>
+<h2 style="color:blue">Merge dtype</h2>
+    <ul>
+        <li>Merging will preserve the dtype of the join keys. If you have missing values, then the resulting dtype will be upcasted.</li>
+        <pre>
+            left = pd.DataFrame({'key': [1], 'v1': [0]})
+            right = pd.DataFrame({'key': [1,2], 'v1': [20, 30]})
+            pd.merge(left, right, how='outer').dtypes # int
+            pd.merge(left, right, on='key').dtypes # missing values at left.v1, dtype upcasted to float
+        </pre>
+        <li>Merging wil preserve category dtypes of the mergands.</li>
+        <pre>
+            from pandas.api.types import CategoricalDtype
+            X = pd.Series(np.random.choice(['foo', 'bar'], size=(10,)))
+            X = X.astype(CategoricalDtype(categories=['foo', 'bar']))
+            left = pd.DataFrame({'X': X, 'Y': np.random.choice(['one', 'two', 'three'], size=(10,))}
+            right = pd.DataFrame({'X': pd.Series(['foo', 'bar'], dtype=pd.CategoricalDtype(['foo', 'bar'])),
+                                    'Z': [1,2]})
+            result = pd.merge(left, right, how='outer').dtypes
+            result = pd.merge(left, right, on='X')
+        </pre>
+        <li>The category dtypes must be exactly the same, meaning the same categories and the ordered attribute. Otherwise, the result will coerce<br>
+        to the categories dtype.</li>
+        <li>Merging on category dtypes that are the same can be quite performant compared to object dtype.</li>
+    </ul>
+<h2 style="color:blue">Joining on index</h2>
+    <ul>
+        <li>DataFrame.join() is a convenient method for combining the columns of two potentially differently-indexed DataFrames into a single result<br>
+        DataFrame.</li>
+        <pre>
+            left = pd.DataFrame({'A': ['A0', 'A1', 'A2'], 'B': ['B0', 'B1', 'B2']}, index=['K0', 'K1', 'K2'])
+            right = pd.DataFrame({'C': ['C0', 'C2', 'C3'], 'D': ['D0', 'D2', 'D3']}, index=['K0', 'K2', 'K3'])
+            result = left.join(right)
+            result = left.join(right, how='outer')
+        </pre>
+        <li>The data alignment here is on the indexes (row labels). This same behavior can be achieved using merge plus additional arguments instructing<br>
+        it to use the indexes:</li>
+        <pre>
+            result = pd.merge(left, right, left_index=True, right_index=True, how='outer')
+            result = pd.merge(left, right, left_index=True, right_index=True, how='inner')
+        </pre>
+    </ul>
+<h2 style="color:blue">Joining key columns on an index</h2>
+    <ul>
+        <li>join() takes an optional on argument which may be a column or multiple column names, which specifies that the passed DataFrame is to be <br>
+        aligned on that column in the DataFrame. These are completely equivalent:</li>
+        <pre>
+            left.join(right, on=key_or_keys)
+            pd.merge(left, right, left_on=key_or_keys, right_index=True, how='left', sort=False)
+        </pre>
+        <li>Obviously you can choose whichever form you find more convenient. For many-to-one joins (where one of the DataFrame's is already indexed by<br>
+        the join key), using join may be more convenient.</li>
+        <pre>
+            left = pd.DataFrame({'A': ['A0', 'A1', 'A2', 'A3'],
+                                'B': ['B0', 'B1', 'B2', 'B3'],
+                                'key': ['K0', 'K1', 'K0', 'K1']})
+            right = pd.DataFrame({'C': ['C0', 'C1'], 'D': ['D0', 'D1']}, index=['K0', 'K1'])
+            result = left.join(right, on='key')
+            result = pd.merge(left, right, left_on='key', right_index=True, how='left', sort=False)
+        </pre>
+        <li>To join() on multiple keys, the passed DataFrame must have a MultiIndex:</li>
+        <pre>
+            left = pd.DataFrame({'A': ['A0', 'A1', 'A2', 'A3'],
+                                'B': ['B0', 'B1', 'B2', 'B3'],
+                                'key1': ['K0', 'K0', 'K1', 'K2'],
+                                'key2': ['K0', 'K1', 'K0', 'K1']})
+            index = pd.MultiIndex.from_arrays(['K0', 'K1', 'K2', 'K2'], ['K0', 'K0', 'K0', 'K1'])
+            right = pd.DataFrame({'C': ['C0', 'C1', 'C2', 'C3'], 'D': ['D0', 'D1', 'D2', 'D3']}, index=index)
+            result = left.join(right, on=['key1', 'key2'])
+            result = left.join(right, on=['key1', 'key2'], how='inner')
+        </pre>
+    </ul>
+<h2 style="color:blue">Joining a single index to a MultiIndex</h2>
+    <ul>
+        <li>You can join a singly-indexed DataFrame with a level of a MultiIndex DataFrame. The level will match on the name of the index of the singly<br>
+        indexed frame against a level name of the MultiIndexed frame.</li>
+        <pre>
+            left = pd.DataFrame({'A': ['A0', 'A1', 'A2'], 'B': ['B0', 'B1', 'B2']}, index=pd.Index(['K0', 'K1', 'K2'], name='key'))
+            index =pd.MultiIndex.from_array([['K0', 'K1', 'K2', 'K2'], ['Y0', 'Y1', 'Y2', 'Y3']], names=['key', 'Y'])
+            right = pd.DataFrame({'C': ['C0', 'C1', 'C2', 'C3'], 'D': ['D0', 'D1', 'D2', 'D3']}, index=index)
+            result = left.join(right) # This is less verbose and more memory efficient/ faster than merge
+            result = pd.merge(left.reset_index(), right.reset_index(), on='key', how='inner').set_index(['key', 'Y'])
+        </pre>
+    </ul>
+<h2 style="color:blue">Joining with two MultiIndexes</h2>
+    <ul>
+        <li>This is supported in a limited way, provided that the index for the right argument is completely used in the join, and is a subset of the<br>
+        indices in the left arguments.</li>
+        <pre>
+            leftindex = pd.MultiIndex.from_product([list('abc'), list('xy')], [1,2], names=['abc', 'xy', 'num'])
+            left = pd.DataFrame({'v1': range(12)}, index=leftindex)
+            rightindex = pd.MultiIndex.from_product([list('abc'), list('xy')], names=['abc', 'xy'])
+            right = pd.DataFrame({'v2': [100*i for i in range(1, 7)}, index=rightindex)
+            left.join(right, on=['abc', 'xy'], how='inner')
+        </pre>
+        <pre>
+            leftindex = pd.MultiIndex.from_tuples([('K0', 'X0'), ('K0', 'X1'), ('K1', 'X2')], name = ['key', 'X'])
+            left = pd.DataFrame({'A': ['A0', 'A1', 'A2'], 'B': ['B0', 'B1', 'B2']}, index=leftindex)
+            rightindex = pd.MultiIndex.from_tuples([("K0", "Y0"), ("K1", "Y1"), ("K2", "Y2"), ("K2", "Y3")], names=["key", "Y"])
+            right = pd.DataFrame({'C': ['C0', 'C1', 'C2', 'C3'], 'D': ['D0', 'D1', 'D2', 'D3']}, index=rightindex)
+            pd.merge(left.reset_index(), right.reset_index(), on='key', how='inner').set_index(['key', 'X', 'Y'])
+        </pre>
+    </ul>
+<h2 style="color:blue">Merging on a combination of columns and index levels</h2>
+    <ul>
+        <li>Strings passed as teh on, left_on, right_on parameters may refer to either column names or index level names. This enables merging<br>
+        DataFrame instances on a combination of index levels and columns without resetting indexes.</li>
+        <pre>
+            left_index = pd.Index(['K0', 'K0', 'K1', 'K2'], name='key1')
+            left = pd.DataFrame({'A': ['A0', 'A1', 'A2', 'A3'],
+                                'B': ['B0', 'B1', 'B2', 'B3'],
+                                'key2': ['K0', 'K1', 'K2', 'K3']}, index=left_index)
+            right_index = pd.Index(['K0', 'K1', 'K2', 'K2'], name='key1')
+            right = pd.DataFrame({'C': ['C0', 'C1', 'C2', 'C3'],
+                                'D': ['D0', 'D1', 'D2', 'D3'],
+                                'key2': ['K0', 'K0', 'K0', 'K1']}, index=right_index)
+            left.merge(right, on=['key1', 'key2'])
+        </pre>
+        <li>When DataFrame are merged on a string that matches an index level in both frames, the index level is preserved as an <br>
+        index level in the resulting DataFrame.</li>
+        <li>When DataFrames are merged using only some of the levels of a MultiIndex, teh extra levels will be dropped from the <br>
+            resulting merge. In order to preserve those levels, use reset_index on those levels names to move those levels to columns<br>
+            prior to doing the merge.</li>
+        <li>If a string matches both a column name and an index level name, the na warning is issued and the column takes precedence.<br>
+            This will result in an ambiguity error in a future version.</li>
+    </ul>
+<h2 style="color:blue">Overlapping value columns</h2>
+    <ul>
+        <li>The merge suffixes argument takes a tuple of list of strings to append to overlapping column names in the input DataFrames to<br>
+        to disambiguate the result columns:</li>
+        <li>DataFrame.join() has two parameters: 'lsuffix' and 'rsuffix' to change the duplicated column names.</li>
+        <pre>
+            left = pd.DataFrame({'k': ['K0', 'K1', 'K2'], 'v': [1,2,3]})
+            right = pd.DataFrame({'k': ['K0', 'K0', 'K3'], 'v': [4,5,6]})
+            pd.merge(left, right, on='k')
+            pd.merge(left, right, on='k', suffixes=('_l', '_r')) # change the suffix of duplicated column to new one
+            left.join(right, lsuffix='_l', rsuffix='_r')
+        </pre>
+    </ul>
+<h2 style="color:blue">Joining multiple DataFrame</h2>
+    <ul>
+        <li>A list or tuple of DataFrames can also be passed to join) to join them together on their indexes.</li>
+        <pre>
+            left = left.set_index('k')
+            right = right.set_index('k')
+            right2 = pd.DataFrame({'v': [7, 8, 9]}, index=['K1', 'K1', 'K2'])
+            left.join([right, right2])
+        </pre>
+    </ul>
+<h2 style="color:blue">Merging together values within Series or DataFrame columns</h2>
+    <ul>
+        <li>Another fairly common situation is to have two like-indexed (or similarly indexed) Series or DataFrame objects and wanting to <br>
+        'patch' values in one object from values for matching indices in the other.</li>
+        <pre>
+            df1 = pd.DataFrame([[np.nan, 3.0, 5.0], [-4.6, np.nan, np.nan], [np.nan, 7.0, np.nan])
+            df2 = pd.DataFrame([[-42.6, np.nan, -8.2], [-5.0, 1.6, 4]], index=[1,2])
+            df1.combine_first(df2)
+        </pre>
+        <li>Note that this method only takes values from the right DataFrame if they are missing in the left DatFrame. A related method, update()<br>
+        alters non-NA values in place.</li>
+        <pre>
+            df1.update(df2)
+        </pre>
+    </ul>
+    </ul>
+<h1 style="color:red">Timeseries friendly merging</h1>
+    <ul>
+    <h2 style="color:blue">Merging ordered data</h2>
+        <li>A merge_ordered() function allows combining time series and other ordered data. In particular it has an optional fill_method keyword<br>
+        to fill/ interpolate missing data.</li>
+        <pre>
+            left = pd.DataFrame({'k': ['K0', 'K1', 'K1', 'K2'], 'lv': [1,2,3,4], 's': ['a', 'b', 'c', 'd']},)
+            right = pd.DataFrame({'k': ['K1', 'K2', 'K3', 'K4'], 'rv': [1,2,3]})
+            pd.merge_ordered(left, right, fill_method='ffill', left_by='s')
+
+        </pre>
+    </ul>
+<h1 style="color:red">Reshaping and pivot tables</h1>
+<ul>
+<h2 style="color:blue">Reshaping by pivoting DataFrame objects</h2>
+    <ul>
+        <li>Data is often stored in so-called 'stacked' or 'record' format.</li>
+        <pre>
+            def unpivot(frame):
+                N, K = frame.shape
+                data = {
+                    "value": frame.to_numpy().ravel("F"),
+                    "variable": np.asarray(frame.columns).repeat(N),
+                    "date": np.tile(np.asarray(frame.index), K),
+                }
+                return pd.DataFrame(data, columns=["date", "variable", "value"])
+
+            df = unpivot(tm.makeTimeDataFrame(3))
+            df
+            Out[]:
+                     date variable     value
+            0  2000-01-03        A  0.469112
+            1  2000-01-04        A -0.282863
+            2  2000-01-05        A -1.509059
+            3  2000-01-03        B -1.135632
+            4  2000-01-04        B  1.212112
+            5  2000-01-05        B -0.173215
+            6  2000-01-03        C  0.119209
+            7  2000-01-04        C -1.044236
+            8  2000-01-05        C -0.861849
+            9  2000-01-03        D -2.104569
+            10 2000-01-04        D -0.494929
+            11 2000-01-05        D  1.071804
+        </pre>
+        <pre>
+            df[df['variable'] == 'A']
+        </pre>
+        <li>To do time series operations with the variables, a better presentation would be where the columns are the unique variables and an index of dates<br>
+        identifies individual observations. To reshape the data into this form, we use the DataFrame.pivot() method.</li>
+        <pre>
+            df.pivot(index='date', columns='variable', values='value') # 'value' is content columns of 'variable' column
+        </pre>
+        <li>If the 'values' argument is omitted, and the input DataFrame has more than one column of values which are not used as column or index <br>
+        input to pivot, then the resulting 'pivoted' DataFrame will have hierarchical columns whose topmost level indicates the respective value column.</li>
+        <pre>
+            df['value2'] = df['value']*2
+            pivoted = df.pivot(index='date', columns='variable') # 'value' and 'value2' are topmost columns of 'variable' column
+            pivoted['value2'] # return the view
+        </pre>
+        <li>Slicing 'pivoted' returns a view in the case where the data are homogeneously-typed.</li>
+        <li>pivot() will error with a ValueError: Index contains duplicate entries, cannot reshape, if the index/ column pair is not unique, consider using<br>
+        pivot_table() which is a generalization of pivot that can handle duplicate values for one index/ column pair.</li>
+    </ul>
+</ul>
+<h1 style="color:red">Reshaping by stacking and unstacking</h1>
+    <ul>
+        <li>Closely related to the pivot() method are the related stack() and unstack() methods available on Series and DataFrame. These methods are designed<br>
+        to work together with MultiIndex objects. Here are essentially what these methods do:</li>
+        <ul>
+            <li><b>stack():</b>'pivot' a level of the (possibly hierarchical) column labels, returning a DatFrame with an index with a new inner-most level of row labels.</li>
+            <li><b>unstack(): inverse operation of stack. </b>'pivot' a level of the (possibly hierarchical_) row index to the column axis, producing a reshaped<br>
+            DataFrame with a new inner-most level of column labels.</li>
+        </ul>
+        <pre>
+            tuples = list(zip(*[['bar', 'bar', 'baz', 'baz', 'foo', 'foo', 'qux', 'qux'],
+                                ['one', 'two', 'one', 'two', 'one', 'two', 'one', 'two']]
+            index = pd.MultiIndex.from_tuples(tuples, names = ['first', 'second'])
+            df = pd.DataFrame(np.random.randn(8,2), index=index, columns =['A', 'B'])
+            df = df[:4]
+        </pre>
+        <li>The stack function 'compresses' a level in the DataFrame's columns to produce either:</li>
+        <ul>
+            <li>A Series, int the case of a simple column index.</li>
+            <li>A DataFrame, in the case of a MultiIndex in the columns.</li>
+        </ul>
+        <li>If the columns have a MultiIndex, you can choose which level to stack. The stacked level becomes the new lowest level in a MultiIndex on the columns:</li>
+        <pre>
+            stacked = df2.stack()
+        </pre>
+        <li>With a 'stacked' DataFrame or Series (gaving a MultiIndex as the index), the inverse operation of stack is unstack, which by default unstacks the 'last level':</li>
+        <pre>
+            stacked.unstack()
+            stacked.unstack(2)
+            stacked.unstack(1)
+            stacked.unstack(0)
+        </pre>
+        <li>Uou can use the level names instead of specifying the level  numbers:</li>
+        <pre>
+            stacked.unstack('second')
+        </pre>
+        <li>Notice that the stack and unstack methods implicitly sort the index levels involved. Hence a all to stack and then unstack, or vice versa, will result<br>
+        in a sorted copy of the original DataFrame or Series.</li>
+        <pre>
+            index = pd.MultiIndex.from_product([[2,1, ['a', 'b']])
+            df = pd.DataFrame(np.random.randn(5), index=index, column=['A'])
+            all(df.unstack().stack() == df.sort_index())
+            True
+        </pre>
+        <li>TypeError will be raised if sort_index is removed.</li>
+<h2 style="color:blue">Multiple levels</h2>
+    <ul>
+        <li>You may also stack or unstack more than one level a a time by passing a list of levels, in which case the end result is as if each level in the list were<br>
+        processed individually.</li>
+        <pre>
+            columns = pd.MultiIndex.from_tuples([('A', 'cat', 'long'), ('B', 'cat', 'long'),
+                                                ('A', 'dog', 'short''), ('B', 'dog', 'short')], names=[''exx[', 'animal', 'hair_length'])
+            df = pd.DataFrame(np.random.randn(4,4), columns=columns)
+            df.stack(level=['animal', 'hair_length'])
+            df.stack(level=[1,2])
+        </pre>
+        <li>The list of levels can contain either level names or level numbers (but not a mixture of the two).</li>
+    </ul>
+<h2 style="color:blue">Missing data</h2>
+    <ul>
+        <li>These functions are intelligent about handling missing data and do not expect each subgroup within the hierarchical index to have the same set of labels.<br>
+        They also can handle the index being unsorted (but you can make it sorted by calling sort_index).</li>
+        <pre>
+            columns = pd.MultiIndex.from_tuples([('A', 'cat'), ('b', 'dog'), ('B', 'cat'), ('A', 'dog')], names=['exp', 'animal'])
+            index = pd.MultiIndex.from_product([('bar', 'baz', 'foo', 'qux'), ('one', 'two)], names=['first', 'second'])
+            df = pd.DataFrame(np.random.randn(8,4), index=index, columns=columns)
+            df2 = df.iloc[[0,1,2,4,5,7]]
+            df2.stack('exp')
+            df2.stack('animal')
+            df3 = df.iloc[[0,1,4,7], [1,2]]
+            df3.unstack()
+            df3.unstack(fill_value=-1e9)
+        </pre>
+        <li>Unstacking can result in missing values f subgroups do not have the same set of labels. By default, missing values will be replaced ith the default <br>
+        fill values for that data type, NaN  for float, NaT for datatimelike, etx. For integer types, by default data will converted to float and missing values will be set to NaN.</li>
+        <li>Alternatively, unstack takes an optional fill_value argument for specifying the value of missing data.</li>
+    </ul>
+<h2 style="color:blue">With a MultiIndex</h2>
+    <ul>
+        <li>Unstacking when the columns are a MultiIndex is also careful about doing the right thing:</li>
+        <pre>
+            df[:3].unstack(0)
+            df2.unstack(1)
+        </pre>
+    </ul>
+    </ul>
+<h1 style="color:red">Reshaping by melt</h1>
+    <ul>
+        <li>The top-level melt() function and the corresponding DataFrame.melt() are useful to massage a DataFrame into a format where one or more columns are identifier variables,<br>
+        while all other columns, considered measured variables, are 'unpivoted' to the row axis, leaving just two non-identifier columns, 'variable' and 'value'. The names of those<br>
+        columns can be customized by supplying the var_name and value_name parameters.</li>
+        <pre>
+            cheese = pd.DataFrame({ 'first': ['John', 'Mary'], 'last': ['Dow', 'Bo'], 'height': [5.5, 6.0], 'weight': [130, 150]})
+            cheese.melt(id_vars=['fist', 'last'])
+            cheese.melt(id_vars=['fist', 'last'], var_name='quantity')
+        </pre>
+        <li>When transforming a DataFrame using melt(), the index will be ignored. The original index values can be kept around by setting the ignore_index parameter to False.<br>
+        (default is True). This will however duplicate them.</li>
+        <pre>
+            index = pd.MultiIndex.from_tuples([('person', 'A'), ('person', 'B')])
+            cheese = pd.DataFrame({'first': ['John', 'Mart'], 'last': ['Doe', 'Bo'], 'height': [5.5, 6.0], 'weight': [130, 150], index=index)
+            cheese.melt(id_vars=['first', 'last']) # ignore index
+            cheese.melt(['first', 'last'], ignore_index=False) # keep index
+        </pre>
+        <li>Another way to transform is to use the wide_to_long() panel data convenience function. It is less flexible than melt(), but more user-friendly.</li>
+        <pre>
+            dft = pd.DataFrame({'A1970': {0:'1', 1:'b', 2:'c'},
+                                'A1980': {0:'d', 1:'e', 2:'f'},
+                                'B1970': {0:2.5, 1:1.2, 2:0.7},
+                                'B1980': {0:3.2, 1:1.3, 2:0.1},
+                                'X': dict(zip(range(3), np.random.randn(3)))})
+            dft['id'] = dft.index
+            pd.wide_to_long(dft, ['A', 'B'], i='id', j='year')
+            Out[]:
+                            X  A    B
+            id year
+            0  1970 -0.121306  a  2.5
+            1  1970 -0.097883  b  1.2
+            2  1970  0.695775  c  0.7
+            0  1980 -0.121306  d  3.2
+            1  1980 -0.097883  e  1.3
+            2  1980  0.695775  f  0.1
+        </pre>
+    </ul>
+<h1 style="color:red">Combining with stats and groupby</h1>
+    <ul>
+        <li>It should be no shock that combining pivot/ stack/ unstack with groupby and the basic Series and DaaFrame statistical functions can produce<br>
+        some very expressive and fast data manipulations.</li>
+        <pre>
+            index = pd.MultiIndex.from_product(['bar', 'baz', 'foo', 'qux'], ['one', 'two'], names=['first', 'second'])
+            columns = pd.MultiIndex.from_tuples([('A', 'cat'), ('B', 'dog'), ('B', 'cat'), ('A', 'dog')], names=['exp', 'animal'])
+            df = pd.DataFrame(np.random.randn(8,4), index=index, columns=columns)
+            df.stack().mean(1).unstack()
+            df.groupby(level=1, axis=1).mean() # same as above
+            df.stack().groupby(level=1).mean()
+            df.mean().unstack(0)
+            df.stack().mean(1).groupby(['animal']).mean()
+        </pre>
+    </ul>
+<h1 style="color:red">Pivot table</h1>
+    <ul>
+        <li>While pivot() provides general purpose pivoting with various data types (strings, numeric, etc.), pandas also provides pivot_table()<br>
+        for pivoting with aggregation of numeric data.</li>
+        <li>The function pivot_table() ca nbe used to create speadsheet-style pivot tables.</li>
+        <li>It takes a number of arguments:</li>
+        <ul>
+            <li><b>data :</b> a DataFrame object.</li>
+            <li><b>values :</b> a column or a list of columns to aggregate.</li>
+            <li><b>index :</b> a column, grouper , array which has the same length as data, or list of them. Keys to group by on the pivot table index.<br>
+            If an array is passed, it is being used as the same manner as column values.</li>
+            <li><b>columns: </b>a column, grouper, array which has teh same length as data, or list of them. Keys to group by on the pivot table column.<br>
+            If an array is passed, it is being used as teh same manner as column values.</li>
+            <li><b>aggfunc :</b>function to use for aggregation, defaulting to numpy.mean</li>
+        </ul>
+        <pre>
+            import datetime
+            df = pd.DataFrame({ 'A': ['one', 'one', 'two', 'three'] * 6,
+                                'B': ['A', 'B', 'C'] * 8,
+                                'C': ['foo', 'foo', 'foo', 'bar', 'bar', 'bar'] * 4,
+                                'D': np.random.randn(24),
+                                'E': np.random.randn(24),
+                                'F': [datetime.datetime(2013, i, 1) for i in range(1, 13)] + [datetime.datetime(2013, i, 15) for i in range(1, 13)]})
+            pd.pivot_table(df, index=['A', 'B'], columns=['C'], values='D')
+            pd.pivot_table(df, values='D', index=['B'], columns=['A', 'C'], aggfunc=np.sum)
+            pd.pivot_table(df, values=['D', 'E'], index=['B'], columns=['A', 'C'], aggfunc=np.sum)
+        </pre>
+        <li>The result object is a DataFrame having potentially hierarchical indexes on the rows and columns. If the values column name is not given<br>
+        the pivot table will include all of the data that can be aggregated in an additional level of hierarchy in the columns:</li>
+        <pre>
+            pd.pivot_table(df, index=['A', 'B'], columns=['C'])
+        </pre>
+        <li>Also, you can use Grouper for index and columns keywords. And you can render a nice output of the table omitting the missing values by calling to_string:</li>
+        <pre>
+            pd.pivot_table(df, values='D', index.pd.Grouper(def='M', key='F'), columns='C')
+            Out[]:
+            C                bar       foo
+            F
+            2013-01-31       NaN -0.514058
+            2013-02-28       NaN  0.002759
+            2013-03-31       NaN  0.176180
+            2013-04-30 -1.181568       NaN
+            2013-05-31 -0.338421       NaN
+            2013-06-30 -0.538846       NaN
+            2013-07-31       NaN  1.000985
+            2013-08-31       NaN  0.433512
+            2013-09-30       NaN  0.699535
+            2013-10-31  1.120915       NaN
+            2013-11-30  0.158248       NaN
+            2013-12-31  0.588783       NaN
+
+            table = pd.pivot_table(df, index=['A', 'B'], columns=['C'])
+            print(table.to_string(na_rep=""))
+        </pre>
+        <li>Note that pivot_table is also available as an instance method on DataFrame.</li>
+        <pre>
+            df.pivot_table()
+        </pre>
+<h2 style="color:blue">Adding margins</h2>
+    <ul>
+        <li>If you pass margins=True to pivot_table, special 'all' columns and rows will be added with partial group aggregates across the categories on the rows and columns.</li>
+        <pre>
+            df.pivot_table(indx=['A', 'B'], columns='C', margins=True, aggfunc=np.std)
+            Out[]:
+                            D                             E
+            C             bar       foo       All       bar       foo       All
+            A     B
+            one   A  1.804346  1.210272  1.569879  0.179483  0.418374  0.858005
+                  B  0.690376  1.353355  0.898998  1.083825  0.968138  1.101401
+                  C  0.273641  0.418926  0.771139  1.689271  0.446140  1.422136
+            three A  0.794212       NaN  0.794212  2.049040       NaN  2.049040
+                  B       NaN  0.363548  0.363548       NaN  1.625237  1.625237
+                  C  3.915454       NaN  3.915454  1.035215       NaN  1.035215
+            two   A       NaN  0.442998  0.442998       NaN  0.447104  0.447104
+                  B  0.202765       NaN  0.202765  0.560757       NaN  0.560757
+                  C       NaN  1.819408  1.819408       NaN  0.650439  0.650439
+            All      1.556686  0.952552  1.246608  1.250924  0.899904  1.059389
+        </pre>
+    </ul>
+    </ul>
+<h1 style="color:red">Cross tabulations</h1>
+    <ul>
+        <li>Use corsstab() to compute a cross-tabulation of two(or more) factors. By default crosstab computes a frequency table of the factors unless an array<br>
+        of values and an aggregation function are passed.</li>
+        <li>It takes a number of arguments:</li>
+        <ul>
+            <li><b>index:</b> array-like, values to group by in the rows.</li>
+            <li><b>columns: </b>array-like, values to group by in the columns.</li>
+            <li><b>values:</b> array-like, optional, array of values to aggregate according to the actors.</li>
+            <li><b>aggfunc:</b> function, optional, if no values array is passed, computes a frequency table.</li>
+            <li><b>rownames:</b> sequence, default None, must match number of row arrays passed.</li>
+            <li><b>colnames: </b>sequence, default None, if passed, must match number of column arrays passed.</li>
+            <li><b>margins: </b>boolean, default False, add row/column margins (subtotals).</li>
+            <li><b>normalize: </b>boolean, {'all', 'index', 'columns'}, or {0, 1}, default False. Normalize by dividing all values by the sum of values.</li>
+        </ul>
+        <li>Any Series passed will have their name attributes used unless row or column names for the cross-tabulation are specified.</li>
+        <pre>
+            foo, bar, dull, shiny, one, two = 'foo', 'bar', 'dull', 'shiny', 'one', 'two'
+            a = np.array([foo, foo, bar, bar, foo, foo], dtype=object)
+            b = np.array([one, one, two, one, two, one], dtype=object)
+            c = np.array([dull dull, shiny, dull, dull, shiny], dtype=object)
+            pd.crosstab(a, [b, c], rownames=['a'], colsname=['b', 'c'])
+        </pre>
+        <li>If crosstab receives only two Series, it will provide a frequency table.</li>
+        <pre>
+            df = pd.DataFrame({'A': [1,2,2,2,2], 'B': [3,3,4,4,4], 'C': [1,1,np.nan,1,1]})
+            pd.crosstab(df['A'], df['B'])
+        </pre>
+        <li>crosstab can also e implemented to categorical data.</li>
+        <pre>
+            foo = pd.Categorical(['a', 'b'], categories=['a', 'b', 'c'])
+            bar = pd.Categorical(['d', 'e'], categories=['d', 'e', 'f'])
+            pd.crosstab(foo, bar)
+        </pre>
+        <li>If you want to include all of data categories even if the actual data does not contain any instances of a particular category, you should set dropna=False.</li>
+        <pre>
+            pd.crosstab(foo, bar, dropna=False)
+        </pre>
+    <h2 style="color:blue">Normalization</h2>
+    <ul>
+        <li>Frequency tables can also be normalized to show percentages rather than counts using the normalize arguments.</li>
+        <li>normalize can also normalize values within each row or within each column.</li>
+        <li>crosstab can also be passed a third Series and an aggregation function (aggfunc) that will be applied to the values of the third Series within each group<br>
+        defined by the first two Series. </li>
+        <pre>
+            pd.crosstab(df['A'], df['B'], normalize=True)
+            pd.crosstab(df['A'], df['B'], nomalize='columns')
+            pd.crosstab(df['A'], df['B'], values=df['C'], aggfunc=np.sum)
+        </pre>
+    </ul>
+    <h2 style="color:blue">Adding margins</h2>
+    <ul>
+        <pre>
+            pd.crosstab(df['A'], df['B'], values=df['C'], aggfunc=np.sum, normalize=True, margin=True)
+        </pre>
+    </ul>
+    </ul>
+<h1 style="color:red">Tiling</h1>
+    <ul>
+        <li>The cut() function computes groupings for the values of the input array and is often used to transform continuous variables to discrete or categorical variables.</li>
+        <pre>
+            ages = np.array([10, 15, 13, 12, 23, 25, 28, 59, 60])
+            pd.cut(ages, bins=3)
+        </pre>
+        <li>If the bins keyword is an integer, the equal-width bins are formed. Alternatively we can specify custom bin-edges.</li>
+        <li>If the bins keyword is an IntervalIndex, then these will be used to bin the passed data.</li>
+        <pre>
+            c = pd.cut(ages, bin = [0, 18, 35, 70])
+            pd.cut([25, 20, 50], bins=c.categories)
+        </pre>
+    </ul>
+<h1 style="color:red">Computing indicator/ dummy variables</h1>
+    <ul>
+        <li>To convert a categorical variable into a 'dummy' or 'indicator' DataFrame, for example a column in a DataFrame (a Series) which has 'k' distinct<br>
+        values, can derive a DataFrame containing 'k' columns of 1s and 0s using get_dummies().</li>
+        <pre>
+            df = pd.DataFrame({'key': list('bbacab'), 'data1': range(6)})
+            pd.get_dummies(df['key'])
+        </pre>
+        <li>Sometimes it's useful to prefix the column names, for example when merging the result with the original DataFrame.</li>
+        <pre>
+            dummies = pd.get_dummies(df['key'], prefix='key')
+            df[['data1']].join(dummy)
+        </pre>
+        <li>This function is often used along with discretization functions like cut().</li>
+        <pre>
+            values = np.random.randn(10)
+            bins = [0, 0.2, 0.4, 0.6, 0.8, 1]
+            pd.get_dummies(pd.cut(values, bins))
+        </pre>
+        <li>get_dummies() also accepts a DataFrame. By default all categorical variables (categorical in the statistical sense, those with object or <br>
+        categorical dtype) are encoded as dummy variables.</li>
+        <li>All non-object columns are included untouched in the output. You can control the columns that are encoded with the columns keyword.</li>
+        <pre>
+            df = pd.DataFrame({'A': ['a', 'b', 'c'], 'B': ['c', 'c', 'b'], 'C': [1,2,3]})
+            pd.get_dummies(df)
+            pd.get_dummies(df, column=['A'])
+        </pre>
+        <li>Notice that the 'B' column is still included in the output, it just hasn't been encoded, You can drop 'B' before calling get_dummies if you<br>
+        don't want to include it in the output.</li>
+        <li>As with the Series version, you can pass values for the 'prefix' and 'prefix_sep'. By default the column name is used as the prefix, and '_'<br>
+        as teh prefix separator. You can specify the 'prefix' and 'prefix_sep' in 3 ways:</li>
+        <ul>
+            <li><b>string: </b>Use the same value for 'prefix' or 'prefix_sep' for each column to be encoded.</li>
+            <li><b>list: </b>Must be the same length as teh number of columns being encoded.</li>
+            <li><b>dict: </b>Mapping columns name to prefix.</li>
+        </ul>
+        <pre>
+            simple = pd.get_dummies(df, prefix='new_prefix')
+            from_list = pd.get_dummies(df, prefix=['from_A', 'from_B'])
+            from_dict = pd.get_dummies(df, prefix={'B': 'from_B', 'A': 'from_A'})
+        </pre>
+        <li>Sometimes it will be useful to only keep k-1 levels of a categorical variable to avoid collinearity when feeding the result to statistical models.<br>
+        You can switch to this mode by turn on 'drop_first'.</li>
+        <pre>
+            s = pd.Series(list('abcaa'))
+            pd.get_dummies(s)
+            pd.get_dummies(s, drop_first=True) # drop first value of get_dummies column(it is sorted before calling)
+            # for example above, if the list is ('cba'), so it will be sorted by 'abc' and drop a
+        </pre>
+        <li>When a column contains only one level, it will be omitted in teh result.</li>
+        <li>By default, new columns will have np.uint8 dtype. To choose another dtype, use the dtype argument:</li>
+        <pre>
+            df = pd.DataFrame({'A': list('aaaaa'), 'B': list('abcab')})
+            pd.get_dummies(df)
+            pd.get_dummies(df, drop_first=True) # drop columns 'A', and drop 'a' in column 'B' ('B' just contains 'b' and 'c')
+        </pre>
+    </ul>
+<h1 style="color:red">Factorizing values</h1>
+    <ul>
+        <pre>
+            x = pd.Series(['A', 'A', np.nan, 'B', 3.14, np.inf])
+            labels, uniques = pd.factorize(x)
+            labels
+            Out[]: array([ 0,  0, -1,  1,  2,  3])
+            uniques
+            Out[]: Index(['A', 'B', 3.14, inf], dtype='object')
+            pd.factorize(x, sort=True)
+        </pre>
+        <li>Note that 'factorize' is similar to numpy.unique, but differs in its handling of NaN. The numpy.unique will fail under python 3 with<br>
+        a TypeError because of an ordering bug. If you just want to handle one column as a categorical variable , you can use df['cat_col'] = <br>
+        pd.Categorical(df['col']) or df['cat_col'] = df['col'].astype('category').</li>
+    </ul>
+<h1 style="color:red">Example</h1>
+    <ul>
+        <pre>
+            np.random.seed([3, 1415])
+            n = 20
+            cols = np.array(['key', 'row', 'item', 'col'])
+            df = cols + pd.DataFrame((np.random.randint(5, size=(n,4)) // [2,1,2,1]).astype(str))
+            df.columns = cols
+            d = df.join(pd.DataFrame(np.random.randn(n, 2).round(2)).add_prefix('val'))
+        </pre>
+    <h2 style="color:blue">Pivoting with single aggregations</h2>
+    <ul>
+        <li>Suppose we wanted to pivot df such that the 'col' values are columns, 'row' values are the index, and the mean of 'val0' are the values:</li>
+        <pre>
+            df.pivot_table(index='row', columns='col', values='val0') # aggfunc='mean' by default
+            df.pivot_table(index='row', columns='col', values='val0', fill_value=0, aggfunc='sum')
+            df.pivot_table(index='row', columns='col', values='val0', fill_value=0, aggfunc='size') # use pd.crosstab(df['row'], df['col'] instead
+        </pre>
+    </ul>
+    <h2 style="color:blue">Pivoting with multiple aggregations</h2>
+    <ul>
+        <li>We can also perform multiple aggregations to perform both a 'sum' and 'mean', we can passing a list to the 'aggfunc' argument.</li>
+        <li>Note to aggregate over multiple value columns, we can pass in a list to the 'values' parameter. And to subdivide over multiple columsn we can pass<br>
+        in a list to the 'columns' parameter.</li>
+        <pre>
+            df.pivot_table(values='val0', index='row', columns='col', aggfunc=['mean', 'sum'])
+            df.pivot_table(values=['val0', 'val1'], index='row', columns='col', aggfunc=['mean', 'sum'])
+            df.pivot_table(values='val0', index='row', columns=['item', 'col'], aggfunc='mean')
+        </pre>
+    </ul>
+    <h2 style="color:blue">Exploding a list-like column</h2>
+    <ul>
+        <li>Sometimes the values in a column are list-like. We can explode teh 'values' column, transforming each list-like to a separate row, by using explode().<br>
+        This will replicate the index values from the original row.</li>
+        <pre>
+            keys = ['panda1', 'panda2', panda3']
+            values = [['eats', 'shots'], ['shoots', 'leave'], ['eats', 'leaves']]
+            df = pd.DataFrame({'key': keys, 'values': values})
+            df['values'].explode() # just explode 'values' column
+            Out[]:
+            0      eats
+            0    shoots
+            1    shoots
+            1    leaves
+            2      eats
+            2    leaves
+            Name: values, dtype: object
+            df.explode('value') # element-wise combination of 'values' column and the rest
+            Out[]:
+                 keys  values
+            0  panda1    eats
+            0  panda1  shoots
+            1  panda2  shoots
+            1  panda2  leaves
+            2  panda3    eats
+            2  panda3  leaves
+        </pre>
+        <li>Series.explode() will replace empty list with NaN values and preserve scalar entries. The dtype of resulting Series is always object.</li>
+        <pre>
+            s = pd.Series([[1,2,3], 'foo', [], ['a', 'b']])
+            s.explode()
+        </pre>
+        <li>If you have comma separated strings in a column and want to expand this.</li>
+        <pre>
+            df = pd.DataFrame([{'var1': "a,b,c", 'var2':1}, {'var3': 'd,e,f', 'var4': 2}])
+            df.assign(var1=df['var1'].str.split(','), var3=df['var3'].str.split(',')).explode('var1')
+            # Or
+            df.assign(var1= df.var1.str.split(','), var3= df.var3.str.split(',')).explode('var1')
+        </pre>
+    </ul>
+    </ul>
+<h1 style="text-align:center">Working with text data</h1>
+<h1 style="color:red">Text data types</h1>
+    <ul>
+        <li>There are two ways to store text data in pandas:</li>
+        <ul>
+            <li><b>object: </b>Numpy array dtype</li>
+            <li><b>StringDtype: </b>extension type</li>
+        </ul>
+        <li>The recommended is to use StringDtype to store text data. When reading code, the contents of an 'object' dtype array is less clear than 'string'.</li>
+        <li>For backwards-compatibility, 'object' dtype remains the default type we infer a list of strings to.</li>
+        <pre>
+            pd.Series(['a', 'b', 'c'])
+            pd.Series(['a', 'b', 'c'], dtype='string')
+            pd.Series(['a', 'b', 'c'], dtype=pd.StringDtype())
+            pd.Series(['a', 'b', 'c']).astype('string')
+            pd.Series(['a', 'b', 'c']).astype(pd.StringDtype())
+        </pre>
+    <h2 style="color:blue">Behavior differences</h2>
+    <ul>
+        <li>These are places where the behavior of StringDtype objects differ from 'object' dtype.</li>
+        <ul>
+            <li>For StringDtype, string accessor methods that return 'numeric' output will always return a nullable integer dtype, rather than eitherbr>
+            int or float dtype, depending on the presence of NA values. Methods returning boolean output will return a nullable boolean dtype.</li>
+            <pre>
+                s = pd.Series(['a', None', 'b'], dtype='string')
+                s.str.count('a') # int64 dtype
+                s.dropna().str.count('a') # int64 dtype
+            </pre>
+            <li>For object dtype: with Na values, it returns float64 dtype, similarly for methods returning boolean values.</li>
+            <pre>
+                s1 = pd.Series(['a', None, 'b'], dtype='object')
+                s1.str.count('a') # float64 dtype
+                s1.dropna().str.count('a') # int64 dtype
+                s1.str.isdigit() # boolean dtype with NA for NA values
+                s1.str.match('a') # boolean dtype with NA for NA values
+            </pre>
+            <li>Some string methods, like Series.str.decode() are not available on StringArray because StringArray only holds strings, not bytes.</li>
+            <li>In comparison operations, arrays.StringArray and Series backed by a StringArray will return an object with BooleanDtype, rather than a bool dtype object.<br>
+            Missing values in a StringArray will propagate in comparison operations, rather than always comparing unequal like numpy.nan.</li>
+        </ul>
+    </ul>
+    </ul>
+<h1 style="color:red">String Methods</h1>
+    <ul>
+        <li>Series and index are equipped with a set of string processing methods that make it easy to operate on each element of the array. Perhaps most importantly, these methods<br>
+        exclude mussing/ NA values automatically. These are accessed via the 'str' attribute and generally have names matching the equivalent (scalar) built-in string methods.</li>
+        <pre>
+            s = pd.Series(['A', 'B', 'C', 'Aaba', 'Baca', np.nan, 'CABA', 'dog', 'cat'], dtype='string')
+            s.str.lower()
+            s.str.upper()
+            s.str.len()
+            idx = pd.Index([' jack', 'jill', 'jesse ', 'frank'])
+            idx.str.strip()
+            idx.str.lstrip()
+            idx.str.rstrip()
+        </pre>
+        <li>The string methods on Index are especially useful for cleaning up or transforming DataFrame columns. For instance, you may have columns with leading or trailing whitespace.</li>
+        <li>Since DataFrame.columns is an index, we can use .str accessor.</li>
+        <pre>
+            df = pd.DataFrame(np.random.randn(3,2), columns=[' Column A ', ' Column B '], index=range(3))
+            df.columns.str.strip()
+            df.columns.str.lower()
+        </pre>
+        <li>These string methods can then be used to clean up the columns as needed. Here we are removing leading and trailing whitespaces, lower casing all names, and replacing<br>
+        any remaining whitespaces with underscores:</li>
+        <pre>
+            df.columns.str.strip().str.lower().str.replace(' ', '_')
+        </pre>
+        <li>If you hve a Series where lots of elements are repeated (the number of unique elements in the Series is a lot smaller than the length of the Series), it can be faster<br>
+        to convert the original Series to one of type category and then use .str.< method> or .dt.< property> on that. The performance difference comes from teh fact that, for Series<br>
+        or type category, the string operations are done on teh .categories and not on each element of the Series.</li>
+        <li>Note that a Series of type category with string .categories has some limitations in comparison to Series of type string(you can't add strings to each other:<br>
+        s + ' ' + s won't work if s is a Series of type category). Also, .str methods which operate on elements of type list are not available on such a Series.</li>
+    </ul>
+<h1 style="color:red">Spitting and replacing strings</h1>
+    <ul>
+        <li>Methods like split return a Series of lists. Elements in the split lists can be accessed using .str.get or .str[] notation:</li>
+        <pre>
+            s2 = pd.Series(['a_b_c', 'c_d_e', np.nan, 'f_g_h'], dtype='string')
+            s2.str.spit('_') # return a list of string, NA with np.nan dtype: object
+            s2.str.split('_').str.get(1) # get elements 1 in each index, NOTE DIFFERENCE WITH .get(1)
+            s2.str.split('_').str[1] # similar above
+        </pre>
+        <li>You can expand columns to return a DataFrame using expand argument. Or limit the number of splits.</li>
+        <pre>
+            s2.str.split('_', expand=True) # return frame with each split as a column
+            Out[]:
+                  0     1     2
+            0     a     b     c
+            1     c     d     e
+            2  < NA>  < NA>  < NA>
+            3     f     g     h
+            s2.str.split('_', expand=True, n=1) # splits 1 '_' (divide str into 2 parts), from left to right(default)
+            Out[]:
+                  0     1
+            0     a   b_c
+            1     c   d_e
+            2  < NA>  < NA>
+            3     f   g_h
+        </pre>
+        <li>rsplit() is reversed of split(), from the end of string to the beginning of the string.</li>
+        <pre>
+            s2.str.rsplit('_', expand=True, n=1) # split 1 '_' (divide str into 2 parts), from right to left
+            Out[]:
+                  0     1
+            0   a_b     c
+            1   c_d     e
+            2  < NA>  < NA>
+            3   f_g     h
+        </pre>
+        <li>replace() optionally uses regex(regular expression).</li>
+        <pre>
+            s3 = pd.Series(['A', 'B', 'C', 'Aaba', 'Baca', '', np.nan, 'CABA', 'dog', 'cat'], dtype='string')
+            s3.str.replace('^.a|dog", 'XX-XX ", case=False, regex=True)
+            Out[]:
+            0           A
+            1           B
+            2           C
+            3    XX-XX ba
+            4    XX-XX ca
+            5
+            6        < NA>
+            7    XX-XX BA
+            8      XX-XX
+            9     XX-XX t
+            dtype: string
+        </pre>
+        <li>If you want literal replacement of a string (equivalent to str.replace()), you can set the optional regex parameter to False, rather than escaping<br>
+        each character. In this case both 'pat' (patterns) and 'repl' (replacement) must be strings:</li>
+        <pre>
+            dollars = pd.Series(['12', '-$10', '$10,000'], dtype='string')
+            dollars.str.replace(r'-\$", '-', regex=True) # use escape char (-\$ as -$ not $)
+            Out[]:
+            0         12
+            1        -10
+            2    $10,000
+            dtype: string
+            dollars.str.replace('-$', '-', regex=False) # use literal char
+            Out[]:
+            0         12
+            1        -10
+            2    $10,000
+            dtype: string
+        </pre>
+        <li>The replace method can also take a callable as replacement. It is called on every 'pat' using re.sub(). The callable should expect one<br>
+        positional argument (a regex object) and return a string.</li>
+        <pre>
+            pat = r'[a-z]+"
+            def repl(m):
+                return m.group(0)[::-1]
+            pd.Series(['foo 123', 'bar baz', np.nan], dtype='string).str.replace(pat, repl, regex=True)
+            Out[]:
+            0    oof 123
+            1    rab zab
+            2       < NA>
+            dtype: string
+
+            pat = r'(?P< one>\w+) (?P< two>\w+) (?P< three>\w+)'
+            def repl(m):
+                return m.group('two').swapcase()
+            pd.Series(['Foo Bar Baz', np.nan], dtype='string').str.replace(pat, repl, regex=True)
+        </pre>
+        <li>The replace() method also accepts a compiled regular expression object from re.compile() as a pattern. All flags should be <br>
+        included in the complied regular expression object.</li>
+        <pre>
+            import re
+            regex_pat = re.compile(r'^.a|dog', flags=re.IGNORECASE)
+            s3.str.replace(regex_pat, 'XX-XX', regex=True)
+            Out[]:
+            0           A
+            1           B
+            2           C
+            3    XX-XX ba
+            4    XX-XX ca
+            5
+            6        < NA>
+            7    XX-XX BA
+            8      XX-XX
+            9     XX-XX t
+            dtype: string
+        </pre>
+        <li>Including a flags argument when calling replace with a compiled regular expression object will raise a ValueError.</li>
+        <pre>
+            s3.str.replace(regex_pat, 'XX-XX', flags=re.IGNORECASE)
+        </pre>
+    </ul>
+<h1 style="color:red">Concatenation: all based on cat() </h1>
+    <ul>
+        <li>There are several ways to concatenate a Series or Index, either with itself or others, all based on cat(). Index.str.cat</li>
+    <h2 style="color:blue">Concatenating a single Series into a String</h2>
+    <ul>
+        <li>The content of a Series( or Index) can be concatenated. If not specified, the keyword 'sep' for the separator defaults to the empty string, sep=''.<br>
+        By default, missing values are ignored. Using na_rep, they can be given a representation.</li>
+        <pre>
+            s = pd.Series(['a', 'b', 'c', 'd'], dtype='string')
+            s.str.cat(sep=',')
+            s.str.cat()
+            t = pd.Series(['a', 'b', np.nan, 'd'], dtype='string')
+            t.str.cat(na_rep = '-')
+            t.str.cat(sep=',', na_rep='-')
+        </pre>
+    </ul>
+    <h2 style="color:blue">Concatenating a Series and something list-like into a Series</h2>
+    <ul>
+        <li>The first argument to cat() can be a list-like object, provided that it matches teh length of the calling Series(or Index).</li>
+        <li>Missing values on either side will result in missing values in teh result as well, unless na_rep is specified:</li>
+        <pre>
+            s.str.cat(t) # concat s and t (s must have same length of t)
+            s.tr.cat(t, na_rep='-') # replace NA values to avoid NA in resulting
+        </pre>
+    </ul>
+    <h2 style="color:blue">Concatenating a Series and something array-like into a Series</h2>
+    <ul>
+        <li>The parameter 'other' can also be two-dimensional. In this case, the number or rows must match the lengths of the calling Series(or Index).</li>
+        <pre>
+            d = pd.concat([t,s], axis=1) # returns frame with two columns t and s
+            s.str.cat(d, na_rep='-') # concat s and d, treat NA as '-'
+        </pre>
+    </ul>
+    <h2 style="color:blue">Concatenating a Series and an indexed object into Series, with alignment</h2>
+    <ul>
+        <li>For concatenation with a Series or DataFrame, it is possible to align teh indexes before concatenation by setting the join-keyword.</li>
+        <pre>
+            u = pd.Series(['b', 'd', 'a', 'c'], index=[1,3,0,2], dtype='string')
+            s.str.cat(u) # align index then cat s and u
+            s.str.cat(u, join='left') # align index then use s index as first argument to cat()
+        </pre>
+        <li>If the 'join' keyword is not passed, the method cat() set default 'left' for 'join' argument.</li>
+        <li>The usual options are available for join(one of 'left', 'outer', 'inner', 'right'). In particular, alignment also means that the different<br>
+        lengths do not need to coincide anymore.</li>
+        <pre>
+            v = pd.Series(['z', 'a', 'b', 'd', 'e'], index=[-1,0,1,3,4], dtype='string')
+            s = pd.Series(['a', 'b', 'c', 'd'], dtype='string')
+            s.str.cat(v) # align index first then cat() with default join='left'
+            s.str.cat(v, na_rep='-') # treat NA as '-'
+            s.str.cat(v, join='outer', na_rep='-') # turn all index appear in both and treat NA as '-'
+        </pre>
+        <li>The same alignment can be used with 'others' is a DataFrame.</li>
+        <pre>
+            f = d.loc[[3,2,1,0], :]
+            Out[]:
+                  0  1
+            3     d  d
+            2  < NA>  c
+            1     b  b
+            0     a  a
+            s.str.cat(f) # cat() with default join='left', align index before.
+        </pre>
+    </ul>
+    <h2 style="color:blue">Concatenating a Series and many objects into a Series</h2>
+    <ul>
+        <li>Several array-like items (specifically: Series, Index, and 1-dimensional variants of np.ndarray) can be combined in a list-like container<br>
+        (including iterators, dict-views, etc).</li>
+        <li>All elements without an index (np.ndarray) within the passed list-like must match in length to the calling Series (or Index), but Series<br>
+        and Index may have arbitrary length(as long as alignment is not disabled with join=None).</li>
+        <li>If using join='right' on a list-like of 'others' that contains different indexes, the union of these indexes will be used as the basis for<br>
+        the final concatenation.</li>
+        <pre>
+            s = pd.Series(['a', 'b', 'c', 'd'], dtype='string')
+            u = pd.Series(['b', 'd', 'a', 'c'], index=[1,3,0,2], dtype='string')
+            s.str.cat([u, u.to_numpy()])
+            v = pd.Series(['z', 'a', 'b', 'd', 'e'], index=[-1,0,1,3,4], dtype='string')
+            s.str.cat([v, u, u.to_numpy()], join='outer', na_rep='-')
+            u.loc[[3]] # return u's index label 3 with all columns
+            v.loc[[-1, 0]] # return v's index labels -1, 0 and all columns
+            s.str.cat([u.loc[[3]], v.loc[[-1, 0]], join='right', na_rep='-') # use index of right side (3, -1, 0) and is sorted
+        </pre>
+    </ul>
+    </ul>
+<h1 style="color:red">Indexing with .str</h1>
+    <ul>
+        <li>You can use [] notation to directly index by position locations. If you index past the end of the string, the result will be a NaN.</li>
+        <pre>
+            s = pd.Series(['A', 'B', 'C', 'Aaba', 'Baca', np.nan, 'CABA', 'dog', 'cat'], dtype='string')
+            s.str[0] # first letter of s
+            s.str[1] # second letter of s
+            s.str[2] # third letter of s
+            s.str[3] # fourth letter of s
+            s.str[4] # NaN , exceed of s's max length
+        </pre>
+    </ul>
+<h1 style="color:red">Extracting substrings</h1>
+    <ul>
+    <h2 style="color:blue">Extract first match in each subject</h2>
+    <ul>
+        <li>The extract() method accepts a regular expression (regex) with at least one capture group. Extracting a regex with more than one group<br>
+        returns a DataFrame with one column per group.</li>
+        <pre>
+            pd.Series(['a1', 'b2', 'c3'], dtype='string').str.extract(r'([ab])(\d)', expand=False)
+        </pre>
+        <li>Elements that do not match return a row filled with NaN. Thus, a Series of messy strings can be 'converted' into a like-indexed Series<br>
+        or DataFrame of cleaned-up or more useful strings, without necessitating get() to access tuples or re.match objects. The dtype of the result<br>
+        is always object, even if no match is found and the result only contains NaN.</li>
+        <pre>
+            # Name group
+            pd.Series(['a1', 'b2' 'c3'], dtype='string').str.extract(r'(?P< letter>[ab])(?P< digit>\d)', expand=False)
+              letter digit
+            0      a     1
+            1      b     2
+            2   < NA>  < NA>
+            # Optional groups like
+            pd.Series(['a1', 'b2', 'c3'], dtype='string').str.extract(r'([ab])?(\d)', expand=False)
+                  0   1
+            0     a   1
+            1     b   2
+            2  < NA>  3
+        </pre>
+        <li>Note that any capture group names in teh regular expression will be used for column names, otherwise capture group numbers will be used.</li>
+        <li>Extracting a regex with one group returns a DataFrame with one column if 'expand=True' and Series if 'expand=False'.</li>
+        <li>Calling on an Index with a regex with exactly one capture group returns a DataFrame with one column if 'expand=True'. And index if 'expand=False'.</li>
+        <pre>
+            s = pd.Series(['a1', 'b2', 'c3'], ['A11', 'B22', 'C33'], dtype='string')
+            s.index.str.extract('(?P< letter>[a-zA-Z])', expand=True)
+            Out[]:
+              letter
+            0      A
+            1      B
+            2      C
+            s.index.str.extract('(?P< letter>[a-zA-Z])', expand=False)
+            Out[]: Index(['A', 'B', 'C'], dtype='object', name='letter')
+        </pre>
+        <li>Calling on an Index with a regex with more than one capture group returns a DataFrame if expand=True, and ValueError if expand=False.</li>
+        <pre>
+            s.index.str.extract('(?P< letter>[a-zA-Z])([0-9]+)', expand=True)
+            Out[]:
+              letter   1
+            0      A  11
+            1      B  22
+            2      C  33
+        </pre>
+        <li>The table below summarizes teh behavior of exract(expand=False) (input subject in first column, number of groups in regex in first row).</li>
+        <table border="1" class="dataframe">
+              <tbody>
+                <tr>
+                  <td></td>
+                  <td>1 group</td>
+                  <td>&gt;1 group</td>
+                </tr>
+                <tr>
+                  <td>Index</td>
+                  <td>Index</td>
+                  <td>ValueError</td>
+                </tr>
+                <tr>
+                  <td>Series</td>
+                  <td>Series</td>
+                  <td>DataFrame</td>
+                </tr>
+              </tbody>
+        </table>
+    </ul>
+    <h2 style="color:blue">Extract all matches in each subject (extractall)</h2>
+    <ul>
+        <li>Unlike extract() (which returns only the first match), the extractall() method returns every match. The result of extractall() is always a <br>
+        DataFrame with a MultiIndex on its rows. The last level of the MultiIndex is named match and indicates the order in the subject.</li>
+        <li>When each subject string in the Series has exactly one match, then extractall(pat).xs(0, level='match') gives the same result as extract(pat).</li>
+        <pre>
+            s = pd.Series(['a1a2', 'b1', 'c1'], index=['A', 'B', 'C'], dtype='string')
+            two_groups = '(?P< letter>[a-z])(?P< digit>[0-9])'
+            s.str.extractall(two_groups, expand=True)
+            s.str.extractall(two_groups)
+            s = pd.Series(['a3', 'b3', 'c2'], dtype='string')
+            extractall_result = s.str.extractall(two_groups)
+            Out[]:
+                    letter digit
+              match
+            0 0          a     3
+            1 0          b     3
+            2 0          c     2
+            extractall_result.xs(0, level='match') # index 0 at name index level 'match'
+            Out[]:
+              letter digit
+            0      a     3
+            1      b     3
+            2      c     2
+        </pre>
+        <li>Index also supports .str.extractall). It returns a DataFrame which has the same result as a Series.str.extractall with a default index (starts from 0).</li>
+        <pre>
+            pd.Index(['a1a2', 'b1', 'c1']).str.extractall(two_groups)
+            Out[]:
+                    letter digit
+              match
+            0 0          a     1
+              1          a     2
+            1 0          b     1
+            2 0          c     1
+            pd.Series(['a1a2', 'b1', 'c1']).str.extractall(two_groups)
+            Out[]:
+                    letter digit
+              match
+            0 0          a     1
+              1          a     2
+            1 0          b     1
+            2 0          c     1
+        </pre>
+    </ul>
+    </ul>
+<h1 style="color:red">Testing for strings that match or contain a pattern</h1>
+    <ul>
+        <li>You can check whether elements contain a pattern or whether elements match a pattern:</li>
+        <pre>
+            pattern = '[0-9][a-z]'
+            pd.Series(['1', '2', '3a', '3b', '03c', '4dx'], dtype='string').str.contains(pattern)
+            pd.Series(['1', '2', '3a', '3b', '03c', '4dx'], dtype='string').str.match(pattern)
+            pd.Series(['1', '2', '3a', '3b', '03c', '4dx'], dtype='string').str.fullmatch(pattern)
+        </pre>
+        <li>The distinction between 'match, fullmatch and contains' is strctness:</li>
+        <ul>
+            <li><b>fullmatch: </b>tests whether the entire string matches the regular expression</li>
+            <li><b>match: </b>tests whether there is a match of the regular expression that begins at the first character of the string.</li>
+            <li><b>contains: </b>tests whether there is a match of the regular expression at any position within the string.</li>
+        </ul>
+        <li>The corresponding functions in the 're' package for these three match modes are 're.fullmatch, re.match, and re.search' respectively.</li>
+        <li>Methods like 'match, fullmatch, contains, startswith, and endswith' take an extra 'na' argument so missing values can be considered True or False.</li>
+        <pre>
+            s4 = pd.Series(['A', 'B', 'C', 'Aaba', 'Baca', np.nan, 'CABA', 'dog', 'cat'], dtype='string')
+            s4.str.contains('A', na=False)
+            Out[]:
+            0     True
+            1    False
+            2    False
+            3     True
+            4    False
+            5    False
+            6     True
+            7    False
+            8    False
+            dtype: boolean
+        </pre>
+    </ul>
+<h1 style="color:red">Creating indicator variables</h1>
+    <ul>
+        <li>You can extract dummy variables from string columns. String Index also supports get_dummies which returns a MultiIndex.</li>
+        <pre>
+            s = pd.Series(['a', 'a|b', np.nan, 'a|c'], dtype='string')
+            s.str.get_dummies(sep='|')
+            Out[]:
+               a  b  c
+            0  1  0  0
+            1  1  1  0
+            2  0  0  0
+            3  1  0  1
+            idx = pd.Index(['a', 'a|b', np.nan, 'a|c'])
+            idx.str.get_dummies(sep='|')
+            Out[]:
+            MultiIndex([(1, 0, 0),
+            (1, 1, 0),
+            (0, 0, 0),
+            (1, 0, 1)],
+           names=['a', 'b', 'c'])
+        </pre>
+    </ul>
+<h1 style="color:red">Method Summary</h1>
+    <ul>
+        <li><b>cat(): </b>Concatenate strings.</li>
+        <pre>
+            str.cat(others= None, sep=None, na_rep=None, join='left')
+            s.str.cat(v, join='left')
+            s.str.cat(v, join='inner')
+            s.str.cat(v, join='outer')
+            s.str.cat(v, join='right', sep='|', na_rep='-')
+        </pre>
+        <li><b>split(): </b>Split strings on delimiter.</li>
+        <pre>
+            str.split(pat=None, n=-1, expand=False)
+            n: int, limit number of splits in output. None, 0 and -1 will be interpreted as return all splits.
+            s.str.split(',', 2, expand=True)
+        </pre>
+        <li><b>rsplit(): </b>Split strings on delimiter working from the end of the string.</li>
+        <pre>
+            str.rsplit(pat=None, n=-1, expand=False)
+            n: int, default -1. Limit the number of splits in output. None, 0 and -1 will be interpreted as return all splits.
+            s.str.rsplit(',')
+        </pre>
+        <li><b>get(): </b>Index into each element(retrieve i-th element).</li>
+        <pre>
+            str.get(i)
+            i: position of element to extract
+            s.str.get(0)
+            pd.DataFrame({i:s.str.get(i) for i in list(range(10))}).fillna('-'))
+        </pre>
+        <li><b>join(): </b>Join string in each element of the Series with passed separator.</li>
+        <pre>
+            str.join(sep)
+            s.str.join('-')
+        </pre>
+        <li><b>get_dummies(): </b>Split strings on the delimiter returning DataFrame of dummy variables.</li>
+        <pre>
+            str.get_dummies(sep='|')
+            s.get_dummies(sep=',')
+        </pre>
+        <li><b>contains(): </b>Return boolean array if each string contains pattern/ regex.</li>
+        <pre>
+            str.contains(pat, case=True, flags=0, na=None, regex=True)
+            <b>case:</b> boolean value, if True, case sensitive
+            <b>na: </b>scalar, fill value for missing. object: np.nan, StringDtype: pandas.NA
+            <b>regex:</b> default True, assumes the 'pat' is regex, if False treat 'pat' as literal string
+            s.str.contains(r'([a-z])')
+        </pre>
+        <li><b>replace(): </b>Replace occurrences of pattern/ regex/ string with some other string or return value of callable given the occurrence.</li>
+        <pre>
+            str.replace(pat, repl, n=-1, case=None, flags=0, regex=None)
+            <b>regex:</b> can not to False if 'pat' is a compiled regex or 'repl' is callable
+            s.replace('a', 'col1', regex=False)
+        </pre>
+        <li><b>repeat(): Default 1. </b>Duplicate values.</li>
+        <pre>
+            str.repeat(repeats)
+            <b>repeats:</b> int or sequence(same length with Series/ Index) of ints
+            s = pd.Series(['a', 'b', 'c'])
+            s.repeat(3)
+            s.repeat([1,2,3])
+        </pre>
+        <li><b>pad(): </b>Add char to left, right, or both sides of strings.
+        <pre>
+            str.pad(width, side='left', fillchar=' ')
+            <b>width: </b>Minimum width of resulting string. just affect if > length of each element in str
+            <b>side: {'left', 'right', 'both'}, default 'left'.</b>
+            s1 = pd.Series(['a', 'b', 'c'], dtype='string')
+            s.str.pad(width=2, side='right', fillchar='a')
+            Out[]:
+            0    aa
+            1    ba
+            2    ca
+            dtype: string
+            s1.str.pad(width=3, fillchar='a', side='both')
+            Out[]:
+            0    aaa
+            1    aba
+            2    aca
+            dtype: string
+        </pre>
+        <li><b>center(): </b>Equivalent to str.center. Keep str in center of 'fillchar'.</li>
+        <pre>
+            str.center(width, fillchar=' ')
+            s.str.center(width=5, fillchar='-')
+        </pre>
+        <li><b>ljust(): </b>Pad right side of strings in the Series/ Index.</li>
+        <pre>
+            str.ljust(width, fillchar=' ')
+            s.ljust(3, fillchar='-')
+        </pre>
+        <li><b>rjust(): </b>Pad left side of strings in the Series/ Index.</li>
+        <pre>
+            str.rjust(width, fillchar=' ')
+            s.rjust(width=3, fillchar='-')
+        </pre>
+        <li><b>zfill(): (zero fill)</b>Pad strings in the Series/ Index by prepending '0' characters.</li>
+        <pre>
+            str.zfill(width)
+            s.zfill(3)
+        </pre>
+        <li><b>wrap(): </b>Wrap strings in Series/ Index at specified line width.</li>
+        <pre>
+            str.wrap(width, **kwargs)
+            <b>width: </b> Maximum line width
+            <b>expand_tabs: bool, default True.</b>If True tab character will be expand to spaces
+            <b>replace_whitespace: bool, default True.</b> If True each whitespace character remaining after tab expansion will be replaced by a single space.
+            <b>drop_whitespace: bool, default True.</b> If True, whitespace that after wrapping, happens to end up at the beginning or end of a line is dropped.
+            <b>break_long_words: bool, default True.</b> Words longer than width will be broken in order to ensure that no lines are longer than width.
+            <b>break_on_hyphens: bool, default True.</b> Wrapping will occur preferably on whitespace and right after hyphens in compound words, as it is customary in E.
+            s = pd.Series(['line to be wrapped', 'another line to be wrapped'])
+            s.str.wrap(12)
+            Out[]:
+            0             line to be\nwrapped
+            1    another line\nto be\nwrapped   #3 parts because part2 and 3 combine in length > width.
+            dtype: object
+        </pre>
+        <li><b>slice(): </b>Slice substrings from each element in the Series or Index.</li>
+        <pre>
+            str.slice(start=None, stop=None, step=None)
+            s.str.slice(2, 8, 2)
+        </pre>
+        <li><b>slice_replace(): </b>Replace a positional slice of a string with another value.</li>
+        <pre>
+            str.slice_replace(start=None, stop=None, repl=None)
+            s.slice_replace(2, 4, 'col1')
+        </pre>
+        <li><b>count(): </b>Count occurrences of pattern in each string of the Series/ Index.</li>
+        <pre>
+            str.count(pat, flag=0)
+            s.str.count('ine')
+        </pre>
+        <li><b>startswith(): </b>Test if the start of each string element matches a pattern.</li>
+        <pre>
+            str.startswith(pat, na=None)
+            s.str.startswith('line')
+        </pre>
+        <li><b>endswith(): </b>Test if the end of each string element matches a pattern.</li>
+        <pre>
+            str.endswith(pat, na=None)
+            s.str.endswith('wrapped')
+        </pre>
+        <li><b>findall(): </b>Find all occurrences of pattern or regex in the Series/ Index.</li>
+        <pre>
+            str.findall(pat, flags=0)
+            s.str.findall('line')
+        </pre>
+        <li><b>match(): </b>Determine if each string starts with a match of regular expression.</li>
+        <pre>
+            str.match(pat, case=True, flag=0, na=None)
+            s.str.match('Line')
+            0    False
+            1    False
+            dtype: bool
+            s.str.match('Line', case=False)
+            0     True
+            1    False
+            dtype: bool
+        </pre>
+        <li><b>extract(): </b>Extract capture groups in the regex pat as columns in a DataFrame.</li>
+        <pre>
+            str.extract(pat, flag=0, expand=True)
+            s = pd.Series(['a1', 'b2', 'c3', 'ca'])
+            s.str.extract(r'([ab])([\d])')
+            s.str.extract(r'([ab])?([\d])')
+            s.str.extract(r'(?P< letter>[ab])(?P< digit>[\d])')
+            s.str.extract(r'[ab]([\d])')
+        </pre>
+        <li><b>extractall(): </b>Extract capture groups in the regex pat as columns in DataFrame.</li>
+        <pre>
+            str.extractall(pat, flags=0)
+            s.str.extractall(r'([abc][\d])') # if column has many matches, match return same indexes.
+            Out[]:
+            	        0
+                match
+            0	0	    a1
+            1	0	    b2
+            2	0	    c3
+        </pre>
+        <li><b>len(): </b>Compute the length of each element in the Series/ Index.</li>
+        <pre>
+            s.str.len()
+        </pre>
+        <li><b>strip(): </b>Remove leading and trailing characters. Strip whitespaces (including newlines) or a set of chars.</li>
+        <pre>
+            str.strip(to_strip=None)
+            <b>to_strip:</b> specifying the set of chars to be removed from each string. From left and right sides.
+            s = pd.Series(['1. Ant.  ', '2. Bee!\n', '3. Cat?\t', np.nan])
+            s.str.strip() # remove whitespaces (includes:  ' ', \n, \t)
+            s.str.trip('123.') # remove pattern like '123.'
+            s.str.strip('123.!? \n\t')
+        </pre>
+        <li><b>rstrip(): </b>Remove trailing characters.</li>
+        <pre>
+            str.rstrip(to_strip=None)
+            s.str.rstrip()
+            s.str.rstrip('.!? \n\t')
+        </pre>
+        <li><b>lstrip(): </b>Remove leading characters.</li>
+        <pre>
+            str.lstrip(to_strip=None)
+            s.str.lstrip()
+            s.str.lstrip('123.')
+        </pre>
+        <li><b>partition(): </b>Split the string at the first occurrence of sep. Return 3 parts: before sep, sep and after sep.</li>
+        <pre>
+            str.partition(sep=' ', expand=True)
+            s = pd.Series(['Linda van der Berg', 'George Pitt-Rivers'])
+            s.str.partition()
+            Out[]:
+                    0  1             2
+            0   Linda     van der Berg
+            1  George      Pitt-Rivers
+
+            s.str.partition(sep='-')
+            Out[]:
+                                0  1       2
+            0  Linda van der Berg
+            1         George Pitt  -  Rivers
+
+            s.tr.partition(sep='-', expand=False)
+            Out[]:
+            0    (Linda van der Berg, , )
+            1    (George Pitt, -, Rivers)
+            dtype: object
+        </pre>
+        <li><b>rpartition(): </b>Split the string at the last occurrence of sep.</li>
+        <pre>
+            str.rpartition(sep=' ', expand=True)
+            s.str.rpartition()
+            s.str.rparition('-')
+            s.str.rpartition('-', expand=False)
+        </pre>
+        <li><b>lower(): </b>Convert strings in the Series/ Index to lowercase.</li>
+        <pre>
+            str.lower()
+        </pre>
+        <li><b>casefold(): </b>Convert strings in the Series/ Index to be casefolded. Or remove all distinctions in the strings.</li>
+        <pre>
+            str.casefold()
+            s = pd.Series(['lower', 'CAPITALS', 'this is a sentence', 'SwApCaSe'])
+            s.casefold() # remove all distinctions in the strings
+            Out[]:
+            0                 lower
+            1              capitals
+            2    this is a sentence
+            3              swapcase
+            dtype: object
+        </pre>
+        <li><b>upper(): </b>Convert strings in the Series/ Index to uppercase.</li>
+        <pre>
+            str.upper()
+        </pre>
+        <li><b>find(): </b>Return lowest(left most) indexes in each strings in the Series/ Index. Return -1 on failure.</li>
+        <pre>
+            str.find(sub, start=0, end=None)
+            s = pd.Series(['lower', 'CAPITALS', 'this is a sentence', 'SwApCaSe'])
+            s.str.find('e')
+            Out[]:
+            0     3
+            1    -1
+            2    11
+            3     7
+            dtype: int64
+        </pre>
+        <li><b>rfind(): </b>Return highest(right most) indexes in each strings in the Series/ Index. Return -1 on failure.</li>
+        <pre>
+            str.rfind(sub, start=0, end=None)
+            s.str.rfind('a')
+            Out[]:
+            0     3
+            1    -1
+            2    17
+            3     7
+            dtype: int64
+        </pre>
+        <li><b>index(): </b>Return lowest indexes in each string in Series/ Index. Raise ValueError when the substring is not found.</li>
+        <pre>
+            str.index(sub, start=0, end=None)
+            s.str.index('e')
+        </pre>
+        <li><b>rindex(): </b>Return highest indexes in each string in Series/ Index.</li>
+        <pre>
+            str.rindex(sub, start=0, end=None)
+            s.str.rindex('e')
+        </pre>
+        <li><b>capitalize(): </b>Convert strings in the Series/ Index to be capitalized.</li>
+        <pre>
+            str.capitalize()
+        </pre>
+        <li><b>swapcase(): </b>Convert strings in the Series/ Index to be swapcase.</li>
+        <pre>
+            str.swapcase()
+            s.str.swapcase()
+            Out[]:
+            0                 LOWER
+            1              capitals
+            2    THIS IS A SENTENCE
+            3              sWaPcAsE
+            dtype: object
+        </pre>
+        <li><b>normalize(): </b>Return the Unicode normal form for the strings in the Series/ Index.</li>
+        <pre>
+            str.normalize(form)
+            <b>form: </b> unicode forms : {'NFC', 'NFKC', 'NDF', 'NFKD'}
+            s.str.normalize('NFC')
+        </pre>
+        <li><b>translate(): </b>Map all characters in the string through the given mapping table.</li>
+        <pre>
+            str.translate(table)
+            <b>table: </b> dict.
+        </pre>
+        <li><b>isalnum(): </b>Check whether all characters in each string are alphanumeric.Note that checks against characters mixed with any additional<br>
+        punctuation or whitespace will evaluate to false for an alphanumeric check.</li>
+        <pre>
+            str.isalnum()
+            s1 = pd.Series(['one', 'one1', '1', ''])
+            s1.isalnum()
+            Out[]:
+            0     True
+            1     True
+            2     True
+            3    False
+            dtype: bool
+        </pre>
+        <li><b>isalpha(): </b>Check whether all chars in each string are alphabetic.</li>
+        <pre>
+            str.isalpha()
+            s1.str.isalpha()
+            Out[]:
+            0     True
+            1    False
+            2    False
+            3    False
+            dtype: bool
+        </pre>
+        <li><b>isdigit(): </b>Check whether all chars in each string are digits.</li>
+        <pre>
+            str.isdigit()
+            s3 = pd.Series(['23', '³', '⅕', ''])
+            s3.str.isdigit()
+            Out[]:
+            0     True
+            1     True
+            2    False
+            3    False
+            dtype: bool
+        </pre>
+        <li><b>isspace(): </b>Check whether all characters in each string are whitespace.</li>
+        <pre>
+            str.isspace()
+            s4 = pd.Series([' ', '\t\r\n ', ''])
+            s4.str.isspace()
+            Out[]:
+            0     True
+            1     True
+            2    False
+            dtype: bool
+        </pre>
+        <li><b>islower(): </b>Check whether all characters in each string are lowercase.</li>
+        <pre>
+            str.islower()
+            s5 = pd.Series(['leopard', 'Golden Eagle', 'SNAKE', ''])
+            s5.str.islower()
+            Out[]:
+            0     True
+            1    False
+            2    False
+            3    False
+            dtype: bool
+        </pre>
+        <li><b>isupper(): </b>check whether all characters in each string are uppercase.</li>
+        <li><b>istitle(): </b>check whether all characters in each string are titlecase.</li>
+        <li><b>isnumeric(): </b>check whether all characters in each string are numeric.</li>
+        <li><b>isdecimal(): </b>check whether all characters in each string are decimal.</li>
+    </ul>
+<h1 style="text-align: center">Working with missing data</h1>
+<h1 style="color:red">Values considered 'missing'</h1>
+<ul>
+    <li>As data comes in many shapes and forms, pandas aims to be flexible with regard to handling missing data. While NaN is teh default missing value<br>
+    marker for reasons of computational speed and convenience, we need to be able to easily detect this value with data of different types: floating point<br>
+    integer, boolean and general object. In many cases, however, the Python None will arise and we wish to also consider that 'missing' or not 'available'<br>
+    or 'NA'.</li>
+    <li>If you want to consider 'inf' and '-inf' to be 'NA' in computations, you can set 'pandas.options.mode.use_inf_as_na = True'.</li>
+    <pre>
+        df = pd.DataFrame(np.random.randn(5,3), index=['a', 'c', 'e', 'f', 'h'], columns=['one', 'two', 'three'])
+        df['four'] = 'bar'
+        df['five'] = df['one'] > 0
+        df2 = df.reindex(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'])
+    </pre>
+    <li>To make detecting missing values easier(and across different array dtypes), pandas provide isna() and notna() functions, which are also methods on Series and DataFrame objects.</li>
+    <pre>
+        df['one']
+        pd.isna(df2['one'])
+        df2['four'].notna()
+        df2.isna()
+    </pre>
+    <li>Note that in pandas/ Numpy <b>np.nan != np.nan, and None = np.nan.</b></li>
+    <h2 style="color:blue">Integer dtypes and missing data</h2>
+    <ul>
+        <li>Because NaN is a float, a column of integers with even one missing values is cast to floating-point dtype, pandas provides a nullable integer<br>
+        array, which can be used by explicitly requesting the dtype.</li>
+        <pre>
+            pd.Series([1,2,np.nan,4], dtype=pd.Int64Dtype())
+            pd.Series([1,2,np.nan,4], dtype='Int64')
+        </pre>
+    </ul>
+    <h2 style="color:blue">Datetime</h2>
+    <ul>
+        <li>For datetime64[ns] types, NaT represents missing values. This is a pseudo-native sentinel value that can be represented by Numpy in a singular dtype<br>
+        (datetime64[ns]). pandas objects provide compatibility between NaT and NaN.</li>
+        <pre>
+            df2 = df.copy()
+            df2['timestamp'] = pd.Timestamp('20120101')
+            df2.loc[['a', 'c', 'h'], ['one', 'timestam']] = np.nan
+            df2.dtype.value_counts()
+            Out[]:
+            float64           3
+            object            1
+            bool              1
+            datetime64[ns]    1
+            dtype: int64
+        </pre>
+    </ul>
+</ul>
+<h1 style="color:red">Inserting missing data</h1>
+<ul>
+    <li>You can insert missing values by simply assigning to containers. The actual missing value used will be chosen based on the dtype.</li>
+    <li>Numeric container will always use NaN regardless of the missing value type chosen. Likewise, date time containers will always use NaT.</li>
+    <li>For object container, pandas will always use given value.</li>
+    <pre>
+        s = pd.Series([1,2,3])
+        s[0] = None
+        s = pd.Series(pd.date_range('20210101', periods=3))
+        s[0] = np.nan
+        s = pd.Series(['a', 'b', 'c'])
+        s[0] = None
+        s[1] = np.nan
+    </pre>
+</ul>
+<h1 style="color:red">Calculations with missing data</h1>
+<ul>
+    <li>Missing values propagate naturally through arithmetic operations between pandas object.</li>
+    <pre>
+        a = pd.DataFrame(np.random.randn(5,2), index=list('acefh'), columns=['one', 'two'])
+        a.loc[['a', 'c'], 'one'] = np.nan
+        b = pd.DataFrame(np.random.randn(5,2), index=a.index, columns=b.columns)
+        b.loc[['a', 'c', 'h'], 'one'] = np.nan
+        a + b
+        a.add(b)
+    </pre>
+    <li>The descriptive statistics and computational methods are all written to account for missing data.</li>
+    <ul>
+        <li>When summing data, NA (missing) values will be treated as zero.</li>
+        <li>If the data are all NA, the result will be 0.</li>
+        <li>Cumulative methods like cumsum() and cumprod() ignore NA values by default, but preserve them in the resulting arrays.<br>
+        To override this behaviour and include NA values, use skipna=False.</li>
+    </ul>
+    <pre>
+        df = pd.DataFrame(np.random.randn(5, 3), index=list('acefh'), columns=['one', 'two', 'three'])
+        df.loc[['a', 'c', 'h'], 'one'] = np.nan
+        df['one'].sum()
+        df.mean(1)
+        df.cumsum()
+        df.cumsum(skipna=False)
+    </pre>
+</ul>
+<h1 style="color:red">Sum/ prod of empties/ nans</h1>
+<ul>
+    <li>The sum of an empty or all-NA Series or column of a DataFrame is 0.</li>
+    <li>The product of an empty or all-NA Series or column of a DataFrame is 1.</li>
+    <li>The behaviour for empty Series or column will be raised an Error in the future.</li>
+    <pre>
+        pd.Series([np.nan]).sum() # 0
+        pd.Series([]).sum() # 0
+        pd.Series([np.nan]).prod() # 0
+        pd.Series([]).prod() # 0
+    </pre>
+</ul>
+<h1 style="color:red">NA values in Groupby</h1>
+<ul>
+    <li>NA groups in Groupby are automatically excluded. This behaviour is consistent with R.</li>
+    <pre>
+        df.groupby('one').mean()
+    </pre>
+</ul>
+    <h2 style="color:blue">Cleaning/ filling missing data</h2>
+    <ul>
+        <li>pandas objects are equipped with various data manipulation methods for dealing with missing data.</li>
+    </ul>
+</ul>
+<h1 style="color:red">Filling missing values: fillna</h1>
+<ul>
+    <li>fillna() can 'fill in' NA values with non-NA data in a couple of ways, which we illustrate:</li>
+    <li><b>Replace NA with a scalar value</b></li>
+    <pre>
+        df2 = pd.DataFrame(np.random.randn(5,3), index=list('acefh'), columns=['one', 'two', 'three'])
+        df2['four'] = 'bar'
+        df2['five'] = df['one'] > 0
+        df2['timestamp'] = pd.Timestamp('20120101')
+        df2.loc[['a', 'c', 'h'], ['one', 'timestamp']] = np.nan
+        df2.fillna(0)
+        df2['one'].fillna('missing')
+    </pre>
+    <li><b>Fill gaps forward or backward</b></li>
+    <li>using the same filling arguments are reindexing, we can propagate non-NA values forward or backward.</li>
+    <pre>
+        df = pd.DataFrame(np.random.randn(5,3), index=list('acefh'), columns=['one', 'two', 'three'])
+        df.loc[['a', 'c', 'h'], 'one'] = np.nan
+        df.fillna(method='pad') # like 'ffill'
+    </pre>
+    <li><b>Limit the amount of filling</b></li>
+    <li>If we only want consecutive gaps filled up to a certain number of data points, we can use the 'limit' keyword.</li>
+    <pre>
+        df.fillna(method='bfill', limit=1) # fill 1 times (if there're a row of 2 or more NA, just fill 1 times for nearest)
+    </pre>
+    <li>Note that 'pad' similar to 'ffill' and 'backfill' similar to 'bfill'.</li>
+    <li><b> And you also can use ffill() replaces for fillna(method='ffill') and bfill() replaces for fillna(method='bfill')</b></li>
+    <li>With time series data, using pad/ffill is extremely common so that the 'last known value' is available at every time point.</li>
+</ul>
+<h1 style="color:red">Filling with a pandas object</h1>
+<ul>
+    <li>You can also fillna using a dict or Series that is alignable. The labels of the dict or index of the Series must match the columns of the<br>
+    columns of the frame you wish to fill. The use case of this is to fill a DataFrame with the mean of that column.</li>
+    <pre>
+        dff = pd.DataFrame(np.random.randn(9,3), columns=list('ABC'))
+        dff.loc[[3,4], 'A'] = np.nan
+        dff.loc[[4,5], 'B'] = np.nan
+        dff.loc[[5,6,7], 'C'] = np.nan
+        dff.fillna(dff.mean()) # A.mean() for column A, B.mean() for column B and C.mean() for column C
+        dff.fillna(dff.mean()['B': 'C']) # fillna in B & C columns
+        dff[['B', 'C']].fillna(dff.mean()) # similar above
+        dff.fillna(dff[['B', 'C']].mean()) # similar above
+        dff.where(pd.notna(dff), dff.mean(), axis=1) # similar above
+    </pre>
+</ul>
+<h1 style="color:red">Dropping axis labels with missing data: dropna</h1>
+<ul>
+    <li>You may wish to simply exclude labels from a data set which refer to missing data. To do this, use dropna():</li>
+    <pre>
+        df = pd.DataFrame(np.random.randn(5,3), index=list('acefh'), columns=['one', 'two', 'three'])
+        df['one'] = np.nan
+        df.dropna(axis=0) # drop all index labels with NA values, in this case return empty frame
+        df.dropna(axis=1) # drop by columns, in this case, drop column 'one'
+        df['one'].dropna() # return empty Series
+    </pre>
+    <li>An equivalent dropna() is available for Series. DataFrame.dropna has considerably more options than Series.dropna.</li>
+</ul>
+<h1 style="color:red">Interpolation</h1>
+<ul>
+    <li>Both Series and DataFrame objects have interpolate() that, by default, performs linear interpolation at missing data points.</li>
+    <pre>
+        index = pd.date_range('1/1/2000', '5/1/2008', freq='M')
+        ts = pd.DataFrame(np.random.randn(len(index)), index=index)
+        ts.loc['2001-06':'2002-03'] = np.nan
+        ts.loc['2004-09':'2006-06'] = np.nan
+        ts.count() # 68
+        ts.interpolate().count() # 100
+        ts2 = ts.loc[['2000-01-31', '2000-02-29', '2002-07-31', '2005-01-31', '2008-04-30'], :]
+        ts2.loc[['2000-02-29', '2005-01-31']] = np.nan
+        ts2.interpolate(method='time')
+        Out[]:
+        2000-01-31    0.469112
+        2000-02-29    0.270241
+        2002-07-31   -5.785037
+        2005-01-31   -7.190866
+        2008-04-30   -9.011531
+        dtype: float64
+    </pre>
+    <li>For floating-point index, use 'method='values''.</li>
+    <li>The 'method' argument gives access to fancier interpolation methods. If you have spicy installer, you can pass name of a 1-d interpolation routine to 'method'<br>
+    The appropriate interpolation method will depend on the type of data you are working with.</li>
+    <ul>
+        <li>If you are dealing with a time series that is growing at an increasing rate, method='quadratic' may be appropriate.</li>
+        <li>If you have values approximating a cumulative distribution function, then method='pchip' should work well.</li>
+        <li>To fill missing values with goal of smooth plotting, consider method='akima'.</li>
+    </ul>
+    <li><b>See more in interpolate()</b></li>
+    <pre>
+        df = pd.DataFrame({ "A": [1, 2.1, np.nan, 4.7, 5.6, 6.8],
+                            "B": [0.25, np.nan, np.nan, 4, 12.2, 14.4]})
+        df.interpolate()
+        Out[]:
+             A      B
+        0  1.0   0.25
+        1  2.1   1.50
+        2  3.4   2.75
+        3  4.7   4.00
+        4  5.6  12.20
+        5  6.8  14.40
+
+        df.interpolate(method='barycentric')
+        df.interpolate(method='pchip')
+        df.interpolate(method='akima')
+    </pre>
+    <li>When interpolating wia a polynomialor spline approximation, you must also specify the degree or order of the approximation.</li>
+    <pre>
+        df.interpolate(method='spline', order=2)
+        df.interpolate(method='polynomial', order=2)
+    </pre>
+    <pre>
+        np.random.seed(2)
+        ser = pd.Series(np.arange(1, 10.1, 0.25) ** 2 + np.random.randn(37))
+        missing = np.array([4, 13, 14, 15, 16, 17, 18, 19, 20, 29])
+        ser[missing] = np.nan
+        methods = ['linear', 'quadratic', 'cubic']
+        df = pd.DataFrame({m: ser.interpolate(method=m) for m in methods})
+        df.plot()
+    </pre>
+    <li>Another use case is interpolation at new values. You can mix pandas reindex and interpolate methods to interpolate at the new values.</li>
+    <pre>
+        ser = pd.Series(np.sort(np.random.uniform(size=100)))
+        new_index = ser.index.union(pd.Index([49.25, 49.5, 49.75, 50.25, 50.5, 50.75]))
+        interp_s = ser.reindex(new_index).interpolate(method='pchip')
+        interp_s[49:51]
+        Out[]:
+        49.00    0.471410
+        49.25    0.476841
+        49.50    0.481780
+        49.75    0.485998
+        50.00    0.489266
+        50.25    0.491814
+        50.50    0.493995
+        50.75    0.495763
+        51.00    0.497074
+        dtype: float64
+    </pre>
+    <h2 style="color:blue">Interpolation limits</h2>
+    <ul>
+        <li>Like other pandas fill method, interpolate() accepts a 'limit' keyword argument. Use this argument to limit the number of consecutive<br>
+        NaN values filled since the last valid observation.</li>
+        <pre>
+            ser = pd.Series([np.nan, np.nan, 5, np.nan, np.nan, np.nan, 13, np.nan, np.nan])
+            ser.interpolate() # fill NA values inside to end, not at the beginning of the Series
+            ser.interpolate(limit=1) # fill first NA inside to end of the Series
+        </pre>
+        <li>By default, NaN values are filled in a 'forward' direction. Use 'limit_direction' parameter to fill 'backward' or form 'both' directions.</li>
+        <pre>
+            ser.interpolate(limit=1, limit_direction='backward') # fill by backward direction
+            ser.interpolate(limit=1, limit_direction='both') # fill by both side directions
+            ser.interpolate(limit_direction='both') # both side and fill all (include at beginning)
+        </pre>
+        <li>By default, NaN values are filled whether they are inside (surrounded by) existing valid values, or outside existing valid values. The 'limit_area'<br>
+        parameter restricts filling to either inside or outside values.</li>
+        <pre>
+            ser.interpolate(limit_direction='both', limit_area='inside', limit=1) # fill inside from both direction and 1 NA value
+            ser.interpolate(limit_direction='backward', limit_area='outside') # fill outside from backward direction and all NA values
+            ser.interpolate(limit_direction='both', limit_area='outside') # fill outside from both side and all NA values
+        </pre>
+    </ul>
+</ul>
+<h1 style="color:red">Replacing generic values</h1>
+<ul>
+    <li>Oftentimes we want to replace arbitrary values with other values.</li>
+    <li>replace() in Series and replace() in DataFrame provides an efficient yet flexible way to perform such replacements.</li>
+    <li>For a Series, you can replace a single value or a list of values by another value.</li>
+    <pre>
+        ser = pd.Series([0.0, 1.0, 2.0, 3.0, 4.0])
+        ser.replace(0, 5) # replace int part
+        ser.replace([0,1,2,3,4], [4,3,2,1,0]) # replace int part
+        ser.replace({0:10, 1:100}) # replace int part
+        df = pd.DataFrame({'a': [0,1,2,3,4], 'b': [5,6,7,8,9]})
+        df.replace({'a': 0, 'b': 5}, 100) # replace column A at value 0, column B with at value 5 with 100
+        ser.replace([1,2,3], method='pad') # method = 'ffill'
+    </pre>
+</ul>
+<h1 style="color:red">String/ regular expression replacement</h1>
+<ul>
+    <li>Python strings prefixed the 'r' character such as r'hello' are so-called 'raw' strings. They have different semantics regarding backslashes<br>
+    than strings without this prefix. Backslashes in raw strings will be interpreted as an escaped backslash (r'\' == '\\').</li>
+    <pre>
+        d = {'a': list(range(4)), 'b': list('ab..'), 'c': ['a', 'b', np.nan, 'd']}
+        df = pd.DataFrame(d)
+        df.replace('.', np.nan)
+        df.replace(r'\s*\.\s*', np.nan, regex=True)
+        df.replace(['a', '.'], ['b', np.nan])
+        df.replace([r'\.', r'(a)'], ['dot', r'\1stuff'])
+        df.replace({'b': '.'}, {'b': np.nan}, regex=True)
+        df.replace({'b': {'b': r""}}, regex=True)
+        df.replace({'b': r'\s*(\.)\s*'}, {'b': r'\1ty'}, regex=True)
+        df.replace([r'\s*\.\s*', r'a|b'], np.nan, regex=True)
+    </pre>
+    <li>All of regular expression examples can also be passed with the 'to_replace' argument as teh 'regex' argument. In this case, 'value' argument<br>
+    must be passed explicitly name or 'regex' must be a nested dictionary.</li>
+    <pre>
+        df.replace([r'\s*\.\s*', r'a|b'], np.nan, regex=True)
+        IS equivalent to
+        df.replace(regex=[r'\s*\.\s*', r'a|b'], value=np.nan)
+    </pre>
+    <li>Anywhere in the above 'replace' examples that you see a regular expression a compiled regular expression is valid as well.</li>
+</ul>
+<h1 style="color:red">Numeric replacement</h1>
+<ul>
+    <li>replace() is similar to fillna().</li>
+    <pre>
+        df = pd.DataFrame(np.random.randn(10,2))
+        df[np.random.randn(df.shape[0]) > 0.5] = 1.5
+        df.replace(1.5, np.nan)
+        df00 = df.iloc[0,0]
+        df.replace([1.5, df00], [np.nan, 'a'])
+        df.replace(1.5, np.nan, inplace=True)
+    </pre>
+    <h2 style="color:blue">Missing data casting rules and indexing</h2>
+    <ul>
+        <li>While pandas supports storing arrays of integer and boolean type, these types are not capable of storing missing data. Until we<br>
+        can switch to using a native NA type in Numpy, we've established some 'casting rules'. When a reindexing operation introduces missing<br>
+        data, the Series will be cast according to the rules introduced in the table below:</li>
+        <table border="1" class="dataframe">
+              <thead>
+                <tr style="text-align: right;">
+                  <th>data type</th>
+                  <th>Cast to</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>integer</td>
+                  <td>float</td>
+                </tr>
+                <tr>
+                  <td>boolean</td>
+                  <td>object</td>
+                </tr>
+                <tr>
+                  <td>float</td>
+                  <td>no cast</td>
+                </tr>
+                <tr>
+                  <td>object</td>
+                  <td>no cast</td>
+                </tr>
+              </tbody>
+        </table>
+        <pre>
+            s = pd.Series(np.random.randn(5), index=[0,2,4,6,7])
+            (s > 0).dtype # boolean
+            crit = (s>0).reindex(list(range(8)) # with unexisted index, the values received are NaN
+            crit.dtype # 'O'
+        </pre>
+        <li>Ordinarily Numpy will complain if you try to use an object array (even if it contains boolean values) instead of a boolean array to get or set<br>
+        values from an ndarray (selecting values based on some criteria). If a boolean vector contains NAs, an exception will be generated. However, these<br>
+        can be filled in using fillna() and it will work fine.</li>
+        <pre>
+            reindexed = s.reindex(list(range(8)).fillna(0)
+            reindexed[crit] # ValueError
+            reindexed[crit.fillna(False)] # completed boolean vector of 'crit', it will work
+            reindexed[crit.fillna(True)]
+        </pre>
+        <li>pandas provides a nullable integer dtype, but you must explicitly request it when creating the series or column.</li>
+        <pre>
+            s = pd.Series([0, 1, np.nan, 3, 4], dtype='Int64')
+        </pre>
+    </ul>
+</ul>
+<h1 style="color:red">Experimental NA scalar to denote missing values</h1>
+<ul>
+    <li>The goal of 'pd.NA' is provide a 'missing' indicator that can be used consistently across data types (instead of 'np.nan, 'None' or pd.NaT<br>
+    depending on the data type).</li>
+    <pre>
+        s = pd.Series([1,2,None], dtype='Int64')
+        s[2] is pd.NA # True
+    </pre>
+    <li>Currently, pandas does not yet use those data types by default (When creating a DataFrame or Series, or when reading in data), so you need<br>
+    to specify explicitly.</li>
+    <h2 style="color:blue">Propagation in arithmetic and comparison operations</h2>
+    <ul>
+        <li>In general, missing values propagate in operations involving 'pd.NA'. When one of the operands is unknown, the outcome of the operation<br>
+        is also unknown. But there are a few cases when the result is known when one of the operand is NA.</li>
+        <li>In equality and comparison operations, pd.NA also propagates. This deviates from the behaviour of 'np.nan', where comparisons with np.nan<br>
+        always return False.</li>
+        <li>To check if a value is equal to pd.NA, the isna() function can be used.</li>
+        <pre>
+            pd.NA + 1 # pd.NA
+            pd.NA ** 0 # 1
+            1 ** pd.NA # 1
+            pd.NA == 1 # pd.NA
+            pd.NA == pd.NA # pd.NA
+            pd.NA < 2.5 # pd.NA
+            pd.isna(pd.NA) # True
+        </pre>
+    </ul>
+    <h2 style="color:blue">Logical operations</h2>
+    <ul>
+        <li>For logical operations, pd.NA follows the rules of the three-valued logic ( or Kleene logic, Similarly to R, SQL and Julia). This logic means<br>
+        to only propagate missing values when it is logically required.</li>
+        <li>For instance, for the logical 'or' operation (|), if one of the operands is True, we already known the result will be True, regardless of the<br>
+        missing value wold be True, or False). In this case, pd.NA does not propagate.</li>
+        <pre>
+            True| False # True
+            True| True  # True
+            True| pd.NA # True
+        </pre>
+        <li>On the other hand, if one of the operand is False, the result depends on teh value of the other operand. In this case, pd.NA propagates.</li>
+        <pre>
+            False | True    # True
+            False | False   # False
+            False | pd.NA   # pd.NA
+        </pre>
+        <li>The behaviour of the logical 'and' operator (&) can be derived using similar logic (where now pd.NA will not propagate if one of the operands is already False).</li>
+        <pre>
+            True & False    # False
+            True & True     # True
+            True & pd.NA    # pd.NA
+            False & True    # False
+            False & False   # False
+            False & pd.NA   # False
+        </pre>
+    </ul>
+    <h2 style="color:blue">NA in boolean context</h2>
+    <ul>
+        <li>Since the actual value of an NA is unknown, it is ambiguous to convert NA to a boolean value.</li>
+        <pre>
+            bool(pd.NA) # TypeError
+        </pre>
+        <li>This also means that 'pd.NA' cannot be used in a context where it is evaluate to a boolean, such as 'if' condition. 'Where' condition can potentially<br>
+        be pd.NA. In such cases, isna() can be use to check for pd.NA or condition being pd.NA can be avoided, for instance by filling missing values beforehand.</li>
+    </ul>
+    <h2 style="color:blue">Numpy ufuncs</h2>
+    <ul>
+        <li>pandas implements Numpy's __array_ufunc__ protocol. Most ufuncs work with NA, and generally return NA:</li>
+        <pre>
+            np.log(pd.NA) # pd.NA
+            np.add(pd.NA) # pd.NA
+        </pre>
+        <li>However you should consider if there're cases that involving with NA values.</li>
+    </ul>
+    <h2 style="color:blue">Conversion</h2>
+    <ul>
+        <li>If you have a DataFrame or Series using traditional types that have missing data represented using np.nan, there are convenience methods<br>
+        convert_dtypes() in Series and convert_dtypes() in DataFrame that can convert data to use the newer dtypes for integers, strings and booleans.<br>
+        This is especially helpful after reading in data sets when letting the readers such as read_csv() and read_excel) infer default dtypes.</li>
+        <per>
+            bb = pd.read_csv('data/baseball.csv', index_col='id')
+            bb[bb.columns[:10]].dtypes # object dtype with some object dtype of columns
+            bbn = bb.convert_dtypes() # convert object dtype of columns into string object
+        </per>
+    </ul>
+</ul>
+</body>
+</html>

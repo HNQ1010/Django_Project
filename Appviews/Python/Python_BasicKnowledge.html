@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+{%load static%}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <meta charset="UTF-8">
+    <title>PYTHON TIPS AND TRICKS</title>
+</head>
+<body>
+<h1 style="color:red; text-align:center;">BASIC KNOWLEDGE: STRING, LIST, TUPLE, ... </h1>
+<table>
+    <tr>
+        <td style="color:blue ;text-align:center;" colspan="2"> IMPORTANT METHODS IN PYTHON</td>
+    </tr>
+    <tr>
+        <th>List</th>
+        <th>String</th>
+    </tr>
+    <tr>
+        <td>.append()</td>
+        <td>.count()</td>
+    </tr>
+    <tr>
+        <td>.copy()</td>
+        <td>.find()</td>
+    </tr>
+    <tr>
+        <td>.count()</td>
+        <td>.index()</td>
+    </tr>
+    <tr>
+        <td>.insert()</td>
+        <td>.join()</td>
+    </tr>
+    <tr>
+        <td>.reverse()</td>
+        <td>.encode()</td>
+    </tr>
+    <tr>
+        <td>.remove()</td>
+        <td>.isupper()</td>
+    </tr>
+    <tr>
+        <td>.sort()</td>
+        <td>.isdigit()</td>
+    </tr>
+    <tr>
+        <td>.pop()</td>
+        <td>.capitalize()</td>
+    </tr>
+    <tr>
+        <td>.extend()</td>
+        <td>.isdecimal()</td>
+    </tr>
+    <tr>
+        <td>.index()</td>
+        <td>.center()</td>
+    </tr>
+</table>
+<br>
+<table>
+    <tr>
+        <td style="color:blue; text-align:center" colspan="3">IMPORTANT METHODS IN PYTHON</td>
+    </tr>
+    <tr>
+        <th>SET</th>
+        <th>LIST</th>
+        <th>DICTIONARY</th>
+    </tr>
+    <tr>
+        <td>.add()</td>
+        <td>.append()</td>
+        <td>.copy()</td>
+    </tr>
+    <tr>
+        <td>.clear()</td>
+        <td>.copy()</td>
+        <td>.clear()</td>
+    </tr>
+    <tr>
+        <td>.pop()</td>
+        <td>.count()</td>
+        <td>.fromkeys</td>
+    </tr>
+    <tr>
+        <td>.union()</td>
+        <td>.insert()</td>
+        <td>.items()</td>
+    </tr>
+    <tr>
+        <td>.issuperset()</td>
+        <td>.reverse()</td>
+        <td>.get()</td>
+    </tr>
+    <tr>
+        <td>.issubset()</td>
+        <td>.remove()</td>
+        <td>.key()</td>
+    </tr>
+    <tr>
+        <td>.intersection()</td>
+        <td>.sort()</td>
+        <td>.pop()</td>
+    </tr>
+    <tr>
+        <td>.difference()</td>
+        <td>.pop()</td>
+        <td>.values()</td>
+    </tr>
+    <tr>
+        <td>.isdisjoint()</td>
+        <td>.extend()</td>
+        <td>.update()</td>
+    </tr>
+    <tr>
+        <td>.setdiscard()</td>
+        <td>.index()</td>
+        <td>.setdefault()</td>
+    </tr>
+    <tr>
+        <td>.copy()</td>
+        <td>.clear()</td>
+        <td>.popitem()</td>
+    </tr>
+</table>
+<br>
+<h2 style="color:blue;">I) STRING METHOD</h2>
+<p><b>%s</b> is used as a placeholder for string values you want to inject into a formatted string.</p>
+<p><b>%d</b> is used as a placeholder for numeric or decimal values.</p>
+<p style="color:red;">Every method always have a set of parentheses () following the add information in there.</p>
+<p>Method usually use:</p>
+<ul>
+    <p><b style="color: #CD5C5C;">.title()</b> : capitalize the first character of each words. MOSTLY USED to represent the variable in the output interface</p>
+    <p><b style="color: #CD5C5C;">.upper()</b> : capitalize all character</p>
+    <p><b style="color: #CD5C5C;">.lower()</b> : lowercase all character</p>
+    <p><b style="color: #CD5C5C;">.rstrip()</b> : replace whitespace in the right of character</p>
+    <p><b style="color: #CD5C5C;">.lstip()</b> : replace whitespace in the left of character</p>
+    <p><b style="color: #CD5C5C;">.strip()</b> : replace whitespace in both side of character</p>
+    <p>msg = " one of Python's strength ..." : use apostrophe inside a set of double quotes.</p>
+</ul>
+<h2 style="color: blue;">II) LIST:</h2>
+<h3> 1) Adding elements into a list</h3>
+<ul>
+    <p><b style="color: #CD5C5C;">.append()</b> : insert (all -if there is a list, tuple)elements into the last of the list</p>
+        <textarea rows="4" cols="100">
+        motorcycles = ['honda', 'yamaha', 'suzuki']
+        motorcycles.append('ducati')
+        motorcycles = ['honda', 'yamaha', 'suzuki','ducati']
+        </textarea>
+    <p><b style="color: #CD5C5C;">.extend()</b> : insert elements (one-by-one if there is a list or tuple)into the last of the list</p>
+        <textarea rows="4" cols="100">
+        motorcycles = ['honda', 'yamaha', 'suzuki']
+        motorcycles.extend('ducati')
+        motorcycles = ['honda', 'yamaha', 'suzuki','ducati']
+        </textarea>
+    <p><b style="color: #CD5C5C;">.insert()</b> : You can add a new element at any position in your list by using the insert()</p>
+        <textarea rows="4" cols="100">
+        motorcycles = ['honda', 'yamaha', 'suzuki']
+        motorcycles.insert(0, 'ducati')
+        motorcycles = ['ducati', 'honda', 'yamaha', 'suzuki']
+        </textarea>
+    <p><b style="color: #CD5C5C;">del</b> :If you know the position of the item you want to remove from a list, you can
+    use the del statement.</p>
+        <textarea rows="4" cols="100">
+        motorcycles = ['honda', 'yamaha', 'suzuki']
+        del motorcycles[0]
+        motorcycles = ['yamaha', 'suzuki']
+        </textarea>
+    <p style="color: #CD5C5C;"><b> .pop()</b>:</p>
+    <p style="line-height:normal;">The pop() method removes the last item in a list, but it lets you work with that item after<br>
+    removing it. The term pop comes from thinking of a list as a stack of items and popping one item<br>
+    off the top of the stack. In this analogy, the top of a stack corresponds to the end of a list.</p>
+        <textarea rows="5" cols="100">
+        motorcycles = ['honda', 'yamaha', 'suzuki']
+        popped_motorcycle = motorcycles.pop()
+        motorcycles = ['honda', 'yamaha']
+        popped_motorcycle = ['suzuki']
+        </textarea>
+    <p><b style="color: #CD5C5C;">Popping Items from any Position in a List :</b>You can actually use pop() to remove an item in a list at any position by
+including the index of the item you want to remove in parentheses.</p>
+        <textarea rows="5" cols="100">
+        motorcycles = ['honda', 'yamaha', 'suzuki']
+        popped_motorcycle = motorcycles.pop(1)
+        motorcycles = ['honda', 'suzuki']
+        popped_motorcycle = ['yamaha']
+        </textarea>
+    <p><b style="color: #CD5C5C;">.remove() :</b>If you only know the value of the item you want to remove, you
+can use the remove() method.</p>
+    <i>If there’s a possibility the value appears more than once in the list, you’ll need to use a loop to
+determine if all occurrences of the value have been removed.</i><br>
+        <textarea rows="5" cols="100">
+        motorcycles = ['honda', 'yamaha', 'suzuki']
+        remove_suzuki = 'suzuki'
+        motorcycles.remove(remove_suzuki)
+        motorcycles = ['honda', 'yamaha']
+        </textarea>
+</ul>
+<h3> 2) Organizting a List</h3>
+<ul>
+    <p><b style="color: #CD5C5C;">.sort():</b>Sorting a List <span style="color: red;">PERMANENTLY</span></p>
+        <textarea rows="4" cols="100">
+            cars = ['bmw', 'audi', 'toyota', 'subaru']
+            cars.sort()
+            cars = ['audi', 'bmw', 'subaru', 'toyota']
+        </textarea>
+    <p><b style="color: #CD5C5C;">.sort(reverse=True):</b>Sorting the list in reverse <span style="color: red;">PERMANENTLY</span> alphabetical order</p>
+        <textarea rows="4" cols="100">
+            cars = ['bmw', 'audi', 'toyota', 'subaru']
+            cars.sort(reverse=True)
+            cars = ['toyota', 'subaru', 'bmw', 'audi']
+        </textarea>
+    <p><b style="color: #CD5C5C;">sorted() Function :</b>Sorting a List <span style="color: red;">Temporarily</span></p>
+        <textarea rows="6" cols="100">
+            cars = ['bmw', 'audi', 'toyota', 'subaru']
+            sorted(cars)
+            cars = ['toyota', 'subaru', 'bmw', 'audi']
+            print(sorted(cars))
+            ['audi', 'bmw', 'subaru', 'toyota']
+        </textarea>
+    <p><b style="color: #CD5C5C;">sorted(reverse=True) function :</b> can also accept a reverse=True
+        argument if you want to display a list in reverse alphabetical order.</p>
+            <p style="color: red; line-height:normal;" rows="4" cols="100">
+                <br>Sorting a list alphabetically is a bit more complicated when all the values are not in lowercase.
+                <br>There are several ways to interpret capital letters when you’re deciding on a sort order, and specifying
+                <br>the exact order can be more complex than we want to deal with at this time.</p>
+
+    <p><b style="color: #CD5C5C;">.reverse():</b>To reverse the original order of a list, you can use the reverse() method.</p>
+        <textarea rows="4" cols="100">
+            cars = ['bmw', 'audi', 'toyota', 'subaru']
+            car.reverse()
+            cars = ['subaru', 'toyota', 'audi', 'bmw']
+        </textarea>
+        <texarea style="color: red; line-height:0.5;" rows="4" cols="100">
+                <p>Notice that reverse() doesn’t sort backward alphabetically; it simply reverses the order of the list</p>
+        </texarea>
+    <p><b style="color: #CD5C5C;">.len():</b>Finding the Length of a List</p>
+       <textarea rows="4" cols="100">
+            cars = ['bmw', 'audi', 'toyota', 'subaru']
+            len(cars)
+            4
+        </textarea>
+</ul>
+<h3> 3) Working with LIST</h3>
+    <ul>
+        <p><b style="color: #CD5C5C;">range() function:</b>Python start counting at the first
+value you give it, and it stops when it reaches the second value you provide.</p>
+        <textarea rows="6" cols="100">
+            for value in range(3):
+                print(value)
+            0
+            1
+            2
+        </textarea>
+        <p><b style="color: #CD5C5C;">LIST COMPREHENSION:</b>. A list comprehension allows you to generate
+this same list in just one line of code. It combines the for loop and the creation of new elements into one line, and automatically
+appends each new element.</p>
+        <textarea rows="3" cols="100">
+            squares = [value**2 for value in range(1,11)]
+            squares = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
+        </textarea>
+        <p><b style="color: #CD5C5C;">Slicing a list:</b></p>
+        <textarea rows="10" cols="160">
+            players = ['charles', 'martina', 'michael', 'florence', 'eli']
+            print(players[0:3])
+            ['charles', 'martina', 'michael', 'florence']
+            print(players[:3])#Python automatically starts your slice at the beginning of the list and stop when it encourage last index you provide.
+            ['charles', 'martina', 'michael']
+            print(players[1:])#Python automatically starts your slice at the first index you provide and stop at the end of the list.
+            ['martina', 'michael', 'florence', 'eli']
+            print(players[-4:]
+            ['martina', 'michael', 'florence', 'eli']# In this case, it same as print(players[1:]
+        </textarea>
+        <p><b style="color: #CD5C5C;">Copying a list using slice: (you can used copy() method to copy a list)</b></p>
+        <textarea rows="7" cols="100">
+            players = ['charles', 'martina', 'michael', 'florence', 'eli']
+            new_players = players[:]
+            players.append('jerry')
+            new_player.append('jessica')
+            players = ['charles', 'martina', 'michael', 'florence', 'eli', 'jerry']
+            new_players = ['charles', 'martina', 'michael', 'florence', 'eli', 'jessica']
+        </textarea>
+        <texarea style="color: red; line-height:0.5;" rows="4" cols="100">
+        <p>Instead of storing a copy of my_foods in friend_foods at u, we set friend_foods equal to my_foods.</p>
+        <p>This syntax actually tells Python to connect the new variable friend_foods to the list that is already</p>
+        <p>contained in my_foods, so now both variables point to the same list. As a result, when we add 'cannoli' to</p>
+        <p>my_foods, it will also appear in friend_foods. Likewise 'ice cream' will appear in both lists, even though it </p>
+        <p>appears to be added only to friend_foods. </p>
+        </texarea>
+        <textarea rows="6" cols="100">
+            players = ['charles', 'martina', 'michael', 'florence', 'eli']
+            new_players = players
+            new_player.append('jessica')
+            players = ['charles', 'martina', 'michael', 'florence', 'eli', 'jessica']
+            new_players = ['charles', 'martina', 'michael', 'florence', 'eli', 'jessica']
+        </textarea>
+    </ul>
+
+<h2 style="color: blue;">III) TUPLE:</h2>
+    <p>Sometimes you’ll want to create a list of items that cannot change. Tuples allow you to do just that. </p>
+    <p>Python refers to values that cannot change as immutable, and an immutable list is called a tuple</p>
+<h3 style="color: #CD5C5C;">Writing over a Tuple And then we can use it as the list method</h3>
+    <p>Although you can’t modify a tuple, you can assign a new value to a variable that holds a tuple. So if we wanted</p>
+    <p>to change our dimensions, we could redefine the entire tuple:</p>
+        <textarea rows="8" cols="100">
+            dimensions = (200, 50)
+            dimensions = (400, 100)
+            print("\nModified dimensions:")
+            for dimension in dimensions:
+                print(dimension)
+            400
+            100
+        </textarea>
+<h2 style="color: blue;">IV) IF STATEMENT:</h2>
+<h3> 1) Conditional Tests</h3>
+    <ul>
+        <p style="color: #CD5C5C;"><b> == </b></p>
+        <p style="color: #CD5C5C;"><b> != </b></p>
+        <p style="color: #CD5C5C;"><b> <= </b></p>
+        <p style="color: #CD5C5C;"><b> >= </b></p>
+        <p style="color: #CD5C5C;"><b> and </b></p>
+        <p style="color: #CD5C5C;"><b> or </b></p>
+        <p style="color: #CD5C5C;"><b> in </b></p>
+        <p style="color: #CD5C5C;"><b> not in </b></p>
+        <p style="color: #CD5C5C;"><b> is -Identity operator: </b>Use with type of data : str, int, float, list </p>
+        <p style="color: #CD5C5C;"><b> is not -Identity operator: </b>Use with type of data : str, int, float, list</p>
+        <p style="color: #CD5C5C;"><b> True, False(Boolean Expressions): </b>Boolean values are often used to keep track of
+            certain conditions, such as whether a game is running or whether a user can edit certain content on a website</p>
+        <p>game_active = True</p>
+        <p>can_edit = False</p>
+        <textarea style="color:red;" rows="4" cols="100">
+         A Boolean expression is just another name for a conditional test.
+         A Boolean value is either True or False, just like the value of a conditional
+         expression after it has been evaluated.
+        </textarea>
+    </ul>
+<h3> 2) Testing Multiple Conditions</h3>
+    <textarea style="color:red;" rows="9" cols="100">
+        The if-elif-else chain is powerful, but it’s only appropriate to use when you
+        just need one test to pass. As soon as Python finds one test that passes, it
+        skips the rest of the tests. This behavior is beneficial, because it’s efficient
+        and allows you to test for one specific condition.</textarea>
+    <textarea style="color:blue;" rows="9" cols="80">
+            if age < 4:
+                price = 0
+            elif age < 18:
+                price = 5
+            elif age < 65:
+                price = 10
+            else:
+                price = 5
+    </textarea><br>
+    <textarea style="color:red;" rows="9" cols="100">
+        The else block is a catchall statement. It matches any condition that
+        wasn’t matched by a specific if or elif test, and that can sometimes include
+        invalid or even malicious data. If you have a specific final condition you are
+        testing for, consider using a final elif block and omit the else block. As a
+        result, you’ll gain extra confidence that your code will run only under the
+        correct conditions.</textarea>
+    <textarea style="color:blue;" rows="9" cols="80">
+            if age < 4:
+                price = 0
+            elif age < 18:
+                price = 5
+            elif age < 65:
+                price = 10
+            elif age >= 65:
+                price = 5
+    </textarea><br>
+    <p>Sometimes it’s important to check all of the conditions of interest. In this case,<br>
+        you should use a series of simple if statements with no elif or else blocks. This<br>
+        technique makes sense when more than one condition could be True, and you want to<br>
+        act on every condition that is True.</p>
+    <textarea style="color:blue;" rows="8" cols="80">
+        requested_toppings = ['mushrooms', 'extra cheese']
+        if 'mushrooms' in requested_toppings:
+            print("Adding mushrooms.")
+        if 'pepperoni' in requested_toppings:
+            print("Adding pepperoni.")
+        if 'extra cheese' in requested_toppings:
+            print("Adding extra cheese.")
+    </textarea>
+<h3> 3) Checking Condition</h3>
+    <textarea style="color: red;" rows= "8" cols="80">
+       1)requested_toppings = []
+       2)if requested_toppings:
+            for requested_topping in requested_toppings:
+                print("Adding " + requested_topping + ".")
+                print("\nFinished making your pizza!")
+       3)else:
+            print("Are you sure you want a plain pizza?")
+    </textarea><br>
+    <textarea style="font-family:bold ;font-size:20px;" rows="10" cols="100">
+    Start out with an empty list of requested toppings at 1).
+    Instead of jumping right into a for loop, we do a quick check at 2).
+    When the name of a list is used in an if statement, Python returns True if the list contains at least one item; an empty list
+    evaluates to False. If requested_toppings passes the conditional test, we run the same for loop we used in the previous
+    example.
+    If the conditional test fails, we print a message asking the customer ,if they really want a plain pizza with no
+    toppings 3).
+    The list is empty in this case, so the output asks if the user really wants a plain pizza:
+            Are you sure you want a plain pizza?</textarea><br>
+
+    <textarea style="color: red;" rows= "14" cols="150">
+            available_toppings = ['mushrooms', 'olives', 'green peppers', 'pepperoni', 'pineapple', 'extra cheese']
+            requested_toppings = ['mushrooms', 'french fries', 'extra cheese']
+            for requested_topping in requested_toppings:
+                if requested_topping in available_toppings:
+                    print("Adding " + requested_topping + ".")
+                else:
+                    print("Sorry, we don't have " + requested_topping + ".")
+
+            print("\nFinished making your pizza!")
+    Adding mushrooms.
+    Sorry, we don't have french fries.
+    Adding extra cheese.
+    Finished making your pizza!
+    </textarea><br>
+<h2 style="color: blue;">V) DICTIONARY:</h2>
+<h3> 1) Adding New Key-Value Pairs</h3>
+    <p>Dictionaries are dynamic structures, and you can add new key-value pairs
+        to a dictionary at any time</p>
+    <textarea style="color: green" rows="5" cols="100">
+        alien_0 = {'color': 'green', 'points': 5}
+        alien_0['x_position'] = 0
+        alien_0['y_position'] = 25
+        alien_0 = {'color': 'green', 'points': 5, 'x_position': 0, 'y_position': 25}
+    </textarea>
+<p style="color:red">Adding key, value into available dict.</p>
+<pre>
+    dict = {}
+    list_1 = list('abcd')
+    list_2 = np.arange(4)
+    for i, j in zip(list_1, list_2):
+        dict[i] = j
+</pre>
+<h3> 2) Modifying Values in a Dictionary</h3>
+<p>To modify a value in a dictionary, give the name of the dictionary with the
+    key in square brackets and then the new value you want associated with that key.</p>
+    <textarea style="color: green" rows="4" cols="100">
+        alien_0 = {'color': 'green'}
+        alien_0['color'] = 'yellow'
+        alien_0 = {'color': 'yellow'}
+    </textarea>
+<h3> 3) Removing Key-Value Pairs</h3>
+<p>When you no longer need a piece of information that’s stored in a dictionary,
+    you can use the del statement to completely remove a key-value pair. </p>
+    <textarea style="color: green" rows="4" cols="100">
+        alien_0 = {'color': 'green', 'points': 5}
+        del alien_0['points']
+        alien_0 = {'color': 'green'}
+    </textarea>
+<h3> 3) A Dictionary of Similar Objects</h3>
+<p>You can also use a dictionary to store one kind of information about many objects.</p>
+    <textarea style="color: green" rows="4" cols="100">
+        favorite_languages = { 'jen': 'python', 'sarah': 'c',
+                             'edward': 'ruby', 'phil': 'python', }
+    </textarea>
+<h3> 4) Looping Through a Dictionary</h3>
+<p>Dictionaries can be used to store information
+in a variety of ways; therefore, several different ways exist to loop through
+them. You can loop through all of a dictionary’s key-value pairs, through its
+keys, or through its values.</p>
+    <textarea style="color: green" rows="15" cols="100">
+                user_0 = {
+                             'username': 'efermi',
+                             'first': 'enrico',
+                             'last': 'fermi',
+                         }
+                for key, value in user_0.items():
+                    print("\nKey: " + key)
+                    print("Value: " + value)
+        Key: last
+        Value: fermi
+        Key: first
+        Value: enrico
+        Key: username
+        Value: efermi
+    </textarea>
+<ul>
+<h4 style="color: blue"> Looping Through All the Keys in a Dictionary</h4>
+</ul>
+    <textarea style="color: green" rows="8" cols="120">
+        favorite_languages = {'jen': 'python', 'sarah': 'c', 'edward': 'ruby', 'phil': 'python', }
+        for name in favorite_languages.keys():
+            print(name.title())
+        Jen
+        Sarah
+        Edward
+        Phil
+    </textarea>
+<p style="color: red">Looping through the keys is actually the default behavior when looping
+through a dictionary, so this code would have exactly the same output if you
+wrote . . . </p>
+<p>for name in favorite_languages:</p>
+<p>You can also use the keys() method to find out if a particular person
+    was polled.</p>
+    <textarea style="color: green" rows="4" cols="120">
+        favorite_languages = {'jen': 'python', 'sarah': 'c', 'edward': 'ruby', 'phil': 'python', }
+        if 'erin' not in favorite_languages.keys():
+            print('Erin, please take the poll!')
+    </textarea>
+<ul>
+<h5> Looping Through a Dictionary’s Keys in Order</h5>
+</ul>
+    <textarea style="color: green" rows="8" cols="120">
+        favorite_languages = {'jen': 'python', 'sarah': 'c', 'edward': 'ruby', 'phil': 'python', }
+        for name in sorted(favorite_languages.keys()):
+            print(name.title() + ", thank you for taking the poll.")
+        Edward, thank you for taking the poll.
+        Jen, thank you for taking the poll.
+        Phil, thank you for taking the poll.
+        Sarah, thank you for taking the poll.
+    </textarea>
+<p style="color: red">When we returned all the keys of the dictionary, it presented as a list,
+    therefore we can use the methods for list</p>
+<ul>
+<h4 style="color: blue"> Looping Through All Values in a Dictionary</h4>
+</ul>
+    <textarea style="color: green" rows="8" cols="120">
+        favorite_languages = {'jen': 'python', 'sarah': 'c', 'edward': 'ruby', 'phil': 'python', }
+        for language in favorite_languages.values():
+            print(language.title())
+        Python
+        C
+        Ruby
+        Python
+    </textarea>
+<p style="color: red">When you wrap set() around a list that contains duplicate items, Python
+identifies the unique items in the list and builds a set from those items.</p>
+<textarea style="color: green" rows="7" cols="120">
+    favorite_languages = {'jen': 'python', 'sarah': 'c', 'edward': 'ruby', 'phil': 'python', }
+    for language in set(favorite_languages.values()):
+        print(language.title())
+    Python
+    C
+    Ruby
+</textarea>
+<h3> 5) Nesting</h3>
+<p>Sometimes you’ll want to store a set of dictionaries in a list or a list of
+items as a value in a dictionary. This is called nesting</p>
+<ul><h4 style="color: blue"> A List of Dictionaries</h4></ul>
+    <textarea style="color: green" rows="5" cols="100">
+            alien_0 = {'color': 'green', 'points': 5}
+            alien_1 = {'color': 'yellow', 'points': 10}
+            alien_2 = {'color': 'red', 'points': 15}
+            aliens = [alien_0, alien_1, alien_2]
+    </textarea>
+<p>A more realistic example would involve more than three aliens with
+code that automatically generates each alien. In the following example we
+use range() to create a fleet of 30 aliens:
+</p>
+    <textarea style="color: green" rows="4" cols="100">
+            for alien_number in range(30):
+                new_alien = {'color': 'green', 'points': 5, 'speed': 'slow'}
+                aliens.append(new_alien)
+    </textarea>
+<p>Python considers each one a separate object, which allows us to modify each alien individually.</p>
+    <textarea style="color: green" rows="6" cols="100">
+            for alien in aliens[0:3]:
+                 if alien['color'] == 'green':
+                 alien['color'] = 'yellow'
+                 alien['speed'] = 'medium'
+                 alien['points'] = 10
+    </textarea>
+<ul><h4 style="color: blue">A List in a Dictionary</h4></ul>
+<p>Rather than putting a dictionary inside a list, it’s sometimes useful to put
+a list inside a dictionary</p>
+    <textarea style="color: green" rows="9" cols="100">
+        favorite_languages = {  'jen': ['python', 'ruby'],
+                                'sarah': ['c'],
+                                'edward': ['ruby', 'go'],
+                                'phil': ['python', 'haskell'], }
+        for name, languages in favorite_languages.items():
+            print("\n" + name.title() + "'s favorite languages are:")
+            for language in languages:
+                print("\t" + language.title())
+    </textarea>
+<ul><h4 style="color: blue">A Dictionary in a Dictionary</h4></ul>
+<p>You can nest a dictionary inside another dictionary, but your code can get
+complicated quickly when you do.</p>
+    <textarea style="color: green" rows="13" cols="100">
+        users = {   'aeinstein': {  'first': 'albert',
+                                    'last': 'einstein',
+                                    'location': 'princeton', },
+                    'mcurie': {     'first': 'marie',
+                                    'last': 'curie',
+                                    'location': 'paris', }, }
+        for username, user_info in users.items():
+            print("\nUsername: " + username)
+            full_name = user_info['first'] + " " + user_info['last']
+            location = user_info['location']
+            print("\tFull name: " + full_name.title())
+            print("\tLocation: " + location.title())
+    </textarea>
+<h2 style="color: blue;">VI) User Input and while Loops:</h2>
+<h3> 1) How the input() Function Works</h3>
+    <textarea style="color: purple" rows="2" cols="100">
+        message = input("Tell me something, and I will repeat it back to you: ")
+    </textarea>
+<ul><h4 style="color: blue">Writing Clear Prompts</h4></ul>
+    <textarea style="color: purple" rows="2" cols="100">
+        name = input("Please enter your name: ")
+    </textarea>
+<ul><h4 style="color: blue">Using int() to Accept Numerical Input</h4></ul>
+    <textarea style="color: purple" rows="3" cols="100">
+            age = input("How old are you? ")
+            age = int(age)
+    </textarea>
+<ul><h4 style="color: blue">The Modulo Operator</h4></ul>
+    <textarea style="color: purple" rows="7" cols="100">
+        number = input("Enter a number, and I'll tell you if it's even or odd: ")
+        number = int(number)
+        if number % 2 == 0:
+            print("\nThe number " + str(number) + " is even.")
+        else:
+            print("\nThe number " + str(number) + " is odd.")
+    </textarea>
+<h3> 2) Introducing While Loops</h3>
+<ul><h4 style="color: blue">The while Loop in Action</h4></ul>
+    <textarea style="color: purple" rows="5" cols="100">
+        current_number = 1
+        while current_number <= 5:
+            print(current_number)
+            current_number += 1
+    </textarea>
+<h3> 3) Stopping While Loops</h3>
+<ul><h4 style="color: blue">Letting the User Choose When to Quit</h4></ul>
+    <textarea style="color: purple" rows="7" cols="100">
+        prompt = "\nTell me something, and I will repeat it back to you:"
+        prompt += "\nEnter 'quit' to end the program. "
+        message = ""
+        while message != 'quit':
+            message = input(prompt)
+            print(message)
+    </textarea>
+<ul><h4 style="color: blue">Using a Flag</h4></ul>
+    <textarea style="color: purple" rows="10" cols="100">
+        prompt = "\nTell me something, and I will repeat it back to you:"
+        prompt += "\nEnter 'quit' to end the program. "
+        active = True
+        while active:
+            message = input(prompt)
+        if message == 'quit':
+            active = False
+        else:
+            print(message)
+    </textarea>
+<ul><h4 style="color: blue">Using break to Exit a Loop</h4></ul>
+    <textarea style="color: purple" rows="9" cols="100">
+        prompt = "\nTell me something, and I will repeat it back to you:"
+        prompt += "\nEnter 'quit' to end the program. "
+        while True:
+        city = input(prompt)
+        if city == 'quit':
+            break
+        else:
+            print("I'd love to go to " + city.title() + "!")
+    </textarea>
+<ul><h4 style="color: blue">Using continue in a Loop</h4></ul>
+    <textarea style="color: purple" rows="7" cols="100">
+        current_number = 0
+        while current_number < 10:
+            current_number += 1
+            if current_number % 2 == 0:
+                continue
+            print(current_number)
+    </textarea>
+<ul><h4 style="color: blue">Avoiding Infinite Loops</h4></ul>
+    <textarea style="color: purple" rows="4" cols="100">
+        x = 1
+        while x <= 5:
+        print(x)
+    </textarea>
+<h3> 4) Using a while Loop with Lists and Dictionaries</h3>
+<ul><h4 style="color: blue">Moving Items from One List to Another</h4></ul>
+    <textarea style="color: purple" rows="6" cols="100">
+        unconfirmed_users = ['alice', 'brian', 'candace']
+        confirmed_users = []
+        while unconfirmed_users:
+            current_user = unconfirmed_users.pop()
+            confirmed_users.append(current_user)
+    </textarea>
+<ul><h4 style="color: blue">Removing All Instances of Specific Values from a List</h4></ul>
+    <textarea style="color: purple" rows="4" cols="100">
+        pets = ['dog', 'cat', 'dog', 'goldfish', 'cat', 'rabbit', 'cat']
+        while 'cat' in pets:
+            pets.remove('cat')
+    </textarea>
+<ul><h4 style="color: blue">Filling a Dictionary with User Input</h4></ul>
+    <textarea style="color: purple" rows="13" cols="100">
+        responses = {}
+        polling_active = True
+        while polling_active:
+            name = input("\nWhat is your name? ")
+            response = input("Which mountain would you like to climb someday? ")
+            responses[name] = response
+            repeat = input("Would you like to let another person respond? (yes/ no) ")
+        if repeat == 'no':
+            polling_active = False
+            print("\n--- Poll Results ---")
+        for name, response in responses.items():
+            print(name + " would like to climb " + response + ".")
+    </textarea>
+</body>
+</html>

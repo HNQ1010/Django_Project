@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css\style.css'%}">
+    <meta charset="UTF-8">
+    <title>SQL Server Aggregate Functions</title>
+</head>
+<body>
+<h1 style="color:red; text-align:center"><b>SQL Server Aggregate Functions</b></h1>
+    <ul>
+        <li>An aggregate function performs a calculation one or more values and returns a single value. </li>
+        <li>The aggregate function is often used with the GROUP BY clause and HAVING clause of the SELECT statement.</li>
+        <table>
+            <tr>
+                <th style="color:blue">Aggregate</th>
+                <th style="color:blue">Description</th>
+            </tr>
+            <tr>
+                <td>APPROX_COUNT_DISTINCT</td>
+                <td>returns the approximate number of unique non-null values (bigint) in a group.</td>
+            </tr>
+            <tr>
+                <td>AVG</td>
+                <td>calculates the average of non-NULL values in a set.</td>
+            </tr>
+            <tr>
+                <td>CHECKSUM_AGG</td>
+                <td>calculates a checksum value based on a group of rows.</td>
+            </tr>
+            <tr>
+                <td>COUNT</td>
+                <td>returns the number of rows in a group, including rows with NULL values.</td>
+            </tr>
+            <tr>
+                <td>COUNT_BIG</td>
+                <td>returns the number of rows (with BIGINT data type) in a group, including rows with NULL values.</td>
+            </tr>
+            <tr>
+                <td>GROUPING</td>
+                <td>Indicates whether a specified column expression in a GROUP BY list is aggregated or not.</td>
+            </tr>
+            <tr>
+                <td>GROUPING_ID</td>
+                <td>Is a function that computes the level of grouping.</td>
+            </tr>
+            <tr>
+                <td>MAX</td>
+                <td>returns the highest value (maximum) in a set of non-NULL values.</td>
+            </tr>
+            <tr>
+                <td>MIN</td>
+                <td>returns the lowest value(minimum) in a set of non-NULL values.</td>
+            </tr>
+            <tr>
+                <td>STDEV</td>
+                <td>return the statistical standard deviation of all values provided in the expression based on a sample of data population.</td>
+            </tr>
+            <tr>
+                <td>STDEVP</td>
+                <td>returns the statistical standard deviation of all values provided expression, but based on the ENTIRE data population.</td>
+            </tr>
+            <tr>
+                <td>SUM</td>
+                <td>returns the summation of all non-NULL values of a set.</td>
+            </tr>
+            <tr>
+                <td>VAR</td>
+                <td>returns the statistical variance of values in an expression based on a sample of specified population.</td>
+            </tr>
+            <tr>
+                <td>VARP</td>
+                <td>returns the statistical variance of values in an expression but based on the ENTIRE data population.</td>
+            </tr>
+        </table><br>
+        <textarea rows= "2" cols="70" style="color:#1F0221; font-family:Times New Roman">
+            aggregate_function_name(DISTINCT | ALL expression)
+        </textarea>
+            <ul>
+                <li>First, specify the name of an aggregate function that you want to use such as AVG, SUM, and MAX...</li>
+                <li>Second, use DISTINCT if you want only distinct values are considered in the calculation or ALL if all values are considered in the calculation.<br>
+                    <span style="color":red>By default, ALL is used if you don’t specify any modifier.</span></li>
+                <li>Third, the expression can be a column of a table or an expression that consists of multiple columns with arithmetic operators.</li>
+            </ul>
+        <h3 style="color:red">1) APPROX_COUNT_DISTINCT</h3>
+            <ul>
+                <textarea rows= "5" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT APPROX_COUNT_DISTINCT(O_OrderKey) AS Approx_Distinct_OrderKey
+                    FROM dbo.Orders;
+                </textarea>
+            </ul>
+        <h3 style="color:red">2) AVG</h3>
+            <ul>
+                <textarea rows= "5" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        AVG(list_price) avg_product_price
+                    FROM
+                        production.products;
+                </textarea>
+                <textarea rows= "5" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        cast(round(AVG(list_price),2) as dec(10,2)) avg_product_price
+                    FROM
+                        production.products;
+                </textarea>
+            </ul>
+        <h3 style="color:red">3) CHECKSUM_AGG</h3>
+            <ul>
+                <li>Returns the checksum of all expression values as int.</li>
+                <li>CHECKSUM_AGG can detect changes in a table.</li>
+                <li>The CHECKSUM_AGG result does not depend on the order of the rows in the table.<br>
+                    Also, CHECKSUM_AGG functions allow the use of the DISTINCT keyword and the GROUP BY clause.</li>
+                <li>If an expression list value changes, the list checksum value list will also probably change. <br>
+                    However, a small possibility exists that the calculated checksum will not change.</li>
+                <textarea rows= "9" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT CHECKSUM_AGG(CAST(Quantity AS INT))
+                    FROM Production.ProductInventory;
+                    GO
+                </textarea>
+                <textarea rows= "9" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    UPDATE Production.ProductInventory
+                    SET Quantity=125
+                    WHERE Quantity=100;
+                    GO
+
+                    --Get the checksum of the modified column.
+                    SELECT CHECKSUM_AGG(CAST(Quantity AS INT))
+                    FROM Production.ProductInventory;
+                </textarea>
+            </ul>
+        <h3 style="color:red">4) COUNT</h3>
+            <ul>
+                <li>COUNT operates like the COUNT_BIG function.</li>
+                <li>COUNT always returns an int data type value.</li>
+                <li>COUNT_BIG always returns a bigint data type value.</li>
+                <li>COUNT(*) returns the total number of rows in the table.</li>
+                <textarea rows= "4" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT COUNT(DISTINCT Title)
+                    FROM HumanResources.Employee;
+                    GO
+                </textarea>
+            </ul>
+        <h3 style="color:red">5) COUNT_BIG</h3>
+            <ul>
+                <li>This function returns the number of items found in a group. </li>
+                <li>COUNT always returns an bigint data type value.</li>
+                <li>COUNT_BIG(*) returns the number of items in a group. This includes NULL values and duplicates.</li>
+            </ul>
+        <h3 style="color:red">6) GROUPING</h3>
+            <ul>
+                <li>Indicates whether a specified column expression in a GROUP BY list is aggregated or not.</li>
+                <li>GROUPING returns 1 for aggregated or 0 for not aggregated in the result set.</li>
+                <li>GROUPING can be used only in the SELECT list, HAVING, and ORDER BY clauses when GROUP BY is specified.</li>
+                <li style="color:red">GROUPING is used to distinguish the null values that are returned by ROLLUP, CUBE or GROUPING SETS from standard null values.<br>
+                    The NULL returned as the result of a ROLLUP, CUBE or GROUPING SETS operation is a special use of NULL. This acts as a column placeholder in the result set and means all.</li>
+                <textarea rows= "2" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    GROUPING (column_expression)
+                </textarea><br>
+                <textarea rows= "7" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT      SalesQuota,
+                                SUM(SalesYTD) 'TotalSalesYTD',
+                                GROUPING(SalesQuota) AS 'Grouping'
+                    FROM Sales.SalesPerson
+                    GROUP BY SalesQuota WITH ROLLUP;
+                    GO
+                </textarea>
+                <img src="{% static 'IMG\Screenshot 2021-09-12 063825.png'%}" width="400" height="150">
+                    <ul>
+                        <li>The result set shows two null values under SalesQuota.</li>
+                        <li style="color:red">The first NULL represents the group of null values from this column in the table.</li>
+                        <li style="color:red">The second NULL is in the summary row added by the ROLLUP operation.</li>
+                        <li style="color:red">The summary row shows the TotalSalesYTD amounts for all SalesQuota groups and is indicated by 1 in the Grouping column.</li>
+                    </ul>
+            </ul>
+        <h3 style="color:red">7) GROUPING_ID</h3>
+            <ul>
+                <li>Is a function that computes the level(or order) of grouping.(type:int)</li>
+                <li>GROUPING_ID can be used only in the SELECT list, HAVING, or ORDER BY clauses when GROUP BY is specified.</li>
+                <textarea rows= "2" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    GROUPING_ID (column_expression[ ,...n ] )
+                </textarea>
+                <ul>
+                    <li>column_expression : Is a column_expression in a GROUP BY clause.</li>
+                </ul>
+                <li style="color:red">The GROUPING_ID column_expression must exactly match the expression in the GROUP BY list. </li>
+                <h4 style="color:blue"><b>* GROUPING_ID () to GROUPING ()</b></h4>
+                <h4 style="color:blue"><b>* GROUPING_ID () to CUBE And ROLLUP</b></h4>
+                    <ul>
+                        <li>If you need to identify the grouping level(or oder) of grouping set, make example to get the level(order) of it through GROUPING SET, CUBE and ROLLUP.</li>
+                        <textarea rows= "5" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT  column1,
+                                    column2,
+                                    column3,
+                                        ...
+                            FROM table_name
+                            GROUP BY
+                                        Grouping Set(column(s)),
+                                  Or    CUBE(column(s)),
+                                  Or    ROLLUP(column(s)
+                        </textarea>
+                        <li>See details in https://docs.microsoft.com/en-us/sql/t-sql/functions/grouping-id-transact-sql?view=sql-server-ver15#arguments</li>
+                    </ul>
+            </ul>
+        <h3 style="color:red">8) MAX</h3>
+            <ul>
+                <li>Max can use with character data, it returns the string follow sort sequence(alphabetically).</li>
+                <textarea rows= "3" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT MAX(TaxRate)
+                    FROM Sales.SalesTaxRate;
+                </textarea>
+                <textarea rows= "3" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT MAX(name) FROM sys.databases
+                </textarea>
+            </ul>
+        <h3 style="color:red">9) MIN</h3>
+            <ul>
+                <li>Similar with max, it can use with char data.</li>
+                <textarea rows= "5" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        MIN(list_price) min_list_price
+                    FROM
+                        production.products;
+                </textarea>
+            </ul>
+        <h3 style="color:red">10) STDEV</h3>
+            <ul>
+                <li>Returns the statistical standard deviation of all values in the specified expression.</li>
+                <li>If STDEVP is used on all items in a SELECT statement, each value in the result set is included in the calculation.</li>
+                <li>STDEVP can be used with numeric columns only. Null values are ignored.</li>
+                <textarea rows= "5" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        CAST(ROUND(STDEV(list_price),2) as DEC(10,2)) stdev_list_price
+                    FROM
+                        production.products;
+                </textarea>
+            </ul>
+        <h3 style="color:red">11) STDEVP</h3>
+            <ul>
+                <li>Returns the statistical standard deviation for the population for all values in the specified expression.</li>
+                <li>If STDEVP is used on all items in a SELECT statement, each value in the result set is included in the calculation.</li>
+                <li>STDEVP can be used with numeric columns only. Null values are ignored.</li>
+                <textarea rows= "5" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        CAST(ROUND(STDEVP(list_price),2) as DEC(10,2)) stdevp_list_price
+                    FROM
+                        production.products;
+                </textarea>
+            </ul>
+        <h3 style="color:red">11) STRING_AGG</h3>
+            <ul>
+                <li>Concatenates the values of string expressions and places separator values between them.</li>
+                <li>The separator is not added at the end of string.</li>
+                <li></li>
+                <li></li>
+                <li></li>
+            </ul>
+        <h3 style="color:red">12) SUM</h3>
+            <ul>
+                <li>Returns the sum of all the values, or only the DISTINCT values, in the expression. </li>
+                <li>SUM can be used with numeric columns only. Null values are ignored.</li>
+            </ul>
+        <h3 style="color:red">13) VAR</h3>
+            <ul>
+                <li>Returns the statistical variance of all values in the specified expression.(float) </li>
+                <li>If VAR is used on all items in a SELECT statement, each value in the result set is included in the calculation. </li>
+                <li>VAR can be used with numeric columns only. Null values are ignored.</li>
+                <textarea rows= "4" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT VAR(Bonus)
+                    FROM Sales.SalesPerson;
+                    GO
+                </textarea>
+            </ul>
+        <h3 style="color:red">14) VARP</h3>
+            <ul>
+                <li>Returns the statistical variance for the population for all values in the specified expression.(float)</li>
+                <li>If VAR is used on all items in a SELECT statement, each value in the result set is included in the calculation. </li>
+                <li>VAR can be used with numeric columns only. Null values are ignored.</li>
+                <textarea rows= "4" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT VARP(Bonus)
+                    FROM Sales.SalesPerson;
+                    GO
+                </textarea>
+            </ul>
+    </ul>
+</body>
+</html>

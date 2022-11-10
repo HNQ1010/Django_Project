@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <style>
+        h2 {color: blue;}
+        h3 {color: red}
+    </style>
+    <meta charset="UTF-8">
+    <title>QUY TRÌNH LẤY HÀNG-ĐÓNG GÓI VÀ BÀN GIAO CHO HÃNG VẬN CHUYỂN</title>
+</head>
+<body>
+<fieldset>
+    <legend><h2>QUY TRÌNH BÀN GIAO CHO HÃNG VẬN CHUYỂN</h2></legend>
+    <h3>I. Chuẩn bị bàn giao</h3>
+    <ul>
+        <h4>Bước 1: Tiếp nhận hàng hóa từ bộ phận đóng gói</h4>
+        <ul>
+            <li>Nhân viên bàn giao nhận hàng từ bộ phận đóng gói tại khu vực đã được chỉ định.</li>
+            <li>Tập kết và phân loại hàng hóa tại các khu vực tương ứng với các hãng vận chuyển.</li>
+            <li>Bàn giao theo thứ tự thời gian tới và Ưu tiên các đơn hàng theo thứ tự ưu tiên của hệ thống.</li>
+            <li>Kiểm soát số lượng hàng hóa, tình trạng hàng hoá thực tế và bảng kê đã tạo.</li>
+            <li>Kéo vào khu vực đã chỉ định và chờ bàn giao.</li>
+        </ul>
+        <h4>Bước 2: Xử lý hàng hóa không đủ điều kiện xuất kho</h4>
+        <ul>
+            <li>Hàng hoá hư hỏng, không đủ điều kiện xuất kho cần được thông báo ngay cho Leader và trả lại cho bộ phận đóng hàng.</li>
+            <li>Tiến hành lập biên bản hiện trạng, ghi rõ tình trạng đơn hàng và ký xác nhận.</li>
+        </ul>
+        <h4>Bước 3: Quy trình xử lý khi bảng kê không khớp với số liệu hệ thống</h4>
+        <ul>
+            <li>Khi số liệu hàng hóa thực tế không khớp với hệ thống, báo ngay cho Leader và tiến hành kiểm tra lại số lượng hàng hoá trước khi bàn giao.</li>
+            <li>Báo cho người phụ trách ngay lập tức về các bảng kê có vấn đề về việc bàn giao.</li>
+            <li>Yêu cầu ghi rõ mã bảng kê, mã đơn hàng thiếu/treo, thông báo lại với Leader để làm việc với các bộ phận liên quan.</li>
+        </ul>
+    </ul>
+    <h3>II. Bàn giao hàng hóa</h3>
+    <ul>
+        <li>Khi hãng vận chuyển tới nhận hàng, nhân viên bàn giao kéo toàn bộ hàng của hãng vận chuyển đó ra tiến hành bàn giao, tuyệt đối không bàn giao cho nhiều hãng cũng lúc và yêu cầu bảo vệ không cho người lạ đi vào khu vực kho.</li>
+        <li>Những đơn hàng hãng vận chuyển từ chối nhận với các lý do khác nhau phải được phân loại theo từng lý do.</li>
+        <li>Những đơn hàng hệ thống thông báo huỷ sẽ được phân loại riêng với ký hiệu hàng huỷ tại kho và chuyển vào khu vực chờ nhận hoàn.</li>
+        <li style="color:red">Các đơn có nhãn Cancelled vẫn scan bàn giao bình thường để hệ thống ghi nhận trạng thái huỷ. Không được để các đơn Cancelled treo trên hệ thống quá 12 tiếng.</li>
+    </ul>
+    <h3>III. ĐƠN HÃNG TỪ CHỐI NHẬN BÀN GIAO</h3>
+        <ul>
+            <li>Quét đúng lý do từ chối vào hệ thống theo từng đơn.</li>
+            <li>Tiếp tục bàn giao trong những lần tiếp theo cho tới khi bàn giao được hoặc PDA báo hủy để tiến hành nhập hoàn.</li>
+            <li>Yêu cầu hãng vận chuyển bàn giao lại đúng khu vực và nhân viên bàn giao phải đánh tách riêng các đơn hàng huỷ.</li>
+            <li>Khi hãng vận chuyển nhận bàn giao xong bộ phận bàn giao sẽ scan loại bỏ các đơn hàng mà hãng vận chuyển từ chối.</li>
+            <li>Nếu bảng kê hai bên khớp số lượng, tiến hành ký xác nhận cập nhật thông tin bưu tá lên hệ thống và sổ theo dõi.</li>
+            <li>Trường hợp lệch bảng kê giữa hai bên, yêu cầu xác minh tại chỗ và báo cáo người phụ trách.</li>
+            <li>Kéo toàn bộ những đơn hàng đã được phân loại về khu vực hàng chờ bàn giao cần xử lý.</li>
+            <li>Với các đơn Fulfill Now mà shipper không tới lấy thì phải kiểm tra. Nếu đơn hàng:</li>
+            <ul>
+                <li>HỦY:  đưa về khu vực hàng huỷ chờ nhận hoàn.
+                <li><b>KHÔNG HỦY: thì bộ phận bàn giao liên hệ với những bên liên quan để giải quyết dứt điểm.</b></li>
+            </ul>
+            <p style="color:red">Lưu y: Thời hạn bàn giao hàng hóa: Bộ phận bàn giao phải tiến hành bàn giao trong vòng 48h kể từ khi đơn được đóng xong bất kể lý do.</p>
+        </ul>
+    <h3>IV. PDA Procedure: Updating ... </h3>
+    <ul>
+        <h4>Bước 1: PDA &rarr; Bàn giao</h4>
+        <img src="{% static 'IMG/handover_1.png'%}">
+        <h4>Bước 2: Bấm vào dấu '+' để tiến hành tạo bảng kê bàn giao với hãng vận chuyển</h4>
+        <img src="{% static 'IMG/handover_2.png'%}">
+        <h4>Bước 3: Chọn hãng vận chuyển tới lấy hàng &rarr; Tạo bàn giao để tạo bảng kê bàn giao với hãng vận chuyển.</h4>
+        <img src="{% static 'IMG/handover_3.png'%}">
+        <h4>Bước 4: Scan mã đơn hàng vào bảng kê, lưu ý thông tin hãng vận chuyển trên bill gửi và trạng thái đơn hàng (có cancel hay không).</h4>
+        <img src="{% static 'IMG/handover_4.png'%}">
+        <h4>Bước 5: Sau khi scan bàn giao xong, bấm Xác nhận, ký, chụp hình và ghi nhận thông tin bưu tá trên PDA.</h4>
+    </ul>
+</fieldset>
+</body>
+</html>

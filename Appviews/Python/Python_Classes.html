@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Classes</title>
+</head>
+<body>
+<h2 style="color: blue;">VIII) CLASSES</h2>
+<p>Object-oriented programming is one of the most effective approaches to writing software. In object-oriented <br>
+programming you write classes that represent real-world things and situations, and you create objects based on these<br>
+classes. When you write a class, you define the general behavior that a whole category of objects can have.</p>
+
+<h3> 1) Creating and Using a Class</h3>
+
+<ul style="color:blue"><b>Creating the Dog Class</b></ul>
+    <textarea style="color: #DC7633" rows="10" cols="100">
+        class Dog:
+            def __init__(self, name, age):
+                self.name = name
+                self.age = age
+
+            def sit(self):
+                print(self.name.title() + " is now sitting.")
+            def roll_over(self):
+                print(self.name.title() + " rolled over!")
+    </textarea>
+
+<ul style="color:blue"><b>The __init__() Method</b></ul>
+<p>A function that’s part of a class is a method.</p>
+<p  style="color:red"><b>The __init__() method  is a special method Python runs automatically whenever we create a new <br>
+instance based on the Dog class. This method has two leading underscores and two trailing underscores, a convention that<br>
+helps prevent Python’s default method names from conflicting with your method names.</b></p>
+<p>We define the __init__() method to have three parameters: self, name, and age.</p>
+<p>When we make an instance of Dog, Python will call the __init__() method from the Dog class. We’ll pass Dog() a name and<br>
+an age as arguments; self is passed automatically, so we don’t need to pass it. Whenever we want to make an instance from the<br>
+Dog class, we’ll provide values for only the last two parameters, name and age</p>
+<p>The two variables defined at each have the prefix self. Any variable prefixed with self is available to every method in<br>
+the class, and we’ll also be able to access these variables through any instance created from the class. self.name = name takes<br>
+the value stored in the parameter name and stores it in the variable name, which is then attached to the instance being created. <br>
+The same process happens with self.age = age. Variables that are accessible through instances like this are called <b><span style="color:red">ATTRIBUTES</span></b>.</p>
+<p>The Dog class has two other <b><span style="color:red">METHODS</span></b> defined: sit() and roll_over(). Because these methods don’t need additional information<br>
+like a name or age, we just define them to have one parameter, self. </p>
+
+<ul style="color:blue"><b>Making an Instance from a Class</b><br><br>
+    <textarea style="color: #DC7633" rows="7" cols="100">
+            class Dog():
+            --snip--
+
+            my_dog = Dog('willie', 6)
+            print("My dog's name is " + my_dog.name.title() + ".")
+            print("My dog is " + str(my_dog.age) + " years old.")
+    </textarea>
+    <ul>Accessing Attributes</ul>
+        <textarea style="color: #DC7633" rows="3" cols="100">
+            my_dog.name
+            my_dog.age
+        </textarea>
+    <ul>Calling Methods</ul>
+        <textarea style="color: #DC7633" rows="3" cols="100">
+            my_dog.sit()
+            my_dog.roll_over()
+        </textarea>
+    <ul>Creating Multiple Instances</ul>
+        <textarea style="color: #DC7633" rows="3" cols="100">
+            my_dog = Dog('willie', 6)
+            your_dog = Dog('lucy', 3)
+        </textarea>
+</ul>
+
+<h3> 2) Working with Classes and Instances</h3>
+<ul style="color:blue"><b>The Car Class</b></ul>
+        <textarea style="color: #DC7633" rows="13" cols="100">
+            class Car:
+                def __init__(self, make, model, year):
+                    self.make = make
+                    self.model = model
+                    self.year = year
+
+                def get_descriptive_name(self):
+                    long_name = str(self.year) + ' ' + self.make + ' ' + self.model
+                    return long_name.title()
+
+            my_new_car = Car('audi', 'a4', 2016)
+            print(my_new_car.get_descriptive_name())
+        </textarea>
+
+<ul style="color:blue"><b>Setting a Default Value for an Attribute</b></ul>
+        <textarea style="color: #DC7633" rows="17" cols="100">
+            class Car:
+                def __init__(self, make, model, year):
+                    self.make = make
+                    self.model = model
+                    self.year = year
+                    self.odometer_reading = 0 # add more one ATTRIBUTE to the class
+
+            def get_descriptive_name(self):
+            --snip--
+
+            def read_odometer(self):
+                print("This car has " + str(self.odometer_reading) + " miles on it.")
+
+            my_new_car = Car('audi', 'a4', 2016)
+            print(my_new_car.get_descriptive_name())
+            my_new_car.read_odometer()
+        </textarea>
+
+<ul style="color:blue"><b>Modifying Attribute Values</b></ul>
+        <textarea style="color: #DC7633" rows="8" cols="100">
+            class Car:
+            --snip--
+
+            my_new_car = Car('audi', 'a4', 2016)
+            print(my_new_car.get_descriptive_name())
+            my_new_car.odometer_reading = 23   # ADD DIRECTLY
+            my_new_car.read_odometer()
+        </textarea>
+
+<ul style="color:blue"><b>Modifying an Attribute’s Value Through a Method</b></ul>
+        <textarea style="color: #DC7633" rows="14" cols="100">
+                class Car:
+                --snip--
+
+                def update_odometer(self, mileage):
+                    if mileage >= self.odometer_reading:
+                        self.odometer_reading = mileage
+                    else:
+                        print("You can't roll back the odometer!")
+
+                my_new_car = Car('audi', 'a4', 2016)
+                print(my_new_car.get_descriptive_name())
+                my_new_car.update_odometer(23)
+                my_new_car.read_odometer()
+        </textarea>
+
+<ul style="color:blue"><b>Incrementing an Attribute’s Value Through a Method</b></ul>
+        <textarea style="color: #DC7633" rows="16" cols="100">
+                class Car:
+                --snip--
+
+                def update_odometer(self, mileage):
+                --snip--
+
+                def increment_odometer(self, miles):
+                    self.odometer_reading += miles
+
+                my_used_car = Car('subaru', 'outback', 2013)
+                print(my_used_car.get_descriptive_name())
+                my_used_car.update_odometer(23500)
+                my_used_car.read_odometer()
+                my_used_car.increment_odometer(100)
+                my_used_car.read_odometer()
+        </textarea>
+
+<h3> 2) Inheritance</h3>
+
+<ul style="color:blue"><b>The __init__() Method for a Child Class</b></ul>
+    <textarea style="color: #DC7633" rows="12" cols="100">
+        class Car:
+        --snip--
+
+        class ElectricCar(Car):
+            def __init__(self, make, model, year):
+                super().__init__(make, model, year)
+                # another way to inherit __init__ methods from parent class
+                #Car.__init_(self, make, model, year)
+
+        my_tesla = ElectricCar('tesla', 'model s', 2016)
+        print(my_tesla.get_descriptive_name())
+    </textarea>
+<p><b>The name super comes from a convention of calling the parent class a <span style="color:red">superclass</span> and the
+child class a <span style="color:red">subclass</span>.</b></p>
+
+<ul style="color:blue"><b>Defining Attributes and Methods for the Child Class</b></ul>
+<p>Once you have a child class that inherits from a parent class, you can add
+any new attributes and methods necessary <br>to differentiate the child class
+from the parent class.</p>
+
+<ul style="color:blue"><b>Overriding Methods from the Parent Class</b></ul>
+<p>You can override any method from the parent class that doesn’t fit what
+you’re trying to model with the child class.<br> To do this, you define a method
+in the child class with the same name as the method you want to override
+in the parent class.<br> Python will disregard the parent class method and only
+pay attention to the method you define in the child class.<br>
+Say the class Car had a method called fill_gas_tank(). This method is
+meaningless for an all-electric vehicle,<br> so you might want to override this
+method. Here’s one way to do that:</p>
+
+    <textarea style="color: #DC7633" rows="5" cols="100">
+        class ElectricCar(Car):
+            --snip--
+            def fill_gas_tank():
+                print("This car doesn't need a gas tank!")
+    </textarea>
+
+<ul style="color:blue"><b>Instances as Attributes</b></ul>
+<p>When modeling something from the real world in code, you may find that
+you’re adding more and more detail to a class.<br> You’ll find that you have a
+growing list of attributes and methods and that your files are becoming
+lengthy.<br> In these situations, you might recognize that part of one class can
+be written as a separate class. You can break your large<br> class into smaller
+classes that work together.</p>
+
+     <textarea style="color: #DC7633" rows="28" cols="100">
+            class Car:
+            --snip--
+
+            class Battery:
+                def __init__(self, battery_size=70):
+                    self.battery_size = battery_size
+                def describe_battery(self):
+                    print("This car has a " + str(self.battery_size) + "-kWh battery.")
+                def get_range(self):
+                    if self.battery_size == 70:
+                        range = 240
+                    elif self.battery_size == 85:
+                        range = 270
+
+                    message = "This car can go approximately " + str(range)
+                    message += " miles on a full charge."
+                    print(message)
+
+            class ElectricCar(Car):
+                def __init__(self, make, model, year):
+                    super().__init__(make, model, year)
+                    self.battery = Battery()
+
+            my_tesla = ElectricCar('tesla', 'model s', 2016)
+            print(my_tesla.get_descriptive_name())
+            my_tesla.battery.describe_battery()
+    </textarea>
+
+<h3> 3) Importing Classes</h3>
+<ul style="color:blue"><b>Importing a Single Class</b></ul>
+        <textarea style="color: #DC7633" rows="4" cols="50">
+        car.py
+            class Car:
+            --snip--
+        </textarea>
+        <textarea style="color: #DC7633" rows="4" cols="50">
+        mycar.py
+            from car import Car
+        </textarea>
+<ul style="color:blue"><b>Storing Multiple Classes in a Module</b></ul>
+        <textarea style="color: #DC7633" rows="5" cols="50">
+        car.py
+            class Car:
+            --snip--
+            class Battery:
+        </textarea>
+<ul style="color:blue"><b>Importing Multiple Classes from a Module</b></ul>
+        <textarea style="color: #DC7633" rows="3" cols="50">
+        mycar.py
+            from car import Car, Battery
+        </textarea>
+<ul style="color:blue"><b>Importing an Entire Module</b></ul>
+        <textarea style="color: #DC7633" rows="3" cols="50">
+        mycar.py
+            import car
+        </textarea>
+<ul style="color:blue"><b>Importing All Classes from a Module</b></ul>
+        <textarea style="color: #DC7633" rows="3" cols="50">
+        mycar.py
+            from car import *
+        </textarea>
+<ul style="color:blue"><b>Importing a Module into a Module</b></ul>
+        <textarea style="color: #DC7633" rows="6" cols="50">
+        car.py
+            class Car:
+            --snip--
+        </textarea>
+        <textarea style="color: #DC7633" rows="6" cols="50">
+        electric_car.py
+            class Battery:
+            --snip--
+            class ElectricCar(Car):
+            --snip--
+        </textarea>
+        <textarea style="color: #DC7633" rows="6" cols="50">
+        mycar.py
+            from car import Car
+            from electric_car import ElectricCar
+        </textarea>
+<h3> 4) Styling Classes</h3>
+<p style="color: red">*Class names should be written in CamelCaps: Eg: iPhone, camelCase, CamelCase</p>
+<p style="color: red">*Every class should have a docstring immediately following the class definition</p>
+<p style="color: red">*If you need to import a module from the standard library and a module
+that you wrote,<br> place the import statement for the standard library module first. Then add a blank <br>
+line and the import statement for the module you wrote</p>
+
+</body>
+</html>

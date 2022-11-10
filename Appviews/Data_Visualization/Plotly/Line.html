@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+    {%load static%}
+<head>
+    <meta charset="UTF-8">
+    <title>LINE</title>
+</head>
+<body>
+<h1 style="color:blue; text-align:center">LINE CHART</h1>
+    <ul>
+        <h2 style = "color: blue">Line Plots With plotly.express Figure</h2>
+        <p>In 2 2D line plot, each row of DataFrame is represented as vertex of a polyline mark in 2D space.</p>
+        <li><b>px.line</b> attributes"</li>
+        <pre>import plotly.express as px</pre>
+        <ul>
+            <li><b>data_frame (DataFrame or array-like or dict)</b> :This argument needs to be passed for column names (not keyword names) to be used.<br>
+                Array-like and dict are transformed internally to a pandas DataFrame. If missing, a DataFrame gets constructed under the hood using the other arguments.</li>
+            <li><b>x(str or int or Series or array-like)</b> : Values from this column or array_like are used to position marks along the x axis <br>
+                in cartesian coordinates.</li>
+            <li><b>y(str or int or Series or array-like)</b> : Values from this column or array-like are used to position marks along the y axis in cartesian coordinates.</li>
+            <li><b>line_group(str or int or Series or array-like)</b> :Values from this column or array_like are used to group rows of data_frame into lines.</li>
+            <li><b>color(str, int, Series or array-like)</b> :Values from this column or array_like are used to assign color to marks.</li>
+            <li><b>line_dash(str, int, Series or array-like)</b> :Values from this column or array_like are used to assign dash_patterns to lines.</li>
+            <li><b>symbol(str, int, Series or array-like)</b> :Values from this column or array_like are used to assign symbols to marks.</li>
+            <li><b>hover_name(str, int, Series or array-like)</b> :Values from this column or array_like appear in bld in the hover tooltip.</li>
+            <li><b>hover_data(list of str, int, Series, array-like or dict)</b> : With dict {'column_name': True| False}. If False, remove this column to hover information.<br>
+                With formatting string, or list-like data will appear in hover as second element. Values from these appear as extra data in the hover tooltip.</li>
+            <li><b>custom_data (list of str, int, Series or array-like)</b> : Values from these are extra data, to be sued in widgets or Dash callbacks. This data <br>
+                is not user-visible but is included in events emitted by the figure(lasso selection).</li>
+            <li><b>text(str, int, Series or array-like)</b> :Values from this appear in the figure as text labels.</li>
+            <li><b>facet_row(str, int, Series or array-like)</b> :Values from this column or array_like are used to assign marks to faceted subplots in the vertical direction.</li>
+            <li><b>facet_col(str, int, Series or array-like)</b> :Values from this column or array_like are used to assign marks to faceted subplots in the horizontal direction.</li>
+            <li><b>facet_col_wrap(int)</b> :Maximum number of facet columns. Wraps the column variable at this width, so that the column facets span multiple rows.<br>
+                Ignored if 0 and force to 0 if facet_row or a marginal is set.</li>
+            <li><b>facet_row_spacing(float from 0 to 1)</b> :Spacing between facet rows, in paper units. Default is 0.03 or 0.0.7 when facet_col_wrap is used.</li>
+            <li><b>facet_col_spacing(float from 0 to 1)</b> :Spacing between facet columns, in paper units. Default is 0.02.</li>
+            <li><b>error_x(str, int, Series or array-like)</b> :Values from this column or array_like are used to size x-axis error bars. If error_x_minus is None, <br>
+                error bars will be symmetrical, otherwise error_y is used for the positive direction only.</li>
+            <li><b>error_x_minus(str, int, Series or array-like)</b> :Value from this column or array_like are used to size x-axis error bars. Ignored if error_x is None.</li>
+            <li><b>error_y(str, int, Series or array-like)</b> :Value from this column or array_like are used to size y-axis error bars. If error_y_minus is None,<br>
+                error bars will be symmetrical, otherwise error_y is used for the positive direction only.</li>
+            <li><b>error_y_minus(str, int, Series or array-like)</b> :Values from this column or array_like are used to size y-axis error bars in the negative direction.<br>
+                Ignored if error_y is None.</li>
+            <li><b>animation_frame(str, int, Series or array-like)</b> :Values from this column or array_like are used to assign marks to animation frames.</li>
+            <li><b>animation_group(str, int, Series or array_like)</b> :Values from this column or array_like are used to provide object-constancy across animation frame:<br>
+                row with matching animation_group will be treated as if they describe the same object in each frame.</li>
+            <li><b>category_orders (dict with str keys and list of str values)</b> :Default {}. This parameter is used to force a specific ordering of values per column.<br>
+                The keys of this dict should correspond to column names, and the values should be lists of strings corresponding to the specific display order desired.</li>
+            <li><b>labels(dict with str keys and str values)</b> : By default, column names are used in the figure for axis titles, legend entries and hovers. This parameters<br>
+                allow this to be overridden. The keys of this dict should correspond to column names, and the values should correspond to the desired label to be displayed.</li>
+            <li><b>orientation('v' for vertical and 'h' for horizontal)</b> : Default 'v' if x and y are provided and both continuous or categorical, otherwise 'v'('h') if <br>
+                x(y) is categorical and y(x) is continuous, and 'v'('h') if only x(y) is provided.</li>
+            <li><b>color_discrete_sequence(list of str)</b> : Strings should define valid CSS-colors. When color is set and the values in the corresponding column are not <br>
+                numeric, values in that column are assigned color by cycling through color_discrete_sequence in the order described in category_orders, unless the value of color<br>
+                is a key in color_discrete_map (see color_discrete_map, specifically plotly.express.colors.qualitative)</li>
+            <li><b>color_discrete_map(dict with str keys and str value)</b> :Default {}. String values should define CSS-colors. Used to override color_discrete_sequence to assign<br>
+                a specific colors to marks corresponding with specific values. Keys in color_discrete_map should be values in the column denoted by color. Alternatively, if the <br>
+                of color are valid colors, the string 'identity' may be passed to cause them to be used directly.</li>
+            <li><b>line_dash_sequence(list of str)</b> :Strings should define valid plotly.js dash-patterns. Wen line-dash is set, values in that column are assigned <br>
+                dash-patterns by cycling through line_dash_sequence in the order described in category_orders, unless the value of line_dash is a key in line_dash_map.</li>
+            <li><b>line_dash_map(dict with str keys and str values)</b> : Default {}. String values define plotly.js dash-patterns. Used to override line_dash_sequence<br>
+                to assign a specific dash-patterns to lines corresponding with specific values. Keys in line_dash_map should be values in the column denoted by line_dash<br>
+                Alternatively, if the values of line_dash are valid symbol names, the string 'identity' may be passed to cause them to be used directly.</li>
+            <li><b>symbol_sequence(list of str)</b> :String should define valid plotly.js symbols. When symbol is set, values in that column are assigned symbols by cycling<br>
+                through symbol_sequence in the order described in category_orders, unless the value of symbol is a key in symbol_map.</li>
+            <li><b>symbol_map(dict with str keys and str values)</b> : Default {}. String values should define plotly.js symbols. Used to override symbol_sequence<br>
+                to assign specific symbols to marks corresponding with specific values. Keys in symbol_map should be values in teh column denoted by symbol. Alternatively, <br>
+                if the values of symbol are valid symbol names, the string 'identity' may be passed to cause them to be used directly.</li>
+            <li><b>markers(boolean)</b> :Default False. If True, markers are shown on lines.</li>
+            <li><b>log_x(boolean)</b> :Default False. If True, the x-axis is log-scaled in cartesian coordinates.</li>
+            <li><b>log_y(boolean)</b> :Default False. If True, the y-axis is log-scaled in cartesian coordinates.</li>
+            <li><b>range_x(list of two numbers)</b> :If provided, overrides auto-scaling on the x-axis in cartesian coordinates.</li>
+            <li><b>range_y(list of two numbers)</b> :If provided, overrides auto-scaling on the y-axis in cartesian coordinates.</li>
+            <li><b>line_shape('linear', 'spline')</b></li>
+            <li><b>render_mode(str)</b> :Options : 'auto', 'svg', 'webgl'. Default 'auto'. Controls the browser API used to draw marks.'svg' is appropriate for figures of less than <br>
+                1000 data points, and will allow for fully-vectorized output. 'webgl' is likely necessary for acceptable performance above 1000 points but rasterizes part of the output.<br>
+                'auto' uses heuristics to choose the mode.</li>
+            <li><b>title(str)</b> : The figure title.</li>
+            <li><b>template(str or dict or go.layout.Template instance)</b> : The figure template name (must be a key in pio.templates) or definition.</li>
+            <li><b>width(int)</b> :Default None. The figure width in pixels.</li>
+            <li><b>height(int)</b> :Default None. The figure height in pixels.</li>
+        </ul>
+        <h2 style = "color: blue">Line Plots With plotly.express</h2>
+        <li>With <b>px.line</b>, each data point is represented as a vertex (which location is given by the x and y columns) of a polyline mark in 2D space.</li>
+        <pre>
+            import plotly.express as px
+            df = px.data.gapminder().query("country == 'Canada'")
+            fig = px.line(df, x = 'year', y = 'lifeExp', title = 'Life Expectancy in Canada')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/linec_1.png'%}">
+        <h2 style = "color: blue">Line Plot With Column Encoding Color</h2>
+        <pre>
+            df = px.data.gapminder().query("continent == 'Oceania'")
+            fig = px.line(df, x= 'year', y = 'lifeExp', color='country')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/linec_2.png'%}">
+        <h2 style = "color: blue">Line Charts in Dash</h2>
+        <li>Dash is the best way to build analytical apps in Python using Plotly figures.</li>
+        <pre>
+            import dash
+            from dash import dcc
+            from dash import html
+            from dash import Input, Output
+
+            df = px.data.gapminder()
+            all_continents = df.continent.unique()
+
+            app.layout = html.Div(  [dcc.Checklist(   id = 'checklist',
+                                                    options = [{'label': x, 'value': x} for x in all_continents],
+                                                    value = all_continents[3:],
+                                                    labelStyle = {'display': 'inline-block'}    ),
+                                    dcc.Graph(id = 'line-chart'), ])
+            @app.callback(Output['line-chart', 'figure'],
+                            [Input('checklist', 'value'])
+            def update_line_chart(continents):
+                mask = df.continent.isin(continents)
+                fig = px.line(df[mask]), x ='year', y = 'lifeExp', color = 'country')
+            return fig
+            app.run_server(debug = True)
+        </pre>
+        <img src="{% static 'IMG/linec_3.png'%}">
+        <h2 style = "color: blue">Data Order In Line Charts</h2>
+        <li>Plotly line charts are implemented a <b>connected scatterplots</b>, meaning that the points are plotted and connected with lines n the order they are provided, without auto-reorder. </li>
+        <li>This makes it possible to make charts, but also means that is may be required to explicitly sort data before passing it to plotly to avoid lines moving 'backward' across the chart.</li>
+        <pre>
+            df = pd.DataFrame({'x' : [1, 3, 2, 4], 'y': [1, 2, 3, 4]})
+            fig = px.line(df, x = 'x', y = 'y', title = 'Unsorted Order')
+            fig.show()
+            df = df.sort_values('x')
+            fig = px.line(df, x= 'x', y = 'y', title = 'Sorted Order')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/linec_4.png'%}">
+        <img src="{% static 'IMG/linec_5.png'%}">
+        <h2 style = "color: blue">Connected Scatterplots</h2>
+        <li>In a connected scatterplot, two ocntinuous variables are plotted against each other, with a line connecting them in some meaningful order,<br>
+        usually a time variable.</li>
+        <pre>
+            df = px.data.gapminder().query("country in ['Canada', 'Botswana'")
+            fig = px.line(df, x = 'lifeExp', y = 'gdpPercap', color = 'country', text = 'year')
+            fig.update_traces(textposition = 'bottom right')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/linec_6.png'%}">
+        <h2 style = "color: blue">Line Charts With Markers</h2>
+        <li><b>markers argument</b></li>
+        <pre>
+            df = px.data.gapmider().query("continent == 'Oceania'")
+            fig = px.line(df, x = 'year', y = 'lifeExp', color= 'country', markers = True)
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/linec_7.png'%}">
+        <li><b>symbol argument (show at different markers)</b></li>
+        <pre>
+            fig = px.line(df, x ='year', y ='lifeExp', color = 'country', markers = True, symbol = 'country')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/linec_8.png'%}">
+        <h2 style = "color: blue">Line Plots on Date Axes</h2>
+        <li>Line plots can be made on using any type of Cartesian axis, including linear, logarithmic, categorical or date axes. Line plots on date axes <br>
+        are often called <b>time-series charts.</b></li>
+        <pre>
+            df = data.stocks()
+            fig = px.line(x ='date' , y = 'GOOG')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/linec_9.png'%}">
+        <h2 style = "color: blue">Sparklines With Plotly Express</h2>
+        <li>Sparklines ae scatter plots inside subplots, with grid-lines, axis lines and ticks removed.</li>
+        <pre>
+            df = px.data.stocks(indexed = True)
+            fig = px.line(df, facet_row_spacing = 0.01, height = 400, width = 600)
+            # hide and lock down axes
+            fig.update_xaxes(visible = False, fixedrange = True)
+            fig.update_yaxes(visible = False, fixedrange = True)
+            # remove facet/ subplot labels
+            fig.update_layout(annotations = [], overwrite = True)
+            # strip down the rest of the plot
+            fig.update_layout(showlegend = False, plot_bgcolor = 'White',
+                                margin = {'t': 10, 'l': 10, 'r': 10, 'b':10}) # top, left, right, bottom
+            # disable the modebar for such a small plot
+            fig.show(config = {'displayModeBar': False})
+        </pre>
+        <img src="{% static 'IMG/linec_10.png'%}">
+        <h2 style = "color: blue">Line Plot With go.Scatter</h2>
+        <li>If plotly express does not provide a good starting point, it is possible to use the more generic go.Scatter(plotly.graph_objects) class.</li>
+        <li>Whereas plotly.express has two functions scatter and line, go.Scatter ca nbe used both fro plotting points (markers) or lines, depending<br>
+        on the value of mode.</li>
+        <pre>
+            x = np.arange(10)
+            fig = go.Figure(data = go.Scatter(x = x, y = x**2))
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/go_line1.png'%}">
+        <pre>
+            np.random.seed(1)
+            N = 100
+            random_x = np.linspace(0, 1, N)
+            random_y0 = np.random.rand(N) + 5
+            random_y1 = np.random.rand(N)
+            random_y2 = np.random.rand(N) -5
+            ### Create traces
+            fig = go.Figure()
+            fig.add_traces(go.Scatter(x = random_x, y = random_y0, mode = 'lines', name = 'lines'))
+            fig.add_traces(go.Scatter(x = random_x, y = random_y1, mode = 'lines + markers', name = 'lines + markers'))
+            fig.add_traces(go.Scatter(x = random_x, y = random_y2, mode = 'markers', name = 'markers'))
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/go_line2.png'%}">
+        <h2 style = "color: blue">Style Line Plots</h2>
+        <pre>
+            df = pd.DataFrame({ 'month': [January, February, March, April, May, June, July, August, September, October, November, December],
+                                'high_2000' : [32.5, 37.6, 49.9, 53.0, 69.1, 75.4, 76.5, 76.6, 70.7, 60.6, 45.1, 29.3],
+                                'low_2000' : [13.8, 22.3, 32.5, 37.2, 49.9, 56.1, 57.7, 58.3, 51.2, 42.8, 31.6, 15.9],
+                                'high_2007' : [36.5, 26.6, 43.6, 52.3, 71.5, 81.4, 80.5, 82.2, 76.0, 67.3, 46.1, 35.0],
+                                'low_2007' : [23.6, 14.0, 27.0, 36.8, 47.6, 57.7, 58.9, 61.2, 53.3, 48.5, 31.0, 23.6],
+                                'high_2014' : [28.8, 28.5, 37.0, 56.8, 69.7, 79.7, 78.5, 77.8, 74.1, 62.6, 45.3, 39.9],
+                                'low_2014' : [12.7, 14.3, 18.6, 35.5, 49.9, 58.0, 60.0, 58.6, 51.7, 45.2, 32.2, 29.1]})
+            fig = go.Figure()
+            # create adn style traces
+            fig.add_trace(go.Scatter(x = df['month'], y = df['high_2014'], name = 'High 2014', line = {'color': 'firebrick', 'width' = 4}))
+            fig.add_trace(go.Scatter(x = df['month'], y = df['low_2014'], name = 'Low 2014', line = {'color': 'royalblue', 'width' = 4}))
+            fig.add_trace(go.Scatter(x = df['month'], y = df['high_2007'], name = 'High 2007', line = {'color': 'firebrick', 'width' = 4, 'dash': 'dash'}))
+            fig.add_trace(go.Scatter(x = df['month'], y = df['low_2007'], name = 'Low 2007', line = {'color': 'royalblue', 'width' = 4, 'dash': 'dash'}))
+            fig.add_trace(go.Scatter(x = df['month'], y = df['high_2000'], name = 'High 2000', line = {'color': 'firebrick', 'width' = 4, 'dash': 'dot'}))
+            fig.add_trace(go.Scatter(x = df['month'], y = df['low_2000'], name = 'Low 2000', line = {'color': 'royalblue', 'width' = 4, 'dash': 'dashdot'}))
+            # Edit layout
+            fig.update_layout(title = 'Average High and Low Temperatures in New York', xaxis_title = 'month', yaxis_title = 'Temperature (degree F)')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/go_line3.png'%}">
+        <h2 style = "color: blue">Connect Data Gaps</h2>
+        <li>Connectgaps determines if missing values in the provided data are shown as a gap in the graph or not.</li>
+        <pre>
+            x= np.arange(1, 16)
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(x = x, y = [10, 20, None, 15, 10, 5 ,15, None, 20, 10, 10, 15, 25, 20, 10],
+                                    name = '<b>No</b> Gaps',# style name/ legend entry with html tags
+                                    connectgaps = True # Override default to connect the gaps.))
+            fig.add_trace(go.Scatter(x = x, y = [5, 15, None, 10, 5, 0, 10, None, 15, 5, 5, 10, 20, 15, 5], name = 'Gaps'))
+            fig.update_layout(title = 'Gap Styles')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/go_line5.png'%}">
+        <h2 style = "color: blue">Interpolation With Line PLots</h2>
+        <pre>
+            x = np.array([1, 2, 3, 4, 5])
+            y = np.array([1, 3, 2, 3, 1])
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(x = x, y = y, name = 'linear', line_shape = 'linear'))
+            fig.add_trace(go.Scatter(x = x, y = y + 5, name = 'spline', text = "tweak line smoothness <br> with 'smoothing' in line object",
+                                    hoverinfo = 'text + name', line_shape = 'spline'))
+            fig.add_trace(go.Scatter(x = x, y = y + 10, name = 'vhv', line_shape = 'vhv'))
+            fig.add_trace(go.Scatter(x = x, y = y +15, name = 'hvh', line_shape = 'hvh'))
+            fig.add_trace(go.Scatter(x = x, y = y + 20, name = 'vh', line_shape = 'vh'))
+            fig.add_trace(go.Scatter(x = x, y = y + 25, name = 'hv', line_shape = 'hv'))
+            fig.update_traces(hoverinfor = 'text + name', mode = 'lines + markers') # update Scatter mode
+            fig.update_layout(legend = {'y' : 0.5, 'traceorder' = 'reversed', 'font_size' = 16}
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/go_line4.png'%}">
+        <h2 style = "color: blue">Label Lines With Annotations</h2>
+        <li>The zip() function return a zip object, which is an iterator of tuples where the first item in each passed iterator is paired together <br>
+            , and then the second item in each passed iterator are paired together, ...</li>
+        <li>If the passed iterators have different lengths, the iterator with the least items decides the length of the new iterator.</li>
+        <pre>
+            a = [1, 2, 3, 4]
+            b = [1, 2, 3]
+            for i, j in zip(a, b):
+                print(i, j)
+            Out[]:
+            1, 1
+            2, 2
+            3, 3
+        </pre>
+        <pre>
+            title = 'Main Source for New'
+            labels = ['Television', 'Newspaper', 'Internet', 'Radio']
+            colors = ['rgb(67, 67, 67)', 'rgb(115, 115, 115)', 'rgb(49, 130, 189)', 'rgb(189, 189, 189)'])
+
+            mode_size = [8, 8, 12, 8]
+            line_size = [2, 2, 4, 2]
+
+            x_data = np.vstack((np.arange(2001, 2014), )*4)
+            y_data = np.array([ [74, 82, 80, 74, 73, 72, 74, 70, 70, 66, 66, 69],
+                                [45, 42, 50, 46, 36, 36, 34, 35, 32, 31, 31, 28],
+                                [13, 14, 20, 24, 20, 24, 24, 40, 35, 41, 43, 50],
+                                [18, 21, 18, 21, 16, 14, 13, 18, 17, 16, 19, 23],
+                                ])
+            fig = go.Figure()
+
+            for i in range(4):
+                fig.add_trace(go.Scatter(x = x_data[i], y = y_data[i], mode = 'lines', name = labels[i],
+                                        line = {'color': color[i], 'width': line_size[i]}, connectgaps = True))
+                fig.add_trace(go.Scatter(x = [x_data[i][0], x_data[i][-1]], y = [y_data[i][0], [i][-1]], mode = 'markers',
+                                            marker = {'color' : colors[i], 'size': mode_size[i]}))
+
+            fig.update_layout(  xaxis = {'showline': True, 'showgrid':False, 'showticklables': True,
+                                        'linecolor': 'rgb(204, 204, 204)', 'linewidth':2, 'ticks': 'outside',
+                                        'tickfont': {   'family' : 'arial', 'size': 12, 'color' : 'rgb(82, 82, 82)'}},
+                                yaxis = {'showgrid': False, 'zeroline': False, 'showline': False, 'showticklabels': False},
+                                autosize = False, margin = {'autoexpand': False, 'l':100, 'r':20, 't':110},
+                                showlegend = False, plot_bgcolor = 'White')
+            annotations = []
+            # adding labels
+            for y_trace, label, color in zip(y_data, labels, colors): #
+            # Labeling the left_side of plot
+                annotations.append({'xref': 'paper', 'x': 0.05, 'y': y_trace[0], 'xanchor': 'right', # (label)from left to x = 0.05
+                                    'yanchor': 'middle', 'text': label + '{}%'.format(y_trace[0]),
+                                    'font' : {'family': 'Arial', 'size':16}, 'showarrow': False})
+            # Labeling the right_side of plot
+                annotations.append({'xref': 'paper', 'x':0.95, 'y': y_trace[11], 'xanchor':'left', # le
+                                    'yanchor': 'middle', text = '{}%'.format(y_trace[11]),
+                                    'font': {'family': 'Arial', 'size': 16}, 'showarrow': False})
+
+            # Title
+            annotation.append({'xref': 'paper', 'yref' = 'paper', 'x' = 0.0, 'y' = 1.05, 'xanchor' = 'left',
+                                'yanchor' = 'bottom', 'text' = 'Main Source for News',
+                                'font' = {'family' = 'arial', 'size' = 30, 'color' = 'rgb(37, 37, 37)'}, 'showarrow' = False})
+            # Source
+            annotations.append({'xref' = 'paper', 'yref' = 'paper', 'x' = 0,5, 'y' = -0.1,
+                                'xanchor' = 'center', 'yanchor' = 'top', 'text' = 'Source: PewReseach Center &' +
+                                'Storytelling with data', 'font' = {'family' = 'arial', 'size' = 12, 'corlor' = 'rgb(150, 150, 150)'},
+                                'showarrow' = False})
+
+            fig.update_layout(annotations = annotations)
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/go_line6.png'%}">
+        <h2 style = "color: blue">Filled Lines</h2>
+        <li style="color:red">Note that 'line_color' attribute is used for adjust line attribute.</li>
+        <pre>
+            x = [ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10]
+            x_rev = x[::-1] # reverse x
+            # Line 1
+            y1 = [ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10]
+            y1_uppper = [ 2,  3,  4,  5,  6,  7,  8,  9, 10, 11]
+            y2_lower =  [ 0, 1,  2,  3,  4,  5,  6,  7,  8,  9]
+            y1_lower = y1[::-1] # reverse y1
+            # Line 2
+            y2 = [5, 2.5, 5, 7.5, 5, 2.5, 7.5, 4.5, 5.5, 5]
+            y2_upper = [5.5, 3, 5.5, 8, 6, 3, 8, 5, 6, 5.5]
+            y2_lower = [4.5, 2, 4.4, 7, 4, 2, 7, 4, 5, 4.75]
+            y2_lower = y2_lower[::-1] # reverse y2_lower
+            # Line 3
+            y3 = [10, 8, 6, 4, 2, 0, 2, 4, 2, 0]
+            y3_upper = [11, 9, 7, 5, 3, 1, 3, 5, 3, 1]
+            y3_lower = [9, 7, 5, 3, 1, -.5, 1, 3, 1, -1]
+            y3_lower = y3_lower[::-1]
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(x = x + x_rev, y = y1_upper + y1_lower, fill = 'toself', fillcolor = 'rgba(0, 100, 80, 0.2)',
+                                    fillcolor = 'rgba(255, 255, 255, 0)', showlegend = Fasle, name = 'Fair'))
+            fig.add_trace(go.Scatter(x = x + x_rev, y = y2_upper + y2_lower, fill = 'toself', fillcolor = 'rgba(0, 176, 246, 0.2)',
+                                    line_color = 'rgba(255, 255, 255, 0)', name = 'Premium', showlegend = False))
+            fig.add_trace(go.Scatter(x = x + x_rev, y = y3_upper + y3_lower, fill = 'toself', fillcolor = 'rgba(231, 107, 243, 0.2)',
+                                    line_color = 'rgba(255, 255, 255, 0)', showlegend = False, name = 'Ideal'))
+            fig.add_trace(go.Scatter(x = x, y = y1, line_color = 'rgb(0, 100, 80)', name = 'Fair))
+            fig.add_trace(go.Scatter(x = x, y = y2, line_color = 'rgb(0, 176, 246)', name = 'Premium'))
+            fig.add_trace(go.Scatter(x = x, y = y3, line_color = 'rgb(231, 107, 243)', name = 'Ideal'))
+            fig.update_traces(mode = 'lines')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/go_line7.png'%}">
+        <h2 style = "color: blue">Dash</h2>
+        <li>Dash is an open source framework for building analytical applications, with no javascript required, and it is tightly integrated with the<br>
+            Plotly graphing library.</li>
+        <pre>
+            fig = go.Figure()
+            fig.add_trace(...)
+            fig.update_layout(...)
+            ...
+            import dash
+            from dash import Input, Output
+            from dash import html
+            from dash import dcc
+            app = dash.Dash()
+            app.layout = html.Div([dcc.Graph(figure = fig])
+            app.runserver(debug = True, use_reloader  = False) # turn off re-loader if inside Jupyter)
+        </pre>
+    </ul>
+</body>
+</html>

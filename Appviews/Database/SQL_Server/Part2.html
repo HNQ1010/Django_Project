@@ -1,0 +1,3092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>SQL BASIC</title>
+</head>
+<body>
+<h1 style="color:red ; text-align:center">SQL BASIC</h1>
+<h1 style="color:#3A578F">Section1. Querying Data</h1>
+    <ul>
+        <h3 style="color:red">SELECT</h3>
+            <ul>
+                <li>Show you how to query data againsts a single table.</li>
+                <textarea rows= "14" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        city,
+                        COUNT (*)
+                    FROM
+                        sales.customers
+                    WHERE
+                        state = 'CA'
+                    GROUP BY
+                        city
+                    HAVING
+                        COUNT (*) > 10
+                    ORDER BY
+                        city;
+                </textarea>
+                <li style="color:#E71811"><b>COUNT(*):</b> returns the number of rows in a specified table</li>
+                <li>Notice that the WHERE clause filters rows while the HAVING clause filter groups.</li>
+            </ul>
+        <h3 style="color:red">SELECT FOR(to be continuing...)</h3>
+        <h3 style="color:red">SELECT OVER (see Part12)</h3>
+    </ul>
+<h1 style="color:#3A578F">Section 2. Sorting data</h1>
+    <ul>
+        <h3 style="color:red">SELECT</h3>
+            <textarea  rows= "7" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                SELECT
+                    select_list
+                FROM
+                    table_name
+                ORDER BY
+                    LEN(column_name) ASC | DESC
+            </textarea>
+        <li><b>ASC:</b> Ascending</li>
+        <li><b>DESC:</b> Descending</li>
+        <li>SQL Server uses ASC as the default sort order</li>
+    </ul>
+<h1 style="color:#3A578F">Section 3. Limiting rows</h1>
+    <ul>
+        <h3 style="color:red"><b>1) OFFSET And FETCH</b></h3>
+            <textarea  rows= "4" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    ORDER BY column_list [ASC |DESC]
+                    OFFSET offset_row_count {ROW | ROWS}
+                    FETCH {FIRST | NEXT} fetch_row_count {ROW | ROWS} ONLY
+            </textarea>
+            <ul>
+                <li>Limit the number of rows returned by a query.</li>
+                <li>Are the options of the ORDER BY clause. </li>
+                <li><b>OFFSET ROW(S)</b> : Specifies the number of rows<span style="color:#E71811">(greater than or equal to 0)</span> to skip before starting to return rows from the query.</li>
+                <li><b>FETCH (FIRST|NEXT) ONLY</b> : Specifies the number of rows<span style="color:#E71811">(greater than or equal to 1)</span> to return after the OFFSET clause has been processed.</li>
+                    <ul>
+                        <li><b>FIRST</b>: if OFFSET 0</li>
+                        <li><b>NEXT</b>: if OFFSET >0</li>
+                    </ul>
+                    <textarea  rows= "18" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                column_name(s)
+                            FROM
+                                table_name
+                            ORDER BY
+                                column_name(s)
+                            OFFSET 0 ROWS
+                            FETCH FIRST 10 ROWS ONLY;
+                        Or
+                            SELECT
+                                column_name(s)
+                            FROM
+                                table_name
+                            ORDER BY
+                                column_name(s)
+                            OFFSET 5 ROWS
+                            FETCH NEXT 10 ROWS ONLY;
+                    </textarea>
+                <li>The OFFSET and FETCH clauses are preferable for implementing the query paging solution than the TOP clause.</li>
+            </ul>
+        <h3 style="color:red"><b>2) SELECT TOP</b></h3>
+            <textarea  rows= "7" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT TOP (expression) [PERCENT]
+                        [WITH TIES]
+                    FROM
+                        table_name
+                    ORDER BY
+                        column_name;
+            </textarea>
+            <ul>
+                <li><b>expression : </b>specifies the number of rows to be returned. </li>
+                <li><b>PERCENT : </b>indicates that the query returns the first N percentage of rows, where N is the result of the expression</li>
+                <li><b>WITH TIES : </b>The WITH TIES allows you to return more rows with values that match the last row in the limited result set.</li>
+                <li style="color:#E71811">Note that WITH TIES may cause more rows to be returned than you specify in the expression.</li>
+                <ul>
+                    <li style="color:blue"><b>Using TOP with a constant value</b></li>
+                        <textarea  rows= "9" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                SELECT TOP 10
+                                    product_name,
+                                    list_price
+                                FROM
+                                    production.products
+                                ORDER BY
+                                    list_price DESC;
+                    * Above query will return 10 product_name with the most expensive price in the table production.products
+                        </textarea>
+                    <li style="color:blue"><b>Using TOP to return a percentage of rows</b></li>
+                        <textarea  rows= "12" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                SELECT TOP 1 PERCENT
+                                    product_name,
+                                    list_price
+                                FROM
+                                    production.products
+                                ORDER BY
+                                    list_price DESC;
+                    * Above query will return 1% of product_name with the most expensive price in the table production.products
+                           * If the table have 100 rows, it will return 1 row
+                           * If the table have 101 rows, it will return 1 row (1% of 101 is 1.01, SQL will round 1.01 to 1)
+                           * If the table have 150-200 rows, it will return 2 row(1% of 150-200 is 1.5-2, SQL will round to 2)
+                        </textarea>
+                    <li style="color:blue"><b>Using TOP WITH TIES to include rows that match the values in the last row</b></li>
+                        <textarea  rows= "11" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                SELECT TOP 1(%) PERCENT WITH TIES
+                                    product_name,
+                                    list_price
+                                FROM
+                                    production.products
+                                ORDER BY
+                                    list_price DESC;
+                    * Above query will return 1(%) of product_name with the most expensive price in the table production.products
+                           * If the table have 100 rows, it will return 1(%) row + the rows that have same price (if any)
+                        </textarea>
+                </ul>
+            </ul>
+    </ul>
+<h1 style="color:#3A578F">Section 4. Filtering data</h1>
+    <ul>
+        <h3 style="color:red"><b>1) DISTINCT</b></h3>
+            <ul>
+                <li>Get only distinct values in a specified column of a table</li>
+                <li>You can choose one or more distinct column(s) in the table</li>
+                <li>With the NULL value, DISTINCT clause will keep only one NULL and eliminates the other</li>
+                <textarea  rows= "6" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        SELECT DISTINCT
+                            column_name(s)
+                        FROM
+                            table_name;
+                </textarea>
+                <li style="color:blue"><b>DISTINCT vs. GROUP BY</b></li>
+                    <ul style="list-style-type:disc">
+                        <li>Both DISTINCT and GROUP BY clause reduces the number of returned rows in the result set by removing the duplicates.</li>
+                        <li>However, you should use the GROUP BY clause when you want to apply an aggregate function on one or more columns.</li>
+                    </ul>
+            </ul>
+        <h3 style="color:red"><b>2) WHERE</b></h3>
+            <ul>
+                <li>To get the rows from the table that satisfy one or more conditions</li>
+                <li>In the WHERE clause, you specify a search condition to filter rows returned by the FROM clause</li>
+                <li>SQL Server uses three-valued predicate logic where a logical expression can evaluate to TRUE, FALSE, or UNKNOWN.</li>
+                <li>The WHERE clause will not return any row that causes the predicate evaluates to FALSE or UNKNOWN.</li>
+            </ul>
+        <h3 style="color:red"><b>3) AND</b></h3>
+            <ul>
+                <li>The AND is a logical operator that allows you to combine two Boolean expressions.</li>
+                <li>The boolean_expression is any valid Boolean expression that evaluates to TRUE, FALSE, and UNKNOWN.</li>
+                <li>It returns TRUE only when both expressions evaluate to TRUE.</li>
+                <li>As always, SQL Server evaluated the AND operator first.</li>
+                <li>You can use the parentheses to change the order of evaluation.</li>
+            </ul>
+        <h3 style="color:red"><b>4) OR</b></h3>
+            <ul>
+                <li>The SQL Server OR is a logical operator that allows you to combine two Boolean expressions.</li>
+                <li>It returns TRUE when either of the conditions evaluates to TRUE.</li>
+                <li>You can replace multiple OR operators by the IN operator</li>
+            </ul>
+        <h3 style="color:red"><b>5) IN / NOT IN</b></h3>
+            <ul>
+                <li>The IN operator is a logical operator to test whether a specified value matches any value in a list.</li>
+                <li>The IN operator is equivalent to multiple OR operators</li>
+                <li>To negate the IN operator, you use the NOT IN operator</li>
+                <li>Note that if a list contains NULL, the result of IN or NOT IN will be UNKNOWN.</li>
+                <li style="color:blue"><b>Using SQL Server IN operator with a subquery</b></li>
+                    <textarea  rows= "17" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        SELECT
+                                product_name,
+                                list_price
+                        FROM
+                                production.products
+                        WHERE
+                                product_id IN (
+                                    SELECT
+                                        product_id
+                                    FROM
+                                        production.stocks
+                                    WHERE
+                                        store_id = 1 AND quantity >= 30
+                                )
+                        ORDER BY
+                            product_name;
+                    </textarea>
+            </ul>
+        <h3 style="color:red"><b>6) BETWEEN / NOT BETWEEN</b></h3>
+            <ul>
+                <li>The BETWEEN operator is a logical operator that allows you to specify a range to test.</li>
+                <li>You can use the greater than or equal to (>=) and less than or equal to (<=) to substitute the BETWEEN operator</li>
+                <li>To negate the result of the BETWEEN operator, you use NOT BETWEEN operator </li>
+                <li>Note that if any input to the BETWEEN or NOT BETWEEN is NULL, then the result is UNKNOWN.</li>
+                <li style="color:blue">Notice that to specify a date constant, you use the format ‘YYYYMMDD‘</li>
+            </ul>
+        <h3 style="color:red"><b>7) LIKE / NOT LIKE</b></h3>
+            <ul>
+                <li>The SQL Server LIKE is a logical operator that determines if a character string matches a specified pattern.</li>
+                <li>A pattern may include regular characters and wildcard characters</li>
+                    <ul>
+                        <li><b>The percent wildcard (%):</b> any string of zero or more characters.</li>
+                        <li><b>The underscore ( _ ) wildcard: </b>any single character.</li>
+                        <li><b>The [list of characters] wildcard:</b> any single character within the specified set.</li>
+                        <li><b>The [character-character]:</b> any single character within the specified range.</li>
+                        <li><b>The [^]:</b> any single character not within a list or a range.</li>
+                        <li style="color:blue"><b>Escape character</b></li>
+                        <ul>
+                            <li>Instructs the LIKE operator to treat the wildcard characters as the regular characters.</li>
+                            <li>The escape character has no default value and must be evaluated to only one character.</li>
+                            <textarea  rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    column | expression NOT LIKE pattern [ESCAPE escape_character]
+                            </textarea>
+                        <br>
+                            <textarea  rows= "17" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                SELECT
+                                   feedback_id,
+                                   comment
+                                FROM
+                                   sales.feedbacks
+                                WHERE
+                                    comment LIKE '%30%';  -- 30%, 30USD, or 30(with any char) is returned in result set.
+                            SELECT
+                                   feedback_id,
+                                   comment
+                                FROM
+                                   sales.feedbacks
+                                WHERE
+                                   comment LIKE '%30!%%' ESCAPE '!';
+                            -- 30% is returned in result set.
+                            -- And it ignore the values those are 30USD or 30(with any char)
+                            </textarea>
+                            <li>ESCAPE clause specified that the character ! is the escape character.</li>
+                            <li>It instructs the LIKE operator to treat the % character as a literal string instead of a wildcard.</li>
+                            <li style="color:blue">Note that without the ESCAPE clause, the query would return an empty result set.</li>
+                        </ul>
+                    </ul>
+                <li>The wildcard characters makes the LIKE operator more flexible than the equal (=) and not equal (!=).</li>
+                <li>To negate the result of the LIKE operator, you use the NOT LIKE operator </li>
+                    <textarea  rows= "9" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        last_name LIKE 'z%'         -- last name starts with the letter z
+                        last_name LIKE '%er'        -- last name ends with the string er
+                        last_name LIKE 't%s'        -- last name starts with the letter t and ends with the letter s
+                        last_name LIKE '_u%'        -- last_name with second character u and after u is any sequence of character
+                        last_name LIKE '[YZ]%'      -- last name with first character is Y or Z
+                        last_name LIKE '[A-C]%'     -- last name with first character is the letter in the range A through C
+                        last_name LIKE '[^A-X]%'    -- last name with first character IS NOT the letter in the range A through X:
+                        first_name NOT LIKE 'A%'    -- fist_name with first character IS NOT the letter A
+                    </textarea>
+            </ul>
+        <h3 style="color:red"><b>8) COLUMN And Table Aliases</b>:To assign a column/ Table or an expression a temporary name during the query execution</h3>
+    </ul>
+<h1 style="color:#3A578F">Section 5. Joining tables</h1>
+    <ul>
+        <li>To get a complete meaningful set of data, you need to query data from these tables by using joins</li>
+        <li>SQL Server supports many kinds of joins including:</li>
+            <ul>
+                <li>INNER JOIN</li>
+                <li>LEFT JOIN</li>
+                <li>RIGHT JOIN</li>
+                <li>FULL OUTER JOIN</li>
+                <li>CROSS JOIN</li>
+                <li>SELF JOIN</li>
+            </ul>
+    </ul>
+    <ul>
+        <h3 style="color:red"><b>1) INNER JOIN</b></h3>
+            <textarea  rows= "12" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                SELECT
+                    select_list
+                FROM
+                    T1
+                INNER JOIN (Or Join)
+                    T2
+                ON join_predicate;
+            </textarea>
+            <textarea  rows= "12" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                SELECT
+                    product_name,
+                    category_name,
+                    brand_name,
+                    list_price
+                FROM
+                    production.products p
+                INNER JOIN production.categories c ON c.category_id = p.category_id
+                INNER JOIN production.brands b ON b.brand_id = p.brand_id
+                ORDER BY
+                    product_name DESC;
+            </textarea>
+            <ul>
+                <li>First, specify the main table (T1) in the FROM clause</li>
+                <li>Second, specify the second table in the INNER JOIN clause (T2) and a join predicate.<br>
+                Only rows that cause the join predicate to evaluate to TRUE are included in the result set.</li>
+                <li>Note that the INNER keyword is optional, you can skip it and just use JOIN</li>
+            </ul>
+        <h3 style="color:red"><b>2) LEFT JOIN</b></h3>
+            <ul>
+                <li>Returns all rows from the left table and the matching rows from the right table.</li>
+                <li>If no matching rows found in the right table, NULL are used.<br>
+                <textarea  rows= "9" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        select_list
+                    FROM
+                        T1
+                    LEFT JOIN
+                        T2
+                    ON join_predicate;
+                </textarea>
+                <textarea  rows= "9" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        product_name,
+                        order_id
+                    FROM
+                        production.products p
+                    LEFT JOIN sales.order_items o ON o.product_id = p.product_id
+                    ORDER BY
+                        order_id;
+                </textarea>
+                <li style="color:blue">Conditions in ON vs. WHERE clause</li>
+                <textarea  rows= "12" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        product_name,
+                        order_id
+                    FROM
+                        production.products p
+                    LEFT JOIN sales.order_items o
+                       ON o.product_id = p.product_id
+                    WHERE order_id = 100
+                    ORDER BY
+                        order_id;
+                </textarea>
+                <textarea  rows= "12" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        p.product_id,
+                        product_name,
+                        order_id
+                    FROM
+                        production.products p
+                        LEFT JOIN sales.order_items o
+                             ON o.product_id = p.product_id AND
+                                o.order_id = 100
+                    ORDER BY
+                        order_id DESC;
+                </textarea>
+                <li style="color:red">As the results, the condition in WHERE clause can move on ON clause </li>
+                <li>Note that for the INNER JOIN clause, the condition in the ON clause is equivalent if it is placed in the WHERE clause.</li>
+            </ul>
+        <h3 style="color:red"><b>3) RIGHT JOIN</b></h3>
+            <ul>
+                <li>Returns all rows from the right table and the matching rows from the left table.</li>
+                <li>If no matching rows found in the left table, NULL are used.<br>
+                <textarea  rows= "9" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        select_list
+                    FROM
+                        T1
+                    RIGHT JOIN
+                        T2
+                    ON join_predicate;
+                </textarea>
+                <textarea  rows= "9" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        product_name,
+                        order_id
+                    FROM
+                        production.products p
+                    RIGHT JOIN sales.order_items o ON o.product_id = p.product_id
+                    ORDER BY
+                        order_id;
+                </textarea>
+            </ul>
+        <h3 style="color:red"><b>3) FULL (OUTER) JOIN</b></h3>
+            <ul>
+                <li>The FULL (OUTER) JOIN returns a result set that includes rows from both left and right tables.</li>
+                <li>When no matching rows exist for the row in the left table, the columns of the right table will have NULLS and vice versa<br>
+                <textarea  rows= "11" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        select_list
+                    FROM
+                        T1
+                    FULL (OUTER) JOIN
+                        T2
+                    ON join_predicate;
+                </textarea>
+                <textarea  rows= "11" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        m.name member,
+                        p.title project
+                    FROM
+                        pm.members m
+                        FULL OUTER JOIN pm.projects p
+                            ON p.id = m.project_id
+                    WHERE
+                        m.id IS NULL OR
+                        P.id IS NULL;
+                </textarea>
+            </ul>
+        <h3 style="color:red"><b>4) CROSS JOIN</b></h3>
+            <ul>
+                <li>The CROSS JOIN joined each row from the first table (T1) with all rows from the second table (T2).</li>
+                <li>The cross join returns a Cartesian product of rows from both tables.<br>
+                <li>Unlike the INNER JOIN or LEFT JOIN, the cross join does not establish a relationship between the joined tables.</li>
+                <textarea  rows= "12" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        select_list
+                    FROM
+                        T1
+                    CROSS JOIN T2;
+                </textarea>
+                <textarea  rows= "12" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        product_id,
+                        product_name,
+                        store_id,
+                        0 AS quantity
+                    FROM
+                        production.products
+                    CROSS JOIN sales.stores
+                    ORDER BY
+                        product_name,
+                        store_id;
+                </textarea>
+            </ul>
+        <h3 style="color:red"><b>5) APPLY</b></h3>
+            <ul>
+                <li>Both the left and right operands of the APPLY operator are table expression.</li>
+                <li>The main difference between these operands is that the right_table_source can use a table-valued function that takes <br>
+                    a column from the left_table_source as one of the arguments of the function. But the left_table_source cannot contain <br>
+                    arguments that are columns in the right_table_source.</li>
+                <li>APPLY operator has two variants:</li>
+                    <ul>
+                        <li><b>CROSS APPLY</b> : Returns rows for the left table expression match only.</li>
+                        <li><b>OUTER APPLY</b> : Returns all rows with NULL values(if any) from the left table expression irrespective of its match with the right table expression.</li>
+                    </ul>
+                <h4 style="color:blue"><b>* Normal table</b></h4>
+                    <ul>
+                        <li>Generally, with the two normal table, CROSS APPLY similar to INNER JOIN and OUTER APPLY similar to LEFT OUTER JOIN.</li>
+                        <textarea  rows= "9" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT * FROM table1 as a
+                                CROSS APPLY
+                                    (   SELECT * FROM table2 as b
+                                        WHERE a.column_name = b.column_name) as c;
+                            -- Similar to
+                                SELECT * FROM table1
+                                INNER JOIN table2
+                                ON table_1.column_name = table_2.column_name
+                        </textarea>
+                        <textarea  rows= "9" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT * FROM table1 as a
+                                OUTER JOIN
+                                    (   SELECT * FROM table2 as b
+                                        WHERE a.column_name = b.column_name) as c;
+                            --Similar to
+                                SELECT * FROM table1 as a
+                                    LEFT OUTER JOIN table2 as b
+                                    ON a.column_name = b.column_name;
+                        </textarea><br>
+                    </ul>
+                <h4 style="color:blue"><b>* Table-valued function</b></h4>
+                    <ul>
+                        <li>In case using TABLE-VALUE FUNCTION , JOIN operator cannot use value or variable as a parameter from the outer query.</li>
+                        <li>The APPLY works in the following way to produce the table source for the FORM clause:</li>
+                            <ul>
+                                <li>Evaluates right_table_source against each row of the left_table_source to produce rowsets.(Or right_table_source depend on left_table_source).</li>
+                                <li>Combines the result sets that are produced for each row of the right_table_source with left_table_source by performing a UNION ALL operator.</li>
+                            </ul>
+                        <textarea  rows= "23" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            IF EXIST (  SELECT * FROM sys.objects
+                                        WHERE object_id = object_id(N'[fn_GetAllEmployeeOfAllDepartment']
+                                            and type = N'IF')
+                                BEGIN
+                                    DROP FUNCTION fn_GetAllEmployeeOfAllDepartment
+                                END
+                            GO
+
+                            CREATE FUNCTION fn_GetAllEmployeeOfAllDepartment (@DeptID as INT)
+                                RETURN TABLE AS
+                                    RETURN
+                                        (SELECT * FROM Employee E
+                                        WHERE E.DepartmentID = @DeptID)
+                            GO
+
+                            SELECT * FROM Department D
+                                CROSS APPLY fn_GetAllEmployeeOfAllDepartment(D.DepartmentID)
+                            GO
+
+                            SELECT * FROM Department D
+                                OUTER JOIN fn_GetAllEmployeeOfAllDepartment(D.DepartmentID)
+                            GO
+                        </textarea>
+                    </ul>
+            </ul>
+        <h3 style="color:red"><b>6) SELF JOIN</b></h3>
+            <ul>
+                <li>A self join allows you to join a table to itself.</li>
+                <li>It is useful for querying hierarchical data or comparing rows within the same table.<br>
+                <li>A self join uses the inner join or left join clause.</li>
+                <li>Because the query that uses self join references the same table, the table alias is used to assign different names to the same table within the query.</li>
+                <textarea  rows= "7" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        select_list
+                    FROM
+                        T t1
+                    [INNER | LEFT]  JOIN T t2 ON
+                        join_predicate;
+                </textarea>
+                <h4 style="color:blue"><b>*Using self join to query hierarchical data</b></h4>
+                    <textarea  rows= "10" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        SELECT
+                            e.first_name + ' ' + e.last_name employee,
+                            m.first_name + ' ' + m.last_name manager
+                        FROM
+                            sales.staffs e
+                        INNER JOIN sales.staffs m ON m.staff_id = e.manager_id
+                        ORDER BY
+                            manager;
+                        --Notice : e table use manager_id to refer to staff_id on m table.
+                    </textarea>
+                <h4 style="color:blue"><b>*Using self join to compare rows within a table</b></h4>
+                    <textarea  rows= "13" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        SELECT
+                            c1.city,
+                            c1.first_name + ' ' + c1.last_name customer_1,
+                            c2.first_name + ' ' + c2.last_name customer_2
+                        FROM
+                            sales.customers c1
+                        INNER JOIN sales.customers c2 ON c1.customer_id > c2.customer_id
+                        AND c1.city = c2.city
+                        ORDER BY
+                            city,
+                            customer_1,
+                            customer_2;
+                    </textarea>
+            </ul>
+    </ul>
+<h1 style="color:#3A578F">Section 6. Grouping data</h1>
+    <ul>
+        <h3 style="color:red"><b>1) GROUP BY</b></h3>
+            <ul>
+                <li>The GROUP BY clause allows you to arrange the rows of a query in groups</li>
+                <li>The groups are determined by the columns that you specify in the GROUP BY clause.</li>
+                <li style="color:blue">In some cases, GROUP BY is equivalent to DISTINCT clause.</li>
+                <li>If you want to refer to any column or expression that is not listed in the GROUP BY clause,<br>
+                    you must use that column as the input of an <span style="color:blue">aggregate function</span>.</li>
+                    <textarea  rows= "8" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        SELECT
+                            select_list
+                        FROM
+                            table_name
+                        GROUP BY
+                            column_name1,
+                            column_name2 ,...;
+                    </textarea>
+            </ul>
+        <h3 style="color:red"><b>2) HAVING</b></h3>
+            <ul>
+                <li>The HAVING clause is often used with the GROUP BY clause to filter groups based on a specified list of conditions.</li>
+                <li>Because SQL Server processes the HAVING clause after the GROUP BY clause, you cannot refer to the aggregate function<br>
+                    specified in the select list by using the column alias. </li>
+                <li>Instead, you must use the aggregate function expression in the HAVING clause explicitly</li>
+                    <textarea  rows= "9" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        SELECT
+                            select_list
+                        FROM
+                            table_name
+                        GROUP BY
+                            group_list
+                        HAVING
+                            conditions;
+                    </textarea>
+            </ul>
+        <h3 style="color:red"><b>3) GROUPING SETS</b></h3>
+            <ul>
+                <li>By definition, a grouping set is a group of columns by which you group.</li>
+                <li>Typically, a single query with an aggregate defines a single grouping set.</li>
+                <li>To get a unified result set with the aggregated data for all grouping sets, you can use the UNION ALL operator.</li>
+                <li>Because UNION ALL operator requires all result set to have the same number of columns, you need to add NULL to the select list</li>
+                <li>To fix these problems, SQL Server provides a subclause of the GROUP BY clause called GROUPING SETS.</li>
+                    <textarea  rows= "17" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        SELECT
+                            column1,
+                            column2,
+                            aggregate_function (column3)
+                        FROM
+                            table_name
+                        GROUP BY
+                            GROUPING SETS (
+                                (column1, column2),
+                                (column1),
+                                (column2),
+                                ()
+                        );
+                    </textarea>
+                    <textarea  rows= "17" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        SELECT
+                            brand,
+                            category,
+                            SUM (sales) sales
+                        FROM
+                            sales.sales_summary
+                        GROUP BY
+                            GROUPING SETS (
+                                (brand, category),
+                                (brand),
+                                (category),
+                                ()
+                            )
+                        ORDER BY
+                            brand,
+                            category;
+                    </textarea>
+                <h4 style="color:blue"><b>*GROUPING function</b></h4>
+                    <ul>
+                        <li>The GROUPING function indicates whether a specified column in a GROUP BY clause is aggregated or not.</li>
+                        <li>It returns 1 for aggregated or 0 for not aggregated in the result set.</li>
+                        <textarea  rows= "19" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                GROUPING(brand) grouping_brand,
+                                GROUPING(category) grouping_category,
+                                brand,
+                                category,
+                                SUM (sales) sales
+                            FROM
+                                sales.sales_summary
+                            GROUP BY
+                                GROUPING SETS (
+                                    (brand, category),
+                                    (brand),
+                                    (category),
+                                    ()
+                                )
+                            ORDER BY
+                                brand,
+                                category;
+                        </textarea>
+                    </ul>
+            </ul>
+        <h3 style="color:red"><b>4) CUBE</b></h3>
+            <ul>
+                <li>The CUBE is a subclause of the GROUP BY clause that allows you to generate multiple grouping sets.</li>
+                    <textarea  rows= "13" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                                        CUBE (d1, d2, d3)
+                        is equivalent to
+                                        GROUPING SETS (
+                                            (d1,d2,d3),
+                                            (d1,d2),
+                                            (d1,d3),
+                                            (d2,d3),
+                                            (d1),
+                                            (d2),
+                                            (d3),
+                                            ()
+                                         );
+                    </textarea>
+                <li>If you have N dimension columns specified in the CUBE, you will have 2N grouping sets.</li>
+                <li>It is possible to reduce the number of grouping sets by using the CUBE partially</li>
+                    <textarea  rows= "4" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        GROUP BY
+                            d1,
+                            CUBE (d2, d3);
+                    </textarea>
+            </ul>
+        <h3 style="color:red"><b>5) ROLLUP</b></h3>
+            <ul>
+                <li>ROLLUP is a subclause of the GROUP BY clause which provides a shorthand for defining multiple grouping sets.</li>
+
+                <li>Unlike the CUBE subclause, ROLLUP does not create all possible grouping sets based on the dimension columns</li>
+                <li>ROLLUP assumes a hierarchy among the dimension columns and only generates grouping sets based on this hierarchy.</li>
+                    <textarea  rows= "9" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        ROLLUP(d1, d2, d3)
+                    Mean
+                        GROUPING SETS(
+                                (d1, d2, d3)
+                                (d1, d2)
+                                (d1)
+                                ()
+                                );
+                    </textarea>
+                <li>Note that if you change the order of columns in ROLLUP, the result will be different.</li>
+                <li>To reduce the number of grouping sets by using the ROLLUP partially</li>
+                    <textarea  rows= "4" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        GROUP BY
+                            d1,
+                            ROLLUP (d2, d3);
+                    </textarea>
+            </ul>
+    </ul>
+<h1 style="color:#3A578F">Section 7. Subquery</h1>
+    <ul>
+        <h3 style="color:red"><b>1) Subquery</b></h3>
+            <ul>
+                <li>A subquery is a query nested inside another statement such as SELECT, INSERT, UPDATE, or DELETE.</li>
+                <li>Note that you must always enclose the SELECT query of a subquery in parentheses ().</li>
+                <li>A subquery is also known as an inner query or inner select while the statement containing the subquery <br>
+                    is called an outer select or outer query</li>
+                    <textarea  rows= "18" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        SELECT
+                            order_id,
+                            order_date,
+                            customer_id
+                        FROM
+                            sales.orders
+                        WHERE
+                            customer_id IN (
+                                SELECT
+                                    customer_id
+                                FROM
+                                    sales.customers
+                                WHERE
+                                    city = 'New York'
+                            )
+                        ORDER BY
+                            order_date DESC;
+                    </textarea>
+                <h4 style="color:blue"><b>*Nesting subquery</b></h4>
+                    <ul>
+                        <li>SQL Server subquery types</li>
+                            <ul>
+                                <li>In place of an expression</li>
+                                <li>With IN or NOT IN</li>
+                                <li>With ANY or ALL</li>
+                                <li>With EXISTS or NOT EXISTS</li>
+                                <li>In UPDATE, DELETE, orINSERT statement</li>
+                                <li>In the FROM clause</li>
+                            </ul>
+                        <textarea  rows= "25" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                product_name,
+                                list_price
+                            FROM
+                                production.products
+                            WHERE
+                                list_price > (
+                                    SELECT
+                                        AVG (list_price)
+                                    FROM
+                                        production.products
+                                    WHERE
+                                        brand_id IN (
+                                            SELECT
+                                                brand_id
+                                            FROM
+                                                production.brands
+                                            WHERE
+                                                brand_name = 'Strider'
+                                            OR brand_name = 'Trek'
+                                                    )
+                                                )
+                                ORDER BY
+                                    list_price;
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>*Subquery is used in place of an expression</b></h4>
+                    <ul>
+                        <li>If a subquery returns a single value, it can be used anywhere an expression is used.</li>
+                        <textarea  rows= "15" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                order_id,
+                                order_date,
+                                (
+                                    SELECT
+                                        MAX (list_price)
+                                    FROM
+                                        sales.order_items i
+                                    WHERE
+                                        i.order_id = o.order_id
+                                ) AS max_list_price
+                            FROM
+                                sales.orders o
+                            ORDER BY order_date DESC;
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>*Subquery is used with IN operator</b></h4>
+                    <ul>
+                        <li>A subquery that is used with the IN operator returns a set of zero or more values.</li>
+                        <textarea  rows= "16" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                product_id,
+                                product_name
+                            FROM
+                                production.products
+                            WHERE
+                                category_id IN (
+                                    SELECT
+                                        category_id
+                                    FROM
+                                        production.categories
+                                    WHERE
+                                        category_name = 'Mountain Bikes'
+                                    OR category_name = 'Road Bikes'
+                                );
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>*Subquery is used with ANY operator</b></h4>
+                    <ul>
+                        <textarea  rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            scalar_expression comparison_operator ANY (subquery)
+                        </textarea>
+                        <li>Assuming that the subquery returns a list of value v1, v2, … vn. The ANY operator returns TRUE <br>
+                            if one of a comparison pair (scalar_expression, vi) evaluates to TRUE; otherwise, it returns FALSE.</li>
+                        <textarea  rows= "15" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                product_name,
+                                list_price
+                            FROM
+                                production.products
+                            WHERE
+                                list_price >= ANY (
+                                    SELECT
+                                        AVG (list_price)
+                                    FROM
+                                        production.products
+                                    GROUP BY
+                                        brand_id
+                                );
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>*Subquery is used with ALL operator</b></h4>
+                    <ul>
+                        <textarea  rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            scalar_expression comparison_operator ALL (subquery)
+                        </textarea>
+                        <li>The ALL operator returns TRUE if all comparison pairs (scalar_expression, vi) evaluate to TRUE; otherwise, it returns FALSE.</li>
+                        <textarea  rows= "15" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                product_name,
+                                list_price
+                            FROM
+                                production.products
+                            WHERE
+                                list_price >= ALL (
+                                    SELECT
+                                        AVG (list_price)
+                                    FROM
+                                        production.products
+                                    GROUP BY
+                                        brand_id
+                                );
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>*Subquery is used with EXISTS or NOT EXISTS</b></h4>
+                    <ul>
+                        <textarea  rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            WHERE [NOT] EXISTS (subquery)
+                        </textarea>
+                        <li>The EXISTS operator returns TRUE if the subquery return results; otherwise it returns FALSE.</li>
+                        <textarea  rows= "21" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                customer_id,
+                                first_name,
+                                last_name,
+                                city
+                            FROM
+                                sales.customers c
+                            WHERE
+                                EXISTS (
+                                    SELECT
+                                        customer_id
+                                    FROM
+                                        sales.orders o
+                                    WHERE
+                                        o.customer_id = c.customer_id
+                                    AND YEAR (order_date) = 2017
+                                )
+                            ORDER BY
+                                first_name,
+                                last_name;
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>*Subquery in the FROM clause</b></h4>
+                    <ul>
+                        <li>The EXISTS operator returns TRUE if the subquery return results; otherwise it returns FALSE.</li>
+                        <textarea  rows= "13" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                               AVG(order_count) average_order_count_by_staff
+                            FROM
+                            (
+                                SELECT
+                                staff_id,
+                                    COUNT(order_id) order_count
+                                FROM
+                                sales.orders
+                                GROUP BY
+                                staff_id
+                            ) t;
+                        </textarea>
+                    </ul>
+            </ul>
+        <h3 style="color:red"><b>2) Correlated subquery</b></h3>
+            <ul>
+                <li>A correlated subquery is a subquery that uses the values of the outer query</li>
+                <li>In other words, it depends on the outer query for its values.</li>
+                <li>Because of this dependency, a correlated subquery cannot be executed independently as a simple subquery.</li>
+                <li>Moreover, a correlated subquery is executed repeatedly, once for each row evaluated by the outer query.</li>
+                <li>The correlated subquery is also known as a repeating subquery.</li>
+                <textarea  rows= "21" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        product_name,
+                        list_price,
+                        category_id
+                    FROM
+                        production.products p1
+                    WHERE
+                        list_price IN (
+                            SELECT
+                                MAX (p2.list_price)
+                            FROM
+                                production.products p2
+                            WHERE
+                                p2.category_id = p1.category_id
+                            GROUP BY
+                                p2.category_id
+                        )
+                    ORDER BY
+                        category_id,
+                        product_name;
+                </textarea>
+            </ul>
+        <h3 style="color:red"><b>3) EXISTS</b></h3>
+            <ul>
+                <li>The EXISTS operator is a logical operator that allows you to check whether a subquery returns any row.</li>
+                <li>The EXISTS operator returns TRUE if the subquery returns one or more rows.</li>
+                    <textarea  rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        EXISTS ( subquery)
+                    </textarea>
+                <li>As soon as the subquery returns rows, the EXISTS operator returns TRUE and stop processing immediately.</li>
+                <li style="color:blue">Note that even though the subquery returns a NULL value, the EXISTS operator is still evaluated to TRUE.</li>
+                <h4 style="color:blue"><b>*EXISTS vs. IN</b></h4>
+                    <ul>
+                        <li>The following statements uses the EXISTS and IN operator that returns the same result:</li>
+                        <textarea  rows= "18" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                *
+                            FROM
+                                sales.orders
+                            WHERE
+                                customer_id IN (
+                                    SELECT
+                                        customer_id
+                                    FROM
+                                        sales.customers
+                                    WHERE
+                                        city = 'San Jose'
+                                )
+                            ORDER BY
+                                customer_id,
+                                order_date;
+                        </textarea>
+                        <textarea  rows= "18" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                *
+                            FROM
+                                sales.orders o
+                            WHERE
+                                EXISTS (
+                                    SELECT
+                                        customer_id
+                                    FROM
+                                        sales.customers c
+                                    WHERE
+                                        o.customer_id = c.customer_id
+                                    AND city = 'San Jose'
+                                )
+                            ORDER BY
+                                o.customer_id,
+                                order_date;
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>*EXISTS vs. JOIN</b></h4>
+                    <ul>
+                        <li>The EXISTS operator returns TRUE or FALSE while the JOIN clause returns rows from another table.</li>
+                        <li>You use the EXISTS operator to test if a subquery returns any row and short circuits as soon as it does.</li>
+                        <li>On the other hand, you use JOIN to extend the result set by combining it with the columns from related tables.</li>
+                    </ul>
+            </ul>
+        <h3 style="color:red"><b>4) ANY </b></h3>
+            <ul>
+                <li>The ANY operator is a logical operator that compares a scalar value with a single-column set of values returned by a subquery.</li>
+                <li>Suppose the subquery returns a list of values v1, v2, …,  vn. The ANY operator returns TRUE if any comparison (scalar_expression, vi)<br>
+                    returns TRUE. Otherwise, it returns FALSE.</li>
+                    <textarea  rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        scalar_expression comparison_operator ANY (subquery)
+                    </textarea>
+                <li>Note that the SOME operator is equivalent to the ANY operator.</li>
+                <li>The EXISTS operator returns TRUE if the subquery return results; otherwise it returns FALSE.</li>
+                <textarea  rows= "17" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        product_name,
+                        list_price
+                    FROM
+                        production.products
+                    WHERE
+                        product_id = ANY (
+                            SELECT
+                                product_id
+                            FROM
+                                sales.order_items
+                            WHERE
+                                quantity >= 2
+                        )
+                    ORDER BY
+                        product_name;
+                </textarea>
+            </ul>
+        <h3 style="color:red"><b>5) ALL </b></h3>
+            <ul>
+                <li>Compares a scalar value with a single-column list of values returned by a subquery.</li>
+                    <textarea  rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        scalar_expression comparison_operator ALL ( subquery)
+                    </textarea>
+                <li>The comparison_operator is any valid comparison operator including equal (=), not equal (<>), greater than (>), greater than or equal (>=),<br>
+                    less than (<), less than or equal (<=).</li>
+                <li>The subquery within the parentheses is a SELECT statement that returns a result of a single column. Also, the data type of the returned column<br>
+                    must be the same data type as the data type of the scalar expression.</li>
+                <li>The ALL operator returns TRUE if all the pairs (scalar_expression, v) evaluates to TRUE; v is a value in the single-column result.</li>
+                <li>If one of the pairs (scalar_expression, v) returns FALSE, then the ALL operator returns FALSE.</li>
+                <textarea  rows= "17" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        product_name,
+                        list_price
+                    FROM
+                        production.products
+                    WHERE
+                        list_price > ALL (
+                            SELECT
+                                AVG (list_price) avg_list_price
+                            FROM
+                                production.products
+                            GROUP BY
+                                brand_id
+                        )
+                    ORDER BY
+                        list_price;
+                </textarea>
+            </ul>
+    </ul>
+<h1 style="color:#3A578F">Section 8. Set Operators</h1>
+    <ul>
+        <h3 style="color:red"><b>1) UNION </b></h3>
+            <ul>
+                <li>SQL Server UNION is one of the set operations that allows you to combine results of two SELECT statements into<br>
+                    a single result set which includes all the rows that belongs to the SELECT statements in the union.</li>
+                    <textarea  rows= "4" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        query_1
+                            UNION
+                        query_2
+                    </textarea>
+                <li>The following are requirements for the queries in the syntax above</li>
+                    <ul>
+                        <li>The number and the order of the columns must be the same in both queries.</li>
+                        <li>The data types of the corresponding columns must be the same or compatible.</li>
+                    </ul>
+                <h3 style="color:red"><b>*UNION vs. JOIN</b></h3>
+                    <ul>
+                        <li>By default, the UNION operator removes all duplicate rows from the result sets. </li>
+                        <li>If you want to retain the duplicate rows, you need to specify the ALL keyword explicitly</li>
+                    </ul>
+                <h3 style="color:red"><b>*UNION vs. UNION ALL </b></h3>
+                    <ul>
+                        <li>In other words, join appends the result sets horizontally while union appends result set vertically.</li>
+                        <li>If you want to retain the duplicate rows, you need to specify the ALL keyword explicitly</li>
+                    </ul>
+            </ul>
+        <h3 style="color:red"><b>2) INTERSECT </b></h3>
+            <ul>
+                <li>The SQL Server INTERSECT combines result sets of two or more queries and returns <span style="color:blue">distinct rows</span> that are output by both queries.</li>
+                    <textarea  rows= "4" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        query_1
+                            INTERSECT
+                        query_2
+                    </textarea>
+                <li>Similar to the UNION operator, the queries in the syntax above must conform to the following rules:</li>
+                    <ul>
+                        <li>The number and the order of the columns must be the same in both queries.</li>
+                        <li>The data types of the corresponding columns must be the same or compatible.</li>
+                    </ul>
+            </ul>
+        <h3 style="color:red"><b>3) EXCEPT </b></h3>
+            <ul>
+                <li>The SQL Server EXCEPT compares the result sets of two queries and returns the <span style="color:blue">distinct rows from the first query that are not output by the second query.</span></li>
+                    <textarea  rows= "4" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        query_1
+                            EXCEPT
+                        query_2
+                    </textarea>
+                <li>The following are the rules for combining the result sets of two queries in the above syntax:</li>
+                    <ul>
+                        <li>The number and the order of the columns must be the same in both queries.</li>
+                        <li>The data types of the corresponding columns must be the same or compatible.</li>
+                    </ul>
+            </ul>
+    </ul>
+<h1 style="color:#3A578F">Section 9. Common Table Expression (CTE)</h1>
+    <ul>
+        <h3 style="color:red"><b>1) CTE </b></h3>
+            <ul>
+                <li>CTE stands for common table expression.</li>
+                <li>A CTE allows you to define a temporary named result set that available temporarily in the execution scope of a statement such as<br>
+                    SELECT, INSERT, UPDATE, DELETE, or MERGE.</li>
+                    <textarea  rows= "5" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        WITH expression_name[(column_name [,...])]
+                            AS
+                                (CTE_definition)
+                            SQL_statement;
+                    </textarea>
+                <li>Similar to the UNION operator, the queries in the syntax above must conform to the following rules:</li>
+                    <ul>
+                        <li>First, specify the expression name (expression_name) to which you can refer later in a query.</li>
+                        <li>Next, specify a list of comma-separated columns after the expression_name. The number of columns must be the same as the<br>
+                            number of columns defined in the CTE_definition. If you omit, CTE will get the column_name(s) in CTE_definition.</li>
+                        <li>Then, use the AS keyword after the expression name or column list if the column list is specified.</li>
+                        <li>After, define a SELECT statement whose result set populates the common table expression.</li>
+                        <li>Finally, refer to the common table expression in a query (SQL_statement) such as SELECT, INSERT, UPDATE, DELETE, or MERGE.</li>
+                    </ul>
+                <li style="color:blue">We prefer to use common table expressions rather than to use subqueries because common table expressions are more readable.</li>
+                <li>We also use CTE in the queries that contain analytic functions (or window functions)</li>
+                    <textarea  rows= "21" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        WITH cte_sales_amounts (staff, sales, year) AS (
+                            SELECT
+                                first_name + ' ' + last_name,
+                                SUM(quantity * list_price * (1 - discount)),
+                                YEAR(order_date)
+                            FROM
+                                sales.orders o
+                            INNER JOIN sales.order_items i ON i.order_id = o.order_id
+                            INNER JOIN sales.staffs s ON s.staff_id = o.staff_id
+                            GROUP BY
+                                first_name + ' ' + last_name,
+                                year(order_date)
+                                )
+                                    SELECT
+                                        staff,
+                                        sales
+                                    FROM
+                                        cte_sales_amounts
+                                    WHERE
+                                        year = 2018;
+                    </textarea>
+                <li style="color:blue"><b>You can use multiple SQL Server CTE in a single query.</b></li>
+                    <textarea  rows= "39" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        WITH    cte_category_counts (category_id, category_name, product_count) AS (
+                                                SELECT
+                                                    c.category_id,
+                                                    c.category_name,
+                                                    COUNT(p.product_id)
+                                                FROM
+                                                    production.products p
+                                                    INNER JOIN production.categories c
+                                                        ON c.category_id = p.category_id
+                                                GROUP BY
+                                                    c.category_id,
+                                                    c.category_name
+                                            ),
+                                cte_category_sales(category_id, sales) AS (
+                                                SELECT
+                                                    p.category_id,
+                                                    SUM(i.quantity * i.list_price * (1 - i.discount))
+                                                FROM
+                                                    sales.order_items i
+                                                    INNER JOIN production.products p
+                                                        ON p.product_id = i.product_id
+                                                    INNER JOIN sales.orders o
+                                                        ON o.order_id = i.order_id
+                                                WHERE order_status = 4 -- completed
+                                                GROUP BY
+                                                    p.category_id
+                                            )
+                                    SELECT
+                                        c.category_id,
+                                        c.category_name,
+                                        c.product_count,
+                                        s.sales
+                                    FROM
+                                        cte_category_counts c
+                                        INNER JOIN cte_category_sales s
+                                            ON s.category_id = c.category_id
+                                    ORDER BY
+                                        c.category_name;
+                    </textarea>
+            </ul>
+        <h3 style="color:red"><b>2) Recursive CTE</b></h3>
+            <ul>
+                <li>A recursive common table expression (CTE) is a CTE that references itself.</li>
+                <li>By doing so, the CTE repeatedly executes, returns subsets of data, until it returns the complete result set.</li>
+                <li>A recursive CTE is useful in querying hierarchical data such as organization charts where one employee reports <br>
+                    to a manager or multi-level bill of materials when a product consists of many components, and each component itself also consists of many other components.</li>
+                    <textarea  rows= "13" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        WITH expression_name (column_list)
+                            AS
+                            (
+                                -- Anchor member
+                                initial_query
+                                UNION ALL
+                                -- Recursive member that references expression_name.
+                                recursive_query
+                            )
+                            -- references expression name
+                            SELECT *
+                            FROM   expression_name
+                    </textarea>
+                <li>In general, a recursive CTE has three parts:</li>
+                    <ul>
+                        <li>An initial query that returns the base result set of the CTE. The initial query is called an anchor member.</li>
+                        <li>Second, execute the recursive member with the input result set from the previous iteration (Ri-1) and return a <br>
+                            sub-result set (Ri) until the termination condition is met.</li>
+                        <li>A termination condition specified in the recursive member that terminates the execution of the recursive member</li>
+                    </ul>
+                <li>The execution order of a recursive CTE is as follows:</li>
+                    <ul>
+                        <li>First, execute the anchor member to form the base result set (R0), use this result for the next iteration.</li>
+                        <li>A recursive query that references the common table expression, therefore, it is called the recursive member.<br>
+                            The recursive member is union-ed with the anchor member using the UNION ALL operator</li>
+                        <li>Third, combine all result sets R0, R1, … Rn using UNION ALL operator to produce the final result set.</li>
+                    </ul>
+                    <textarea  rows= "18" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        WITH cte_numbers(n, weekday)
+                            AS (
+                                SELECT
+                                    0,
+                                    DATENAME(DW, 0)
+                                UNION ALL
+                                SELECT
+                                    n + 1,
+                                    DATENAME(DW, n + 1)
+                                FROM
+                                    cte_numbers
+                                WHERE n < 6
+                            )
+                            SELECT
+                                weekday
+                            FROM
+                                cte_numbers;
+                    </textarea>
+                <li style="color:blue"><b>The DATENAME() function returns the name of the weekday based on a weekday number.</b></li>
+                    <ul>
+                        <li>year, yyyy, yy = Year</li>
+                        <li>quarter, qq, q = Quarter</li>
+                        <li>month, mm, m = month</li>
+                        <li>dayofyear = Day of the year</li>
+                        <li>day, dy, y = Day</li>
+                        <li>week, ww, wk = Week</li>
+                        <li>weekday, dw, w = Weekday</li>
+                        <li>hour, hh = hour</li>
+                        <li>minute, mi, n = Minute</li>
+                        <li>second, ss, s = Second</li>
+                        <li>millisecond, ms = Millisecond</li>
+                    </ul>
+                <h4 style="color:blue"><b>*Using a SQL Server recursive CTE to query hierarchical data</b></h4>
+                    <textarea  rows= "20" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        WITH cte_org AS (
+                                SELECT
+                                    staff_id,
+                                    first_name,
+                                    manager_id
+                                FROM
+                                    sales.staffs
+                                WHERE manager_id IS NULL
+                                UNION ALL
+                                SELECT
+                                    e.staff_id,
+                                    e.first_name,
+                                    e.manager_id
+                                FROM
+                                    sales.staffs e
+                                    INNER JOIN cte_org o
+                                        ON o.staff_id = e.manager_id
+                            )
+                            SELECT * FROM cte_org;
+                    </textarea>
+            </ul>
+    </ul>
+<h1 style="color:#3A578F">Section 10. Pivot</h1>
+    <ul>
+        <li>SQL Server PIVOT operator rotates a table-valued expression.</li>
+        <li style="color:blue">It turns the unique values in one column into multiple columns in the output and performs aggregations on any remaining column values.</li>
+        <li>Follow these steps to make a query a pivot table:</li>
+            <ul>
+                <li>First, select a base dataset for pivoting.</li>
+                <li>Second, create a temporary result by using a derived table or common table expression (CTE)</li>
+                <li>Third, apply the PIVOT operator.</li>
+            </ul>
+        <textarea  rows= "10" cols="50" style="color:#1F0221; font-family:Times New Roman">
+            SELECT
+                category_name,
+                product_id
+            FROM
+                production.products p
+                INNER JOIN production.categories c
+                    ON c.category_id = p.category_id
+        </textarea>
+        <textarea  rows= "10" cols="50" style="color:#1F0221; font-family:Times New Roman">
+            SELECT * FROM (
+                    SELECT
+                        category_name,
+                        product_id
+                    FROM
+                        production.products p
+                        INNER JOIN production.categories c
+                            ON c.category_id = p.category_id
+                ) t
+        </textarea>
+        <br>
+        <textarea  rows= "22" cols="104" style="color:#1F0221; font-family:Times New Roman">
+            SELECT * FROM
+                (
+                    SELECT
+                        category_name,
+                        product_id
+                    FROM
+                        production.products p
+                        INNER JOIN production.categories c
+                            ON c.category_id = p.category_id
+                ) t
+                PIVOT(
+                    COUNT(product_id)
+                    FOR category_name IN (
+                        [Children Bicycles],
+                        [Comfort Bicycles],
+                        [Cruisers Bicycles],
+                        [Cyclocross Bicycles],
+                        [Electric Bikes],
+                        [Mountain Bikes],
+                        [Road Bikes])
+                ) AS pivot_table;
+        </textarea>
+    </ul>
+    <h3 style="color:red"><b>*Generating column values</b></h3>
+        <ul>
+            <li>To avoid type each category name in the parentheses after the IN operator manually,you can use the <br>
+                <span style="color:blue">QUOTENAME() function</span> to generate the category name list and copy them over the query.</li>
+            <textarea  rows= "16" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                DECLARE
+                    @columns NVARCHAR(MAX) = '';
+
+                SELECT
+                    @columns += QUOTENAME(category_name) + ','
+                FROM
+                    production.categories
+                ORDER BY
+                    category_name;
+
+                SET @columns = LEFT(@columns, LEN(@columns) - 1);
+
+                PRINT @columns;
+                The output like:
+                [Children Bicycles],[Comfort Bicycles],[Cruisers Bicycles],[Cyclocross Bicycles],...
+            </textarea>
+            <ul>
+                <li>If you use nchar or nvarchar, we recommend to:</li>
+                <ul>
+                    <li>Use nchar when the sizes of the column data entries are consistent.</li>
+                    <li>Use nvarchar when the sizes of the column data entries vary considerably.</li>
+                    <li>Use nvarchar(max) when the sizes of the column data entries vary considerably, and the string length might exceed 4,000 byte-pairs.</li>
+                </ul>
+                <li>The QUOTENAME() function wraps the category name by the square brackets e.g., [Children Bicycles]</li>
+                <li>The LEFT() function removes the last comma from the @columns string.</li>
+            </ul>
+        </ul>
+    <h3 style="color:red"><b>*Dynamic pivot tables</b></h3>
+        <ul>
+            <li>If you add a new category name to the production.categories table, you need to rewrite your query, which is not ideal. </li>
+            <li>To avoid doing this, you can use dynamic SQL to make the pivot table dynamic.</li>
+            <textarea  rows= "36" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                DECLARE
+                    @columns NVARCHAR(MAX) = '',
+                    @sql     NVARCHAR(MAX) = '';
+
+                -- select the category names
+                SELECT
+                    @columns+=QUOTENAME(category_name) + ','
+                FROM
+                    production.categories
+                ORDER BY
+                    category_name;
+
+                -- remove the last comma
+                SET @columns = LEFT(@columns, LEN(@columns) - 1);
+
+                -- construct dynamic SQL
+                SET @sql ='
+                SELECT * FROM
+                (
+                    SELECT
+                        category_name,
+                        model_year,
+                        product_id
+                    FROM
+                        production.products p
+                        INNER JOIN production.categories c
+                            ON c.category_id = p.category_id
+                ) t
+                PIVOT(
+                    COUNT(product_id)
+                    FOR category_name IN ('+ @columns +')
+                ) AS pivot_table;';
+
+                -- execute the dynamic SQL
+                EXECUTE sp_executesql @sql;
+            </textarea>
+        </ul>
+<h1 style="color:#3A578F">Section 11. Modifying data</h1>
+    <ul>
+        <h3 style="color:red"><b>1) INSERT</b></h3>
+            <ul>
+                <li>To add one or more rows into a table, you use the INSERT statement. </li>
+                    <textarea  rows= "3" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        INSERT INTO table_name (column_list)
+                        VALUES (value_list);
+                    </textarea>
+                <li style="color:blue">SQL Server automatically uses the following value for the column that is available in the table but<br>
+                    does not appear in the column list of the INSERT statement:</li>
+                <ul>
+                    <li>The next incremental value if the column has an IDENTITY property.</li>
+                    <li>The default value if the column has a default value specified.</li>
+                    <li>The current timestamp value if the data type of the column is a timestamp data type.</li>
+                    <li>The NULL if the column is nullable.</li>
+                    <li>The calculated value if the column is a computed column.</li>
+                </ul>
+                <h4 style="color:blue"><b>*Insert and return inserted values</b></h4>
+                    <textarea  rows= "18" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        OUTPUT inserted.column_name(s)
+                    </textarea>
+                    <textarea  rows= "18" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        INSERT INTO sales.promotions (
+                                promotion_name,
+                                discount,
+                                start_date,
+                                expired_date
+                            ) OUTPUT inserted.promotion_id,
+                             inserted.promotion_name,
+                             inserted.discount,
+                             inserted.start_date,
+                             inserted.expired_date
+                        VALUES
+                            (
+                                '2018 Winter Promotion',
+                                0.2,
+                                '20181201',
+                                '20190101'
+                            );
+                    </textarea>
+                <h4 style="color:blue"><b>*Insert explicit values into the identity column</b></h4>
+                <li>In some situations, you may want to insert a value into the identity column such as data migration.</li>
+                <li>To insert explicit value for the identity column, you must execute the following statement first:</li>
+                    <ul style="color:blue">
+                        <li>SET IDENTITY_INSERT table_name ON;</li>
+                        <li>SET IDENTITY_INSERT table_name OFF;</li>
+                    </ul>
+                    <textarea  rows= "19" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                        SET IDENTITY_INSERT sales.promotions ON;
+
+                            INSERT INTO sales.promotions (
+                                promotion_id,
+                                promotion_name,
+                                discount,
+                                start_date,
+                                expired_date)
+                            VALUES
+                                (
+                                    4,
+                                    '2019 Spring Promotion',
+                                    0.25,
+                                    '20190201',
+                                    '20190301'
+                                );
+
+                        SET IDENTITY_INSERT sales.promotions OFF;
+                    </textarea>
+                <h4 style="color:blue"><b>*INSERT INTO SELECT</b></h4>
+                    <textarea  rows= "4" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        INSERT  [ TOP ( expression ) [ PERCENT ] ]
+                        INTO target_table (column_list)
+                        query
+                    </textarea>
+                <li>In this syntax, the statement inserts rows returned by the query into the target_table.</li>
+                    <ul>
+                        <li>As the SELECT TOP PERCENT, the INSERT statement have the same option for this type.</li>
+                        <li>The TOP clause part is optional. It allows you to specify the number of rows returned by<br>
+                            the query to be inserted into the target table. If you use the PERCENT option, the statement<br>
+                            will insert the percent of rows instead. Note that it is a best practice to always use the TOP <br>
+                            clause with the ORDER BY clause.</li>
+                    </ul>
+                <li>If you want to get a new table with Insert statement, TRUNCATE table first before insert values</li>
+                    <textarea  rows= "14" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                        TRUNCATE TABLE sales.addresses;
+                        INSERT TOP (10) PERCENT
+                        INTO sales.addresses (street, city, state, zip_code)
+                        SELECT
+                            street,
+                            city,
+                            state,
+                            zip_code
+                        FROM
+                            sales.customers
+                        ORDER BY
+                            first_name,
+                            last_name;
+                    </textarea>
+            </ul>
+        <h3 style="color:red"><b>2) UPDATE</b></h3>
+            <ul>
+                <textarea  rows= "4" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    UPDATE table_name
+                    SET c1 = v1, c2 = v2, ... cn = vn
+                    [WHERE condition]
+                </textarea>
+                <li>First, specify the name of the table from which the data is to be updated.</li>
+                <li>Second, specify a list of column c1, c2, …, cn and values v1, v2, … vn to be updated.</li>
+                <li>Third, specify the conditions in the WHERE clause for selecting the rows that are updated.<br>
+                    <span style="color:blue">The WHERE clause is optional. If you skip the WHERE clause, all rows in the table are updated.</span></li>
+                <textarea  rows= "5" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    UPDATE sales.taxes
+                    SET updated_at = GETDATE();
+                    * The statement changed the values in the updated_at column to the system
+                    date time returned by the GETDATE() function.
+                </textarea>
+                <br>
+                <textarea  rows= "6" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    UPDATE sales.taxes
+                    SET max_local_tax_rate += 0.02,
+                        avg_local_tax_rate += 0.01
+                    WHERE
+                        max_local_tax_rate = 0.01;
+                </textarea>
+                <h4 style="color:blue"><b>*UPDATE JOIN</b></h4>
+                    <textarea  rows= "12" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        UPDATE
+                            t1
+                        SET
+                            t1.c1 = t2.c2,
+                            t1.c2 = expression,
+                            ...
+                        FROM
+                            t1
+                            [INNER | LEFT] JOIN t2 ON join_predicate
+                        WHERE
+                            where_predicate;
+                    </textarea>
+                <ul>
+                    <li>First, specify the name of the table (t1) that you want to update in the UPDATE clause.</li>
+                    <li>Next, specify the new value for each column of the updated table.</li>
+                    <li>Then, again specify the table from which you want to update in the FROM clause.</li>
+                    <li>After that, use either INNER JOIN or LEFT JOIN to join to another table (t2) using a join predicate specified after the ON keyword.</li>
+                    <li>Finally, add an optional WHERE clause to specify rows to be updated.</li>
+                </ul>
+                    <textarea  rows= "10" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                        UPDATE
+                            sales.commissions
+                        SET
+                            sales.commissions.commission =
+                                c.base_amount * COALESCE(t.percentage,0.1)
+                        FROM
+                            sales.commissions c
+                            INNER JOIN sales.targets t
+                                ON c.target_id = t.target_id;
+                    </textarea>
+            </ul>
+        <h3 style="color:red"><b>3) DELETE</b></h3>
+            <ul>
+                <textarea  rows= "4" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    DELETE [ TOP ( expression ) [ PERCENT ] ]
+                    FROM table_name
+                    [WHERE search_condition];
+                </textarea>
+                <li>First, you specify the name of the table from which the rows are to be deleted in the FROM clause.</li>
+                <li>Second, to specify the number or percent of random rows that will be deleted, you use the TOP clause.</li>
+                <li>Similarly, you can delete the 10 percent of random rows.</li>
+                <li>Third, practically speaking, you will rarely remove all rows from a table but only one or several rows. <br>
+                    In this case, you need to specify the search_condition in the WHERE clause to limit the number of rows that are deleted.</li>
+                <li>The WHERE clause is optional. If you skip it, the DELETE statement will remove all rows from the table.</li>
+                <textarea  rows= "6" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    DELETE TOP (5) PERCENT
+                    FROM
+                        production.product_history
+                    WHERE
+                        model_year = 2017;
+                </textarea>
+            </ul>
+        <h3 style="color:red"><b>4) MERGE</b></h3>
+            <ul>
+                <li>Suppose, you have two table called source and target tables, and you need to update the target table based on the values <br>
+                    matched from the source table. There are three cases:</li>
+                    <ul>
+                        <li>The source table has some rows that do not exist in the target table. In this case, you need to insert rows that <br>
+                            are in the source table into the target table.</li>
+                        <li>The target table has some rows that do not exist in the source table. In this case, you need to delete rows from <br>
+                            the target table.</li>
+                        <li>The source table has some rows with the same keys as the rows in the target table. However, these rows have different <br>
+                            values in the non-key columns. In this case, you need to update the rows in the target table with the values coming from the source table.</li>
+                    </ul>
+                <li>If you use the INSERT, UPDATE, and DELETE statement individually, you have to construct three separate statements.</li>
+                <li>SQL Server provides the MERGE statement that allows you to perform three actions at the same time.</li>
+                <textarea  rows= "9" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    MERGE target_table USING source_table
+                        ON merge_condition
+                    WHEN MATCHED
+                        THEN update_statement
+                    WHEN NOT MATCHED
+                        THEN insert_statement
+                    WHEN NOT MATCHED BY SOURCE
+                        THEN DELETE;
+                </textarea>
+                    <ul>
+                        <li>First, you specify the target table and the source table in the MERGE clause.</li>
+                        <li>Second, the merge_condition determines how the rows from the source table are matched to the rows from the target table.<br>
+                        <span style="color:blue">It is similar to the join condition in the join clause. Typically, you use the key columns either primary key or unique key for matching.</span></li>
+                        <li>Third, the merge_condition results in three states: MATCHED, NOT MATCHED, and NOT MATCHED BY SOURCE.</li>
+                            <ul>
+                                <li><b>MATCHED:</b> these are the rows that match the merge condition.</li>
+                                <li><b>NOT MATCHED:</b> these are the rows from the source table that does not have any matching rows in the target table.
+                                <br><span style="color:blue">Note that NOT MATCHED is also known as NOT MATCHED BY TARGET.</span></li>
+                                <li><b>NOT MATCHED BY SOURCE:</b> these are the rows in the target table that does not match any rows in the source table.</li>
+                            </ul>
+                    </ul>
+                <textarea  rows= "24" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE TABLE sales.category (
+                        category_id INT PRIMARY KEY,
+                        category_name VARCHAR(255) NOT NULL,
+                        amount DECIMAL(10 , 2 )
+                        );
+                    CREATE TABLE sales.category_staging (
+                        category_id INT PRIMARY KEY,
+                        category_name VARCHAR(255) NOT NULL,
+                        amount DECIMAL(10 , 2 )
+                        );
+
+                    MERGE sales.category t
+                        USING sales.category_staging s
+                    ON (s.category_id = t.category_id)
+                    WHEN MATCHED
+                        THEN UPDATE SET
+                            t.category_name = s.category_name,
+                            t.amount = s.amount
+                    WHEN NOT MATCHED BY TARGET
+                        THEN INSERT (category_id, category_name, amount)
+                             VALUES (s.category_id, s.category_name, s.amount)
+                    WHEN NOT MATCHED BY SOURCE
+                        THEN DELETE;
+                </textarea>
+            </ul>
+    </ul>
+<h1 style="color:#3A578F">Section 12. Data definition</h1>
+    <ul>
+        <h3 style="color:red"><b>1) CREATE DATABASE</b></h3>
+            <ul>
+                <textarea  rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE DATABASE TestDb;
+                </textarea>
+                <h4 style="color:blue"><b>*Lists all databases in the SQL Server by query:</b></h4>
+                    <textarea  rows= "7" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        SELECT
+                            name
+                        FROM
+                            master.sys.databases
+                        ORDER BY
+                            name;
+                    </textarea>
+                <h4 style="color:blue"><b>*Lists all databases in the SQL Server by execute store_procedure</b></h4>
+                    <textarea  rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        EXEC sp_databases;
+                    </textarea>
+            </ul>
+        <h3 style="color:red"><b>2) DROP DATABASE</b></h3>
+            <ul>
+                <textarea  rows= "4" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    DROP DATABASE  [ IF EXISTS ]
+                    database_name
+                    [,database_name2,...];
+                </textarea>
+                <li>Before deleting a database, you must ensure the following important points:</li>
+                    <ul>
+                        <li>First, the DROP DATABASE statement deletes the database and also the physical disk files used by the database.<br>
+                            Therefore, you should have a backup of the database in case you want to restore it in the future.</li>
+                        <li>Second, you cannot drop the database that is currently being used.</li>
+                        <li> If using PGAdmin to delete database, uncheck the Delete backup and restore history information for databases check box,<br>
+                            check the Close existing connections check box, and click the OK button to delete the database.</li>
+
+                    </ul>
+            </ul>
+        <h3 style="color:red"><b>3) CREATE SCHEMA</b></h3>
+            <ul>
+                <li>A schema is a collection of database objects including tables, views, triggers, stored procedures, indexes, etc.</li>
+                <li>A schema is associated with a username which is known as the schema owner</li>
+                <li>A schema always belongs to one database.A database may have one or multiple schemas.</li>
+                <textarea  rows= "6" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE SCHEMA schema_name
+                        [AUTHORIZATION owner_name]
+                Or
+                    CREATE SCHEMA customer_services;
+                    GO
+                </textarea>
+                <li style="color:blue">Note that GO command instructs the SQL Server Management Studio to send the SQL statements up to the GO statement to the server to be executed.</li>
+                <h4 style="color:blue"><b>*To list all schemas in the current database, you can query schemas from the sys.schemas</b></h4>
+                    <textarea  rows= "9" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        SELECT
+                            s.name AS schema_name,
+                            u.name AS schema_owner
+                        FROM
+                            sys.schemas s
+                        INNER JOIN sys.sysusers u ON u.uid = s.principal_id
+                        ORDER BY
+                            s.name;
+                    </textarea>
+                <li>After having the schema, you can create objects for the schema. </li>
+                    <textarea  rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        CREATE TABLE schema.table_name(table_definition);
+                    </textarea>
+            </ul>
+        <h3 style="color:red"><b>4) ALTER SCHEMA</b></h3>
+            <ul>
+                <li>The ALTER SCHEMA statement allows you to transfer a object from a schema to another within the same database.</li>
+                    <textarea  rows= "3" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        ALTER SCHEMA target_schema_name
+                        TRANSFER [ entity_type :: ] object_name;
+                    </textarea>
+                    <ul>
+                        <li><b>target_schema_name :</b> is the name of a schema in the current database, into which you want to move the object. Note that it cannot be SYS or INFORMATION_SCHEMA.</li>
+                        <li><b>entity_type :</b>can be Object, Type or XML Schema Collection. It defaults to Object. The entity_type represents the class of the entity for which the owner is being changed.</li>
+                        <li><b>object_name:</b> is the name of the object that you want to move into the target_schema_name.</li>
+                    </ul>
+                <li>If you move a stored procedure, function, view, or trigger, SQL Server will not change the schema name of these objects.</li>
+                <li>You must manually modify the references to reflect the new schema name. </li>
+                <ul>
+                    <li>First, create a stored procedure </li>
+                    <textarea  rows= "12" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        CREATE PROC usp_get_office_by_id(
+                                @id INT
+                            ) AS
+                            BEGIN
+                                SELECT
+                                    *
+                                FROM
+                                    dbo.offices
+                                WHERE
+                                    office_id = @id;
+                            END;
+                    </textarea>
+                    <li>Second, transfer this dbo.offices table to the sales schema:</li>
+                    <textarea  rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        ALTER SCHEMA sales TRANSFER OBJECT::dbo.offices;
+                    </textarea>
+                    <li>Finally, manually modify the stored procedure to reflect the new schema:</li>
+                    <textarea  rows= "12" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        ALTER PROC usp_get_office_by_id(
+                                @id INT
+                            ) AS
+                            BEGIN
+                                SELECT
+                                    *
+                                FROM
+                                    sales.offices
+                                WHERE
+                                    office_id = @id;
+                            END;
+                    </textarea>
+                    <li style="color:blue">If you execute the procedure usp_get_office_by_id before modify it. There will be raise an error.</li>
+                    <textarea  rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        Msg 208, Level 16, State 1, Procedure usp_get_office_by_id, Line 5 [Batch Start Line 30]
+                        Invalid object name 'dbo.offices'.
+                    </textarea>
+                </ul>
+            </ul>
+        <h3 style="color:red"><b>5) DROP SCHEMA </b></h3>
+            <ul>
+                <textarea  rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    DROP SCHEMA [IF EXISTS] schema_name;
+                </textarea>
+                <li style="color:blue"><b>First, specify the name of the schema that you want to drop. If the schema contains any objects, the statement will fail.<br>
+                    Therefore, you must delete all objects in the schema before removing the schema.</b></li>
+                <li>Second, use the IF EXISTS option to conditionally remove the schema only if the schema exists. Attempting to drop a nonexisting schema without <br>
+                    the IF EXISTS option will result in an error.</li>
+                    <textarea  rows= "13" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        *Create SCHEMA
+                            CREATE SCHEMA logistics;
+                            GO
+                        *CREATE SCHEMA TABLE
+                            CREATE TABLE logistics.deliveries
+                            (table_definition);
+                        *DROP SCHEMA TABLE
+                            DROP TABLE logistics.deliveries;
+                        *DROP SCHEMA
+                            DROP SCHEMA IF EXISTS logistics;
+                        *If you drop schema before drop the table,SQL Server issued
+                        the error because the schema is not empty.
+                    </textarea>
+            </ul>
+        <h3 style="color:red"><b>6) CREATE TABLE</b></h3>
+            <ul>
+                <li>Tables are used to store data in the database.</li>
+                <li>Tables are uniquely named within a database and schema. Each table contains one or more columns.</li>
+                <li>And each column has an associated data type that defines the kind of data it can store e.g., numbers, strings, or temporal data.</li>
+
+                <textarea  rows= "8" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE TABLE [database_name.][schema_name.]table_name (
+                        pk_column data_type PRIMARY KEY,
+                        column_1 data_type NOT NULL,
+                        column_2 data_type,
+                        ...,
+                        table_constraints
+                        );
+                </textarea>
+                <ul>
+                    <li>First, specify the name of the database in which the table is created. The database_name must be the name of an<br>
+                        existing database. If you don’t specify it, the database_name defaults to the current database.</li>
+                    <li>Second, specify the schema to which the new table belongs.</li>
+                    <li>Third, specify the name of the new table.</li>
+                    <li>Fourth, each table should have a primary key which consists of one or more columns.<br>
+                        Typically, you list the primary key columns first and then other columns. <br>
+                        <span style="color:blue">If the primary key contains only one column, you can use the PRIMARY KEY keywords after the column name.</span><br>
+                        <span style="color:red">If the primary key consists of two or more columns, you need to specify the PRIMARY KEY constraint as a <br>
+                            table constraint. </span>Each column has an associated data type specified after its name in the statement. <br>
+                        <span style="color:blue"> A column may have one or more column constraints such as NOT NULL and UNIQUE.</span></li>
+                    <li>Fifth, a table may have some constraints specified in the table constraints section such as FOREIGN KEY, PRIMARY KEY, UNIQUE and CHECK.</li>
+                </ul>
+                <li>Note that CREATE TABLE is complex and has more options than the syntax above.</li>
+                <textarea  rows= "10" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE TABLE sales.visits (
+                        visit_id INT PRIMARY KEY IDENTITY (1, 1),
+                        first_name VARCHAR (50) NOT NULL,
+                        last_name VARCHAR (50) NOT NULL,
+                        visited_at DATETIME,
+                        phone VARCHAR(20),
+                        store_id INT NOT NULL,
+                        FOREIGN KEY (store_id) REFERENCES sales.stores (store_id)
+                        );
+                </textarea>
+                <h4 style="color:blue"><b>*Identity Column</b></h4>
+                    <ul>
+                        <textarea  rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            IDENTITY[(seed,increment)]
+                        </textarea>
+                        <ul>
+                            <li><b>seed</b> : is the value of the first row loaded into the table.</li>
+                            <li><b>increment</b> : is the incremental value added to the identity value of the previous row.</li>
+                        </ul>
+                        <li>The default value of seed and increment is 1 .</li>
+                        <h5 style="color:red"><b>*Reusing of identity values</b></h5>
+                        <ul>
+                            <li>SQL Server does not reuse the identity values.</li>
+                            <li>If you insert a row into the identity column and the insert statement is failed or rolled back, then the identity value is lost and will not be generated again.</li>
+                        </ul>
+                    </ul>
+            </ul>
+        <h3 style="color:red"><b>7) SEQUENCE</b></h3>
+            <ul>
+                <li>A sequence is simply a list of numbers, in which their orders are important.</li>
+                <li> For example, the {1,2,3} is a sequence while the {3,2,1} is an entirely different sequence.</li>
+                    <ul>
+                        <textarea  rows= "9" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            CREATE SEQUENCE [schema_name.] sequence_name
+                                [ AS integer_type ]
+                                [ START WITH start_value ]
+                                [ INCREMENT BY increment_value ]
+                                [ { MINVALUE [ min_value ] } | { NO MINVALUE } ]
+                                [ { MAXVALUE [ max_value ] } | { NO MAXVALUE } ]
+                                [ CYCLE | { NO CYCLE } ]
+                                [ { CACHE [ cache_size ] } | { NO CACHE } ];
+                        </textarea>
+                        <ul>
+                            <li><b>sequence_name</b> : Specify a name for the sequence which is uniquely in the current database.</li>
+                            <li><b>AS integer_type</b> : Use any valid integer type for the sequence e.g., TINYINT, SMALLINT, INT, BIGINT, <br>
+                                or DECIMAL and NUMERIC with a scale of 0. By default, the sequence object uses BIGINT.</li>
+                            <li><b>START WITH start_value</b> : Specify the first value that the sequence returns. The start_value must be between the range (min_value, max_value).<br>
+                            The start_value defaults to the min_value in an ascending sequence and max_value in a descending sequence.</li>
+                            <li><b>INCREMENT BY increment_value</b> : Specify the increment_value of the sequence object when you call the NEXT VALUE FOR function.<br>
+                            <span style="color:blue">Note that the increment_value cannot be zero.</span></li>
+                            <li><b>[ MINVALUE min_value | NO MINVALUE ]</b> : Specify the lower bound for the sequence object. It defaults to the minimum value of the data type of the sequence object
+                            <span style="color:blue">Zero for TINYINT and a negative number for all other data types.</span></li>
+                            <li><b>[ MAXVALUE max_value | NO MAXVALUE]</b> : Specify the upper bound for the sequence object. It defaults to the maximum value of the data type of the sequence object.</li>
+                            <li><b>[ CYCLE | NO CYCLE ]</b> : Use CYCLE if you want the value of the sequence object to restart from the min_value for the ascending sequence object, or max_value for the <br>
+                                descending sequence object or throw an exception when its min_value or max_value is exceeded. SQL Server uses NO CYCLE by default for new sequence objects.</li>
+                            <li><b>[ CACHE cache_size ] | NO CACHE ]</b> : Specify the number of values to cache to improve the performance of the sequence by minimizing the number of disk I/O required<br>
+                                to generate sequence numbers. By default, SQL Server uses NO CACHE for new sequence objects.</li>
+                        </ul>
+                        <textarea  rows= "7" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            CREATE SEQUENCE item_counter
+                            AS INT
+                            START WITH 10
+                            INCREMENT BY 10;
+
+                            SELECT NEXT VALUE FOR item_counter;
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>*Using a sequence object in a table(s)</b></h4>
+                    <ul>
+                        <textarea  rows= "10" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            INSERT INTO procurement.purchase_orders
+                                (order_id,
+                                vendor_id,
+                                order_date)
+                            VALUES
+                                (NEXT VALUE FOR procurement.order_number,1,'2019-04-30');
+                        </textarea>
+                        <textarea  rows= "10" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            CREATE TABLE procurement.goods_receipts
+                                (
+                                    receipt_id   INT	PRIMARY KEY
+                                        DEFAULT (NEXT VALUE FOR procurement.receipt_no),
+                                    order_id     INT NOT NULL,
+                                    full_receipt BIT NOT NULL,
+                                    receipt_date DATE NOT NULL,
+                                    note NVARCHAR(100),
+                                );
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>*Sequence vs. Identity columns</b></h4>
+                    <img src="{% static 'IMG\SQL-screen.png'%}">
+                <h4 style="color:blue"><b>*When to use sequences</b></h4>
+                    <ul>
+                        <li>The application requires a number before inserting values into the table.</li>
+                        <li>The application requires sharing a sequence of numbers across multiple tables or multiple columns within the same table.</li>
+                        <li>The application requires to restart the number when a specified value is reached.</li>
+                        <li>The application requires multiple numbers to be assigned at the same time.<span style="color:blue"> Note that you can call the stored procedure sp_sequence_get_range to retrieve several numbers in a sequence at once.</span></li>
+                        <li>The application needs to change the specification of the sequence like maximum value.</li>
+                    </ul>
+                <h4 style="color:blue"><b>*Getting sequences information</b></h4>
+                    <ul>
+                        <li>You use the view sys.sequences to get the detailed information of sequences.</li>
+                        <textarea  rows= "5" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                *
+                            FROM
+                                sys.sequences;
+                        </textarea>
+                    </ul>
+            </ul>
+        <h3 style="color:red"><b>8) ALTER TABLE</b></h3>
+            <ul>
+                <h4 style="color:blue"><b>* ALTER TABLE ADD</b></h4>
+                    <ul>
+                        <textarea  rows= "7" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            ALTER TABLE table_name
+                                ADD
+                                    column_name_1 data_type_1 column_constraint_1,
+                                    column_name_2 data_type_2 column_constraint_2,
+                                    ...,
+                                    column_name_n data_type_n column_constraint_n;
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>* ALTER TABLE ALTER COLUMN</b></h4>
+                    <ul>
+                        <li>SQL Server allows you to perform the following changes to an existing column of a table:</li>
+                        <ul>
+                            <li>Modify the data type</li>
+                            <li>Change the size</li>
+                            <li>Add a NOT NULL constraint</li>
+                        </ul>
+                        <textarea  rows= "3" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            ALTER TABLE table_name
+                            ALTER COLUMN column_name new_data_type(size);
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>* ALTER TABLE DROP COLUMN</b></h4>
+                    <ul>
+                        <li>Sometimes, you need to remove one or more unused or obsolete columns from a table. To do this, you use the ALTER TABLE DROP COLUMN</li>
+                        <textarea  rows= "3" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            ALTER TABLE table_name
+                            DROP COLUMN column_name(s);
+                        </textarea>
+                    </ul>
+            </ul>
+        <h3 style="color:red"><b>9) COMPUTE COLUMN</b></h3>
+            <ul>
+                <li>To query the full names of people in the persons table, you normally use the CONCAT() function or the + operator</li>
+                <textarea  rows= "4" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        person_id,
+                        first_name + ' ' + last_name AS full_name
+                </textarea>
+                <li>But adding full_name expression first_name + ' ' + last_name in every query is not convenient.</li>
+                <li>SQL Server provides us with a feature called computed columns that allows you to add a new column to a table<br>
+                    with the value derived from the values of other columns in the same table.</li>
+                <textarea  rows= "3" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    ALTER TABLE persons
+                        ADD full_name AS (first_name + ' ' + last_name);
+                </textarea>
+                <h4 style="color:blue"><b>* Persisted Computed columns</b></h4>
+                    <ul>
+                        <li>Computed columns can be persisted. It means that SQL Server physically stores the data of the computed columns on disk.</li>
+                        <li>When you change data in the table, SQL Server computes the result based on the expression of the computed columns<br>
+                            and stores the results in these persisted columns physically. When you query the data from the persisted computed columns,<br>
+                            SQL Server just needs to retrieve data without doing any calculation. This avoids calculation overhead with the cost of extra storage.</li>
+                        <li>Add the new full_name column to the persons table with the PERSISTED property:</li>
+                        <textarea  rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            ALTER TABLE persons
+                            ADD full_name AS (first_name + ' ' + last_name) [PERSISTED];
+                        </textarea>
+                        <ul>
+                            <li>First, specify the name of the table to which you want to add the computed column.</li>
+                            <li>Second, specify the computed column name with the expression that returns the values for the column.</li>
+                            <li>Third, if the expression is deterministic and you want to store the data of the computed column physically, you can use the PERSISTED property.</li>
+                        </ul>
+                        <li style="color:red">Note that a computed column is persisted only if its expression is deterministic. It means that for a set of inputs, the expression always returns the same result.</li>
+                        <li>For example, the expression first_name + ' ' + last_name is deterministic. However, the GETDATE() function is a non-deterministic function because it returns a different value on a different day.</li>
+                        <textarea  rows= "7" cols="120" style="color:#1F0221; font-family:Times New Roman">
+                            ALTER TABLE persons
+                                ADD age_in_years
+                                    AS (CONVERT(INT,CONVERT(CHAR(8),GETDATE(),112))-CONVERT(CHAR(8),dob,112))/10000;
+                            * This query will work.
+                            * If you add PERSISTED property for this table, it will raise an error because getdate()
+                            function have differ values at differ days.
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>* The syntax for defining computed columns when creating a new table</b></h4>
+                    <textarea  rows= "6" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                        CREATE TABLE table_name(
+                                ...,
+                                column_name AS expression [PERSISTED],
+                                ...
+                            );
+                    </textarea>
+            </ul>
+        <h3 style="color:red"><b>10) DROP TABLE</b></h3>
+            <ul>
+                <li>Sometimes, you want to remove a table that is no longer in use. To do this, you use DROP TABLE statement:</li>
+                <textarea  rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    DROP TABLE [IF EXISTS]  [database_name.][schema_name.]table_name;
+                </textarea>
+                <ul>
+                    <li>First, specify the name of the table to be removed.</li>
+                    <li>Second, specify the name of the database in which the table was created and the name of the schema to which the table belongs.<br>
+                        The database name is optional. If you skip it, the DROP TABLE statement will drop the table in the currently connected database.</li>
+                    <li>Third, use IF EXISTS clause to remove the table only if it exists. The IF EXISTS clause has been supported since SQL Server 2016 13.x.<br>
+                        If you remove a table that does not exist, you will get an error. The IF EXISTS clause conditionally removes the table if it already exists.</li>
+                </ul>
+                <li>SQL Server allows you to remove multiple tables at once using a single DROP TABLE statement.</li>
+                <li style="color:blue">SQL Server does not allow you to delete a table that is referenced by a foreign constraint.<br>
+                    To delete this table, you must drop the referencing foreign key constraint or referencing table first.</li>
+                <li>If you use a single DROP TABLE statement to remove both tables, the referencing table must be listed first .</li>
+            </ul>
+        <h3 style="color:red"><b>11) TRUNCATE TABLE</b></h3>
+            <ul>
+                <li>Sometimes, you want to delete all rows from a table. In this case, you typically use the DELETE statement without a WHERE clause.</li>
+                <li>Besides the DELETE FROM statement, you can use the TRUNCATE TABLE statement to delete all rows from a table.</li>
+                <textarea  rows= "4" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    DELETE FROM [database_name.][schema_name.]table_name;
+                    Or
+                    TRUNCATE TABLE [database_name.][schema_name.]table_name;
+                </textarea>
+                <h4 style="color:blue"><b>* TRUNCATE TABLE vs. DELETE</b></h4>
+                    <ul>
+                        <li><b>Use less transaction log</b> : The DELETE statement removes rows one at a time and inserts an entry in the transaction log for each removed row.<br>
+                        On the other hand, the TRUNCATE TABLE statement deletes the data by deallocating the data pages used to store the table data and inserts only the page deallocations in the transaction logs.</li>
+                        <li><b>Use fewer locks</b> : When the DELETE statement is executed using a row lock, each row in the table is locked for removal. The TRUNCATE TABLE locks the table and pages, not each row.</li>
+                        <li><b>Identity reset</b> : If the table to be truncated has an identity column, the counter for that column is reset to the seed value when data is deleted by the TRUNCATE TABLE statement but not the DELETE statement.</li>
+                    </ul>
+            </ul>
+        <h3 style="color:red"><b>12) SELECT INTO</b></h3>
+            <ul>
+                <li>The SELECT INTO statement creates a new table and inserts rows from the query into it.</li>
+                <textarea  rows= "8" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        select_list
+                    INTO
+                        destination
+                    FROM
+                        source
+                    [WHERE condition]
+                </textarea>
+                <li>If you want to copy the partial data from the source table, you use the WHERE clause to specify which rows or columns to copy.</li>
+                <li style="color:blue">Note that SELECT INTO statement does not copy constraints such as primary key and indexes from the source table to the destination table.</li>
+                <textarea  rows= "14" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE SCHEMA marketing;
+                        GO
+
+                        SELECT
+                            *
+                        INTO
+                            marketing.customers
+                        FROM
+                            sales.customers;
+                </textarea>
+                <textarea  rows= "14" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE DATABASE TestDb;
+                    GO
+                        SELECT
+                            customer_id,
+                            first_name,
+                            last_name,
+                            email
+                        INTO
+                            TestDb.dbo.customers
+                        FROM
+                            sales.customers
+                        WHERE
+                            state = 'CA';
+                </textarea>
+            </ul>
+        <h3 style="color:red"><b>13) RENAME TABLE</b></h3>
+            <ul>
+                <h4 style="color:blue"><b>* SQL Rename table using Transact SQL</b></h4>
+                <li>SQL Server does not have any statement that directly renames a table. However, it does provide you with a stored procedure named <br>
+                    <span style="color:red">sp_rename </span>that allows you to change the name of a table.</li>
+                <li>Note that both the old and new name of the table whose name is changed must be enclosed in single quotations.</li>
+                <textarea  rows= "2" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    EXEC sp_rename 'old_table_name', 'new_table_name'
+                </textarea>
+            </ul>
+        <h3 style="color:red"><b>14) TEMPORARY TABLE</b></h3>
+            <ul>
+                <li>Temporary tables are tables that exist temporarily on the SQL Server.</li>
+                <li>The temporary tables are useful for storing the immediate result sets that are accessed multiple times.</li>
+                <li>The name of the temporary table starts with a hash symbol (#).</li>
+                <h4 style="color:blue"><b>* Create temporary tables using SELECT INTO statement</b></h4>
+                    <ul>
+                        <textarea  rows= "9" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                select_list
+                            INTO
+                                #temporary_table
+                            FROM
+                                table_name
+                            ....
+                        </textarea>
+                        <textarea  rows= "9" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                product_name,
+                                list_price
+                            INTO #trek_products --- temporary table
+                            FROM
+                                production.products
+                            WHERE
+                                brand_id = 9;
+                        </textarea>
+                        <li>Once you execute the statement, you can find the temporary table name created in the system database named tempdb, <br>
+                            which can be accessed via the SQL Server Management Studio using the following path System Databases > tempdb > Temporary Tables</li>
+                    </ul>
+                <h4 style="color:blue"><b>* Create temporary tables using CREATE TABLE statement</b></h4>
+                    <ul>
+                        <textarea  rows= "5" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            CREATE TABLE #haro_products (
+                                product_name VARCHAR(MAX),
+                                list_price DEC(10,2)
+                                );
+                        </textarea>
+                        <li>If you open another connection and try the query above query, you will get the error</li>
+                        <li>This is because the temporary tables are only accessible within the session that created them.</li>
+                    </ul>
+                <h4 style="color:blue"><b>* Global temporary tables</b></h4>
+                    <ul>
+                        <li>Sometimes, you may want to create a temporary table that is accessible across connections. In this case, you can use global temporary tables.</li>
+                        <li>Unlike a temporary table, the name of a global temporary table starts with a double hash symbol (##).</li>
+                        <textarea  rows= "5" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            CREATE TABLE ##heller_products (
+                                product_name VARCHAR(MAX),
+                                list_price DEC(10,2)
+                                );
+                        </textarea>
+                        <li>Now, you can access the ##heller_products table from any session.</li>
+                    </ul>
+                <h4 style="color:blue"><b>* Dropping temporary tables</b></h4>
+                    <ul>
+                        <h5 style="color:red"><b>*Automatic removal</b></h5>
+                        <li>SQL Server drops a temporary table automatically when you close the connection that created it.</li>
+                        <li>SQL Server drops a global temporary table once the connection that created it closed and the queries against this table from other connections completes.</li>
+                        <h5 style="color:red"><b>*Automatic removal</b></h5>
+                        <li>Manual Deletion</li>
+                        <textarea  rows= "2" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            DROP TABLE ##table_name;
+                        </textarea>
+                    </ul>
+            </ul>
+        <h3 style="color:red"><b>15) SYNONYM</b></h3>
+            <ul>
+                <li>In SQL Server, a synonym is an alias or alternative name for a database object such as a table, view, stored procedure, user-defined function, and sequence.</li>
+                <textarea  rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE SYNONYM [ schema_name_1. ] synonym_name
+                    FOR object ([ server_name.[ database_name ] . [ schema_name_2 ]. object_name);
+                </textarea>
+                <ul>
+                    <li>First, specify the target object that you want to assign a synonym in the FOR clause</li>
+                    <li>Second, provide the name of the synonym after the CREATE SYNONYM keywords</li>
+                    <li>Note that the object for which you create the synonym does not have to exist at the time the synonym is created.</li>
+                </ul>
+                <h4 style="color:blue"><b>* Creating a synonym within the same database</b></h4>
+                    <ul>
+                        <textarea  rows= "2" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            CREATE SYNONYM orders FOR sales.orders;
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>* Creating a synonym for a table in another database</b></h4>
+                    <ul>
+                        <textarea  rows= "3" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            CREATE SYNONYM suppliers
+                            FOR test.purchasing.suppliers;
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>* Listing all synonyms of a database</b></h4>
+                    <ul>
+                        <textarea  rows= "9" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                name,
+                                base_object_name,
+                                type
+                            FROM
+                                sys.synonyms
+                            ORDER BY
+                                name;
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>* Removing a synonym</b></h4>
+                    <ul>
+                        <textarea  rows= "2" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                           DROP SYNONYM [ IF EXISTS ] [schema.] synonym_name
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>* When to use synonyms</b></h4>
+                    <ul>
+                        <li><b>1) Simplify object names</b> : If you refer to an object from another database (even from a remote server), <br>
+                            you can create a synonym in your database and reference to this object as it is in your database.</li>
+                        <li><b>2) Enable seamless object name changes</b> : When you want to rename a table or any other object such as a view,<br>
+                            stored procedure, user-defined function, or a sequence, the existing database objects that reference to this table need<br>
+                            to be manually modified to reflect the new name. In addition, all current applications that use this table need to be changed<br>
+                            and possibly to be recompiled. To avoid all of these hard work, you can rename the table and create a synonym for it to keep <br>
+                            existing applications function properly.</li>
+                    </ul>
+                <h4 style="color:blue"><b>* Benefits of synonyms</b></h4>
+                     <ul>
+                        <li>Provide a layer of abstraction over the base objects.</li>
+                        <li>Shorten the lengthy name e.g., a very_long_database_name.with_schema.and_object_name with a simplified alias.</li>
+                        <li>Allow backward compatibility for the existing applications when you rename database objects such as tables, views, stored procedures,<br>
+                            user-defined functions, and sequences.</li>
+                    </ul>
+            </ul>
+    </ul>
+<h1 style="color:#3A578F">Section 13. SQL Server Data Types</h1>
+    <ul>
+        <img src="{% static 'IMG\SQL-Server-Data-Types.png'%}">
+        <li style="color:blue">Notice that SQL Server will remove ntext, text, and image data types in its future version.<br>
+            Therefore, you should avoid using these data types and use nvarchar(max), varchar(max), and varbinary(max) data types instead.</li>
+        <ul>
+            <h4 style="color:blue"><b>* Exact numeric data types</b></h4>
+            <li>Exact numeric data types store exact numbers such as integer, decimal, or monetary amount.</li>
+                <ul>
+                    <li>The bit store one of three values 0, 1, and NULL</li>
+                    <li>The int, bigint, smallint, and tinyint data types store integer data.</li>
+                    <li>The decimal and numeric data types store numbers that have fixed precision and scale. Note that decimal and numeric are synonyms.</li>
+                    <li>The money and smallmoney data type store currency values.</li>
+                </ul>
+            <img src="{% static 'IMG\exact.png'%}" width="600", height="400">
+            <h4 style="color:blue"><b>* Approximate numeric data types</b></h4>
+            <li>The approximate numeric data type stores floating point numeric data. They are often used in scientific calculations.</li>
+            <img src="{% static 'IMG\Approx.png'%}" width="600", height="200">
+            <h4 style="color:blue"><b>* Date & Time data types</b></h4>
+            <li>The date and time data types store data and time data, and the date time offset.</li>
+            <img src="{% static 'IMG\date&time.png'%}" width="600", height="400">
+            <li style="color:blue"><b>If you develop a new application, you should use the time, date, datetime2 and datetimeoffset data types.<br>
+                Because these types align with the SQL Standard and more portable. In addition, the time, datetime2 and datetimeoffset have more <br>
+                seconds precision and datetimeoffset supports time zone.</b></li>
+            <h4 style="color:blue"><b>* Character strings data types</b></h4>
+            <li>Character strings data types allow you to store either fixed-length (char) or variable-length data (varchar). The text data type can <br>
+                store non-Unicode data in the code page of the server.</li>
+            <img src="{% static 'IMG\char.png'%}" width="600", height="200">
+            <h4 style="color:blue"><b>* Unicode character string data types</b></h4>
+            <li>Unicode character string data types store either fixed-length (nchar) or variable-length (nvarchar) Unicode character data.</li>
+            <img src="{% static 'IMG\unicode.png'%}" width="600", height="200">
+            <h4 style="color:blue"><b>* Binary string data types</b></h4>
+            <li>The binary data types stores fixed and variable length binary data.</li>
+            <img src="{% static 'IMG\binary.png'%}" width="600", height="200">
+            <h4 style="color:blue"><b>* Other data types</b></h4>
+            <img src="{% static 'IMG\other.png'%}" width="600", height="400">
+        </ul>
+        <h3 style="color:red"><b>1) BIT</b></h3>
+            <ul>
+                <li>SQL Server BIT data type is an integer data type that can take a value of 0, 1, or NULL.</li>
+                <li>SQL Server optimizes storage of BIT columns. If a table has 8 or fewer bit columns, SQL Server stores them as 1 byte.<br>
+                    If a table has 9 up to 16 bit columns, SQL Server stores them as 2 bytes, and so on.</li>
+                <li>SQL Server converts a string value TRUE to 1 and FALSE to 0. It also converts any nonzero value to 1.</li>
+                <textarea  rows= "10" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE TABLE test.sql_server_bit (
+                        bit_col BIT                         --create bit column
+                        );
+                        INSERT INTO test.sql_server_bit (bit_col) --insert 1 bit
+                            OUTPUT inserted.bit_col
+                            VALUES(1);
+                        INSERT INTO test.sql_server_bit (bit_col) -- insert 0 bit
+                            OUTPUT inserted.bit_col
+                            VALUES(0);
+                </textarea>
+            </ul>
+        <h3 style="color:red"><b>2) INT</b></h3>
+            <ul>
+                <li>SQL Server support standard SQL integer types including BIGINT, INT, SMALLINT, and TINYINT.</li>
+                <img src="{% static 'IMG\int.png'%}" width="600", height="200"><br>
+                <textarea  rows= "10" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE TABLE test.sql_server_integers (
+                        bigint_col bigint,
+                        int_col INT,
+                        smallint_col SMALLINT,
+                        tinyint_col tinyint
+                    );
+                </textarea>
+                <li style="color:red">SQL Server converts the integer constant greater than 2,147,483,647 to DECIMAL data type</li>
+            </ul>
+        <h3 style="color:red"><b>3) DECIMAL</b></h3>
+            <ul>
+                <li>To store numbers that have fixed precision and scale, you use the DECIMAL data type.</li>
+                <textarea  rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    DECIMAL(p,s)
+                </textarea>
+                <ul>
+                    <li>p is the precision which is the maximum total number of decimal digits that will be stored, both to the<br>
+                        left and to the right of the decimal point. The precision has a range from 1 to 38. The default precision is 38.</li>
+                    <li>s is the scale which is the number of decimal digits that will be stored to the right of the decimal point. The scale<br>
+                        has a range from 0 to p (precision). The scale can be specified only if the precision is specified. By default, the scale is zero.</li>
+                </ul>
+                <li>The maximum storage sizes vary, depending on the precision as illustrated in the following table:</li>
+                <img src="{% static 'IMG\decimal.png'%}" width="600", height="200">
+                <li style="color:red">The NUMERIC and DECIMAL are synonyms, therefore, you can use them interchangeably.</li>
+                <textarea  rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    DECIMAL(10,2) Or DEC(10,2)
+                    NUMERIC(10,2)
+                </textarea>
+                <li>Because the ISO synonyms for DECIMAL are DEC and DEC(p,s), you can use either DECIMAL or DEC</li>
+            </ul>
+        <h3 style="color:red"><b>4) CHAR/ NCHAR</b></h3>
+            <ul>
+                <h4 style="color:blue"><b>* CHAR</b></h4>
+                <ul>
+                    <li>If you want to store fixed length, non-Unicode string data, you use the SQL Server CHAR data type:</li>
+                    <li style="color:red">Note that the ISO synonym for  CHAR is CHARACTER so you can use them interchangeably.</li>
+                    <textarea  rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        char(n) Or character(n)
+                    </textarea>
+                    <li>In this syntax, n specifies the string length which ranges from 1 to 8,000.</li>
+                    <li>Because n is optional, if don’t specify it in a data definition or variable declaration statement, its default value is 1.</li>
+                    <li>You should use the CHAR data type only when the sizes of values in the column are fixed.</li>
+                    <li style="color:blue">When you insert a string value into a CHAR column. If the length of the string value is less than the length specified in the <br>
+                        column, SQL Server will add trailing spaces to the string value to the length declared in the column. However, when you select this<br>
+                        string value, SQL Server removes the trailing spaces before returning it.On the other hand, if you insert a value whose length exceeds<br>
+                        the column length, SQL Server issues an error message.</li>
+                    <textarea  rows= "5" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        CREATE TABLE test.sql_server_char (
+                            val CHAR(3)
+                            LEN(val) len,
+                            DATALENGTH(val) data_length);
+                    </textarea>
+                    <li><b>LEN function</b> : returns the number of characters in a specified column that excludes the trailing blanks</li>
+                    <li><b>DATALENGTH function</b> : returns the number of bytes.</li>
+                    <li>If you insert a value 'A' into the table, the data_length of val_column still is 3</li>
+                </ul>
+                <h4 style="color:blue"><b>* NCHAR</b></h4>
+                <ul>
+                    <li>To store fixed-length, Unicode character string data in the database, you use the SQL Server NCHAR data type:</li>
+                    <textarea  rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        NCHAR(n)
+                    </textarea>
+                    <li>In this syntax, n specifies the string length that ranges from 1 to 4,000. The storage size of a NCHAR value is two times n bytes.</li>
+                    <li>The ISO synonyms for NCHAR are NATIONAL CHAR and NATIONAL CHARACTER, therefore, you can use them interchangeably.</li>
+                    <li>Similar to the CHAR data type, you use the NCHAR for storing fixed-length character string only. If the lengths of data <br>
+                        values are variable, you should consider using VARCHAR or NVARCHAR data type.</li>
+                </ul>
+                <h4 style="color:blue"><b>* CHAR Vs NCHAR</b></h4>
+                    <ul>
+                        <img src="{% static 'IMG\char&nchar.png'%}" width="600", height="400">
+                    </ul>
+                <textarea  rows= "8" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE TABLE test.sql_server_nchar (
+                        val NCHAR(1) NOT NULL
+                        );
+                    INSERT INTO test.sql_server_nchar (val)
+                    VALUES
+                        (N'あ');
+                </textarea>
+                <li><b>Notice that you must prefix the Unicode character string constants with the letter N.<br>
+                    Otherwise, SQL Server will convert the string to the default code page of the database which<br>
+                    may not recognize some certain Unicode characters.</b></li>
+                <li>If a character string has length is greater than the length specified in the column definition, SQL Server issues an error and terminates the statement.</li>
+                <li>To find the number of characters and the number of bytes of the values the val column, you use the LEN and DATALENGTH functions</li>
+            </ul>
+        <h3 style="color:red"><b>5) VARCHAR/ NVARCHAR</b></h3>
+            <ul>
+                <h4 style="color:blue"><b>* VARCHAR</b></h4>
+                <ul>
+                    <li>SQL Server VARCHAR data type is used to store variable-length, non-Unicode string data.</li>
+                    <li>The ISO synonyms of VARCHAR are CHARVARYING or CHARACTERVARYING, therefore, you can use them interchangeably.</li>
+                    <textarea  rows= "3" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        VARCHAR(n)
+                        VARCHAR(MAX)
+                    </textarea>
+                    <li>In this syntax, n defines the string length that ranges from 1 to 8,000. If you don’t specify n, its default value is 1.</li>
+                    <li>In this syntax, max defines the maximum storage size which is 2^31-1 bytes (2 GB).</li>
+                    <li>In general, the storage size of a VARCHAR value is the actual length of the data stored plus 2 bytes.</li>
+                    <li>If you insert a value whose length exceeds the column length, SQL Server issues an error message.</li>
+                    <li>To find the number of characters and the number of bytes of values stored in the VARCHAR column, you use the LEN and DATALENGTH functions</li>
+                </ul>
+                <h4 style="color:blue"><b>* NVARCHAR</b></h4>
+                <ul>
+                    <li>SQL Server VARCHAR data type is used to store variable-length, Unicode string data.</li>
+                    <li>The ISO synonyms of NVARCHAR are NATIONAL CHAR VARYING or NATIONAL CHARACTER VARYING, you can use them interchangeably.</li>
+                    <textarea  rows= "3" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        NVARCHAR(n)
+                        NVARCHAR(MAX)
+                    </textarea>
+                    <li>In this syntax, n defines the string length that ranges from 1 to 4,000. If you don’t specify n, its default value is 1.</li>
+                    <li>In this syntax, max defines the maximum storage size which is 2^31-1 bytes (2 GB).</li>
+                    <li>In general, the storage size of a NVARCHAR value is the actual length of the data stored plus 2 bytes.</li>
+                    <li>If you insert a value whose length exceeds the column length, SQL Server issues an error message.</li>
+                    <li>To find the number of characters and the number of bytes of values stored in the VARCHAR column, you use the LEN and DATALENGTH functions</li>
+                </ul>
+                <h4 style="color:blue"><b>* VARCHAR Vs NVARCHAR</b></h4>
+                    <ul>
+                        <img src="{% static 'IMG\varchar&nvarchar.png'%}" width="600", height="400">
+                    </ul>
+                <li>To find the number of characters and the storage size in bytes of the values stored in the NVARCHAR column, you use the LEN and DATALENGTH functions</li>
+            </ul>
+        <h3 style="color:red"><b>6) DATETIME2</b></h3>
+            <ul>
+                <li>To store both date and time in the database, you use the SQL Server DATETIME2 data type.</li>
+                <textarea  rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    DATETIME2(fractional seconds precision)
+                </textarea>
+                <li>The fractional seconds precision is optional. It ranges from 0 to 7.</li>
+                <li>The DATETIME2 has two components: date and time.</li>
+                    <ul>
+                        <li>The date has a range from January 01, 01 (0001-01-01) to December 31, 9999 (9999-12-31)</li>
+                        <li>The time has a range from 00:00:00 to 23:59:59.9999999.</li>
+                    </ul>
+                <textarea  rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    YYYY-MM-DD hh:mm:ss[.fractional seconds]
+                </textarea>
+                    <ul>
+                        <li><b>YYYY</b> : is a four-digit number that represents a year e.g., 2018. It ranges from 0001 through 9999.</li>
+                        <li><b>MM</b> : is a two-digit number that represents a month in a year e.g., 12. It ranges from 01 to 12.</li>
+                        <li><b>DD</b> : is a two-digit number that represents a day of a specified month e.g., 23. It ranges from 01 to 31.</li>
+                        <li><b>hh</b> : is a two-digit number that represents the hour. It ranges from 00 to 23.</li>
+                        <li><b>mm</b> : is a two-digit number that represents the minute. It ranges from 00 to 59.</li>
+                        <li><b>ss</b> : is a two-digit number that represents the second. It ranges from 00 to 59.</li>
+                        <li><b></b> : The fractional seconds is zero to a seven-digit number that ranges from 0 to 9999999.</li>
+                    </ul>
+                <textarea  rows= "15" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE TABLE production.product_colors (
+                        color_id INT PRIMARY KEY IDENTITY,
+                        color_name VARCHAR (50) NOT NULL,
+                        created_at DATETIME2
+                        );
+                    INSERT INTO production.product_colors (color_name, created_at)
+                    VALUES
+                        ('Red', GETDATE());
+                    INSERT INTO production.product_colors (color_name, created_at)
+                    VALUES
+                        ('Green', '2018-06-23 07:30:20');
+                    ALTER TABLE production.product_colors
+                        ADD CONSTRAINT df_current_time
+                        DEFAULT CURRENT_TIMESTAMP FOR created_at;
+                </textarea>
+                <li style="color:red"><b>Note that the CURRENT_TIMESTAMP returns the same value as the GETDATE() function.</b></li>
+            </ul>
+        <h3 style="color:red"><b>7) DATE</b></h3>
+            <ul>
+                <li>Unlike the DATETIME2 data type, the DATE data type has only the date component.</li>
+                <li>The range of a DATE value is from January 1, 1 CE (0001-01-01) through December 31, 9999 CE (9999-12-31).</li>
+                <li>It takes 3 bytes to store a DATE value. The default literal string format of a DATE value is as follows:</li>
+                <textarea  rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    YYYY-MM-DD
+                </textarea>
+                <ul>
+                    <li><b>YYYY</b> :  is four digits that represent a year, which ranges from 0001 to 9999.</li>
+                    <li><b>MM</b> : is two digits that represent a month of a year, which ranges from 01 to 12.</li>
+                    <li><b>DD</b> : is two digits that represent a day of the specified month, which ranges from 01 to 31, depending on the month.</li>
+                </ul>
+            </ul>
+        <h3 style="color:red"><b>8) TIME</b></h3>
+            <ul>
+                <li>The SQL Server TIME data type defines a time of a day based on 24-hour clock.</li>
+                <textarea  rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    TIME[ (fractional second scale) ]
+                </textarea>
+                <li>The fractional second scale specifies the number of digits for the fractional part of the seconds. The fractional second scale <br>
+                    ranges from 0 to 7. By default, the fractional second scale is 7 if you don’t explicitly specify it.</li>
+                <li>The default literal format for a TIME value is</li>
+                <textarea  rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    hh:mm:ss[.nnnnnnn]
+                </textarea>
+                <ul>
+                    <li><b>hh</b> : is two digits that represent the hour with a range from 0 to 23.</li>
+                    <li><b>mm</b> : is two digits that represent the minute with a range from 0 to 59.</li>
+                    <li><b>ss</b> :  is two digits that represent the second with the range from 0 to 59.</li>
+                    <li>The fractional seconds part can be zero to seven digits that has a range from 0 to 9999999.</li>
+                </ul>
+                <li>A time value with the default of 100ms fractional second precision requires 5 bytes storage.</li>
+                <li style="color:red"><b>Note that the TIME data type is not the time zone-awareness.</b></li>
+                <textarea  rows= "6" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE TABLE sales.visits (
+                        start_at TIME (0) NOT NULL,
+                        end_at TIME (0) NOT NULL,
+                        FOREIGN KEY (store_id) REFERENCES sales.stores (store_id)
+                        );
+                </textarea>
+            </ul>
+        <h3 style="color:red"><b>9) DATETIMEOFFSET</b></h3>
+            <ul>
+                <li>The DATETIMEOFFSET allows you to manipulate any single point in time, which is a datetime value, along with an<br>
+                    offset that specifies how much that datetime differs from UTC.</li>
+                <textarea  rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    DATETIMEOFFSET [ (fractional seconds precision) ]
+                </textarea>
+                <li>The DATETIMEOFFSET has a range from January 01, 0001 CE to December 31, 9999 CE. </li>
+                <li>The time ranges from 00:00:00 through 23:59:59.9999999.</li>
+                <li>The literal formats of DATETIMEOFFSET is as:</li>
+                <textarea  rows= "4" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    YYYY-MM-DDThh:mm:ss[.nnnnnnn][{+|-}hh:mm]
+                    E.g:
+                    2020-12-12 11:30:30.12345
+                </textarea>
+                <li>Or follow ISO</li>
+                <textarea  rows= "4" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    YYYY-MM-DDThh:mm:ss[.nnnnnnn]Z
+                    E.g:
+                    2020-12-12 19:30:30.12345Z
+                </textarea>
+                <h4 style="color:blue"><b>* Time Zone Offset</b></h4>
+                    <ul>
+                        <li>For a datetime or time value, a time zone offset specifies the zone offset from UTC. A time zone offset is represented as [+|-] hh:mm:</li>
+                        <ul>
+                            <li><b>hh</b> : is two digits that range from 00 to 14, which represents the number of hour in the time zone offset.</li>
+                            <li><b>mm</b> : is two digits that range from 00 to 59, which represents the number of additional minutes in the time zone offset.</li>
+                            <li><b>+(plus) or -(minus)</b> : specifies whether the time zone offset is added or subtracted from the UTC time to return the local time.</li>
+                        </ul>
+                    </ul>
+                <li>The valid range of a time zone offset is -14:00 to +14:00</li>
+                <textarea  rows= "15" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE TABLE messages(
+                        id         INT PRIMARY KEY IDENTITY,
+                        message    VARCHAR(255) NOT NULL,
+                        created_at DATETIMEOFFSET NOT NULL
+                        );
+                    INSERT INTO messages(message,created_at)
+                    VALUES('DATETIMEOFFSET demo',
+                            CAST('2019-02-28 01:45:00.0000000 -08:00' AS DATETIMEOFFSET));
+
+                    Or
+
+                    INSERT INTO messages(message,created_at)
+                    VALUES('DATETIMEOFFSET demo',
+                            '2019-02-28 01:45:00.0000000 -08:00');
+                </textarea>
+            </ul>
+        <h3 style="color:red"><b>10) GUID</b></h3>
+            <ul>
+                <li>A GUID is guaranteed to be unique across tables, databases, and even servers.</li>
+                <li>n SQL Server, GUID is 16-byte binary data type, which is generated by using the NEWID() function:</li>
+                <textarea  rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        NEWID() AS GUID;
+                </textarea>
+                <li>If you execute the above statement several times, you will see different value every time.</li>
+                <li>In SQL Server, the UNIQUEIDENTIFIER data type holds GUID values.</li>
+                <textarea  rows= "8" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    DECLARE
+                        @id UNIQUEIDENTIFIER;
+
+                    SET @id = NEWID();
+
+                    SELECT
+                        @id AS GUID;
+                </textarea>
+                <h4 style="color:blue"><b>* Using SQL Server GUID as primary key</b></h4>
+                    <ul>
+                        <li>Using GUID as the primary key of a table brings the following advantages:</li>
+                        <ul>
+                            <li>GUID values are globally unique across tables, databases, and even servers. Therefore, it allows you to merge data from different servers with ease.</li>
+                            <li>GUID values do not expose the information so they are safer to use in public interface such as a URL. <br>
+                                For example, if you have the URL https://www.example.com/customer/100/ URL, it is not so difficult to find <br>
+                                that there will have customers with id 101, 102, and so on. However, with GUID, it is not possible:<br>
+                                https://www.example.com/customer/F4AB02B7-9D55-483D-9081-CC4E3851E851/</li>
+                        </ul>
+                        <li>Besides these advantages, storing GUID in the primary key column of a table has the following disadvantages:</li>
+                        <ul>
+                            <li>GUID values (16 bytes) takes more storage than INT (4 bytes) or even BIGINT(8 bytes)</li>
+                            <li>GUID values make it difficult to troubleshoot and debug, comparing WHERE id = 100 with WHERE id = 'F4AB02B7-9D55-483D-9081-CC4E3851E851'.</li>
+                        </ul>
+                    </ul>
+                <textarea  rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE TABLE marketing.customers(
+                        customer_id UNIQUEIDENTIFIER DEFAULT NEWID(),
+                </textarea>
+            </ul>
+    </ul>
+<h1 style="color:#3A578F">Section 14. Constraints</h1>
+    <ul>
+        <h3 style="color:red"><b>1) Primary Key</b></h3>
+            <ul>
+                <li>A primary key is a column or a group of columns that uniquely identifies each row in a table. </li>
+                <li>You create a primary key for a table by using the PRIMARY KEY constraint.</li>
+                <textarea  rows= "7" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE TABLE table_name (
+                        pk_column data_type PRIMARY KEY,
+                        ...
+                        );
+                </textarea>
+                <textarea  rows= "7" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE TABLE table_name (
+                        pk_column_1 data_type,
+                        pk_column_2 data type,
+                        ...
+                        PRIMARY KEY (pk_column_1, pk_column_2)
+                        );
+                </textarea>
+                <li>Each table can contain only one primary key. All columns that participate in the primary key must be defined as NOT NULL. </li>
+                <li>Primary key can consist of multiple column, and combination of those columns is unique</li>
+                <li>SQL Server automatically sets the NOT NULL constraint for all the primary key columns if the NOT NULL constraint is not specified for these columns.</li>
+                <li>SQL Server also automatically creates a unique clustered index (or a non-clustered index if specified as such) when you create a primary key.</li>
+                <textarea  rows= "6" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE TABLE sales.participants(
+                        activity_id int,
+                        customer_id int,
+                        PRIMARY KEY(activity_id, customer_id)
+                        );
+                </textarea>
+                <textarea  rows= "6" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE TABLE sales.activities (
+                        activity_id INT PRIMARY KEY IDENTITY,
+                        activity_name VARCHAR (255) NOT NULL,
+                        activity_date DATE NOT NULL
+                        );
+                </textarea>
+                <li>Typically, a table always has a primary key defined at the time of creation. However, sometimes, an existing table may not have a primary key defined.<br>
+                    In this case, you can add a primary key to the table by using the ALTER TABLE statement.</li>
+                <li>Note that if the column already has data, before promoting that column as the primary key, you must ensure that the values in the event_id are unique.</li>
+                <textarea  rows= "3" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    ALTER TABLE sales.events
+                    ADD PRIMARY KEY(event_id);
+                </textarea>
+            </ul>
+        <h3 style="color:red"><b>2) Foreign Key</b></h3>
+            <ul>
+                <li>A foreign key is a column or a group of columns in one table that uniquely identifies a row of another table (or the same table in case of self-reference).</li>
+                <textarea  rows= "8" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                        CONSTRAINT fk_constraint_name
+                        FOREIGN KEY (column_1, column2,...)
+                        REFERENCES parent_table_name(column1,column2,..)
+                    Or
+
+                        FOREIGN KEY (column_1, column2,...)
+                        REFERENCES parent_table_name(column1,column2,..)
+                </textarea>
+                <ul>
+                    <li>First, specify the FOREIGN KEY constraint name after the CONSTRAINT keyword. The constraint name is optional.<br>
+                    If you do not specified the constraint name, SQL will automatically generate the name for the FOREIGN KEY constraint.</li>
+                    <li>Second, specify a list of comma-separated foreign key columns enclosed by parentheses after the FOREIGN KEY keyword.</li>
+                    <li>Third, specify the name of the parent table that has a link with the column in the child table.</li>
+                </ul>
+                <textarea  rows= "8" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE TABLE procurement.vendors (
+                        vendor_id INT IDENTITY PRIMARY KEY,
+                        vendor_name VARCHAR(100) NOT NULL,
+                        group_id INT NOT NULL,
+                        CONSTRAINT fk_group FOREIGN KEY (group_id)
+                        REFERENCES procurement.vendor_groups(group_id)
+                        );
+                </textarea>
+                <ul>
+                    <li>The vendor_groups table now is called the parent table that is the table to which the foreign key constraint references.</li>
+                    <li>The vendors table is called the child table that is the table to which the foreign key constraint is applied.</li>
+                    <li>The relationship between the vendor_groups and vendors tables is one-to-many. That means For each row in the  vendors table,<br>
+                        you can always find a corresponding row in the vendor_groups table.</li>
+                </ul>
+                <h4 style="color:blue"><b>* Referential Actions</b></h4>
+                    <ul>
+                        <li><span style="color:red"><b>The foreign key constraint ensures referential integrity. It means that you can only insert a row into the child table if there is a corresponding row in the parent table.</b></span></li>
+                        <li>Besides, the foreign key constraint allows you to define the referential actions when the row in the parent table is updated or deleted.</li>
+                        <textarea  rows= "5" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            FOREIGN KEY (foreign_key_columns)
+                            REFERENCES parent_table(parent_key_columns)
+                            ON UPDATE action
+                            ON DELETE action;
+                        </textarea>
+                        <h5 style="color:red"><b>*actions of rows in the parent table</b></h5>
+                            <ul>
+                                <li><b>NO ACTION</b> : SQL Server raises an error and rolls back the delete/ update action on the row in the parent table.</li>
+                                <li><b>CASCADE</b> : SQL Server deletes the rows in the child table that is corresponding to the row deleted/ updated from the parent table.</li>
+                                <li><b>SET NULL</b> : SQL Server sets the rows in the child table to NULL if the corresponding rows in the parent table are deleted/ updated. To execute this action, <br>
+                                    the foreign key columns must be nullable.</li>
+                                <li><b>SET DEFAULT</b> : SQL Server sets the rows in the child table to their default values if the corresponding rows in the parent table are deleted/ updated. <br>
+                                    To execute this action, the foreign key columns must have default definitions. Note that a nullable column has a default value of NULL if no default value specified.</li>
+                                <li style="color:red"><b>By default, SQL Server appliesON DELETE NO ACTION if you don’t explicitly specify any action.</b></li>
+                            </ul>
+                    </ul>
+            </ul>
+        <h3 style="color:red"><b>3) Not NULL Constraint</b></h3>
+            <ul>
+                <textarea  rows= "8" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE TABLE hr.persons(
+                        person_id INT IDENTITY PRIMARY KEY,
+                        first_name VARCHAR(255) NOT NULL,
+                        last_name VARCHAR(255) NOT NULL,
+                        email VARCHAR(255) NOT NULL,
+                        phone VARCHAR(20)
+                        );
+                </textarea>
+                <li>The SQL Server NOT NULL constraints simply specify that a column must not assume the NULL.</li>
+                <li><b>Note that the NOT NULL constraints are always written as column constraints.</b></li>
+                <li>By default, if you don’t specify the NOT NULL constraint, SQL Server will allow the column to accepts NULL. In this example, the phone column can accept NULL.</li>
+                <h5 style="color:red"><b>* Add NOT NULL constraint to an existing column</b></h5>
+                    <ul>
+                        <textarea  rows= "6" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            UPDATE table_name
+                                SET column_name = 'value'
+                                WHERE column_name IS NULL;
+                            ALTER TABLE table_name
+                                ALTER COLUMN column_name data_type NOT NULL;
+                        </textarea>
+                        <li>First, update the table so there is no NULL in the column.</li>
+                        <li>Second, alter the table to change the property of the column.</li>
+                    </ul>
+                        </textarea>
+                <h5 style="color:red"><b>* Removing NOT NULL constraint</b></h5>
+                        <textarea  rows= "3" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            ALTER TABLE table_name
+                            ALTER COLUMN column_name data_type NULL;
+                        </textarea>
+            </ul>
+        <h3 style="color:red"><b>4) Unique Constraint</b></h3>
+            <ul>
+                <li>SQL Server UNIQUE constraints allow you to ensure that the data stored in a column, or a group of columns, is unique among the rows in a table.</li>
+                <textarea  rows= "8" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE TABLE hr.persons(
+                        person_id INT IDENTITY PRIMARY KEY,
+                        first_name VARCHAR(255) NOT NULL,
+                        last_name VARCHAR(255) NOT NULL,
+                        email VARCHAR(255) UNIQUE
+                        );
+                </textarea>
+                <textarea  rows= "8" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE TABLE hr.persons(
+                        person_id INT IDENTITY PRIMARY KEY,
+                        first_name VARCHAR(255) NOT NULL,
+                        last_name VARCHAR(255) NOT NULL,
+                        email VARCHAR(255),
+                        UNIQUE(email)
+                        );
+                </textarea>
+                <li>Behind the scenes, SQL Server automatically creates a UNIQUE index to enforce the uniqueness of data stored in the columns that participate in the UNIQUE constraint.<br>
+                    Therefore, if you attempt to insert a duplicate row, SQL Server rejects the change and returns an error message stating that the UNIQUE constraint has been violated.</li>
+                <li>To assign a particular name to a UNIQUE constraint, you use the CONSTRAINT keyword as follows:</li>
+                <textarea  rows= "8" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE TABLE hr.persons (
+                        person_id INT IDENTITY PRIMARY KEY,
+                        first_name VARCHAR(255) NOT NULL,
+                        last_name VARCHAR(255) NOT NULL,
+                        email VARCHAR(255),
+                        CONSTRAINT unique_email UNIQUE(email)
+                        );
+                </textarea>
+                <h5 style="color:red"><b>* UNIQUE constraint vs. PRIMARY KEY constraint</b></h5>
+                    <ul>
+                        <li>Although both UNIQUE and PRIMARY KEY constraints enforce the uniqueness of data, you should use the UNIQUE constraint instead of PRIMARY KEY constraint <br>
+                            when you want to enforce the uniqueness of a column, or a group of columns, that are not the primary key columns.</li>
+                        <li>Different from PRIMARY KEY constraints, UNIQUE constraints allow NULL. Moreover, UNIQUE constraints treat the NULL as a regular value, therefore, it <span style="color:red"><b>allows one NULL per column.</b></span></li>
+                    </ul>
+                <h5 style="color:red"><b>* UNIQUE constraints for a group of columns</b></h5>
+                    <ul>
+                        <li>To define a UNIQUE constraint for a group of columns, you write it as a table constraint with column names separated by commas.</li>
+                        <textarea  rows= "9" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            CREATE TABLE table_name (
+                                key_column data_type PRIMARY KEY,
+                                column1 data_type,
+                                column2 data_type,
+                                column3 data_type,
+                                ...,
+                                UNIQUE (column1,column2)
+                            );
+                        </textarea>
+                    </ul>
+                <h5 style="color:red"><b>* Add UNIQUE constraints to existing columns</b></h5>
+                    <ul>
+                        <li>When you add a UNIQUE constraint to an existing column or a group of columns in a table, SQL Server first examines the existing data<br>
+                            in these columns to ensure that all values are unique. If SQL Server finds the duplicate values, then it returns an error and does not add the UNIQUE constraint.</li>
+                        <textarea  rows= "4" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            ALTER TABLE table_name
+                            ADD CONSTRAINT constraint_name
+                            UNIQUE(column1, column2,...);
+                        </textarea>
+                    </ul>
+                <h5 style="color:red"><b>* Delete UNIQUE constraints</b></h5>
+                    <ul>
+                        <li>To delete a UNIQUE constraint, you use the ALTER TABLE DROP CONSTRAINT statement </li>
+                        <textarea  rows= "3" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            ALTER TABLE table_name
+                            DROP CONSTRAINT constraint_name;
+                        </textarea>
+                    </ul>
+                <h5 style="color:red"><b>* Delete UNIQUE constraints</b></h5>
+                    <ul>
+                        <li>SQL Server does not have any direct statement to modify a UNIQUE constraint, therefore, you need to drop the constraint first and recreate it if you want to change the constraint.</li>
+                    </ul>
+            </ul>
+        <h3 style="color:red"><b>5) CHECK Constraint</b></h3>
+            <ul>
+                <li>The CHECK constraint allows you to specify the values in a column that must satisfy a Boolean expression.</li>
+                <textarea  rows= "9" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE SCHEMA test;
+                    GO
+
+                        CREATE TABLE test.products(
+                            product_id INT IDENTITY PRIMARY KEY,
+                            product_name VARCHAR(255) NOT NULL,
+                            unit_price DEC(10,2) CHECK(unit_price > 0)
+                        );
+                </textarea>
+                <li>The CHECK constraint definition comes after the data type. It consists of the keyword CHECK followed by a logical expression in parentheses</li>
+                <li>You can also assign the constraint a separate name by using the CONSTRAINT keyword</li>
+                <textarea  rows= "9" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE SCHEMA test;
+                    GO
+
+                        CREATE TABLE test.products(
+                            product_id INT IDENTITY PRIMARY KEY,
+                            product_name VARCHAR(255) NOT NULL,
+                            unit_price DEC(10,2) CONSTRAINT positive_price CHECK(unit_price > 0)
+                        );
+                </textarea>
+                <li>If you don’t specify a constraint name this way, SQL Server automatically generates a name for you.</li>
+                <h5 style="color:red"><b>* SQL Server CHECK constraint and NULL</b></h5>
+                    <ul>
+                        <li>The CHECK constraints reject values that cause the Boolean expression evaluates to FALSE.</li>
+                        <li>Because NULL evaluates to UNKNOWN, it can be used in the expression to bypass a constraint.</li>
+                    </ul>
+                <h5 style="color:red"><b>* CHECK constraint referring to multiple columns</b></h5>
+                    <ul>
+                        <textarea  rows= "8" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            CREATE TABLE test.products(
+                                product_id INT IDENTITY PRIMARY KEY,
+                                product_name VARCHAR(255) NOT NULL,
+                                unit_price DEC(10,2) CHECK(unit_price > 0),
+                                discounted_price DEC(10,2) CHECK(discounted_price > 0),
+                                CHECK(discounted_price < unit_price)
+                            );
+                        </textarea>
+                        <li>Or</li>
+                        <textarea  rows= "10" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            CREATE TABLE test.products(
+                                product_id INT IDENTITY PRIMARY KEY,
+                                product_name VARCHAR(255) NOT NULL,
+                                unit_price DEC(10,2),
+                                discounted_price DEC(10,2),
+                                CHECK(unit_price > 0),
+                                CHECK(discounted_price > 0),
+                                CHECK(discounted_price > unit_price)
+                            );
+                        </textarea>
+                        <li>Or even :</li>
+                        <textarea  rows= "10" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            CREATE TABLE test.products(
+                                product_id INT IDENTITY PRIMARY KEY,
+                                product_name VARCHAR(255) NOT NULL,
+                                unit_price DEC(10,2),
+                                discounted_price DEC(10,2),
+                                CHECK(unit_price > 0),
+                                CHECK(discounted_price > 0 AND discounted_price > unit_price)
+                            );
+                        </textarea>
+                        <li>You can also assign a name to a table constraint in the same way as a column constraint:</li>
+                        <textarea  rows= "10" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            CREATE TABLE test.products(
+                                product_id INT IDENTITY PRIMARY KEY,
+                                product_name VARCHAR(255) NOT NULL,
+                                unit_price DEC(10,2),
+                                discounted_price DEC(10,2),
+                                CHECK(unit_price > 0),
+                                CHECK(discounted_price > 0),
+                                CONSTRAINT valid_prices CHECK(discounted_price > unit_price)
+                            );
+                        </textarea>
+                        <li style="color:red"><b>Note that you can write column constraints as table constraints. However, you cannot write table constraints as column constraints.</b></li>
+                    </ul>
+                <h5 style="color:red"><b>* Add CHECK constraints to an existing table</b></h5>
+                    <ul>
+                        <li>To add a CHECK constraint to an existing table, you use the ALTER TABLE ADD CONSTRAINT statement.</li>
+                        <textarea  rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            ALTER TABLE test.products
+                            ADD CONSTRAINT positive_price CHECK(unit_price > 0);
+                        </textarea>
+                    </ul>
+                <h5 style="color:red"><b>* Remove CHECK constraints</b></h5>
+                    <ul>
+                        <li>To remove a CHECK constraint, you use the ALTER TABLE DROP CONSTRAINT statement:</li>
+                        <li>If you assign a CHECK constraint a specific name, you can refer the name in the statement.</li>
+                        <textarea  rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            ALTER TABLE table_name
+                            DROP CONSTRAINT constraint_name;
+                        </textarea>
+                        <li>However, in case you did not assign the CHECK constraint a particular name, then you need to find it using the following statement:</li>
+                        <textarea  rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            EXEC sp_help 'table_name';
+                        </textarea><br>
+                        <img src="{% static 'IMG\checkinfor.png'%}" width="900", height="150">
+                    </ul>
+                <h5 style="color:red"><b>* Disable CHECK constraints for insert or update</b></h5>
+                    <ul>
+                        <textarea  rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            ALTER TABLE table_name
+                            NOCHECK CONSTRAINT constraint_name;
+                        </textarea>
+                    </ul>
+            </ul>
+    </ul>
+<h1 style="color:#3A578F">Section 15. Expressions</h1>
+    <ul>
+        <h3 style="color:red"><b>1) CASE</b></h3>
+            <ul>
+                <li>SQL Server CASE expression evaluates a list of conditions and returns one of the multiple specified results.</li>
+                <li>The CASE expression has two formats: simple CASE expression and searched CASE expression. Both of CASE expression formats support an optional ELSE statement.</li>
+                <h5 style="color:red"><b>* SQL Server simple CASE expression</b></h5>
+                    <ul>
+                        <textarea  rows= "11" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            CASE input
+                                WHEN e1 THEN r1
+                                WHEN e2 THEN r2
+                                ...
+                                WHEN en THEN rn
+                                [ ELSE re ]
+                            END
+                        </textarea>
+                        <textarea  rows= "11" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                CASE order_status
+                                    WHEN 1 THEN 'Pending'
+                                    WHEN 2 THEN 'Processing'
+                                    WHEN 3 THEN 'Rejected'
+                                    WHEN 4 THEN 'Completed'
+                                END AS order_status,
+                                COUNT(order_id) order_count
+                            FROM
+                                sales.orders
+                        </textarea>
+                        <ul>
+                            <li>The simple CASE expression compares the input expression (input) to an expression (ei) in each WHEN clause for equality.</li>
+                            <li>If the input expression equals an expression (ei) in the WHEN clause, the result (ri) in the corresponding THEN clause is returned.</li>
+                            <li>If the input expression does not equal to any expression and the ELSE clause is available, the CASE expression will return the result in the ELSE clause (re).</li>
+                            <li>In case the ELSE clause is omitted and the input expression does not equal to any expression in the WHEN clause, the CASE expression will return NULL.</li>
+                        </ul>
+                    </ul>
+                <h5 style="color:red"><b>* SQL Server searched CASE expression</b></h5>
+                    <ul>
+                        <textarea  rows= "8" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            CASE
+                                WHEN e1 THEN r1
+                                WHEN e2 THEN r2
+                                ...
+                                WHEN en THEN rn
+                                [ ELSE re ]
+                            END
+                        </textarea>
+                        <ul>
+                            <li>e1, e2, …ei, … en are Boolean expressions.</li>
+                            <li>r1, r2, …ri,…, or rn is one of the possible results.</li>
+                        </ul>
+                        <li>The searched CASE expression evaluates the Boolean expression in each WHEN clause in the specified<br>
+                            order and returns the result (ri) if the Boolean expression (ei) evaluates to TRUE.</li>
+                        <li>If no Boolean expression evaluates to TRUE, the searched CASE expression returns the result (re) in the ELSE <br>
+                            clause or NULL if the ELSE clause is not specified.</li>
+                    </ul>
+            </ul>
+        <h3 style="color:red"><b>2) COALESCE</b></h3>
+            <ul>
+                <li>The SQL Server COALESCE expression accepts a number of arguments, evaluates them in sequence, and returns the first non-null argument.</li>
+                <textarea  rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    COALESCE(e1,[e2,...,en])
+                </textarea>
+                <ul>
+                    <li>In this syntax, e1, e2, … en are scalar expressions that evaluate to scalar values.</li>
+                    <li>The COALESCE expression returns the first non-null expression.</li>
+                    <li>If all expressions evaluate to NULL, then the COALESCE expression return NULL.</li>
+                </ul>
+                <li>Because the COALESCE is an expression, you can use it in any clause that accepts an expression such as SELECT, WHERE, GROUP BY, and HAVING.</li>
+                <h5 style="color:red"><b>* Using SQL Server COALESCE expression with character string data</b></h5>
+                    <ul>
+                        <textarea  rows= "3" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                COALESCE(NULL, 'Hi', 'Hello', NULL) result;
+                        </textarea>
+                    </ul>
+                <h5 style="color:red"><b>* Using SQL Server COALESCE expression with the numeric data</b></h5>
+                    <ul>
+                        <textarea  rows= "3" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                COALESCE(NULL, NULL, 100, 200) result;
+                        </textarea>
+                    </ul>
+                <h5 style="color:red"><b>* Using SQL Server COALESCE expression to substitute NULL by new values</b></h5>
+                    <ul>
+                        <textarea  rows= "8" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                first_name,
+                                last_name,
+                                COALESCE(phone,'N/A') phone,
+                                email
+                            FROM
+                                sales.customers ;
+                        </textarea>
+                        <li>To make the output more business friendly, you can use the COALESCE expression to substitute NULL by the string N/A (not available).</li>
+                    </ul>
+                <h5 style="color:red"><b>* Using SQL Server COALESCE expression to use the available data</b></h5>
+                    <ul>
+                        <textarea  rows= "10" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                staff_id,
+                                COALESCE(
+                                    hourly_rate*22*8,
+                                    weekly_rate*4,
+                                    monthly_rate
+                                ) monthly_salary
+                            FROM
+                                salaries;
+                        </textarea>
+                    </ul>
+                <h5 style="color:red"><b>* COALESCE vs. CASE expression</b></h5>
+                    <ul>
+                        <li>The COALESCE expression is a syntactic sugar of the CASE expression.</li>
+                        <li></li>
+                        <textarea  rows= "8" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            COALESCE(e1,e2,e3)
+
+                            CASE
+                                WHEN e1 IS NOT NULL THEN e1
+                                WHEN e2 IS NOT NULL THEN e2
+                                ELSE e3
+                            END
+                        </textarea>
+                        <li>Note that the query optimizer may use the CASE expression to rewrite the COALESCE expression.</li>
+                    </ul>
+            </ul>
+        <h3 style="color:red"><b>3) NULLIF</b></h3>
+            <ul>
+                <li>The NULLIF expression accepts two arguments and returns NULL if two arguments are equal.<span style="color:red"><b>Otherwise, it returns the first expression.</b></span></li>
+                <textarea  rows= "2" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    NULLIF(expression1, expression2)
+                </textarea>
+                <li>In this syntax, the expression1 and expression2 are scalar expressions. It means each of them evaluates to a scalar value.</li>
+                <li>It is recommended that you not use the time-dependent functions such as RAND() function in the NULLIF function. <br>
+                    Because this may cause the function to be evaluated twice and to yield different results from the two function calls.</li>
+                <h5 style="color:red"><b>* Using NULLIF expression with numeric data</b></h5>
+                    <ul>
+                        <textarea  rows= "3" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                NULLIF(10, 10);
+                        </textarea>
+                    </ul>
+                <h5 style="color:red"><b>* Using NULLIF expression with character string data</b></h5>
+                    <ul>
+                        <textarea  rows= "3" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                NULLIF('Hello', 'Hi') result;
+                        </textarea>
+                    </ul>
+                <h5 style="color:red"><b>* Using NULLIF expression to translate a blank string to NULL</b></h5>
+                    <ul>
+                        <textarea  rows= "3" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            WHERE
+                                NULLIF(column_name,'') IS NULL;
+                        </textarea>
+                        <li>Note that you may encounter a situation like this a lot if you are working with legacy databases.</li>
+                    </ul>
+                <h5 style="color:red"><b>* NULLIF and CASE</b></h5>
+                    <ul>
+                        <textarea  rows= "7" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                NULLIF(a,b);
+                            CASE
+                                WHEN a=b THEN NULL
+                                ELSE a
+                            END;
+                        </textarea>
+                        <li>The CASE expression is verbose while the NULLIF expression is much shorter and more readable.</li>
+                    </ul>
+            </ul>
+    </ul>
+</body>
+</html>

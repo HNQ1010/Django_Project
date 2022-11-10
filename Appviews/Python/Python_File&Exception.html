@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>File&Exception</title>
+</head>
+<body>
+<h1 style="color: blue;">IX) FILE AND EXCEPTIONS</h1>
+<h1 style="text-align:center">FILES</h1>
+<h3> 1) Reading from a File</h3>
+<ul style="color:blue"><b>Reading an Entire File</b></ul>
+    <textarea style="color: #DC7633" rows="5" cols="50">
+    pi_digits.txt
+        3.1415926535
+            8979323846
+            2643383279
+    </textarea>
+    <textarea style="color: #DC7633" rows="5" cols="80">
+    file_reader.py
+        with open('pi_digits.txt') as file_object:
+        contents = file_object.read()
+        print(contents)
+    </textarea>
+<p>The open() function needs one argument: the name of the file you want to open. Python looks for this file in the directory <br>
+<span style="color:red">where the program that’s currently being executed is stored</span>. In this example, file_reader.py is currently running, so Python looks<br>
+for pi_digits.txt in the directory where file_reader.py is stored. The open() function returns an object representing the file. <br>
+Here, open('pi_digits.txt') returns an object representing pi_digits.txt.<span style="color:red">Python stores this object in file_object</span> </p>
+<ul style="color:blue"><b>File Paths</b></ul>
+    <textarea style="color: #DC7633" rows="5" cols="50">
+    pi_digits.txt
+        3.1415926535
+            8979323846
+            2643383279
+    </textarea>
+<p>Sometimes, depending on how you organize your work, the file you want to open won’t be in the same directory as your <br>
+program file.To get Python to open files from a directory other than the one where your program file is stored, you need to<br>
+provide a file path, which tells Python to look in a specific location on your system.</p>
+    <textarea style="color: #DC7633" rows="2" cols="100">
+        with open('text_files/filename.txt') as file_object:
+    </textarea>
+<p>You can also tell Python <span style="color:red">exactly</span> where the file is on your computer regardless of where the program that’s being executed<br>
+is stored. This is called an <span style="color:red"><b>absolute FILE PATH</b></span>.</p>
+    <textarea style="color: #DC7633" rows="3" cols="100">
+        file_path = 'C:\Users\ehmatthes\other_files\text_files\filename.txt'
+        with open(file_path) as file_object:
+    </textarea>
+<ul style="color:blue"><b>Reading Line by Line</b></ul>
+    <textarea style="color: #DC7633" rows="5" cols="50">
+    filename = 'pi_digits.txt'
+    with open(filename) as file_object:
+    for line in file_object:
+        print(line)
+    </textarea>
+<ul style="color:blue"><b>Making a List of Lines from a File</b></ul>
+    <textarea style="color: #DC7633" rows="6" cols="50">
+    filename = 'pi_digits.txt'
+    with open(filename) as file_object:
+        lines = file_object.readlines()
+    for line in lines:
+        print(line.rstrip())
+    </textarea>
+<ul style="color:blue"><b>Working with a File’s Contents</b></ul>
+    <textarea style="color: #DC7633" rows="7" cols="50">
+    filename = 'pi_digits.txt'
+    with open(filename) as file_object:
+        lines = file_object.readlines()
+    pi_string = ''
+    for line in lines:
+        pi_string += line.rstrip()
+    </textarea>
+
+<h3> 2) Writing to a File</h3>
+<ul style="color:blue"><b>Writing to an Empty File</b></ul>
+    <textarea style="color: #DC7633" rows="5" cols="50">
+        filename = 'programming.txt'
+        with open(filename, 'w') as file_object:
+            file_object.write("I love programming.")
+    </textarea>
+<p>The first argument is still the name of the file we want to open.<br>
+    <ul style="color:red"> <b>   'w'  :write mode<br>
+            'r'  :read mode<br>
+            'a'  :append mode<br>
+            'r+' :read and write mode</b>
+    </ul>
+</p>
+<p style="color:red"><i>*Python can only write strings to a text file. If you want to store numerical data in a
+text file, <br>you’ll have to convert the data to string format first using the str() function.</i></p>
+<ul style="color:blue"><b>Writing Multiple Lines</b></ul>
+    <textarea style="color: #DC7633" rows="5" cols="80">
+        filename = 'programming.txt'
+        with open(filename, 'w') as file_object:
+            file_object.write("I love programming.\n")
+            file_object.write("I love creating new games.\n")
+    </textarea>
+<ul style="color:blue"><b>Appending to a File</b></ul>
+    <textarea style="color: #DC7633" rows="5" cols="80">
+        filename = 'programming.txt'
+        with open(filename, 'a') as file_object:
+            file_object.write("I also love finding meaning in large datasets.\n")
+            file_object.write("I love creating apps that can run in a browser.\n")
+    </textarea>
+<p style="color:red"><b><i>If you want to add content to a file instead of writing over existing content,
+you can open the file in append mode.</i></b></p>
+
+<h2 style="text-align:center">EXCEPTIONS</h2>
+<p>Python uses special objects called exceptions to manage errors that arise during a program’s execution.</p>
+<h3> 1) ZeroDivisionError Exception</h3>
+    <textarea style="color: #DC7633" rows="5" cols="100">
+        Traceback (most recent call last):
+            File "division.py", line 1, in <module>
+            print(5/0)
+            ZeroDivisionError: division by zero
+    </textarea>
+<h3> 2) Using try-except Blocks</h3>
+    <textarea style="color: #DC7633" rows="5" cols="100">
+        try:
+            print(5/0)
+        except ZeroDivisionError:
+            print("You can't divide by zero!")
+    </textarea>
+<h3> 3) Using Exceptions to Prevent Crashes</h3>
+     <textarea style="color: #DC7633" rows="12" cols="100">
+        print("Give me two numbers, and I'll divide them.")
+        print("Enter 'q' to quit.")
+        while True:
+            first_number = input("\nFirst number: ")
+            if first_number == 'q':
+                break
+            second_number = input("Second number: ")
+            if second_number == 'q':
+                break
+            answer = int(first_number) / int(second_number)
+            print(answer)
+    </textarea>
+<h3> 4) The else Block</h3>
+     <textarea style="color: #DC7633" rows="14" cols="100">
+        print("Give me two numbers, and I'll divide them.")
+        print("Enter 'q' to quit.")
+        while True:
+            first_number = input("\nFirst number: ")
+            if first_number == 'q':
+                break
+            second_number = input("Second number: ")
+            try:
+                answer = int(first_number) / int(second_number)
+            except ZeroDivisionError:
+                print("You can't divide by 0!")
+            else:
+                print(answer)
+    </textarea>
+<h3> 5) Handling the FileNotFoundError Exception</h3>
+     <textarea style="color: #DC7633" rows="9" cols="80">
+            filename = 'alice.txt'
+            with open(filename) as f_obj:
+                contents = f_obj.read()
+         #Python can’t read from a missing file, so it raises an exception:
+            Traceback (most recent call last):
+            File "alice.py", line 3, in <module>
+            with open(filename) as f_obj:
+            FileNotFoundError: [Errno 2] No such file or directory: 'alice.txt'
+    </textarea>
+     <textarea style="color: #DC7633" rows="9" cols="80">
+            try:
+                with open(filename) as f_obj:
+                contents = f_obj.read()
+            except FileNotFoundError:
+                msg = "Sorry, the file " + filename + " does not exist."
+                print(msg)
+    </textarea>
+<h3> 6) Analyzing Text</h3>
+     <textarea style="color: #DC7633" rows="13" cols="100">
+            filename = 'alice.txt'
+            try:
+                with open(filename) as f_obj:
+                contents = f_obj.read()
+            except FileNotFoundError:
+                msg = "Sorry, the file " + filename + " does not exist."
+                print(msg)
+            else:
+            # Count the approximate number of words in the file.
+                words = contents.split()
+                num_words = len(words)
+                print("The file " + filename + " has about " + str(num_words) + " words.")
+    </textarea>
+<h3> 7) Working with Multiple Files</h3>
+     <textarea style="color: #DC7633" rows="14" cols="100">
+            def count_words(filename):
+                try:
+                    with open(filename) as f_obj:
+                    contents = f_obj.read()
+                except FileNotFoundError:
+                    msg = "Sorry, the file " + filename + " does not exist."
+                    print(msg)
+                else:
+                    words = contents.split()
+                    num_words = len(words)
+                    print("The file " + filename + " has about " + str(num_words) + " words.")
+            filename = 'alice.txt'
+            count_words(filename)
+    </textarea>
+<h3> 8) Failing Silently</h3>
+     <textarea style="color: #DC7633" rows="11" cols="100">
+            def count_words(filename):
+                try:
+                    --snip--
+                except FileNotFoundError:
+                    pass
+                else:
+                    --snip--
+            fileNames = ['alice.txt', 'siddhartha.txt', 'moby_dick.txt', 'little_women.txt']
+            for filename in fileNames:
+               count_words(filename)
+    </textarea>
+<h1 style="text-align:center">Storing Data</h1>
+<p>When users close a program, you’ll almost always want to save the information
+they entered.<br> A simple way to do this involves storing your data using the
+    <span style="color:red"><b>JSON module</b></span>.</p>
+<p>The JSON (JavaScript Object Notation) format was originally developed for JavaScript.
+However, it has since become a common format used by many languages, including
+Python.</p>
+
+
+<h3> 1) Reading from a File</h3>
+<ul style="color:blue"><b>Using json.dump() and json.load()</b></ul>
+    <textarea style="color: #DC7633" rows="6" cols="50">
+            import json
+            numbers = [2, 3, 5, 7, 11, 13]
+            filename = 'numbers.json'
+            with open(filename, 'w') as f_obj:
+       *         json.dump(numbers, f_obj)
+    </textarea>
+<p style="color:red"><b>At * we use the json.dump()
+    function to store the list numbers in the file numbers.json</b></p>
+    <textarea style="color: #DC7633" rows="5" cols="50">
+            import json
+            filename = 'numbers.json'
+            with open(filename) as f_obj:
+                numbers = json.load(f_obj)
+    </textarea>
+<p style="color:red"><b>Now we’ll write a program that uses json.load() to read the list back into
+memory:
+</b></p>
+<ul style="color:blue"><b>Saving and Reading User-Generated Data</b></ul>
+    <textarea style="color: #DC7633" rows="13" cols="100">
+            import json
+            filename = 'username.json'
+            try:
+                with open(filename) as f_obj:
+                username = json.load(f_obj)
+            except FileNotFoundError:
+                username = input("What is your name? ")
+                with open(filename, 'w') as f_obj:
+                json.dump(username, f_obj)
+                print("We'll remember you when you come back, " + username + "!")
+            else:
+                print("Welcome back, " + username + "!")
+    </textarea>
+<ul style="color:blue"><b>Refactoring</b></ul>
+<p>Often, you’ll come to a point where your code will work, but you’ll recognize that you could improve the code by breaking<br>
+it up into a series of functions that have specific jobs. This process is called refactoring.</p>
+    <textarea style="color: #DC7633" rows="15" cols="100">
+        import json
+        def greet_user():
+            filename = 'username.json'
+            try:
+                with open(filename) as f_obj:
+                username = json.load(f_obj)
+            except FileNotFoundError:
+                username = input("What is your name? ")
+                with open(filename, 'w') as f_obj:
+                json.dump(username, f_obj)
+                print("We'll remember you when you come back, " + username + "!")
+            else:
+                print("Welcome back, " + username + "!")
+        greet_user()
+    </textarea>
+<p>Let’s refactor greet_user() so it’s not doing so many different tasks.
+We’ll start by moving the code for retrieving<br> a stored username to a separate function:</p>
+
+    <textarea style="color: #DC7633" rows="23" cols="100">
+        def get_stored_username():
+            filename = 'username.json'
+            try:
+                with open(filename) as f_obj:
+                username = json.load(f_obj)
+            except FileNotFoundError:
+                return None
+            else:
+                return username
+
+        def greet_user():
+            username = get_stored_username()
+            if username:
+                print("Welcome back, " + username + "!")
+            else:
+                username = input("What is your name? ")
+                filename = 'username.json'
+            with open(filename, 'w') as f_obj:
+                json.dump(username, f_obj)
+                print("We'll remember you when you come back, " + username + "!")
+        greet_user()
+    </textarea>
+<p>We should factor one more block of code out of greet_user(). If the
+username doesn’t exist, we should move the code <br>that prompts for a
+new username to a function dedicated to that purpose:</p>
+    <textarea style="color: #DC7633" rows="18" cols="100">
+            import json
+            def get_stored_username():
+                --snip--
+            def get_new_username():
+                username = input("What is your name? ")
+                filename = 'username.json'
+                with open(filename, 'w') as f_obj:
+                    json.dump(username, f_obj)
+                    return username
+            def greet_user():
+                username = get_stored_username()
+                if username:
+                    print("Welcome back, " + username + "!")
+                else:
+                    username = get_new_username()
+                print("We'll remember you when you come back, " + username + "!")
+            greet_user()
+    </textarea>
+</body>
+</html>

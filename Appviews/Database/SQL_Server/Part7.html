@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>SQL Server Triggers</title>
+</head>
+<body>
+<h1 style="text-align:center; color:red">SQL Server Triggers</h1>
+    <ul>
+        <li>SQL Server triggers are special stored procedures that are executed automatically in response to the database<br>
+            object, database, and server events. SQL Server provides three type of triggers:</li>
+        <ul>
+            <li>Data manipulation language (DML) triggers which are invoked automatically in response to INSERT, UPDATE, and DELETE events against tables.</li>
+            <li>Data definition language (DDL) triggers which fire in response to CREATE, ALTER, and DROP statements. <br>
+                DDL triggers also fire in response to some system stored procedures that perform DDL-like operations.</li>
+            <li>Logon triggers which fire in response to LOGON events</li>
+        </ul>
+        <h3 style="color:red">1) Creating A Trigger In SQL Server</h3>
+            <ul>
+                <li>The CREATE TRIGGER statement allows you to create a new trigger that is fired automatically whenever an event such as INSERT, DELETE, or UPDATE occurs against a table.</li>
+                <textarea rows= "7" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE TRIGGER [schema_name.]trigger_name
+                        ON table_name
+                        AFTER  {[INSERT],[UPDATE],[DELETE]}
+                        [NOT FOR REPLICATION]
+                        AS
+                        {sql_statements}
+                </textarea>
+                <ul>
+                    <li><b>schema_name</b> : is the name of the schema to which the new trigger belongs. The schema name is optional.</li>
+                    <li><b>trigger_name</b> is the user-defined name for the new trigger.</li>
+                    <li><b>table_name </b> : is the table to which the trigger applies.</li>
+                    <li><b>AFTER</b> : is the event could be INSERT, UPDATE, or DELETE. A single trigger can fire in response to one or more actions against the table.</li>
+                    <li><b>NOT FOR REPLICATION</b> : option instructs SQL Server not to fire the trigger when data modification is made as part of a replication process.<br>
+                        “Not for Replication” is a property which can be set for different objects like Check constraints, Foreign Key constraints, Triggers , Identity columns etc<br>
+                        while using SQL Server Replication.</li>
+                    <li>The sql_statements is one or more Transact-SQL used to carry out actions once an event occurs.</li>
+                </ul>
+                <h4 style="color:blue"><b>* “Virtual” tables for triggers: INSERTED and DELETED</b></h4>
+                    <ul>
+                        <li>SQL Server provides two virtual tables that are available specifically for triggers called INSERTED and DELETED tables. </li>
+                        <li> SQL Server uses these tables to capture the data of the modified row before and after the event occurs.</li>
+                        <li>The following table shows the content of the INSERTED and DELETED tables before and after each event:</li>
+                        <img src="{% static 'IMG\Screenshot 2021-09-10 163224.png'%}"><br>
+                    </ul>
+                <li><b>Create a table for logging the changes</b></li>
+                    <textarea rows= "13" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        CREATE TABLE production.product_audits(
+                                change_id INT IDENTITY PRIMARY KEY,
+                                product_id INT NOT NULL,
+                                product_name VARCHAR(255) NOT NULL,
+                                brand_id INT NOT NULL,
+                                category_id INT NOT NULL,
+                                model_year SMALLINT NOT NULL,
+                                list_price DEC(10,2) NOT NULL,
+                                updated_at DATETIME NOT NULL,
+                                operation CHAR(3) NOT NULL,
+                                CHECK(operation = 'INS' or operation='DEL')
+                            );
+                    </textarea>
+                <li><b>Creating DML trigger</b></li>
+                    <textarea rows= "41" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        CREATE TRIGGER production.trg_product_audit     --trigger_name
+                            ON production.products                      --table_name
+                            AFTER INSERT, DELETE                        --events
+                            AS                                          --alias
+                            BEGIN                                       --start transaction
+                                SET NOCOUNT ON;                         --message (x rows affected) is not returned
+                                INSERT INTO production.product_audits   --insert statement for trigger table
+                                (   product_id,
+                                    product_name,
+                                    brand_id,
+                                    category_id,
+                                    model_year,
+                                    list_price,
+                                    updated_at,
+                                    operation
+                                )
+                                SELECT                                  --values from insert events
+                                    i.product_id,
+                                    product_name,
+                                    brand_id,
+                                    category_id,
+                                    model_year,
+                                    i.list_price,
+                                    GETDATE(),
+                                    'INS'
+                                FROM
+                                    inserted i
+                                UNION ALL                               --alias between insert and delete event
+                                SELECT                                  --values from delete events
+                                    d.product_id,
+                                    product_name,
+                                    brand_id,
+                                    category_id,
+                                    model_year,
+                                    d.list_price,
+                                    GETDATE(),
+                                    'DEL'
+                                FROM
+                                    deleted d;
+                            END
+                    </textarea>
+                <li><b>Testing the trigger</b></li>
+                    <ul>
+                        <li>First, inserts a new row into the production.products table:</li>
+                        <textarea rows= "15" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            INSERT INTO production.products(
+                                    product_name,
+                                    brand_id,
+                                    category_id,
+                                    model_year,
+                                    list_price
+                                )
+                            VALUES (
+                                    'Test product',
+                                    1,
+                                    1,
+                                    2018,
+                                    599
+                                );
+                        </textarea>
+                        <li>Because of the INSERT event, the production.trg_product_audit trigger of production.products table was fired. Let's check production.product_audits table</li>
+                        <textarea rows= "5" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                *
+                            FROM
+                                production.product_audits;
+                        </textarea>
+                        <img src="{% static 'IMG\SQL-Server-Create-Trigger-After-Insert-Example.jpg'%}"><br>
+                        <li>The following statement deletes a row from the production.products table:</li>
+                        <textarea rows= "5" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            DELETE FROM
+                                production.products
+                            WHERE
+                                product_id = 322;
+                        </textarea>
+                        <li>As expected, the trigger was fired and inserted the deleted row into the production.product_audits table:</li>
+                        <img src="{% static 'IMG\SQL-Server-Create-Trigger-After-delete-Example.jpg'%}"><br>
+                    </ul>
+            </ul>
+        <h3 style="color:red">2) Creating An Instead of Trigger</h3>
+            <ul>
+                <li>An INSTEAD OF trigger is a trigger that allows you to skip an INSERT, DELETE, or UPDATE statement to a table or a view and<br>
+                    execute other statements defined in the trigger instead. The actual insert, delete, or update operation does not occur at all.</li>
+                <li>In other words, an INSTEAD OF trigger skips a DML statement and execute other statements.</li>
+                <textarea rows= "6" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE TRIGGER [schema_name.] trigger_name
+                        ON {table_name | view_name }
+                        INSTEAD OF {[INSERT] [,] [UPDATE] [,] [DELETE] }
+                        AS
+                        {sql_statements}
+                </textarea>
+                    <ul>
+                        <li>First, specify the name of the trigger and optionally the name of the schema to which the trigger belongs in the CREATE TRIGGER clause.</li>
+                        <li>Second, specify the name of the table or view which the trigger associated with.</li>
+                        <li>Third, specify an event such as INSERT, DELETE, or UPDATE which the trigger will fire in the INSTEAD OF clause.<br>
+                        The trigger may be called to respond to one or multiple events.</li>
+                        <li>Fourth, place the trigger body after the AS keyword. A trigger’s body may consist of one or more Transact-SQL statements.</li>
+                    </ul>
+                <li>First, creates a new view named production.vw_brands against the production.brands and production.brand_approvals tables:</li>
+                <textarea rows= "14" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE VIEW production.vw_brands
+                        AS
+                        SELECT
+                            brand_name,
+                            'Approved' approval_status
+                        FROM
+                            production.brands
+                        UNION
+                        SELECT
+                            brand_name,
+                            'Pending Approval' approval_status
+                        FROM
+                            production.brand_approvals;
+                </textarea>
+                <li>Once a row is inserted into the production.vw_brands view, we need to route it to the production.brand_approvals table via the <br>
+                    following INSTEAD OF trigger. And the trigger inserts the new brand name into the production.brand_approvals if the brand name does not exist in the production.brands.</li>
+                <textarea rows= "22" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE TRIGGER production.trg_vw_brands
+                        ON production.vw_brands
+                        INSTEAD OF INSERT
+                        AS
+                        BEGIN
+                            SET NOCOUNT ON;
+                            INSERT INTO production.brand_approvals (
+                                brand_name
+                            )
+                            SELECT
+                                i.brand_name
+                            FROM
+                                inserted i
+                            WHERE
+                                i.brand_name NOT IN (
+                                    SELECT
+                                        brand_name
+                                    FROM
+                                        production.brands
+                                );
+                        END
+                </textarea>
+                <li></li>
+            </ul>
+        <h3 style="color:red">3) Creating A DDL Trigger</h3>
+            <ul>
+                <li>SQL Server DDL triggers respond to server or database events rather than to table data modifications.</li>
+                <li>These events created by the Transact-SQL statement that normally starts with one of the following keywords:br>
+                    CREATE, ALTER, DROP, GRANT, DENY, REVOKE, or UPDATE STATISTICS.</li>
+                <li>The DDL triggers are useful in the following cases:</li>
+                    <ul>
+                        <li><b>Record changes in the database schema.</b></li>
+                        <li><b>Prevent some specific changes to the database schema.</b></li>
+                        <li><b>Respond to a change in the database schema.</b></li>
+                    </ul>
+                <textarea rows= "6" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE TRIGGER trigger_name
+                        ON { DATABASE |  ALL SERVER}
+                        [WITH ddl_trigger_option]
+                        FOR {event_type | event_group }
+                        AS {sql_statement}
+                </textarea>
+                    <ul>
+                        <li><b>trigger_name</b> : Specify the user-defined name of trigger after the CREATE TRIGGER keywords. <br>
+                            <span style="color:red"> Note that you don’t have to specify a schema for a DDL trigger because it isn’t related to an actual database table or view.</span></li>
+                        <li><b>DATABASE | ALL SERVER</b> : Use DATABASE if the trigger respond to database-scoped events or ALL SERVER if the trigger responds to the server-scoped events.</li>
+                        <li><b>ddl_trigger_option</b> : The ddl_trigger_option specifies ENCRYPTION and/or EXECUTE AS clause. </li>
+                            <ul>
+                                <li>ENCRYPTION encrypts the definition of the trigger.</li>
+                                <li>EXECUTE AS defines the security context under which the trigger is executed.</li>
+                            </ul>
+                        <li><b>event_type | event_group</b> : The event_type indicates a DDL event that causes the trigger to fire e.g., CREATE_TABLE, ALTER_TABLE, etc.<br>
+                        The event_group is a group of event_type event such as DDL_TABLE_EVENTS.</li>
+                    </ul>
+                <textarea rows= "21" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE TRIGGER trg_index_changes        --trigger_name
+                        ON DATABASE                         --all server
+                        FOR                                 --events
+                            CREATE_INDEX,
+                            ALTER_INDEX,
+                            DROP_INDEX
+                        AS
+                        BEGIN
+                            SET NOCOUNT ON;                 --message(x rows affected) is not returned
+
+                            INSERT INTO index_logs (        --statement
+                                event_data,
+                                changed_by
+                            )
+                            VALUES (
+                                EVENTDATA(),                --trigger function used in statements
+                                USER                        --(there are other functions inside DDL or logon trigger)
+                            );
+                        END;
+                        GO
+                </textarea>
+                <li>Then, execute the event :</li>
+                <textarea rows= "5" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        *
+                    FROM
+                        index_logs;
+                </textarea>
+                <img src="{% static 'IMG\SQL-Server-DDL-Trigger-Example.png'%}">
+                <li>if you click into the cell of event data, you will see XML data of the event</li>
+                <img src="{% static 'IMG\SQL-Server-DDL-Trigger-EventData-XML.png'%}">
+                <h4 style="color:blue"><b>* Trigger Functions (Transact-SQL)</b></h4>
+                    <ul>
+                        <li style="color:red"><b>COLUMNS_UPDATE</b></li>
+                            <ul>
+                                <li>This function returns a varbinary bit pattern indicating the inserted or updated columns of a table or view. <br>
+                                    Use COLUMNS_UPDATED anywhere inside the body of a Transact-SQL INSERT or UPDATE trigger to test whether the trigger should execute certain actions.</li>
+                                <li>Using COLUMNS_UPDATED to test the first eight columns of a table</li>
+                                <textarea rows= "74" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    USE AdventureWorks2012;
+                                        GO
+                                        IF EXISTS(SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES
+                                           WHERE TABLE_NAME = 'employeeData')
+                                           DROP TABLE employeeData;
+                                        IF EXISTS(SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES
+                                           WHERE TABLE_NAME = 'auditEmployeeData')
+                                           DROP TABLE auditEmployeeData;
+                                        GO
+                                        CREATE TABLE dbo.employeeData (
+                                           emp_id INT NOT NULL PRIMARY KEY,
+                                           emp_bankAccountNumber CHAR (10) NOT NULL,
+                                           emp_salary INT NOT NULL,
+                                           emp_SSN CHAR (11) NOT NULL,
+                                           emp_lname NCHAR (32) NOT NULL,
+                                           emp_fname NCHAR (32) NOT NULL,
+                                           emp_manager INT NOT NULL
+                                           );
+                                        GO
+                                        CREATE TABLE dbo.auditEmployeeData (
+                                           audit_log_id uniqueidentifier DEFAULT NEWID() PRIMARY KEY,
+                                           audit_log_type CHAR (3) NOT NULL,
+                                           audit_emp_id INT NOT NULL,
+                                           audit_emp_bankAccountNumber CHAR (10) NULL,
+                                           audit_emp_salary INT NULL,
+                                           audit_emp_SSN CHAR (11) NULL,
+                                           audit_user sysname DEFAULT SUSER_SNAME(),
+                                           audit_changed DATETIME DEFAULT GETDATE()
+                                           );
+                                        GO
+                                        CREATE TRIGGER dbo.updEmployeeData
+                                        ON dbo.employeeData
+                                        AFTER UPDATE AS
+                                        /* Check whether columns 2, 3 or 4 have been updated. If any or all
+                                        columns 2, 3 or 4 have been changed, create an audit record.
+                                        The bitmask is: power(2, (2-1)) + power(2, (3-1)) + power(2, (4-1)) = 14.
+                                        This bitmask translates into base_10 as: 2 + 4 + 8 = 14.
+                                        To test whether all columns 2, 3, and 4 are updated, use = 14 instead of > 0
+                                        (below). */
+
+                                           IF (COLUMNS_UPDATED() & 14) > 0
+                                        /* Use IF (COLUMNS_UPDATED() & 14) = 14 to see whether all columns 2, 3,
+                                        and 4 are updated. */
+                                              BEGIN
+                                        -- Audit OLD record.
+                                              INSERT INTO dbo.auditEmployeeData
+                                                 (audit_log_type,
+                                                 audit_emp_id,
+                                                 audit_emp_bankAccountNumber,
+                                                 audit_emp_salary,
+                                                 audit_emp_SSN)
+                                                 SELECT 'OLD',
+                                                    del.emp_id,
+                                                    del.emp_bankAccountNumber,
+                                                    del.emp_salary,
+                                                    del.emp_SSN
+                                                 FROM deleted del;
+
+                                        -- Audit NEW record.
+                                              INSERT INTO dbo.auditEmployeeData
+                                                 (audit_log_type,
+                                                 audit_emp_id,
+                                                 audit_emp_bankAccountNumber,
+                                                 audit_emp_salary,
+                                                 audit_emp_SSN)
+                                                 SELECT 'NEW',
+                                                    ins.emp_id,
+                                                    ins.emp_bankAccountNumber,
+                                                    ins.emp_salary,
+                                                    ins.emp_SSN
+                                                 FROM inserted ins;
+                                           END;
+                                        GO
+                                </textarea>
+                                <li>Using COLUMNS_UPDATED to test more than eight columns.To test for updates that affect columns other than the first eight table columns,<br>
+                                    use the SUBSTRING function to test the correct bit returned by COLUMNS_UPDATED.</li>
+                                <textarea rows= "18" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    USE AdventureWorks2012;
+                                        GO
+                                        IF OBJECT_ID (N'Person.uContact2', N'TR') IS NOT NULL
+                                            DROP TRIGGER Person.uContact2;
+                                        GO
+                                        CREATE TRIGGER Person.uContact2 ON Person.Person
+                                        AFTER UPDATE AS
+                                            IF ( (SUBSTRING(COLUMNS_UPDATED(), 1, 1) & 20 = 20)
+                                                AND (SUBSTRING(COLUMNS_UPDATED(), 2, 1) & 1 = 1) )
+                                            PRINT 'Columns 3, 5 and 9 updated';
+                                        GO
+
+                                        UPDATE Person.Person
+                                           SET NameStyle = NameStyle,
+                                              FirstName=FirstName,
+                                              EmailPromotion=EmailPromotion;
+                                        GO
+                                </textarea>
+                            </ul>
+
+                        <li style="color:red"><b>EVENTDATA</b></li>
+                        <li style="color:red"><b>TRIGGER_NESTLEVEL</b></li>
+                        <li style="color:red"><b></b>UPDATE()</li>
+                    </ul>
+            </ul>
+        <h3 style="color:red">4) Disabling Triggers</h3>
+            <ul>
+                <textarea rows= "3" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    DISABLE TRIGGER [schema_name.][trigger_name]
+                        ON [object_name | DATABASE | ALL SERVER]
+                </textarea>
+                <textarea rows= "3" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    DISABLE TRIGGER sales.trg_members_insert
+                    ON sales.members;
+                </textarea>
+                <li>Note that the trigger definition is still there on the table. If you view the trigger in the SQL Server Management Studio (SSMS),<br>
+                    you will notice a red cross icon on the disabled trigger name:</li>
+                <li>Disable all trigger on a table</li>
+                <textarea rows= "2" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    DISABLE TRIGGER ALL ON table_name;
+                </textarea>
+                <li>Disable all trigger on a table</li>
+                <textarea rows= "2" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    DISABLE TRIGGER ALL ON DATABASE;
+                </textarea>
+            </ul>
+        <h3 style="color:red">5) Enabling Triggers</h3>
+            <ul>
+                <li>Enable all triggers of a table</li>
+                <textarea rows= "3" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    ENABLE TRIGGER [schema_name.][trigger_name]
+                        ON [object_name | DATABASE | ALL SERVER]
+                </textarea>
+                <textarea rows= "3" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    ENABLE TRIGGER sales.trg_members_insert
+                        ON sales.members;
+                </textarea>
+                <li>Enable all triggers of a table</li>
+                <textarea rows= "2" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    ENABLE TRIGGER ALL ON table_name;
+                </textarea>
+                <li>Enable all triggers of a table</li>
+                <textarea rows= "2" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    ENABLE TRIGGER ALL ON DATABASE;
+                </textarea>
+            </ul>
+        <h3 style="color:red">6) Viewing The Definition Of A Trigger</h3>
+            <ul>
+                <li>Getting trigger definition by querying from a system view by sys.sql_modules view</li>
+                <textarea rows= "7" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        definition
+                    FROM
+                        sys.sql_modules
+                    WHERE
+                        object_id = OBJECT_ID('sales.trg_members_delete');
+                </textarea>
+                <img src="{% static 'IMG\SQL-Server-View-Trigger-Definition-querying-system-view.png'%}">
+                <li>Getting trigger definition using OBJECT_DEFINITION function</li>
+                <textarea rows= "7" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        OBJECT_DEFINITION (
+                            OBJECT_ID(
+                                'sales.trg_members_delete'
+                            )
+                        ) AS trigger_definition;
+                </textarea>
+                <li>Getting trigger definition using sp_helptext stored procedure</li>
+                <textarea rows= "2" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    EXEC sp_helptext 'sales.trg_members_delete' ;
+                </textarea>
+                <li>Getting trigger definition using SSMS: expand Triggers, right-click the trigger you want to view the definition, and then click Modify</li>
+            </ul>
+        <h3 style="color:red">7) Listing All Triggers In SQL Server</h3>
+            <ul>
+                <li>To list all triggers in a SQL Server, you query data from the sys.triggers view:</li>
+                <textarea rows= "8" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        name,
+                        is_instead_of_trigger
+                    FROM
+                        sys.triggers
+                    WHERE
+                        type = 'TR';
+                </textarea>
+                <img src="{% static 'IMG\SQL-Server-List-Triggers.png'%}">
+            </ul>
+        <h3 style="color:red">8) Removing Triggers</h3>
+            <ul>
+                <li>The following illustrates the syntax of the DROP TRIGGER statement that removes DML triggers:</li>
+                <textarea rows= "2" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    DROP TRIGGER [ IF EXISTS ] [schema_name.]trigger_name [ ,...n ];
+                </textarea>
+                <textarea rows= "2" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    DROP TRIGGER IF EXISTS sales.trg_member_insert;
+                </textarea>
+                <li>To remove one or more DDL triggers, you use the following form of the DROP TRIGGER statement:</li>
+                <textarea rows= "3" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    DROP TRIGGER [ IF EXISTS ] trigger_name [ ,...n ]
+                        ON { DATABASE | ALL SERVER };
+                </textarea>
+                <textarea rows= "3" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    DROP TRIGGER IF EXISTS trg_index_changes;
+                </textarea>
+                <li>To remove a LOGON event trigger, you use the following syntax:</li>
+                <textarea rows= "3" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    DROP TRIGGER [ IF EXISTS ] trigger_name [ ,...n ]
+                        ON ALL SERVER;
+                </textarea>
+            </ul>
+    </ul>
+</body>
+</html>

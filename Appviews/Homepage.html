@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+    h1 {
+        color: #DC7033;
+        font-size: 50px
+    }
+
+    h2 {
+        color: #3336DC;
+        font-size: 30px
+    }
+
+    body {
+      font-family: Georgia, serif;
+    }
+
+    .navbar {
+      overflow: hidden;
+      background-color: #333;
+    }
+
+    .navbar a {
+      float: left;
+      font-size: 16px;
+      color: white;
+      text-align: center;
+      padding: 14px 16px;
+      text-decoration: none;
+    }
+
+    .dropdown {
+      float: left;
+      overflow: hidden;
+    }
+
+    .dropdown .dropbtn {
+      font-size: 16px;
+      border: none;
+      outline: none;
+      color: white;
+      padding: 14px 16px;
+      background-color: inherit;
+      font-family: inherit;
+      margin: 0;
+    }
+
+    .navbar a:hover, .dropdown:hover .dropbtn {
+      background-color: red;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #f9f9f9;
+      min-width: 160px;
+      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+      z-index: 1;
+    }
+
+    .dropdown-content a {
+      float: none;
+      color: black;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+      text-align: left;
+    }
+
+    .dropdown-content a:hover {
+      background-color: #ddd;
+    }
+
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+    </style>
+    <meta charset="UTF-8">
+    <title>HOMEPAGE</title>
+</head>
+<body>
+    <div class="navbar">
+      <div class="dropdown">
+        <button class="dropbtn">Python
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href="py1">Basic Knowledge</a>
+            <a href="py2">Classes</a>
+            <a href="py3">CSV And JSON</a>
+            <a href="py4">File And Exception</a>
+            <a href="py5">Function</a>
+            <a href="py6">Testing Code</a>
+            <a href="py7">DJANGO</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button class="dropbtn">Database
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href="Database_connection">Database Connection</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button class="dropbtn">Git
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href="Git">Basic Guides</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button class="dropbtn">Marchine Learning
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href="Numpy">NUMPY Brief</a>
+            <a href="Pandas">PANDAS Brief</a>
+            <a href="Pandas_plus_1">PANDAS Adventure Part 1</a>
+            <a href="Pandas_plus_2">PANDAS Adventure Part 2</a>
+            <a href="Pandas_plus_3">PANDAS Adventure Part 3</a>
+            <a href="Pandas_plus_4">PANDAS Adventure Part 4</a>
+            <a href="Pandas_cookbook">PANDAS COOKBOOK</a>
+            <a href="Descriptive">Descriptive Statistics</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button class="dropbtn">Data Visualization
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href="Plotly">Plotly</a>
+            <a href="Dash">Plotly-Dash</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button class="dropbtn">SQL
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href="Part1">Getting Started with SQL Server</a>
+            <a href="Part2">SQL Server Basics</a>
+            <a href="Part3">SQL Server Views</a>
+            <a href="Part4">SQL Server Indexes</a>
+            <a href="Part5">SQL Server Stored Procedures</a>
+            <a href="Part6">SQL Server User-defined Functions</a>
+            <a href="Part7">SQL Server Triggers</a>
+            <a href="Part8">SQL Server Aggregate Functions</a>
+            <a href="Part9">SQL Server Date Functions</a>
+            <a href="Part10">SQL Server String Functions</a>
+            <a href="Part11">SQL Server System Functions</a>
+            <a href="Part12">SQL Server Window Functions</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button class="dropbtn">IELs
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href="unit1">Unit 1: What's Your Learning Mode?</a>
+            <a href="unit2">Unit 2: Siesta Time</a>
+            <a href="unit3">Unit 3: The Interesting Lore of April Fools' Day</a>
+            <a href="unit4">Unit 4: Oh, Temptation</a>
+            <a href="unit5">Unit 5: The ABCs Of Living a Happy Life</a>
+            <a href="unit6">Unit 6: But Is It Art?</a>
+            <a href="unit7">Unit 7: Chatroom Help Lonely Kids</a>
+            <a href="unit8">Unit 8: MBA: More Bucks for Applicants</a>
+            <a href="unit9">Unit 9: Habit of Harmonize Life</a>
+            <a href="unit10">Unit 10: Ruth Handler</a>
+            <a href="unit11">Unit 11: Positive Thinking Bring Rewards</a>
+            <a href="unit12">Unit 12: The Latest Mating Strategy</a>
+            <a href="unit13">Unit 13: Two Different Forms of British Leisure Life</a>
+            <a href="unit14">Unit 14: Australian Aboriginals</a>
+            <a href="unit15">Unit 15: The Role of The Admissions Offices</a>
+            <a href="unit16">Unit 16: British Universities Cambridge and Oxford</a>
+            <a href="unit17">Unit 17: Oxford Considers Future Roles</a>
+            <a href="unit18">Unit 18: Disparities at Harvard</a>
+            <a href="unit19">Unit 19: Unlucky Thirteen</a>
+            <a href="unit20">Unit 20: Closing In For The Kill?</a>
+            <a href="unit21">Unit 21: You Think That Funny?</a>
+            <a href="unit22">Unit 22: Origin of The Modern Olympic Games</a>
+            <a href="unit23">Unit 23: The Future of The MBA</a>
+            <a href="unit24">Unit 24: Head Cases</a>
+            <a href="unit25">Unit 25: British Public School</a>
+            <a href="unit26">Unit 26: The Next Society I</a>
+            <a href="unit27">Unit 27: The Next Society II</a>
+            <a href="unit28">Unit 28: Visible Man</a>
+            <a href="unit29">Unit 29: Persuasion</a>
+            <a href="unit30">Unit 30: Footprints In The Muds Time Time</a>
+            <a href="Voca1">VOCABULARY: Page 1</a>
+            <a href="Voca2">VOCABULARY: Page 2</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button class="dropbtn">Resume
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href="CV">RESUME</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button class="dropbtn">Freelance
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href="transferimg">Wetransfer</a>
+        </div>
+      </div>
+    </div>
+        <h1 style="text-align:center; font-size: 60px">BUSINESS TYPES</h1>
+            <ul>
+                <h2>I. Fulfillment Center</h2>
+                <ul>
+                    <p><a href="Rule">1. Company Rule</a></p>
+                    <p><a href="Flow">2. Fulfillment Flow</a></p>
+                    <p><a href="Layout">3. Layout & Process Standardization</a></p>
+                    <p><a href="Standard">4. Storage Standardization</a></p>
+                    <p><a href="Reverse Logistic">5. Reverse Logistic</a></p>
+                    <p>6. Training Document</p>
+                    <ul>
+                        <p><a href="Input Regulation">i. Input Regulation</a></p>
+                        <p><a href="receiving">ii. Receiving Procedure</a></p>
+                        <p><a href="checker">iii. Checker Procedure</a></p>
+                        <p><a href="wh_controller">iv. WH Controller Procedure</a></p>
+                        <p><a href="picking">v. Picking Procedure</a></p>
+                        <p><a href="packing">vi. Packing Procedure</a></p>
+                        <p><a href="handover">vii. Handover Procedure</a></p>
+                        <p><a href="return">viii. Return Procedure</a></p>
+                    </ul>
+                    <p><a href="PDA">7. PDA Update</a></p>
+                </ul>
+                <h2>II. Distribution Center</h2>
+                <ul>
+                <p><a href="flow & procedure">I. Flow And Procedures</a></p>
+                <p><a>II. Projects</a></p>
+                    <ul>
+                        <li><a href="allocation"> 1. WH Re-Allocation</a></li>
+                        <li><a href="wms">2. WMS Improvement</a></li>
+                        <li><a href="3pl">3. 3PL Vendors</a></li>
+                        <li><a href="location">4. WH Location's Changing - Cost Per Unit</a></li>
+                        <li><a href="priorities">5. Priority Tasks</a></li>
+                    </ul>
+            </ul>
+            </ul>
+</body>
+</html>

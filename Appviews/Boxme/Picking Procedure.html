@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <style>
+        h2 {color: blue;}
+        h3 {color: red}
+        h5 {color: #8F3A84}
+    </style>
+    <meta charset="UTF-8">
+    <title>PICKING</title>
+</head>
+<body>
+<fieldset>
+    <legend><h2>QUY TRÌNH LẤY HÀNG</h2></legend>
+    <ul>
+    <h4>1. TIẾP NHẬN THÔNG TIN VÀ XỬ LÝ ĐƠN HÀNG</h4>
+    <ul>
+        <li>Nắm bắt thông tin về số lượng đơn hàng, thứ tự ưu tiên trên hệ thống và lên kế hoạch đầu mỗi ca làm việc.</li>
+        <li>Nhân viên lấy hàng sử dụng PDA tạo bảng kê theo thứ tự ưu tiên mặc định của hệ thống ...</li>
+        <li>Đặc biệt lưu ý và xử lý trước đối với các trường hợp khẩn cấp (FFnow, ...).</li>
+        <li>Nhân viên lấy hàng phải lấy đúng vị trí hệ thống gợi ý, tuyệt đối không được lấy hàng ở vị trí không được hệ thống hướng dẫn.</li>
+        <li>Lấy hàng, phân loại các mã hàng, sắp xếp gọn gàng khi đặt vào xe lấy hàng để bộ phận đóng gói tiếp nhận và xử lý dễ dàng, thuận tiện.</li>
+        <li>Tuyệt đối không được để hàng hóa lộn xộn trên xe lấy hàng.</li>
+        <li>Trường hợp không tìm thấy hàng hoá ở vị trí được hệ thống hướng dẫn, nhân viên lấy hàng cập nhật tình trạng thiếu hàng cho sản phẩm trong bảng kê và tiếp tục lấy các sản phẩm khác để hoàn thành bàng kê.</li>
+        <li>Trường hợp thừa hàng hoặc có sản phẩm khác tại vị trí chỉ định, nhân viên lấy hàng ghi nhận, báo cáo thông tin cho Leader để giải quyết triệt để.</li>
+    </ul>
+    <h3>II. BÀN GIAO HÀNG HÓA CHO CHECKER</h3>
+    <ul>
+        <li>Bộ phận lấy hàng đưa xe hàng tới khu vực chờ bàn giao.</li>
+        <li>Ký xác nhận vào <b>sổ theo dõi lấy hàng</b> các thông tin:</li>
+        <ul>
+            <li>Ngày tháng</li>
+            <li>Số hiệu bảng kê</li>
+            <li>Mã đơn hàng (đối với các sản phẩm bị thiếu, mất hàng)</li>
+            <li>Mã sản phẩm (đối với các sản phẩm bị thiếu, mất hàng)</li>
+            <li>Số lượng sản phẩm</li>
+            <li>Ký xác nhận</li>
+        </ul>
+        <li>Đối với các đơn hàng thiếu sản phẩm, nếu tìm thấy hàng, bộ phận lấy hàng lấy đủ đơn hàng theo hệ thống và bàn giao đơn hàng tìm thấy sản phẩm cho Checker, ký xác nhận.</li>
+        <li>Tuyệt đối không đẩy xe hàng vào khu vực đóng gói.</li>
+    </ul>
+    <h4>3. PDA Procedure</h4>
+        <ul>
+        <h3>Các bước lấy hàng trên PDA</h3>
+        <ul>
+            <h3>Bước 1: Đăng nhập vào PDA &rarr; Lấy hàng</h3>
+            <img src="{% static 'IMG/pic1.jpg'%}">
+            <br>
+            <h3>Bước 2: Chọn kho cần lấy hàng</h3>
+            <img src="{% static 'IMG/pic2.png'%}">
+            <br>
+            <h3>Bước 3: Chọn thứ tự ưu tiên</h3>
+            <img src="{% static 'IMG/pic3.jpg'%}">
+            <br>
+
+            <h4>Bước 3: Hệ thống sẽ tự động đưa sản phẩm vào bảng kê theo thứ tự ưu tiên đã chọn, nhân viên lấy hàng đi theo chỉ dẫn của hệ thống để lấy sản phẩm.</h4>
+            <img src="{% static 'IMG/p3.png'%}">
+            <img src="{% static 'IMG/pick_4.png'%}">
+            <h4>Bước 4: Bấm vào vị trí cần lấy hàng &rarr; đi tới vị trí lấy hàng &rarr; kiểm tra barcode sản phẩm và số lượng tại vị trí cần lấy &rarr; điều chỉnh số lượng, scan mã barcode và lấy đúng số lượng cần lấy, tiếp tục cho tới hết bảng kê.</h4>
+            <img src="{% static 'IMG/pick_5.png'%}">
+        </ul>
+        <h3>Các bước báo thiếu hàng trên PDA</h3>
+        <ul>
+            <li>Trong trường hợp khi tới vị trí lấy hàng mà không có hàng hoặc số lượng hàng cần lấy nhiều hơn số lượng thực tế:</li>
+            <ul>
+                <h4>Bước 1: Bấm báo thiếu hàng trên PDA.</h4>
+                <img src="{% static 'IMG/pick_6.png'%}">
+                <img src="{% static 'IMG/pick_7.png'%}">
+                <h4>Bước 2: Tiếp tục lấy sản phẩm khác tới khi lấy hết bảng kê.</h4>
+                <h4>Bước 3: Bàn giao thông tin và ký nhận vào sổ theo dõi.</h4>
+            </ul>
+        </ul>
+        </ul>
+        <h3>4. XỬ LÝ CÁC TRƯỜNG HỢP HÀNG THIẾU, MẤT</h3>
+        <ul>
+            <li>Ghi nhận thông tin các trường hợp thiếu, mất hàng tại vị trí, thao tác xác nhận thiếu hàng trên hệ thống.</li>
+            <li>Để riêng đơn hàng thiếu và bàn giao thông tin cho Checker.</li>
+            <li>Nếu tìm thấy sản phẩm, tiến hành lấy hàng, hoàn thiện đơn hàng.</li>
+            <img src="{% static 'IMG/Miss-lost.png'%}">
+            <img src="{% static 'IMG/Miss-lost1.png'%}">
+            <img src="{% static 'IMG/Miss-lost2.png'%}">
+            <li>Làm việc với các bộ phận liên quan để giải quyết các vấn đề liên quan tới hàng hóa, tồn kho sản phẩm.</li>
+        </ul>
+        </ul>
+    </ul>
+</fieldset>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <title>DOT PLOT</title>
+</head>
+<body>
+<h1 style="color:blue; text-align:center">DOT PLOT</h1>
+    <ul>
+        <h2 style = "color: blue">Basic Dot Plot</h2>
+        <li>Dot plots (also known as Cleveland dot plots) are scatter plots with one categorical axis and one continuous axis.<br>
+            They can be used to show changes between two (or more) points in time or between two (or more) conditions. Compared <br>
+            to bar charts, dot plots can be less cluttered and allow for an easier comparison between conditions.</li>
+        <pre>
+            df = px.data.medals_long()
+            fig = px.Scatter(x = 'count', y = 'nation', color = 'medal', symbol = 'medal')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/dot_1.png'%}">
+        <pre>
+            schools = ["Brown", "NYU", "Notre Dame", "Cornell", "Tufts", "Yale",
+                       "Dartmouth", "Chicago", "Columbia", "Duke", "Georgetown",
+                       "Princeton", "U.Penn", "Stanford", "MIT", "Harvard"]
+            n_schools = len(schools)
+            women_salary = [72, 67, 73, 80, 76, 79, 84, 78, 86, 93, 94, 90, 92, 96, 94, 112]
+            men_salary = [92, 94, 100, 107, 112, 114, 114, 118, 119, 124, 131, 137, 141, 151, 152, 165]
+            df = pd.DataFrame(  {'school': schools*2, 'salary' = men_salary + women_salary,
+                                'gender': ['Men']*n_chools + ['Women']*n_chools})
+            fig = px.scatter(df, x = 'salary', y = 'school', color = 'gender',
+                            title = 'Gender Earnings Disparity',
+                            labels = {'salary':'Annual Salary (in thousands)'})
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/dot_2.png'%}">
+        <pre>
+            schools = ["Brown", "NYU", "Notre Dame", "Cornell", "Tufts", "Yale",
+                       "Dartmouth", "Chicago", "Columbia", "Duke", "Georgetown",
+                       "Princeton", "U.Penn", "Stanford", "MIT", "Harvard"]
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(x=[72, 67, 73, 80, 76, 79, 84, 78, 86, 93, 94, 90, 92, 96, 94, 112],
+                                    y = schools, marker = {'color': 'gold', 'size': 12},
+                                    mode = 'markers', name = 'Men')
+            fig.add_trace(go.Scatter( x=[92, 94, 100, 107, 112, 114, 114, 118, 119, 124, 131, 137, 141, 151, 152, 165],
+                                    y = schools, marker = {'color':'crimson', 'size': 12},
+                                    mode = 'markers', name = 'Women')
+            fig.update_layout(title = 'Gender Earnings Disparity', xaxis_title = 'Annual Salary (in thousands),
+                                yaxis_title = 'School')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/dot_3.png'%}">
+        <h2 style = "color: blue">Styled Categorical Dot Plot</h2>
+        <pre>
+            country = ['Switzerland (2011)', 'Chile (2013)', 'Japan (2014)',
+                       'United States (2012)', 'Slovenia (2014)', 'Canada (2011)',
+                       'Poland (2010)', 'Estonia (2015)', 'Luxembourg (2013)', 'Portugal (2011)']
+            voting_pop = [40, 45.7, 52, 53.6, 54.1, 54.2, 54.5, 54.7, 55.1, 56.6]
+            reg_voters = [49.1, 42, 52.7, 84.3, 51.7, 61.1, 55.3, 64.2, 91.1, 58.9]
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(   x = voting_pop, y = country,
+                                        name = 'Percent of estimated voting age population',
+                                        marker = {  'color': 'rgba(156, 165, 196, 0.95)',
+                                                    'line_color':'rgb(156, 165, 196, 0.95)'}))
+            fig.add_trace(go.Scatter(   x = reg_votes, y = country,
+                                        name = 'Percent of estimated registered voters',
+                                        marker = {  'color':'rgba(204, 204, 204, 1.0)',
+                                                    'line_color':'rgba(204, 204, 204, 1.0)'}))
+            fig.update_traces(mode = 'markers', marker = {'line_width' : 1, 'size': 16})
+            fig.update_layout(title = 'Votes cast for ten lowest voting age population in OECD countries',
+                                xaxis = {   'showgrid' : False, 'showline': True, 'linecolor': 'rgb(102, 102, 102)',
+                                            'tickfont_color' : 'rgb(102, 102, 102)', 'showticklabels':True,
+                                            'dtick' : 10, 'ticks':'outside', 'tickcolor':'rgb(102, 102, 102)'},
+                                margin = {'l':140, 'r':40, 't':80, 'b':50},
+                                legend = {'font_size':10, 'yanchor':'middle', 'xanchor':right},
+                                width = 800, height = 600, paper_bgcolor = 'White', plot_bgcolor = 'White',
+                                hovermode = 'closest')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/dot_4.png'%}">
+        <h2 style = "color: blue">Dash</h2>
+        <pre>
+            import dash
+            from dash import dcc
+            from dash import html
+            fig = go.Figure(...)
+            app = dash.Dash()
+            app.layout = html.Div([dcc.Graph(figure = fig)])
+            app.run_server(debug = True, use_reloader = False) # turn off re-loader if inside Jupyter
+        </pre>
+    </ul>
+</body>
+</html>

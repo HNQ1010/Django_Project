@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <style>
+        h2 {color: blue;}
+        h3 {color: red}
+        h4 {color: #8F3A84; font-size: 20px}
+    </style>
+    <meta charset="UTF-8">
+    <title>QC PROCEDURE</title>
+</head>
+<body>
+<fieldset>
+    <legend><h2>QUY TRÌNH QC</h2></legend>
+    <h3>I. KIỂM HÀNG NHẬP KHO</h3>
+    <ul>
+        <li>Tại khu vực kiểm hàng nhập kho, kiểm từng từng Shipment theo:
+        <ul>
+            <li>Barcode sản phẩm</li>
+            <li>BOX</li>
+        </ul>
+        và thực hiện lần lượt theo các bước sau:</li>
+        <li><b>Bước 1:</b> Khi kiểm hàng, xác nhận chính xác các thông tin gồm:</li>
+        <ul>
+            <li>Số loại hàng hóa.</li>
+            <li>Số lượng từng loại hàng hóa.</li>
+            <li>Ngoại quan vỏ, hộp, bao bì, các thông tin nhận diện sản phẩm: tem, nhãn, seal, ...</li>
+        </ul>
+        <li><b>Bước 2:</b>Tổng hợp thông tin, lưu ý, ghi chú và báo lại các bộ phận liên quan về các trường hợp:</li>
+        <ul>
+            <li>Có số lượng, chủng loại hàng thực tế khác với thông tin trên hệ thống.</li>
+            <li>Hàng hóa bị hư hỏng khi nhận tại kho.</li>
+            <li>Hàng hóa thiếu các thông tin liên quan cần phải chuẩn hóa trước khi nhập kho.</li>
+            <li>Các vấn đề phát sinh khác.</li>
+        </ul>
+    </ul>
+    <h3>II. KIỂM HÀNG ĐÓNG GÓI</h3>
+    <ul>
+        <li>Tại khu vực kiểm hàng đóng gói, dựa vào danh sách lấy hàng, xác nhận các thông tin sau:</li>
+        <ul>
+            <li>Mã sản phẩm, tên sản phẩm so sánh với hàng đã lấy.</li>
+            <li>Số lượng từng mã so sánh với hàng đã lấy.</li>
+        </ul>
+        &#9733; Đối với các trường hợp:</li>
+        <ul>
+            <li>Thừa/ sai sản phẩm: Bàn giao lại nhân viên lấy hàng để hoàn trả hàng về vị trí cũ.</li>
+            <li>Thiếu sản phẩm: Thông báo nhân viên lấy hàng để tiến hành bổ sung hàng cho sản phẩm còn thiếu.</li>
+            <li>Đủ sản phẩm và số lượng: Bàn giao cho nhân viên đóng gói để đóng gói đơn hàng.</li>
+        </ul>
+    </ul>
+    <h3>III. QUY TRÌNH KIỂM HÀNG TRÊN SYS</h3>
+    <ul>
+        <h4>Bước 1: admin.lixibox.com &rarr; Operation &rarr; Chọn Kho &rarr; Stock Request &rarr; Chọn Picking list có trạng thái <b>Out</b></h4>
+        <ul>
+            <li>Picking list có status <b>Out</b>: Sản phẩm được dùng để đóng gói đơn hàng và hệ thống sẽ trừ tồn những sản phẩm đó.</li>
+            <li>Picking list có status <b>In</b>: Những sản phẩm bị hủy cần thao tác nhập lại kho. (xem phần Store procedure).</li>
+        </ul>
+        <img src="{% static 'IMG/Lx_pack_1.png'%}" style="width: 100%">
+
+        <img src="{% static 'IMG/Lx_recheck_1.png'%}" style="width: 100%">
+        <img src="{% static 'IMG/Lx_recheck_2.png'%}" style="width: 100%">
+        <h4>Bước 2: Kiểm tra số lượng thực tế sản phẩm đã lấy &rarr; nhập vào số lượng của từng mã sản phẩm &rarr; <b>Xác nhận</b> sau khi hoàn thành.</h4>
+        <li style="color:red">Lưu ý:</li>
+        <ul>
+            <li>Đối với các sản phẩm kiểm đếm thừa/ thiếu số lượng: hệ thống sẽ vô hiệu hóa nút <b>Xác Nhận</b>, không cho phép hoàn thành Re-check.</li>
+            <li>Đối với các sản phẩm kiểm đếm đủ số lượng, hệ thống sẽ kích hoạt nút <b>Xác Nhận</b>, cho phép hoàn thành Re-check.</li>
+        <img src="{% static 'IMG/Lx_recheck_3.png'%}" style="width: 100%">
+        </ul>
+        </ul>
+    </ul>
+</fieldset>
+</body>
+</html>

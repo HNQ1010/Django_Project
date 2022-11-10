@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <link rel="stylesheet" href=" {% static 'css\style.css'%}">
+    <meta charset="UTF-8">
+    <title>SQL Server System Functions</title>
+</head>
+<body>
+<h1 style="color:red; text-align:center"><b>SQL Server System Functions</b></h1>
+    <ul>
+        <li><b>CAST</b> : Cast a value of one type to another.</li>
+        <li><b>CONVERT</b> : Convert a value of one type to another.</li>
+        <li><b>CHOOSE</b> : Return one of the two values based on the result of the first argument.</li>
+        <li><b>ISNULL</b> : Replace NULL with a specified value.</li>
+        <li><b>ISNUMERIC</b> : Check if an expression is a valid numeric type.</li>
+        <li><b>IIF</b> : Add if-else logic to a query.</li>
+        <li><b>TRY_CAST</b> : Cast a value of one type to another and return NULL if the cast fails.</li>
+        <li><b>TRY_CONVERT</b> : Convert a value of one type to another and return the value to be translated into the specified type. It return NULL if the cast fails.</li>
+        <li><b>TRY_PARSE</b> : Convert a string to a date/time or a number and return NULL if the conversion fails.</li>
+        <li><b>CONVERT DATETIME TO STRING</b> : Show you how to convert a datetime value to a string in a specified format.</li>
+        <li><b>CONVERT STRING TO DATETIME</b> : Describe how to convert a string to a datetime value.</li>
+        <li><b>CONVERT DATETIME TO DATE</b> : Convert a datetime to a date.</li>
+        <h3 style="color:red">1) CAST</h3>
+            <ul>
+                <li>When you use two values with different data types, SQL will implicitly convert lower data type to higher one before process the calculations.</li>
+                <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT 1 + '1' result;  --Output: 2
+                </textarea>
+                <li>In contrary, we have explicitly conversions where you can call the CAST() function to do this.</li>
+                <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    CAST(expression as target_type[(length)])
+                </textarea>
+                    <ul>
+                        <li><b>expression</b> : can be a literal value or valid expression of any types that will be converted.</li>
+                        <li><b>target_type</b> : is the type that expression will be returned.(INT, BIT, SQL variants). It cannot be an alias type.</li>
+                        <li><b>length</b> : is an optional integer that specifies the length of target data type.(default 30)</li>
+                    </ul>
+                <textarea rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT  CAST(5.95 as int) result1,      --Output: 5
+                            CAST(5.43242 as dec(5,3)) result2;  --Output: 5.4324
+                </textarea>
+                <li>When you convert a value of the different data type, SQL will return a truncated result or a rounded value based on these rules:</li>
+                <table>
+                    <tr style="text-align:center">
+                        <th>From Data type</th>
+                        <th>To Data type</th>
+                        <th>Behavior</th>
+                    </tr>
+                    <tr>
+                        <td>numeric</td>
+                        <td>numeric</td>
+                        <td>round</td>
+                    </tr>
+                    <tr>
+                        <td>numeric</td>
+                        <td>int</td>
+                        <td>truncate</td>
+                    </tr>
+                    <tr>
+                        <td>numeric</td>
+                        <td>money</td>
+                        <td>round</td>
+                    </tr>
+                    <tr>
+                        <td>money</td>
+                        <td>int</td>
+                        <td>round</td>
+                    </tr>
+                    <tr>
+                        <td>money</td>
+                        <td>numeric</td>
+                        <td>round</td>
+                    </tr>
+                    <tr>
+                        <td>float</td>
+                        <td>int</td>
+                        <td>truncate</td>
+                    </tr>
+                    <tr>
+                        <td>float</td>
+                        <td>numeric</td>
+                        <td>round</td>
+                    </tr>
+                    <tr>
+                        <td>float</td>
+                        <td>datetime</td>
+                        <td>Round</td>
+                    </tr>
+                    <tr>
+                        <td>datetime</td>
+                        <td>int</td>
+                        <td>round</td>
+                    </tr>
+                </table>
+                <h4 style="color:blue"><b>* Using CAST to convert a string to datetime</b></h4>
+                    <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        SELECT      CAST('2021-09-17' as datetime);     --Output:2021-09-17 00:00:00.000
+                    </textarea>
+            </ul>
+        <h3 style="color:red">2) CONVERT</h3>
+            <ul>
+                <li>Convert a value of one type to another.</li>
+                <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    CONVERT(target_type [(length)], expression [, style])
+                </textarea>
+                    <ul>
+                        <li><b>target_type</b> : is the type that the expression will be converted to.</li>
+                        <li><b>length</b> : is an optional, specifies length of target_type (the default is 30).</li>
+                        <li><b>expression</b> : is a valid expression of any type that will be converted.</li>
+                        <li><b>style</b> : is an optional integer that determines how the convert() function will translate expression.</li>
+                        <li style="color:red"><b>If the style is NULL, the convert() return NULL.</b></li>
+                    </ul>
+                <li>The convert() is similar to the CAST. However, is specifies to SQL Server. CAST() is the ANSI-SQL function, which is widely available in many other database.</li>
+                <textarea rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT  CONVERT(INT, 9.943),             --Output: 9
+                            CONVERT(varchar, getdate(), 1);    --Output: 09/18/21(see date format)
+                </textarea>
+            </ul>
+        <h3 style="color:red">3) CHOOSE</h3>
+            <ul>
+                <li>Returns the item from a list of items at a specified index.</li>
+                <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    CHOOSE(index, elem_1, elem_2 [, elem_n])
+                </textarea>
+                    <ul>
+                        <li><b>index</b> : is an integer expression that specifies the index of the element to be returned.<br>
+                        Note that the indexes of of elements are 1-based. That mean the first index is elem_1, the second is elem_2 and so on.</li>
+                        <li><b>elem_1, elem_2, ...elem_n</b> : is the list of comma-separated values of any type.</li>
+                    </ul>
+                <li>If index is not an integer, the CHOOSE() function will implicitly convert to INT. If index is out of boundary range, NULL will be returned.</li>
+                <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT  CHOOSE(2, 'T-Shirt', 'Pant', 'Shoe'); --Output: Pant
+                </textarea>
+                <li>Using CHOOSE() in the table with value in range(1,4)</li>
+                <textarea rows= "10" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT  order_id,
+                            order_date,
+                            order_status,
+                            CHOOSE( order_status,
+                                    'Pending',
+                                    'Processing',
+                                    'Rejected',
+                                    'Completed')
+                    FROM    sales.orders;
+                </textarea><br>
+                <img src="{% static 'IMG\SQL-Server-CHOOSE-Function-example-with-table-column-1.png'%}">
+            </ul>
+        <h3 style="color:red">4) ISNULL</h3>
+            <ul>
+                <li>Replaces NULL with a specified value.</li>
+                <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    ISNULL(expression, replacement)
+                </textarea>
+                    <ul>
+                        <li><b>expression</b> : is an expression of any type that is checked for NULL.</li>
+                        <li><b>replacement</b> : is the returned value if expression is NULL. If it's a different type, <br>
+                            ISNULL will implicitly convert to expression type. In case expression is not NULL, returned value is expression.</li>
+                    </ul>
+                <textarea rows= "4" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT  ISNULL('Hello', 'hi'),  --Output: Hello
+                            ISNULL(min_age, 0)      --Output: min_age value if not NULL, and 0 if NULL
+                    FROM divisions;
+                </textarea>
+            </ul>
+        <h3 style="color:red">5) ISNUMERIC</h3>
+            <ul>
+                <li>Accepts an expression and returns 1 if the expression is a valid numeric type. Otherwise, return 0.</li>
+                <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    ISNUMERIC(expression)
+                </textarea>
+                <li>expression: is any expression to be evaluated. Valid numeric type is one of these:</li>
+                    <ul>
+                        <li>Exact number: INT, BIGINT, SMALLINT, TINYINT, and BIT</li>
+                        <li>Approximate: FLOAT, REAL</li>
+                        <li>Fixed precision: DECIMAL, NUMERIC</li>
+                        <li>MONETARY values: SMALLMONEY, MONEY</li>
+                        <li></li>
+                    </ul>
+                <li>ISNUMERIC() actually checks if a value can be converted to a numeric data type and returns the right answer.<br>
+                However it doesn't tell you which data type or properly handle the overflow. That was introduction of TRY_CAST, TRY_CONVERT.</li>
+                <textarea rows= "3" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT  ISNUMERIC(1),       --Output: 1
+                            ISNUMERIC('abc')    --Output: 0
+                </textarea>
+            </ul>
+        <h3 style="color:red">6) IIF</h3>
+            <ul>
+                <li>The IIF() function accepts three argument. It evaluates the first argument and returns the second argument if the first argument is True,<br>
+                    and returns the third argument if the first argument is False.</li>
+                <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    IIF(boolean_expression, true_value, false_value)
+                </textarea>
+                    <ul>
+                        <li><b>boolean_expression</b> : is an expression to be evaluated. It must be valid boolean expression.</li>
+                        <li><b>true_value</b> : is the returned value if boolean_expression is true.</li>
+                        <li><b>false_value</b> : is the returned value if boolean_expression is false.</li>
+                    </ul>
+                <li>In other side, IIF is shorthand of CASE expression.</li>
+                <textarea rows= "5" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    CASE
+                        WHEN boolean_expression THEN true_value
+                        ELSE false_value
+                    END;
+                </textarea><br>
+                <textarea rows= "6" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT  SUM(IIF(order_status =1, 1, 0)) Pending,
+                            SUM(IIF(order_status =2, 1, 0)) Processing,
+                            SUM(IIF(order_status =3, 1, 0)) Rejected,
+                            SUM(IIF(order_status =4, 1, 0)) Completed
+                    FROM sales.orders;
+                </textarea>
+                <img src="{% static 'IMG\SQL-Server-IIF-Function-Pivot-example.png'%}">
+            </ul>
+        <h3 style="color:red">7) TRY_CAST</h3>
+            <ul>
+                <li>Casts a value of one type to another. It return NULL if conversion fails.</li>
+                <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    TRY_CAST(expression AS data_type[(length)])
+                </textarea>
+                <li>TRY_CAST() is similar to CAST() function, but it return NULL if conversion is fails while CAST() raises an error.<br>
+                    So, you can use TRY_CAST() handling function or expression such as ISNULL, COALELSE, or CASE to hadle NULL values.<br>
+                    You also use TRY_CAST function to handle CAST() if the CAST() fails.</S></li>
+                <li>If the conversion is not allow (such as cast integer to xml), SQL will raise an error.</li>
+            </ul>
+        <h3 style="color:red">8) TRY_CONVERT</h3>
+            <ul>
+                <li>Similar to TRY_CAST</li>
+            </ul>
+        <h3 style="color:red">9) TRY_PARSE</h3>
+            <ul>
+                <li>Use only to convert string to date/time and numeric date type.</li>
+                <li>With the general conversion, use CAST or CONVERT because there is an certain performance overhead in parsing the string value.</li>
+                <li>TRY_PARSE relies on the presence of the .NET Framework Common Language Runtime.(CLR)</li>
+                <li>Similar to TRY_CAST and TRY_CONVERT, it return NULL if the cast fails.</li>
+                <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    TRY_PARSE(string_value AS data_type [Using culture])
+                </textarea>
+                    <ul>
+                        <li><b>string_value</b> : nvarchar(4000) value representing the formatted value to parse into the specified data type.</li>
+                        <li><b>data_type</b> : Literal representing the data type requested for the result.</li>
+                        <li><b>culture</b> : Optional string that identifies the culture in which string_value is formatted.<br>
+                            If the culture is not specifies, the language of the current session is used. If the culture is not valid, error will be raised.</li>
+                    </ul>
+                <textarea rows= "4" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT  TRY_PARSE('Jabbewokkie' as datetime Using 'en-US)   --Output: NULL
+                            TRY_PARSE('14022021' as date Using 'en-US),         --Output: NULL
+                            TRY_PARSE('2021-02-14' as date);                    --Output: 2021-02-14
+                </textarea>
+            </ul>
+        <h3 style="color:red">10) Convert datetime to string</h3>
+            <ul>
+                <li>Use CONVERT() function</li>
+            </ul>
+        <h3 style="color:red">11) Convert string to datetime</h3>
+            <ul>
+                <li>Use CONVERT() and TRY_CONVERT() functions.</li>
+            </ul>
+        <h3 style="color:red">12) Convert datetime to date</h3>
+            <ul>
+                <li>Use CONVERT(), TRY_CONVERT(), CAST() functions.</li>
+            </ul>
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

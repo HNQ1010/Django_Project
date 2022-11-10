@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>SQL Server Views</title>
+</head>
+<body>
+<h1 style="color:red; text-align:center"><b>SQL Server Views</b></h1>
+    <ul>
+        <li>SQL Server provides a better way to save this query in the database catalog through a view to avoid execute query many time again.</li>
+        <li>A view is a named query stored in the database catalog that allows you to refer to it later.</li>
+        <li>By definition, views do not store data except for indexed views.</li>
+        <li>A view may consist of columns from multiple tables using joins or just a subset of columns of a single table. This makes views useful for abstracting or hiding complex queries.</li>
+        <img src="{% static 'IMG\SQL-Server-Views.png'%}">
+        <h3 style="color:red">*Advantages of views</h3>
+            <ul>
+                <h4 style="color:blue"><b>1) Security</b></h4>
+                    <ul>
+                        <li>You can restrict users to access directly to a table and allow them to access a subset of data via views.</li>
+                    </ul>
+                <h4 style="color:blue"><b>2) Simplicity</b></h4>
+                    <ul>
+                        <li>you can simplify the complex queries with joins and conditions using a set of views.</li>
+                    </ul>
+                <h4 style="color:blue"><b>3) Consistency</b></h4>
+                    <ul>
+                        <li>Once views are defined, you can reference the logic from the views rather than rewriting it in separate queries.</li>
+                    </ul>
+            </ul>
+    </ul>
+    <ul>
+        <h3 style="color:red">I) Creating a new view</h3>
+            <ul>
+                <textarea rows= "4" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE VIEW [OR ALTER] schema_name.view_name [(column_list)]
+                        AS
+                            select_statement;
+                </textarea>
+                <ul>
+                    <li>First, specify the name of the view after the CREATE VIEW keywords. The schema_name is the name of the schema to which the view belongs.</li>
+                    <li>Second, specify a SELECT statement (select_statement) that defines the view after the AS keyword. The SELECT statement can refer to one or more tables.</li>
+                </ul>
+                <li>If you don’t explicitly specify a list of columns for the view, SQL Server will use the column list derived from the SELECT statement.</li>
+                <li>In case you want to redefine the view e.g., adding more columns to it or removing some columns from it, you can use the OR ALTER keywords after the CREATE VIEW keywords.</li>
+                <h4 style="color:blue"><b>* Creating a view</b></h4>
+                <textarea rows= "16" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE VIEW sales.daily_sales
+                        AS
+                        SELECT
+                            year(order_date) AS y,
+                            month(order_date) AS m,
+                            day(order_date) AS d,
+                            p.product_id,
+                            product_name,
+                            quantity * i.list_price AS sales
+                        FROM
+                            sales.orders AS o
+                        INNER JOIN sales.order_items AS i
+                            ON o.order_id = i.order_id
+                        INNER JOIN production.products AS p
+                            ON p.product_id = i.product_id;
+                </textarea>
+                <h4 style="color:blue"><b>* Redefining a view</b></h4>
+                <textarea rows= "28" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE OR ALTER sales.daily_sales (
+                        year,
+                        month,
+                        day,
+                        customer_name,
+                        product_id,
+                        product_name
+                        sales)
+                    AS
+                        SELECT
+                            year(order_date),
+                            month(order_date),
+                            day(order_date),
+                            concat(first_name, ' ', last_name),
+                            p.product_id,
+                            product_name,
+                            quantity * i.list_price
+                        FROM
+                            sales.orders AS o
+                            INNER JOIN
+                                sales.order_items AS i
+                            ON o.order_id = i.order_id
+                            INNER JOIN
+                                production.products AS p
+                            ON p.product_id = i.product_id
+                            INNER JOIN sales.customers AS c
+                            ON c.customer_id = o.customer_id;
+                </textarea>
+            </ul>
+        <h3 style="color:red">II) Renaming a view</h3>
+            <ul>
+                <li>Therefore, after renaming the view, you must ensure that all objects that reference the view’s old name use the new name.</li>
+                <h4 style="color:blue"><b>* SQL Server rename view using SSMS</b></h4>
+                    <ul>
+                        <li>First, in Object Explorer, expand the Databases, choose the database name which contains the view that you want to rename and expand the Views folder.</li>
+                        <li>Second, right-click the view that you want to rename and select Rename.</li>
+                        <li>Third, enter the new name for the view.</li>
+                    </ul>
+                <h4 style="color:blue"><b>* SQL Server rename view using Transact-SQL</b></h4>
+                    <ul>
+                        <li>If you want to rename a view programmatically, you can use the sp_rename stored procedure:</li>
+                        <textarea rows= "4" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            EXEC sp_rename
+                                @objname = 'sales.product_catalog',
+                                @newname = 'product_list';
+                        </textarea>
+                        <ul>
+                            <li>First, pass the name of the view which you want to rename using the @objname parameter and the new view name to using the @newname parameter.</li>
+                            <li style="color:red"><b> Note that in the @objectname you must specify the schema name of the view. However, in the @newname parameter, you must not.</b></li>
+                            <li>Second, execute the statement.</li>
+                        </ul>
+                    </ul>
+            </ul>
+        <h3 style="color:red">III) Listing views in SQL Server</h3>
+            <ul>
+                <li>To list all views in a SQL Server Database, you query the sys.views or sys.objects catalog view.</li>
+                <textarea rows= "8" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        OBJECT_SCHEMA_NAME(v.object_id) schema_name,
+                        v.name
+                    FROM
+                        sys.views as v;
+                </textarea>
+                <textarea rows= "8" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        OBJECT_SCHEMA_NAME(o.object_id) schema_name,
+                        o.name
+                    FROM
+                        sys.objects as o
+                    WHERE
+                        o.type = 'V';
+                </textarea>
+                <h4 style="color:blue"><b>* Creating a stored procedure to show views in SQL Server Database</b></h4>
+                    <ul>
+                        <textarea rows= "16" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            CREATE PROC usp_list_views(
+                                    @schema_name AS VARCHAR(MAX)  = NULL,
+                                    @view_name AS VARCHAR(MAX) = NULL
+                                )
+                                AS
+                                SELECT
+                                    OBJECT_SCHEMA_NAME(v.object_id) schema_name,
+                                    v.name view_name
+                                FROM
+                                    sys.views as v
+                                WHERE
+                                    (@schema_name IS NULL OR
+                                    OBJECT_SCHEMA_NAME(v.object_id) LIKE '%' + @schema_name + '%') AND
+                                    (@view_name IS NULL OR
+                                    v.name LIKE '%' + @view_name + '%');
+                        </textarea>
+                    </ul>
+            </ul>
+        <h3 style="color:red">IV) Getting view information</h3>
+            <ul>
+                <h4 style="color:blue"><b>* Getting the view information using the sql.sql_module catalog</b></h4>
+                <ul>
+                    <li>To get the information of a view, you use the system catalog sys.sql_module and the OBJECT_ID() function:</li>
+                    <textarea rows= "13" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        SELECT
+                            definition,
+                            uses_ansi_nulls,
+                            uses_quoted_identifier,
+                            is_schema_bound
+                        FROM
+                            sys.sql_modules
+                        WHERE
+                            object_id
+                            = object_id(
+                                    'sales.daily_sales'
+                                );
+                    </textarea>
+                    <li>Note that you need to output the result to the text format in order to see the SELECT statement clearly.</li>
+                    <li>To show the results as text, from the query editor, you press Ctrl-T keyboard shortcut or click the Results to Text button.</li>
+                </ul>
+                <h4 style="color:blue"><b>* Getting view information using the sp_helptext stored procedure</b></h4>
+                <ul>
+                    <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        EXEC sp_helptext 'sales.product_catalog' ;
+                    </textarea>
+                </ul>
+                <h4 style="color:blue"><b>* Getting the view information using OBJECT_DEFINITION() function</b></h4>
+                <ul>
+                    <textarea rows= "7" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        SELECT
+                            OBJECT_DEFINITION(
+                                OBJECT_ID(
+                                    'sales.staff_sales'
+                                )
+                            ) view_info;
+                    </textarea>
+                </ul>
+            </ul>
+        <h3 style="color:red">V) Removing a view</h3>
+            <ul>
+                <li>To remove a view from a database, you use the DROP VIEW statement.</li>
+                <textarea rows= "4" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    DROP VIEW [IF EXISTS] schema_name.view_name;
+                </textarea>
+                <textarea rows= "4" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    DROP VIEW IF EXISTS
+                        sales.staff_sales,
+                        sales.product_catalogs;
+                </textarea>
+            </ul>
+        <h3 style="color:red">VI) Creating an indexed view</h3>
+            <ul>
+                <li>Indexed views are materialized views that stores data physically like a table hence may provide some the performance benefit if they are used appropriately.</li>
+                <li>To create an indexed view, you use the following steps:</li>
+                    <ul>
+                        <li>First, create a view that uses the WITH SCHEMABINDING option which binds the view to the schema of the underlying tables.</li>
+                        <li>Second, create a unique clustered index on the view. This materializes the view.</li>
+                    </ul>
+                <li>Because of the WITH SCHEMABINDING option, if you want to change the structure of the underlying tables which affect the indexed view’s definition,<br>
+                    you must drop the indexed view first before applying the changes.</li>
+                <li>In addition, SQL Server requires all object references in an indexed view to include the two-part:</li>
+                    <ul>
+                        <li>schema.object</li>
+                        <li>All referenced objects are in the same database</li>
+                    </ul>
+                <textarea rows= "4" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE VIEW product_master
+                        WITH SCHEMABINDING
+                        AS statement;
+                </textarea>
+                <li>Notice the option WITH SCHEMABUILDING after the view name. The rest is the same as regular view.</li>
+                <li>Before creating a unique clustered index for the view, let’s examine the query I/O cost statistics by querying data from a regular view<br>
+                    and using the SET STATISTICS IO command:</li>
+                <textarea rows= "11" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    SET STATISTICS IO ON
+                        GO
+
+                        SELECT
+                            *
+                        FROM
+                            production.product_master
+                        ORDER BY
+                            product_name;
+                        GO
+                </textarea>
+                <img src="{% static 'IMG\Screenshot 2021-09-12 053243.png'%}" width="600" height="150">
+                <li>Let's add unique clustered and non-clustered indexes:</li>
+                <textarea rows= "4" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE UNIQUE CLUSTERED INDEX
+                        ucidx_product_id
+                    ON production.product_master(product_id);
+                </textarea>
+                <textarea rows= "4" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE NONCLUSTERED INDEX
+                        ucidx_product_name
+                    ON production.product_master(product_name);
+                </textarea>
+                <li>Now, if you query again, you will see SQL reads data directly from the materialized view product_master</li>
+                <img src="{% static 'IMG\Screenshot 2021-09-12 053557.png'%}" width="600" height="70">
+                <li>Note that this feature is only available on SQL Server Enterprise Edition. If you use the SQL Server Standard or Developer Edition,<br>
+                you must use the WITH (NOEXPAND) table hint directly in the FROM clause of the query which you want to use the view like the following query:</li>
+                <textarea rows= "5" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT *
+                    FROM production.product_master
+                       WITH (NOEXPAND)
+                    ORDER BY product_name;
+                </textarea>
+            </ul>
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

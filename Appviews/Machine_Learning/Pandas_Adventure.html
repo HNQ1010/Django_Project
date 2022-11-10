@@ -1,0 +1,2677 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <meta charset="UTF-8">
+    <title>Pandas Adventure</title>
+</head>
+<body>
+<h2 style="color:blue">Object Creation</h2>
+    <ul>
+        <li>Creating a Series by passing a list of values, letting pandas create a default integer index</li>
+        <pre>s = pd.Series([1, 3, 4, np.nan, 5, 9])</pre>
+        <li>Creating a DataFrame by passing a Numpy array, with a datetime index and labeled columns:</li>
+        <pre>
+            dates = pd.date_range('20010101', periods = 6)
+            df = pd.DataFrame(np.random.randn(6,4), index_col = dates, columns = list('ACCD'))
+        </pre>
+        <li style="color:red">Creating a DataFrame by passing a dict of objects that can be converted to series-like:</li>
+        <pre>
+            df2 = pd.DataFrame({'A': 1.0,
+                                'B': pd.Timestamp('20130102'),
+                                'C': pd.Series(1, index = list(range(4)), dtype = 'float32'),
+                                'D': np.array([3] * 4, dtype = 'int32',
+                                'E': pd.Categorical(['test', 'train', 'test', 'train']),
+                                'F': 'foo'})
+        </pre>
+    </ul>
+<h2 style="color:blue">Viewing Data</h2>
+    <ul>
+        <li>View top and bottom:</li>
+        <pre>
+            df = pd.DataFrame( {'A': pd.Series(np.range(100), dtype='int32',
+                                'B': pd.date_range('20210101', periods = 100)})
+            df.head()
+            df.tail()
+        </pre>
+        <li>View index, columns</li>
+        <pre>
+            df.index
+            df.columns
+        </pre>
+        <li>DataFrame.to_numpy() finds a Numpy representation of the underlying data. Note that this can be <br>
+            expensive operation when your DataFrame has columns with different data types, which comes down <br>
+            to a fundamental difference between pandas and Numpy:Numpy has one data type for entire array while <br>
+            pandas has one type per column. When you call DataFrame.to_numpy(), pandas will find the Numpy dtype<br>
+            that can hold all of the dtypes in DataFrame. This may end up being 'object', which requires casting<br>
+            every value to a Python object.</li>
+        <li>If DataFrame is of all floating-point values, DataFrame.to_numpy() is fast and doesn't require copying data.</li>
+        <pre>
+            df = pd.DataFrame(np.random.randn(6,4), index=pd.date_range('20200101', periods = 6), columns=list('ABCD'))
+            df.to_numpy()
+        </pre>
+        <li>If DataFrame with multiple dtypes, DataFrame.to_numpy() is relatively expensive.</li>
+        <pre>
+            df = pd.DataFrame(  pd.Timestamp('20130102'), pd.Series(1.0),
+                                np.array([3]*4, dtype = 'int32'),
+                                pd.Categorical('test', 'train', 'test', 'train'),
+                                'foo', index=np.arange(4), columns=list('ABCD'))
+        </pre>
+        <li>Notice that DataFrame.to_numpy() does not included index or column labels in the output.</li>
+        <li>describe() shows a quick statistic summary of your data.</li>
+        <li>Transpose your data: When transposing your data, the index turn into column labels, and the columns turn to DataFrame rows.</li>
+        <pre>
+            df.T
+        </pre>
+        <li>Sorting: index and value</li>
+        <pre>
+            df.sort_index(axis=1, ascending=True) # sort by column, ascending
+            df.sort_index(axis=0, ascending=False) # sort by row, descending
+            df.sort_values(by = 'A', ascending=True) # sort by column A
+            df.sort_values('A', ascending=False) # sort by column A
+        </pre>
+    </ul>
+<h2 style="color:blue">Selection</h2>
+    <ul>
+        <li>While standard Python/ Numpy expressions for selecting and setting are intuitive and come in handy<br>
+            for interactive work, for production code, we recomend the optimized pandas data access methods:<br>
+        <b> .at, .iat, .loc, .iloc.</b></li>
+        <li>Selecting a single column, which yields a Series:</li>
+        <pre>
+            df['A'] # Select column A
+            df.A # Similar above
+        </pre>
+        <li>Select via [], <b>which slice the rows</b>, it just accept one argument represented row.</li>
+        <pre>
+            df[2:5] # Select row 2 to 5 of DataFrame
+            df['20130102':'20130104'] # Select index rows from '20130102' to '20130104'
+            df['A', 2:5'] # Select column A, rows 2 to 5
+            df.A[2:5] # Similar above
+        </pre>
+        <li>Select by label:</li>
+        <pre>
+            dates = pd.date_range('20010101', periods=6)
+            df.loc[dates[0]] # row at scalar value dates[0]
+            df.loc[:, ['A', 'B']] # all row with columns A, B
+            df.loc['20130102', ['A', 'B']] # row at index '20130102' with columns A, B
+            df.loc[dates[0], 'A'] # row at scalar value dates[0] with column A
+            df.at[dates[0], 'A'] # scalar value with 'at' method
+        </pre>
+        <li>Select by position:</li>
+        <pre>
+            df.iloc[3] # row 3
+            df.iloc[3:5, 1:2] # rows 3 to 5 and columns 1 to 2(column 1)
+            df.iloc[[1,2,4], [0,2]] # rows 1, 2, 4 at columns 0, 2
+            df.iloc[1:3, :] # rows 1 to 3 at all columns
+            df.iloc[:, 1:3] # all rows at column 1 to 3 (columns 1, 2)
+            df.iloc[1,1] # value at row 1, column 1
+            df.iat[1,1] # similar above, use iat method
+        </pre>
+        <li style="color:red">'.at' and '.iat' just using for single value. It mean the value at single row and single column.</li>
+    </ul>
+<h2 style="color:blue">Boolean Indexing</h2>
+    <ul>
+        <li>Using a single column's values to select data:</li>
+        <pre>
+            df[df['A']>0] # rows at values of column A > 0
+            df[df>0] # values at positions that has value > 0
+        </pre>
+        <li>Using 'isin()' method for filtering:</li>
+        <pre>
+            df2 = df.copy()
+            df2['E'] = ['one', 'two', 'one', 'two', 'three', 'four', 'three']
+            df2[df2['E'].isin(['one', 'two'])]
+        </pre>
+    </ul>
+<h2 style="color:blue">Setting</h2>
+    <ul>
+        <li>Setting a new column automatically aligns the data by the indexes:</li>
+        <pre>
+            s1 = pd.Series([1,2,3,4,5,5], index=pd.date_range('20010101', periods=6))
+            df['F'] = s1
+            df.at[dates[0], 'A'] = 0
+            df.iat[0,1] = 0
+            df.loc[:, 'D'] = np.array([5]*len(df))
+        </pre>
+        <li>A 'where' operation with setting</li>
+        <pre>
+            df2 = df.copy()
+            df2[df2 > 0] = -df2
+        </pre>
+    </ul>
+<h2 style="color:blue">Missing Data</h2>
+    <ul>
+        <li>Pandas primarily uses the value 'np.nan' to represent missing data. It is by default not included in <br>
+            computations.</li>
+        <li>Reindexing allows you to change/ add/ delete the index on a specified axis. This return a copy of the data.</li>
+        <pre>
+            dates = pd.date_range('20010101', periods=6)
+            df1 = df.reindex(index=dates[0:4], columns=list(df.columns) + ['E'])
+            df1.loc[dates[0:2], 'E'] = 1.0
+        </pre>
+        <li>To drop any rows that have missing data:</li>
+        <pre>
+            df.dropna(how='any') # drop rows if any 'na' value
+            df.dropna(how='all') # drop rows if all 'na' values
+        </pre>
+        <li>Filling missing data:</li>
+        <pre>
+            df.fillna(value=5)
+        </pre>
+        <li>Get 'nan' boolean values:</li>
+        <pre>
+            pd.isna(df1)
+        </pre>
+        <li></li>
+    </ul>
+<h2 style="color:blue">Operations</h2>
+    <ul>
+        <li><b>Stats</b>: Operations in general exclude missing data.</li>
+        <pre>
+            df.mean() # default axis = 0
+            df.mean(1) # axis = 1
+        </pre>
+        <li>Operating with objects that have different dimensionality and need alignment. In addition, pandas automatically<br>
+            broadcasts along teh specified dimension.</li>
+        <li><b>shift(periods, freq, axis=0, fill_value)</b>: shift index by desired number of periods with an optional time 'frep'</li>
+        <li><b>sub(other, axis='columns', level, fill_value)</b>: Get subtraction of DataFrame and other, element-wise.</li>
+        <pre>
+            s = pd.DataFrame({ 'col1':[1, 3, 5, np.nan, 6, 8],
+                            'col2': [2, np.nan, 3, 4, np.nan, 2}, index=dates)
+            s.shift(1) # Switch info (row) of index 0 to index 1, index 0 is np.nan value. Default rows
+            s.shift(3) # Switch info (row) of index 0 to index 3, index 0:3 are np.nan values. Default columns
+            s.shift(1, axis='columns') # shift index to col 1
+            s.shift(1, axis='columns', fill_value=0) # shift index to col1, fill col[0] = 0
+            s.shift(3, freq='D') # Extend the index replacing the ignored index
+            s.shift(3, freq='infer') # Extend the index replacing the ignored index as inferred-freq.
+            df.sub(s, axis='index') # if axis = 'index', s has to have similar rows
+            df.sub([0, 1, 2, 3, 4], axis='columns') # if axis = 'column', other has to have similar columns(excluded index column)
+        </pre>
+    </ul>
+<h2 style="color:blue">Apply</h2>
+    <ul>
+        <pre>
+            df.apply(np.cumsum) # df cumulative summary by rows
+            df.apply(np.cumsum, axis=1) # df cumulative summary by columns
+            df.apply(lambda x: x.max() - x.min()) # apply lambda function by rows(column labels)
+            df.apply(lambda x:x.max()- x.min(), axis=1) #apply lambda function by columns(index labels)
+        </pre>
+    </ul>
+<h2 style="color:blue">Histogram</h2>
+    <ul>
+        <pre>
+            s = pd.Series(np.random.randint(0, 7, size =10) # random values from 0 to 7 with 10 elements
+            s.value_counts() # frequency distribution of values
+            df['A'].value_counts() # frequency distribution of column A's values.
+        </pre>
+    </ul>
+<h2 style="color:blue">String Method</h2>
+    <ul>
+        <li>Series is equipped with a set of string processing methods in the <b>str</b> attribute that make it easy to operate on <br>
+            each element of the array. Note that pattern-matching in <b>str</b> generally uses regular expression by default (and in <br>
+            some cases always uses them).</li>
+        <pre>
+            s = pd.Series(['A', 'B', 'C', 'Aaba', 'Baca', np.nan, 'CABA', 'dog', 'cat'])
+            s.str.lower()
+        </pre>
+    </ul>
+<h2 style="color:blue">Merge</h2>
+    <ul>
+        <h3 style="color:red">CONCAT</h3>
+        <li>Pandas provides various facilities for easily combining together Series and DataFrame objects with various kinds of set logic<br>
+            for the indexes and relational algebra functionality in the case of join/ merge-type operations.</li>
+        <pre>
+            g1 = pd.DataFrame(np.random.randn(3, 4))
+            g2 = pd.DataFrame(np.random.randn(2, 4))
+            g3 = pd.DataFrame(np.random.randn(5, 4))
+            g = pd.concat([g1, g2, g3])
+            g.shape
+            Out[]: (10,4)
+        </pre>
+        <li style="color:blue">Adding a column to a DataFrame is relatively fast. However, adding a row requires a copy, and may be <br>
+            expensive. We recommend passing a pre-built list of records to the DataFrame constructor instead of building a DataFrame<br>
+            by iteratively appending records to it.</li>
+        <h3 style="color:red">JOIN</h3>
+        <li>SQL style merges.</li>
+        <pre>
+            left = pd.DataFrame({'key': ['foo', 'foo'], 'lval': [1, 2]})
+            right = pd.DataFrame({'key': ['foo', 'foo'], 'rval': [4, 5]})
+            pd.merge(left, right, on='key') # get all column from left and right at 'key' value
+        </pre>
+    </ul>
+<h2 style="color:blue">Grouping</h2>
+    <ul>
+        <li>By 'group by' we are referring to a process involving one or more of the following steps:</li>
+        <ul>
+            <li><b>Splitting</b> the data into groups based on some criteria</li>
+            <li><b>Applying</b> a function to each group independently</li>
+            <li><b>Combining</b> the results into a data structure</li>
+        </ul>
+        <pre>
+            df = pd.DataFrame({ 'A': ['foo', 'bar', 'foo', 'bar', 'foo', 'bar', 'foo', 'foo'],
+                                'B': ['one', 'one', 'two', 'three', 'two', 'two', 'one', 'three'],
+                                'C': np.random.randn(8), 'D': np.random.randn(8)})
+            # Grouping then applying sum
+            df.groupby(['A', 'B']).sum()
+        </pre>
+    </ul>
+<h2 style="color:blue">Reshaping</h2>
+    <ul>
+        <h3 style="color:red">Stack</h3>
+        <li>The <b>stack()</b> method compresses a level in the DataFrame's columns.</li>
+        <li style="color:red">Another way using zip method:</li>
+        <pre>
+            tuples = list(zip(*[    ['bar', 'bar', 'baz', 'baz', 'foo', 'foo', 'qux', 'qux'],
+                                    ['one', 'two', 'one', 'two', 'one', 'two', 'one', 'two'] ]))
+            # It similar to :
+            A = ['bar', 'bar', 'baz', 'baz', 'foo', 'foo', 'qux', 'qux']
+            B = ['one', 'two', 'one', 'two', 'one', 'two', 'one', 'two']
+            tuples= []
+            for i, j in zip(A,B)
+                tuples.append((i,j))
+        </pre>
+        <li>MultiIndex</li>
+        <pre>
+            index = pd.MultiIndex.from_tuples(tuples, name=['first', 'second'])
+            df = pd.DataFrame(np.random.randn(8,2), index=index, columns=list('AB')
+            df2 = df[:4]
+            stacked = df2.stack() # Switch columns into rows
+        </pre>
+        <li>With a 'stacked' DataFrame or Series (having a MultiIndex as the index), the inverse operation of <b>stack()</b><br>
+            is <b>unstack()</b>, which by default un-stacks the <b>last level</b></li>
+        <pre>
+            stacked.unstack() # turn stacked into original df2
+            stacked.unstack(1) # turn column index 1 into row
+            stacked.unstack(0) # turn column index 0 into row
+        </pre>
+        <h3 style="color:red">Pivot</h3>
+        <pre>
+            df = pd.DataFrame({ 'A': ['one', 'one', 'two', 'three']*3,
+                                'B': ['A', 'B', 'C']*4,
+                                'C': ['foo', 'foo', 'foo', 'bar', 'bar', 'bar']*2,
+                                'D': np.random.randn(12),
+                                'E': np.random.randn(12)})
+            pd.pivot_table(df, values='D', index=['A', 'B'], columns=['C'])
+        </pre>
+    </ul>
+<h2 style="color:blue">Time Series</h2>
+    <ul>
+        <li>Pandas has simple, powerful, and efficient functionality for performing re-sampling operations during frequency<br>
+            conversion (converting secondly data into 5-minutely data). This is extremely common in, but not limited to financial<br>
+            applications.</li>
+        <li><b>resample()</b>: resample <b>time-series</b> data.</li>
+        <pre>
+            rng = pd.date_range('1/1/2021', periods=100, freq='S')
+            ts = pd.Series(np.random.randint(0, 500, len(rng)), index=rng)
+            ts.resample('5Min').sum() # Sum per 5 minutes
+            ts.resample('1Min').sum() # Sum per 1 minutes
+            ts.resample('0.5H').sum() # Sum per 0.5 hour (30 minutes)
+        </pre>
+        <li>Time zone representation:</li>
+        <pre>
+            Date list with extended part is date
+            rng = pd.date_range('3/6/2021 00:00:00', periods=5, freq='D')
+            ts = pd.Series(np.random.randn(len(rng)), rng) # similar to index=rng
+            ts_utc = ts.tz_localize('UTC') # turn ts index into timezone
+            ts_utc.tz_convert('US/Eastern') # turn current timezone into different timezone
+        </pre>
+        <li>Converting between time span representations:</li>
+        <pre>
+             # date series by month, start at the end of the month
+            rng = pd.date_range('1/1/2021', periods=5, freq='M')
+            ts = pd.Series(np.random.randn(len(rng)), rng)
+            ps = ts.to_period() # represent index as month
+            ps.to_timestamp() # represent index as the first day of the month
+        </pre>
+        <li style="color:red">As example above, you can get the first of each month by convert to period then convert again to timestamp.</li>
+        <li>Converting between period and timestamp enables some convenient arithmetic functions to be used.</li>
+        <pre>
+            # Set series as quarter
+            prng = pd.period_range('1990Q1', '2000Q4', freq='Q')
+            # Set Series with quarter index
+            ts = pd.Series(np.random.randn(len(prng)), prng)
+            # Set index as the last month of the quarter ('M', 'e') with the first day of the month at 9:00 (('H', 's') + 9)
+            ts.index = (prng.asfreq('M', 'e').asfreq('H', 's') + 9
+        </pre>
+    </ul>
+<h2 style="color:blue">Categoricals</h2>
+    <ul>
+        <li>Pandas can include categorical data in a DataFrame.</li>
+        <li>Convert the raw grades to a categorical data type:</li>
+        <pre>
+            df = pd.DataFrame({ 'id': [1,2,3,4,5,6],
+                                'raw_grade': ['a', 'b', 'b', 'a', 'a', 'e']})
+            # copy df['raw_grade'] into new column with astype('category').
+            # If you use pd method, that will be <b>pd.Categorical([])</b>.
+            df['grade'] = df['raw_grade'].astype('category')
+        </pre>
+        <li>Rename the categories to more meaningful names (assigning to <b>Series.cat.categories()</b> is in place!)</li>
+        <pre>
+            df['grade'].cat.categories = ['very good', 'good', 'very bad']
+        </pre>
+        <li>Reorder the categories and simultaneously add the missing categories (methods under <b>Series.cat()</b> return a new <b>Series</b> by default).</li>
+        <pre>
+            df['grade'] = df['grade'].cat.set_categories(['very bad', 'bad', 'medium', 'good', 'very good'])
+        </pre>
+        <li>Sorting is per order in the categories, not lexical order.</li>
+        <pre>
+            df.sort_values('grade')
+        </pre>
+        <li>Grouping by a category column also shows empty categories.</li>
+        <pre>
+            df.groupby(['grade']).size() # can also use .count() to replace for .size()
+        </pre>
+    </ul>
+<h2 style="color:blue">Plotting</h2>
+    <ul>
+        <li>Use matplotlib.pyplot or plotly library</li>
+        <li>The <b>close()</b> method uses to close a figure window.</li>
+        <pre>
+            import matplotlib.pyplot as plt
+            plt.close('all')
+            ts = pd.Series(np.random.randn(1000), index=pd.date_range('1/1/2018', periods=1000))
+            ts = ts.cumsum()
+            ts.plot()
+        </pre>
+        <img src="{% static 'IMG/pd_1.png'%}">
+        <li>On a DataFrame, the <b>plot()</b> method is a convenience to plot all of teh columns with labels.</li>
+        <pre>
+            df = pd.DataFrame(np.random.randn(1000, 4), index=ts.index, columns=list('ABCD'))
+            df = df.cumsum()
+            fig = px.line(df)
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/pd_2.png'%}">
+    </ul>
+<h2 style="color:blue">Getting Data In/ Out</h2>
+    <ul>
+        <li>Write to a csv file</li>
+        <pre>df.to_csv('foo'.csv)</pre>
+        <li>Reading from a csv file.</li>
+        <pre>
+            df = pd.read_csv('foo.csv')
+        </pre>
+        <li>Writing to a HDF5 Store.</li>
+        <pre>df.to_hdf('foo.h5', 'df')</pre>
+        <li>Reading from a HDF5 Store.</li>
+        <pre>df = pd.read_hdf('foo.h5', 'df')</pre>
+        <li>Reading and writing to MS Excel</li>
+        <pre>
+            df.to_excel('foo.xlsx', sheet_name='Sheet1')
+            df.read_excel('foo.xlsx', 'Sheet1', index_col=None, na_value=['NA'])
+        </pre>
+    </ul>
+<h2 style="color:blue">Intro to Data Structure</h2>
+    <ul>
+        <li>We'll start with a quick, non-comprehensive overview of the fundamental data structures in pandas to get you started.<br>
+            The fundamental behavior about data types, indexing, and axis labeling/ alignment apply across all of the objects.</li>
+        <li>Here is a basic tenet to keep in mind: <b>data alignment is intrinsic.</b> The link between labels and data will not <br>
+            be broken unless done so explicitly by you.</li>
+        <li>We'll give a brief intro to the data structures, then consider all of the broad categories of functionality and methods<br>
+            in separate sections.</li>
+    </ul>
+<h2 style="color:blue">Series</h2>
+    <ul>
+        <li>Series is one-dimensional labeled array capable of holding any data type( int, str, float, point numbers, Py Object, etc).<br>
+            The axis labels are collectively referred to as the index. The basic method to create a Series is to call:</li>
+        <pre>
+            s = pd.Series(data, index=index)
+        </pre>
+        <li>Here, data can be many different things:</li>
+            <ul>
+                <li><b>A python dict</b></li>
+                <li><b>An ndarray</b></li>
+                <li><b>A scalar value</b></li>
+            </ul>
+        <li>The passed <b>index</b> is a list of axis labels. Thus, this separates into a few cases depending on what data is:</li>
+        <h3 style="color:red">From ndarray</h3>
+        <li>If data is an ndarray, index must be the same length as data. If no index is passed, one will be created having values:<br>
+            <b style="color:red">[0, ..., len(data-1)]</b>.</li>
+        <pre>
+            s = pd.Series(np.random.randn(5), index=['a', 'b', 'c', 'd', 'e'])
+        </pre>
+        <li>Pandas supports non-unique index values. If an operation that does not support duplicate index values is attempt, an exception<br>
+            will be raised at that time. The reason for being lazy is nearly all performance-based(there are many instances in computations,<br>
+            like parts of Groupby, where the index is not used).</li>
+        <h3 style="color:red">From Dict</h3>
+        <li>Series can be instantiated from dicts:</li>
+        <pre>
+            d = {'b': 1, 'a':0, 'c':2}
+        </pre>
+        <li>When the data is a dict, and an index is not passed, the Series index will be ordered by the dict's insertion order (Python >=3.6 and pandas >=0.23).</li>
+        <li>If an index is passed, the values in data corresponding to the labels in the index will be pulled out.</li>
+        <pre>
+            d = {'a':0.0, 'b':1.0, 'c':2.0}
+            pd.Series(d, index=['b', 'c', 'd', 'a']
+            Out[]:
+            b    1.0
+            c    2.0
+            d    NaN
+            a    0.0
+            dtype: float64
+        </pre>
+        <li>Note: NaN (not a number) is the standard missing data marker used in pandas.</li>
+        <h3 style="color:red">From Scalar value</h3>
+        <li>If data is a scalar value, an index must be provided. The value will be repeated to match the length of index.</li>
+        <pre>
+            pd.Series(5, index=['a', 'b', 'c', 'd', 'e']
+            Out[]:
+            a    5.0
+            b    5.0
+            c    5.0
+            d    5.0
+            e    5.0
+            dtype: float64
+        </pre>
+    </ul>
+<h2 style="color:blue">Series is ndarray-like</h2>
+    <ul>
+        <li>Series acts very similarly to a <b>ndarray</b>, and is a valid argument to most Numpy functions. However, operations such as <br>
+            slicing will also slice the index.</li>
+        <pre>
+            s = pd.Series(np.random.randn(5), index=['a', 'b', 'c', 'd', 'e'])
+            s[0] # get index and value at position 0
+            s[:3] # get index and value at position 0 to 2
+            s[s > s.median()] # get rows(included indexes) at position s that have s > s.median()
+            s[[4,3,1]] # get rows(included indexes) at positions 4, 3 and 1
+            np.exp(s) # calculate exponential s element-wise.
+        </pre>
+        <li>We'll address array-based indexing like s[[4,3,1]] in section on indexing.</li>
+        <li>Like a numpy array, a pandas Series has a dtype: Eg: s.dtype</li>
+        <li>This is often a Numpy dtype. However, pandas and 3rd-party libraries extend Numpy's type sys in a few places, in which case the <br>
+            dtype would be an <b>extensionDtype</b>. Some examples within pandas are Categorical data and Nullable integer data type.</li>
+        <li>If you need the actual array backing a Series, use <b>Series.array</b>.</li>
+        <pre>s.array</pre>
+        <li>Accessing the array can be useful when you need to do some operation without the index(to disable automatic alignment).</li>
+        <li><b>Series.array</b> will always be an Extension.array. Pandas knows how to take an ExtensionArray and store it in a Series or a <br>
+            column of a DataFrame.</li>
+        <li>While Series is ndarray-like, if you need an actual ndarray, then use <b>Series.to_numpy()</b>. But consider if s exist of many <br>
+            types of objects. It'll cost expensive conversion.</li>
+        <li>Even if theSeries is backed by a ExtensionArray, Series.to_numpy() will return a Numpy array.</li>
+    </ul>
+<h2 style="color:blue">Series is dict-like</h2>
+    <ul>
+        <li>A Series is like a fixed-size dict in that you can get and set values by index label:</li>
+        <pre>
+            s['a'] # return row at index 'a' (access by index label)
+            s['e'] # return row at index 'e' (access by index label)
+            'e' in s : True
+            'f' in s : False
+        </pre>
+        <li>If a label is not contained, an exception is raised.</li>
+        <li>Using the <b>get</b> method, a missing label will return None or specified default.</li>
+        <pre>
+            s.get('f') : Return None
+            s.get('f', np.nan): Return nan
+        </pre>
+    </ul>
+<h2 style="color:blue">Vectorized Operations and label alignment with Series</h2>
+    <ul>
+        <li>When working with raw Numpy arrays, looping through value-by-value is usually not necessary. The same is true when working with Series in Pandas.<br>
+            Series can also be passed into most Numpy methods expecting an ndarray.</li>
+        <pre>
+            s  + s # plus itself element-wise
+            s * 2 # multiply 2 element-wise
+            np.exp(s) # exponential itself element-wise
+        </pre>
+        <li>A key different between Series and ndarray is that operations between Series automatically align the data based on label. Thus <br>
+            you can write computations without giving consideration to whether the Series involved have the same labels.</li>
+        <pre>
+            s[1:] + s[:-1]  # s[1:] miss index 0 and s[:-1] miss last index
+            Out[]: # first value and last value contain nan value, so the result is:
+            a         NaN
+            b   -0.565727
+            c   -3.018117
+            d   -2.271265
+            e         NaN
+            dtype: float64
+        </pre>
+        <li>The result of an operation between unaligned Series will have th union of the indexes involved. If a label is not found<br>
+            in one Series or the other, the result will be marked as missing NaN. Being able to write code without doing any explicit data <br>
+            alignment grants immense freedom and flexibility in interactive data analysis and research. The integrated data alignment <br>
+            features of the pandas data structures set pandas apart from the majority of related tools for working with labeled data.</li>
+        <li>In general, we chose to make the default result of operations between differently indexed objects yield the union of the indexes<br>
+            in order to avoid loss of information. Having an index label, though the data is missing, is typically important information as part <br>
+            of a computation. You of course have the option of dropping labels with missing data via the <b>dropna</b> function.</li>
+    </ul>
+<h2 style="color:blue">Name attribute</h2>
+    <ul>
+        <li>Series can also have a <b>name</b> attribute.</li>
+        <pre>
+            s = pd.Series(np.random.randn(5), name='something')
+            s.name
+        </pre>
+        <li>The Series <b>name</b> will be assigned automatically in many cases, in particular when taking 1D slices of DataFrame, you can <b>rename</b><br>
+            a Series with the <b>pandas.Series.rename()</b> method.</li>
+        <pre>
+            s2 = s.rename('different')
+            s2.name
+        </pre>
+        <li>Note that <b>s</b> and <b>s2</b> refer to different objects.</li>
+    </ul>
+<h2 style="color:blue">DataFrame</h2>
+    <ul>
+        <li>DataFrame is 2-dimensional labeled data structure with columns of potentially different types. You can think of it like a spreadsheet <br>
+            or SQL table, or a dict of Series objects. It is generally the most commonly used pandas object. Like Series, DataFrame accepts many different<br>
+            kinds of input:</li>
+        <ul>
+            <li><b>Dict of 1D ndarrays, lists, dicts, or Series</b></li>
+            <li><b>2-D numpy.ndarray</b></li>
+            <li><b>Structured or record ndarray</b></li>
+            <li><b>A Series</b></li>
+            <li><b>Another DataFrame</b></li>
+        </ul>
+        <li>Along with the data, you can optionally pass <b>index</b>(row labels) and <b>columns</b>(column labels) arguments. If you pass an index and / or <br>
+            columns, you are guaranteeing the index and/ or columns of the resulting DataFrame. Thus, a dict of Series plus a specific index will discard all <br>
+            data not matching up to the passed index.</li>
+        <li>If axis labels are not passed, they will be constructed from teh input data based on common sense rules.</li>
+        <li>When the data is a dict, and columns is not specified, the DataFrame columns will be ordered by the dict's insertion order.</li>
+    </ul>
+<h2 style="color:blue">From dict of Series or dicts</h2>
+    <ul>
+        <li>The resulting <b>index</b> will be the <b>union</b> of the indexes of the various Series. If there are any nested dicts, these will first be converted to<br>
+            Series. If no columns are passed, the columns will be the ordered list of dict keys.</li>
+        <pre>
+            d = {   'one': pd.Series([1.0, 2.0, 3.0], index=['a', 'b', 'c']),
+                    'two': pd.Series([1.0, 2.0, 3.0, 4.0], index = ['a', 'b', 'c', 'd'])}
+            df = pd.DataFrame(d) # combine index of two Series
+            pd.DataFrame(d, index=['d', 'b', 'a']) # DataFrame exist of indexes: d, b, a and ignored index c
+            pd.DataFrame(d, index=['d', 'b', 'a'], columns=['two', 'three'])
+            # DataFrame exist of indexes: d, b, a, ignored index c, and name of 'columns' override the dict keys ['one', 'two']
+        </pre>
+        <li>The row and column labels can be accessed respectively by accessing the <b>index</b> and <b>columns</b> attributes.</li>
+        <li>When a particular set of columns is passed along with a dict of data, the passed columns override the keys in the dict.</li>
+    </ul>
+<h2 style="color:blue">DataFrame From dict of ndarays/ list</h2>
+    <ul>
+        <li>The ndarray must be the same length. If an index is passed, it must clearly also be the same length as the arrays. If no index <br>
+            is passed, the result will be <b>range(n)</b>, where <b>n</b> is the length of array.</li>
+        <pre>
+            d = {'one': [1.0, 2.0, 3.0, 4.0], 'two': [4.0, 3.0, 2.0, 1.0]}
+            pd.DataFrame(d) # index is in range(4), for 4 is the length of array
+            pd.DataFrame(d, index=['a', 'b', 'c', 'd']) # index is specified : a, b, c, d
+        </pre>
+    </ul>
+<h2 style="color:blue">DataFrame From structured or record array</h2>
+    <ul>
+        <li>This case is handled identically to a dict of arrays.</li>
+        <pre>
+            # Define pattern 'data'
+            data = np.zeros((2, ), dtype=[('A', 'i4'), ('B', 'f4'), ('C', 'a10')])
+            # Override 'data' data
+            data[:] = [(1, 2.0, 'Hello'), (2, 3.0, 'World')]
+            # Put data into DataFrame
+            pd.DataFrame(data)
+            # Override index labels
+            pd.DataFrame(data, index=['first', 'secon']
+            # Override columns
+            pd.DataFrame(data, columns=['C', 'A', 'B']
+        </pre>
+        <li>DataFrame is not intended to work exactly like a 2-dimensional Numpy ndarray.</li>
+    </ul>
+<h2 style="color:blue">DataFrame from a list of dicts</h2>
+    <ul>
+        <pre>
+            data2 = [{'a': 1, 'b': 2}, {'a': 5, 'b': 10, 'c': 20}]
+            pd.DataFrame(data2) # keys is columns , values is index rows
+            pd.DataFrame(data2, index=['first', 'second']) # keys is columns, values are index rows, index labels are changed
+            pd.DataFrame(data2, column = ['a', 'b']) # keys is columns, values are index rows, override columns name and ignored third column.
+        </pre>
+        <li></li>
+    </ul>
+<h2 style="color:blue">DataFrame from a dict of tuples</h2>
+    <ul>
+        <li>You can automatically create a MultiIndexed frame by passing a tuples dictionary.</li>
+        <pre>
+            pd.DataFrame({
+                            ('a', 'b'): {('A', 'B'): 1, ('A', 'C'): 2}, # tuple is columns, dict is values
+                            ('a', 'a'): {('A', 'C'): 3, ('A', 'B'): 4},
+                            ('a', 'c'): {('A', 'B'): 5, ('A', 'C'): 6},
+                            ('b', 'a'): {('A', 'C'): 7, ('A', 'B'): 8},
+                            ('b', 'b'): {('A', 'D'): 9, ('A', 'B'): 10},
+                        })
+            Out[]:
+                   a              b
+                   b    a    c    a     b
+            A B  1.0  4.0  5.0  8.0  10.0
+              C  2.0  3.0  6.0  7.0   NaN
+              D  NaN  NaN  NaN  NaN   9.0
+        </pre>
+    </ul>
+<h2 style="color:blue">DataFrame from a Series</h2>
+    <ul>
+        <li>The result will be a DataFrame with the same index as the input Series, and with one column whose name is the original <br>
+            of the Series (only if no other column name provided).</li>
+    </ul>
+<h2 style="color:blue">DataFrame from a list of <b>namedtuples</b></h2>
+    <ul>
+        <li>The field names of the first <b>namedtuple</b> in the list determine the columns of the <b>DataFrame</b>. The remaining<br>
+            nametuples (or tuples) are simply unpacked and their values are fed into the rows of the <b>DataFrame</b>. If any of those<br>
+            tuples is shorter than the first <b>namedtuple</b> then the later columns in teh corresponding row are marked as missing values.<br>
+            If any are longer than the first <b>namedtuple</b>, a <b>ValueError</b> is raised.</li>
+        <pre>
+            from collections import namedtuple
+            Point = namedtuple('Point', 'x y')
+            pd.DataFrame([Point(0, 0), Point(0, 3), Point(2, 3)])
+            Out[]:
+               x  y
+            0  0  0
+            1  0  3
+            2  2  3
+            Point3D = namedtuple('Point3D', 'x y z')
+            pd.DataFrame([Pont3D(0, 0, 0), Point3D(0, 3, 5), Point(2, 3)])
+            Out[]:
+               x  y    z
+            0  0  0  0.0
+            1  0  3  5.0
+            2  2  3  NaN
+        </pre>
+    </ul>
+<h2 style="color:blue">DataFrame from a list of dataclasses</h2>
+    <ul>
+        <li>Data Classes as introduced in PEP557, can be passed into the DataFrame constructor. Passing a list of dataclasses is equivalent<br>
+            to passing a list of dictionaries.</li>
+        <li>Please be aware, that all values in the list should be dataclasses, mixing types in the list would result in a TypeError.</li>
+        <pre>
+            from dataclasses import make_dataclass
+            Point = make_dataclass('Point', [('x', int), ('y', int)])
+            pd.DataFrame([Point(0, 0), Point(0, 3), Point(2, 4)])
+            Out[]:
+               x  y
+            0  0  0
+            1  0  3
+            2  2  3
+        </pre>
+        <h3 style="color:red">Missing data</h3>
+        <li>Much more will be said on this topic in the Messing Data section. To construct a DataFrame with missing data, we use <b>np.nan</b> to <br>
+            represent missing values. Alternatively, you may pass a <b>numpy.MaskedArray</b> as teh data argument to the DataFrame<br>
+            constructor, and its masked entries will be considered missing.</li>
+    </ul>
+<h2 style="color:blue">Alternate constructors</h2>
+    <ul>
+        <h3 style="color:red">DataFrame.from_dict</h3>
+        <li><b>DataFrame.from_dict</b> takes a dict of dicts or a dict of array-like sequences and returns a DataFrame. It operates like <br>
+            the <b>DataFrame</b> constructor except for the <b>orient</b> parameter which is <b>'columns'</b> by default, but which can be<br>
+            set to <b>'index'</b> in order to use the dict keys as row labels.</li>
+        <pre>
+            pd.DataFrame.from_dict({[('A': [1,2,3]), ('B': [4,5,6])})
+            Out[]:
+               A  B
+            0  1  4
+            1  2  5
+            2  3  6
+        </pre>
+        <li>If you pass <b>orient='index'</b>, the keys will be treat as row labels. In this case, you can also pass the desired column names.</li>
+        <pre>
+            pd.DataFrame.from_dict({[('A': [1, 2, 3]), ('B': [4, 5, 6])]}, orient='index', columns=['one', 'two', 'three'])
+            Out[]:
+               one  two  three
+            A    1    2      3
+            B    4    5      6
+        </pre>
+        <h3 style="color:red">DataFrame.from_records</h3>
+        <li><b>DataFrame.from_records</b> takes a list of tuples or an ndarray with structured dtype. It works analogously to the normal <br>
+            DataFrame constructor, except that the resulting DataFrame index may be a specific field of the structured dtype.</li>
+        <pre>
+            data = np.zeros((2,), dtype=[('A', 'i4'), ('B', 'f4'), ('C', 'a10')])
+            data[:] = [(1, 2.0, 'Hello'), (2, 3.0, 'World')]
+            pd.DataFrame.from_records(data, index='C')
+            Out[]:
+                      A    B
+            C
+            b'Hello'  1  2.0
+            b'World'  2  3.0
+        </pre>
+    </ul>
+<h2 style="color:blue">Column Selection, Addition, Deletion</h2>
+    <ul>
+        <li>You can treat a DataFrame semantically like a dict of like-indexed Series objects. Getting, setting, and deleting columns works<br>
+            with the same syntax as the analogous dict operations.</li>
+        <pre>
+            df = pd.DataFrame({ 'one' : [1.0, 2.0, 3.0, np.nan],
+                                'two': [1.0, 2.0, 3.0, 4.0],
+                                'three': [1.0, 4.0, 9.0, np.nan]}, index=['a', 'b', 'c', 'd'])
+            df['one'] # get column 'one'
+            df['three'] # get column 'three'
+            df['flag'] = df['two'] > 2 # add column 'flag' with boolean values based on column 'two' values
+        </pre>
+        <li>Column can be deleted or popped permanently like with a dict:</li>
+        <pre>
+            del df['two'] # delete column 'two'
+            df.pop('three') # drop and return item from DataFrame
+        </pre>
+        <li>When inserting a scalar value, it will naturally be propagated to fill the column:</li>
+        <pre>
+            df['foo'] = 'bar'
+            Out[]:
+               one   flag  foo
+            a  1.0  False  bar
+            b  2.0  False  bar
+            c  3.0   True  bar
+            d  NaN  False  bar
+        </pre>
+        <li>When inserting a Series that does not have the same index as the DataFrame, it will be conformed to the DataFrame' index:</li>
+        <pre>
+            df['one_trunct'] = df['one][:2]
+            Out[]:
+               one   flag  foo  one_trunc
+            a  1.0  False  bar        1.0
+            b  2.0  False  bar        2.0
+            c  3.0   True  bar        NaN
+            d  NaN  False  bar        NaN
+        </pre>
+        <li>You can insert raw ndarrays but their length must match teh length of the DataFrame's index.</li>
+        <li>By default, columns get inserted at the end. The <b>insert</b> function is available to insert at a particular location in the columns.</li>
+        <li><b>insert(loc, column, value, allow_duplicate=False)</b></li>
+        <pre>
+            df.insert(1, 'bar', df['one']) # insert into position 1, column 'bar' with value of df['one']
+            Out[]:
+               one  bar   flag  foo  one_trunc
+            a  1.0  1.0  False  bar        1.0
+            b  2.0  2.0  False  bar        2.0
+            c  3.0  3.0   True  bar        NaN
+            d  NaN  NaN  False  bar        NaN
+        </pre>
+    </ul>
+<h2 style="color:blue">Assigning new columns in method chains</h2>
+    <ul>
+        <li>Inspired by dplyr's <b>mutate</b> verb, DataFrame has an <b>assign()</b> method that allows you to easily create new columns that are potentially<br>
+            derived from existing columns:</li>
+        <pre>
+            iris = pd.read_csv('data/iris.data')
+            iris.assign(sepal_ratio=iris['sepal_width']/ iris['sepal_length'])
+            # Or you can do with iris['sepal_ratio'] = iris['sepal_width']/ iris['sepal_length']
+        </pre>
+        <li>We can also pass in a function of one argument to be evaluated on the DataFrame being assigned to.</li>
+        <pre>
+            iris.assign(sepal_ratio=lambda x:(x['sepal_width']/ x['sepal_length']))
+        </pre>
+        <li style="color:red"><b>assign() always</b> returns a copy of the data, leaving the original DataFrame untouched.</li>
+        <li>Passing a callable, as opposed to an actual value to be inserted, is useful when you don't have a reference to the DataFrame<br>
+            at hand. This is common when using <b>assign()</b> in a chain of operations.</li>
+        <pre>
+            (iris.query('sepal_length >5').assign(  SepalRatio=lambda x: x.sepal_width/ x.sepal_length,
+                                                    PetalRatio=lambda x: x.petal_width/ x.petal_length)
+                                .plot(kind='scatter', x='SepalRatio', y='PetalRatio')
+        </pre>
+        <img src="{% static 'IMG/pd_3.png'%}">
+        <li>The function signature for <b>assign</b> is simply <b>**kwargs</b>. Starting with Python 3.6, the order of <b>**kwargs</b> is preserved.<br>
+            This allows for dependent assignment, where an <b style="color:red"> expression later in **kwargs can refer to a column created earlier in<br>
+            the same assign().</b></li>
+        <pre>
+            dfa = pd.DataFrame({'A': [1, 2,3], 'B': [4,5,6]})
+            dfa.assign(C=lambda x: x.A + x.B, D=lambda x: x.C + x.B)
+            Out[]:
+               A  B  C   D
+            0  1  4  5   6
+            1  2  5  7   9
+            2  3  6  9  12
+        </pre>
+        <li>In the second expression, x.C will refer to the newly created column, that's equal to dfa['A'] + dfa['B'].</li>
+    </ul>
+<h2 style="color:blue">Indexing/ Selection</h2>
+    <ul>
+        <li>The basic of indexing are as follows:</li>
+        <table>
+            <tr>
+                <th>Operation</th>
+                <th>Syntax</th>
+                <th>Result</th>
+            </tr>
+            <tr>
+                <td>Select Column</td>
+                <td>df['column']</td>
+                <td>Series</td>
+            </tr>
+            <tr>
+                <td>Select Row Label</td>
+                <td>df.loc['row_label']</td>
+                <td>Series</td>
+            </tr>
+            <tr>
+                <td>Select row by integer location</td>
+                <td>df.iloc[location(int)]</td>
+                <td>Series</td>
+            </tr>
+            <tr>
+                <td>Slice rows</td>
+                <td>df[int:int]</td>
+                <td>DataFrame</td>
+            </tr>
+            <tr>
+                <td>Select rows by boolean vector</td>
+                <td>df[bool_vec]</td>
+                <td>DataFrame</td>
+            </tr>
+        </table>
+        <li>Row selection, returns a Series whose index is the columns of the DataFrame:</li>
+        <pre>
+            df.loc['b']
+            df.iloc[2]
+        </pre>
+    </ul>
+<h2 style="color:blue">Data alignment and arithmetic</h2>
+    <ul>
+        <li>Data alignment between DataFrame objects automatically align on <b>both the column and the index(row labels)</b>.<br>
+            Again, the resulting object will have the union of the column and row labels.</li>
+        <pre>
+            df = pd.DataFrame(np.random.randn(10, 4), columns=list('ABCD'))
+            df2 = pd.DataFrame(np.random.randn(7, 3), columns=list('ABC')
+            df + df2
+            Out[]:
+                      A         B         C   D
+            0  0.045691 -0.014138  1.380871 NaN
+            1 -0.955398 -1.501007  0.037181 NaN
+            2 -0.662690  1.534833 -0.859691 NaN
+            3 -2.452949  1.237274 -0.133712 NaN
+            4  1.414490  1.951676 -2.320422 NaN
+            5 -0.494922 -1.649727 -1.084601 NaN
+            6 -1.047551 -0.748572 -0.805479 NaN
+            7       NaN       NaN       NaN NaN
+            8       NaN       NaN       NaN NaN
+            9       NaN       NaN       NaN NaN
+        </pre>
+        <li>When doing an operation between DataFrame and Series, the default behavior is to align the Series <b>index</b> on the<br>
+            DataFrame <b>columns</b>, thus broadcasting row-wise.</li>
+        <pre>
+            df - df.iloc[0] # it just do operation at the first row of the DataFrame (both they have the same index)
+            Out[94]:
+                      A         B         C         D
+            0  0.000000  0.000000  0.000000  0.000000
+            1 -1.359261 -0.248717 -0.453372 -1.754659
+            2  0.253128  0.829678  0.010026 -1.991234
+            3 -1.311128  0.054325 -1.724913 -1.620544
+            4  0.573025  1.500742 -0.676070  1.367331
+        </pre>
+        <li>Operations with scalars are just as you would expect:</li>
+        <pre>
+            df * 5 + 2 # act on all row of df
+        </pre>
+        <li>Boolean works well:</li>
+        <pre>
+            df1 = pd.DataFrame({'a': [1, 0, 1], 'b': [0, 1, 1]}, dtype='bool')
+            df2 = pd.DataFrame({'a': [0, 1, 1], 'b': [1, 1, 0]}, dtype='bool')
+            df1 & df2
+            df1 | df2
+            df1 ^ df2
+            -df1
+        </pre>
+    </ul>
+<h2 style="color:blue">Transposing</h2>
+    <ul>
+        <li>To transpose, access the T attribute (also the <b>transpose</b> function), similar to an ndarray.</li>
+        <pre>df[:5].T</pre>
+    </ul>
+<h2 style="color:blue">DataFrame interoperability with Numpy functions</h2>
+    <ul>
+        <li>Element-wise Numpy ufuncs(log, exp, sqrt, ...) and various other Numpy functions can be used with no issues on Series and DataFrame,<br>
+            assuming the data within are numeric.</li>
+        <pre>
+            np.exp(df) # exponential
+            np.asarray(df) # turn DataFrame into nparray
+        </pre>
+        <li>DataFrame is not intended to be a drop-in replacement for ndarray as its indexing semantics and data model are quite different in places<br>
+            from an n-dimensional array.</li>
+        <li><b>Series</b> implements <b>__array_ufunc__</b>, which allows it to work with Numpy's universal functions.</li>
+        <li>The ufunc is applied to the underlying array in a Series.</li>
+        <pre>
+            ser = pd.Series([1,2,3,4])
+            np.exp(ser)
+        </pre>
+        <li>Like other parts of the library, pandas will automatically align labeled inputs as part of a ufunc with multiple inputs.</li>
+        <pre>
+            ser1 = pd.Series([1,2,3], index=['a', 'b', 'c'])
+            ser2 = pd.Series([1,3,5], index=['b', 'a', 'c'])
+            np.remainder(ser1, ser2) # Similar to ser1%ser2
+            Out[]:
+            a    1
+            b    0
+            c    3
+            dtype: int64
+        </pre>
+        <li>As usual, the union of the two indices is taken, and non-overlapping values are filled with missing values</li>
+        <pre>
+            ser3 = pd.Series([2, 4, 6], index=['b', 'c', 'd'])
+            np.remainder(ser1, ser3)
+            Out[116]:
+            a    NaN
+            b    0.0
+            c    3.0
+            d    NaN
+            dtype: float64
+        </pre>
+        <li>When a binary ufunc is applied to a Series and Index, the Series implementation takes precedence and a Series is returned.</li>
+        <pre>
+            ser = pd.Series([1,2,3])
+            idx = pd.index([4,5,6])
+            np.maximum(ser, idx)
+        </pre>
+        <li>Numpy ufuncs are safe to apply to Series backed by non-ndarrays, for example arrays.SparseArray. If possible, the ufunc is<br>
+            applied without converting the underlying data to an ndarray.</li>
+    </ul>
+<h2 style="color:blue">Console display</h2>
+    <ul>
+        <li>Very large DataFrame will be truncated to display them in the console. You can also get a summary using <b>info()</b>.</li>
+        <pre>
+            baseball = pd.read_csv('data/baseball.csv')
+            print(baseball)
+            baseball.info()
+        </pre>
+        <li>However, using <b>to_string()</b> will return a string representation of the DataFrame in tabular form, though it won't<br>
+            always fit the console width.</li>
+        <pre>
+            print(baseball.loc[-20:12].to_string())
+        </pre>
+        <li>Wide DatFrames will be printed across multiple rows by default.(11)</li>
+        <li>You can change how much to print by these options:</li>
+        <pre>
+            pd.set_options('display.width', 40) # default is 80
+            pd.set_options('display.max_colwidth', 30) # max width of the individual column
+            pd.set_print_options(threshold=sys.maxsize) # set print all rows(default 1000 with shorten symbol '...')
+        </pre>
+    </ul>
+<h2 style="color:blue">DataFrame column attribute access and Ipython completion</h2>
+    <ul>
+        <li>If a DataFrame column label is a valid Python variable name, the column can be accessed like an attribute.</li>
+        <pre>
+            df = DataFrame({'foo1': np.random.randn(5), 'foo2': np.random.randn(5)})
+            df.foo1
+            df.foo2
+        </pre>
+        <li>The columns are also connected to the Ipython completion mechanism so they can be tab-completed (tab press)</li>
+    </ul>
+<h2 style="color:blue">Head and tail</h2>
+    <ul>
+        <li>To view a small sample of Series or DataFrame object, use the <b>head()</b> and <b>tail()</b> methods. The default number<br>
+            of elements to display is five, but you may pass a custom number.</li>
+        <pre>
+            long_series = pd.Series(np.random.randn(1000))
+            long_series.head()  # see just head part
+            long_series.tail() # see just tail part
+        </pre>
+    </ul>
+<h2 style="color:blue">Attributes an underlying data</h2>
+    <ul>
+        <li>Pandas objects have a number of attributes enabling you to access the metadata.</li>
+        <li><b>Axis labels</b></li>
+        <ul>
+            <li><b>Series</b>: index(only axis)</li>
+            <li><b>DataFrame</b>: index(rows) and columns</li>
+        </ul>
+        <li>These attributes can be safely assigned to!</li>
+        <pre>
+            df[:2]
+            df.columns = [x.lower() for x in df.columns]
+        </pre>
+        <li>Pandas objects(Index, Series, DataFrame) can be thought of as container for arrays, which hold the actual data and do the actual computations.</li>
+        <li>For many types, the underlying array is a <b>numpy.ndarray</b>. However, pandas and 3rd party libraries may extend Numpy's type sys<br>
+            to add support for custom arrays.</li>
+        <li>To get the actual data inside a <b>Index</b> or <b>Series</b>, use the <b style="color:red">.array</b> property.</li>
+        <pre>
+            s = np.random.randn(5)
+            s.array()
+            s.index.array()
+        </pre>
+        <li><b>array</b> will always be an <b>ExtensionArray</b>. The exact details of what an <b>ExtensionArray</b> is and why pandas uses them<br>
+            are a bit beyond the scope of this introduction.</li>
+        <li>If you know you need a Numpy array, use <b>to_numpy()</b> or <b>asarray()</b></li>
+        <pre>
+            s.to_numpy()
+            s.asarray()
+        </pre>
+        <li>When the Series or Index is backed by an ExtensionArray, to_numpy() may involved copying data and coercing values.</li>
+        <li><b>to_numpy()</b> gives some control over the dtype of the resulting numpy.ndarray. For instance, consider datetimes<br>
+            with timezones, numpy doesn't have a dtype to represent timezone-aware datetimes, so there are two possibly useful representations:</li>
+        <ul>
+            <li>1. An object-dtype numpy.ndarray with Timestamp objects, each with the correct tz.</li>
+            <li>2. A datetime64[ns]-dtype numpy.ndarray, where the values have been converted to UTC and the timezone discarded.</li>
+        </ul>
+        <li>timezones may be preserved with <b>dtype=object</b></li>
+        <pre>
+            ser = pd.Series(pd.date_range('2000', periods=2, tz='CET')
+            ser.to_numpy(dtype=object)
+        </pre>
+        <li>Or thrown away with dtype='datetime64[ns]'</li>
+        <pre>
+            ser.to_numpy(dtype='datetime64[ns]')
+        </pre>
+        <li>Getting the 'raw data' inside a DataFrame is possibly a bit more complex. When your DataFrame only has a single data <br>
+            for all the columns, <b>to_numpy()</b> return fastly. If a DataFrame contains homogeneously-typed data, the ndarray <br>
+            can actually be modified in-place, and the changes will be reflected in the data structure. For heterogeneous data(some<br>
+            of the DataFrame's columns are not all the same dtype), this will not be the case. The values attribute itself, unlike the <br>
+            axis labels, cannot be assigned to.</li>
+        <li>When working with heterogeneous data, the dtype of the resulting ndarray will be chosen to accommodate all of the data involved<br>
+            .For this search time, may be cost expensive.</li>
+        <li>In the past, pandas recommed Series.values or DataFrame.values. Going forward, we recommend avoiding .values and using <b>.array</b><br>
+            or <b>to_numpy().values</b> has the following drawbacks:</li>
+        <ul>
+            <li>When your Series contains an extension type, it's unclear whether Series.values returns a Numpy array or the extension array.<br>
+                <b>Series.array will always return a Numpy array, potentially at the cost of copying/ coercing values.</b></li>
+            <li>When you DataFrame contains a mixture of data types, <b>DataFrame.values</b> may involved copying data and coercing values<br>
+                to a common dtype, a relatively expensive operation. <b>DataFrame.to_numpy()</b>, being a method, makes it clearer that the returned <br>
+                Numpy array may not be a view on the same data in teh DataFrame.</li>
+        </ul>
+    </ul>
+<h2 style="color:blue">Accelerated operations</h2>
+    <ul>
+        <li>Pandas has support accelerating certain types of binary numerical and boolean operations using the <b>numexpr</b> library and the <br>
+            <b>bottlenexk</b> libraries.</li>
+        <li>These libraries are especially useful when dealing with large data sets, and provide large speedups. <b>numexpr</b> uses smart chunking<br>
+            ,caching and multiple cores.<b> bottleneck</b> is a set of specialized cython routines that are specially fst when dealing with arrays <br>
+            that have <b>nans</b>.</li>
+        <li>These are both enable to be used by default, you can control this by setting the options:</li>
+        <pre>
+            pd.set_option('conpute.use_bottleneck', False)
+            pd.set_option('compute.use_numexpr', False)
+        </pre>
+    </ul>
+<h2 style="color:blue">Flexible binary operations</h2>
+    <ul>
+        <li>With binary operations between pandas data structures, there are two key points of interest:</li>
+        <ul>
+            <li>Broadcasting behavior between higher and lower-dimensional objects.</li>
+            <li>Missing data in computations.</li>
+        </ul>
+        <li>We will demonstrate how to manage these issues independently, though they can be handled simultaneously.</li>
+    </ul>
+<h2 style="color:blue">Maching/ Broadcasting behavior</h2>
+    <ul>
+        <li>DataFrame has the methods <b>add(), sub(), div()</b> and related functions <b>radd(), rsub(), ...</b>for carrying out<br>
+            binary operations. For broadcasting behavior, Series input is of primary interest. Using these functions, you can use <br>
+            to either match on the index or columns via the axis keyword:</li>
+        <pre>
+            df = pd.DataFrame({'one': pd.Series(np.random.randn(3), index=['a', 'b', 'c'],
+                                'two': pd.Series(np.random.randn(4), index=['a', 'b', 'c', 'd'],
+                                'three': pd.Series(np.random.randn(3), index=['b', 'c', 'd']})
+            Out[]:
+                    one       two     three
+            a  1.394981  1.772517       NaN
+            b  0.343054  1.912123 -0.050390
+            c  0.695246  1.478369  1.227435
+            d       NaN  0.279344 -0.613172
+
+            row = df.iloc[1] # get row 1
+            Out[]:
+                    one       two     three
+            b  0.343054  1.912123 -0.050390
+
+            column = df['two'] # get column 'two'
+            Out[]:
+                    two
+            a  1.772517
+            b  1.912123
+            c  1.478369
+            d  0.279344
+
+            df.sub(row, axis=1) # (or axis='column') # 'row' index: ['one', 'two', 'three']
+            # df['one'] - row['one'], df['two'] - row['two'], df['three'] - row['three']
+            df.sub(column, axis=0) # (or axis='index') # 'column' index: similar to df
+            # df subtract column's values, happen in common index label
+        </pre>
+        <li>Furthermore, you can align a level of a MultiIndexed DataFrame with a Series.</li>
+        <pre>
+            dfmi = df.copy()
+            dfmi.index = pd.MultiIndex.from_tuples([(1, 'a'), (1, 'b'), (1, 'c'), (2, 'a')],
+                                                    names=['first', 'second'])
+            Out[]:
+                               one       two     three
+            first second
+            1     a      -0.377535  0.000000       NaN
+                  b      -1.569069  0.000000 -1.962513
+                  c      -0.783123  0.000000 -0.250933
+            2     a            NaN -1.493173 -2.385688
+        </pre>
+        <li>Series and Index also support the <b>divmod()</b> builtin. This function takes the floor division and modulo operation at <br>
+            the same time returning a two-tuple of the same type as the left hand side.</li>
+        <pre>
+            s = pd.Series(np.arnage(5))
+            div, rem = divmod(s, 3)
+
+            div : division with index, get floor number
+            Out[32]:
+            0    0
+            1    0
+            2    0
+            3    1
+            4    1
+            dtype: int64
+
+            rem :remainder with index
+            Out[]:
+            0    0
+            1    1
+            2    2
+            3    0
+            4    1
+            dtype: int64
+
+            idx = pd.Index(np.arange(5))
+            idx: Out[]: Int64Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
+            div, rem = divmod(idx, 3)
+            div: Similar to s div but Series or DataFrame is column, Index is row (array)
+            Out[]: Int64Index([0, 0, 0, 1, 1, 1, 2, 2, 2, 3], dtype='int64')
+            rem: Result similar to s rem but row(array) type
+            Out[]: Int64Index([0, 1, 2, 0, 1, 2, 0, 1, 2, 0], dtype='int64')
+        </pre>
+        <li>We can also element-wise <b>divmode()</b>.</li>
+        <pre>
+            div, rem = divmod(s, [2, 2, 2, 3, 1])
+            div:
+            Out:[]
+            0    0
+            1    0
+            2    1
+            3    1
+            4    4
+            dtype: int32
+            rem
+            0    0
+            1    1
+            2    0
+            3    0
+            4    0
+            dtype: int32
+        </pre>
+    </ul>
+<h2 style="color:blue">Missing data/ operations with fill values</h2>
+    <ul>
+        <li>In Series and DataFrame, the arithmetic functions have the options of inputting a <b>fill_value</b>, namely a value to <br>
+            substitute when at most one of the values at a location are missing. For instance, when adding two DataFrame objects, <br>
+            you may wish to treat <b>NaN</b> value as 0 unless both DataFrame are missing that value, in which case the result wil be<br>
+            NaN(you can later replace NaN with some other value using <b>fillna</b> method).</li>
+        <pre>
+            df = pd.DataFrame({'one': pd.Series(np.random.randn(3), index=['a', 'b', 'c']),
+                              'two': pd.Series(np.random.randn(4), index=['a', 'b', 'c', 'd']),
+                              'three': pd.Series(np.random.randn(4), index=['b', 'c', 'd'])}, )
+            df2 = pd.DataFrame({'one': pd.Series(np.random.randn(3), index=['a', 'b', 'c']),
+                              'two': pd.Series(np.random.randn(4), index=['a', 'b', 'c', 'd']),
+                              'three': pd.Series(np.random.randn(4), index=['a', 'b', 'c', 'd'])}, )
+            df + df2 # addition df with df2
+            df.add(df2, fill_value=0) # addition df with df2 and fill nan=0
+        </pre>
+    </ul>
+<h2 style="color:blue">Flexible comparisons</h2>
+    <ul>
+        <li>Series and DataFrame have the binary comparison method <b>eq(equal), ne(not equal), lt(less than), gt(greater than), le(less <br>
+            than or equal to) and ge(greater than or equal to)</b> whose behavior is analogous to binary arithmetic operations described above:</li>
+        <pre>
+            df.gt(df2)
+            df.eq(df2)
+            df.lt(df2)
+            df.gt(df2)
+            df.ne(df2)
+        </pre>
+        <li>These operations produce a pandas object of the same type as the left-hand-side input that  is of dtype <b>bool.</b>These <b>bool</b><br>
+            objects can be used in indexing operations.</li>
+    </ul>
+<h2 style="color:blue">Boolean reductions</h2>
+    <ul>
+        <li>You can apply the reductions: <b>empty(), all(), and bool()</b> to provide a way to summarize a boolean result:</li>
+        <pre>
+            (df > 0).all()
+            (df > 0).any()
+        </pre>
+        <li>you can reduce to a final boolean value.</li>
+        <pre>
+            (df > 0).any().any()
+        </pre>
+        <li>You can test if a pandas object is empty via <b>empty</b> property.</li>
+        <pre>
+            df.empty
+            pd.DataFrame(columns=list('ABC')).empty
+        </pre>
+        <li>To evaluate single-element pandas objects in a boolean context, use the method <b>bool()</b>.</li>
+        <pre>
+            pd.Series([True]).bool()
+            pd.Series([False]).bool()
+        </pre>
+    </ul>
+<h2 style="color:blue">Comparing if objects are equivalent</h2>
+    <ul>
+        <li>Often you may find that there is more than one way to compute the same result. As a simple example, consider <b>
+            df + df and df * 2</b>. To test that these two computations produce the same result, given the tools shown above<br>
+            you can use (df + df == df *2), but this expression sometimes is False, because either both may include NaN values.</li>
+        <li>So, NDFrames(such as Series and DataFrames) have an <b>equal()</b> method for testing equality, with NaNs in <br>
+            corresponding locations treated as equal:</li>
+        <pre>
+            (df + df).eq(df *2) : False
+            (df + df).equal(df * 2) : True
+        </pre>
+    </ul>
+<h2 style="color:blue">Comparing array-like objects</h2>
+    <ul>
+        <li>You can conveniently perform element-wise comparisons when comparing a pandas data structure with a scalar value.</li>
+        <pre>
+            pd.Series(['foo', 'bar', 'bz'] == 'foo'
+            Out[]:
+            0    True
+            1    False
+            2    False
+            dtype: bool
+            pd.Index(['foo', 'bar', 'bz']) == 'foo'
+            Out[]: array([ True, False, False])
+        </pre>
+        <li>Pandas also handles element-wise comparisons between different array-like objects of the same length:</li>
+        <pre>
+            pd.Series(['foo', 'bar', 'baz']) == pd.Series(['foo', 'bar', 'qux'])
+            Out[]:
+            0     True
+            1     True
+            2    False
+            dtype: bool
+            pd.Series(['foo', 'bar', 'baz']) == np.array(['foo', 'bar', 'qux'])
+            # Similar result
+        </pre>
+        <li>Trying to compare Index and Series with different length will raise an error.</li>
+        <li>If they are Numpy, the behavior will be different, the result returns False if broadcasting can not be done.</li>
+    </ul>
+<h2 style="color:blue">Combining overlapping data sets</h2>
+    <ul>
+        <li>A problem occasionally arising is the combination of two similar data sets where values in one are preferred over the other.<br>
+            An example would be two data series representing a particular economic indicator where one is considered to be of 'higher quality'.<br>
+            However, the lower quality series might extend further back in history or have more complete data coverage. As such, we would <br>
+            like to combine two DataFrame objects where missing values in one DataFrame are conditionally filled with like-labeled values<br>
+            from the other DataFrame. The function implementing this operation is <b>combine_first()</b>, which we illustrate:</li>
+        <pre>
+            df1 = pd.DataFrame({'A': [1.0, np.nan, 3.0, 5.0, np.nan], 'B': [np.nan, 2.0, 3.0, np.nan, 6.0]})
+            df2 = pd.DataFrame({'A': [5.0, 2.0, 4.0, np.nan, 3.0, 7.0], 'B': [np.nan, np.nan, 3.0, 4.0, 6.0, 8.0]})
+            df1.combine_first(df2) # start from df1
+            Out[]:
+                 A    B
+            0  1.0  NaN
+            1  2.0  2.0
+            2  3.0  3.0
+            3  5.0  4.0
+            4  3.0  6.0
+            5  7.0  8.0
+        </pre>
+    </ul>
+<h2 style="color:blue">General DataFrame combine</h2>
+    <ul>
+        <li>The <b>combine_first()</b>method calls the more general <b>DataFrame.combine()</b>. This method takes another DataFrame and a combiner<br>
+            function, aligns the input DataFrame and then passes combiner function pairs of Series.</li>
+        <li>We can reproduce <b>combine_first()</b> as :</li>
+        <pre>
+            def combiner(x,y)
+                return np.where(pd.isna(x), y, x)
+            df1.combine(df2, combiner)
+        </pre>
+    </ul>
+<h2 style="color:blue">Descriptive statistics</h2>
+    <ul>
+        <li>There exists a large number of methods for computing descriptive statistics and other related operations on Series, DataFrames.<br>
+            Most of these are aggregations (hence producing a lower-dimensional result) like <b>sum(), mean(), quantile()</b>, but some of <br>
+            them, like <b>cumsum(), cumprod()</b>, produce an object of the same size. General speaking, these methods take an axis argument<br>
+            just like ndarray.{sum, std, ...}, but the axis can be specified by name or integer:</li>
+        <ul>
+            <li><b>Series</b>: No axis argument needed</li>
+            <li><b>DataFrame</b>: 'index' (axis=0, default), 'columns' (axis =1)</li>
+        </ul>
+        <pre>
+            df = pd.DataFrame({'one': pd.Series(np.random.randn(3), index=['a', 'b', 'c']),
+                                'two': pd.Series(np.random.randn(4), index=['a', 'b', 'c', 'd']),
+                                'three': pd.Series(np.random.randn(3), index=['b', 'c', 'd'])})
+            df.mean() # axis = 0, all rows at columns labels
+            df.mean(1) # all columns at rows labels
+        </pre>
+        <li>As such methods have a <b>skipna</b> option signaling whether to exclude missing data (True by default).</li>
+        <pre>
+            df.sum(0, skipna=False) # some indexes labels with NaN values return df.sum() = NaN
+            df.sum(1, skipna=False) # some columns labels with NaN values return df.sum() = NaN
+        </pre>
+        <li>Combined with the broadcasting/ arithmetic behavior, one can describe various statistical procedure, like standardization<br>
+            (rendering data zero mean and standard deviation of 1), very concisely.</li>
+        <pre>
+            ts_stand = (df - df.mean())/ df.std()
+            ts_stand.std()
+            xs_stand = df.sub(df.mean(1), axis=0).div(df.std(), axis = 1)
+            xs_stand.std(1)
+        </pre>
+        <li>Note that methods like <b>cumsum() and cumprod()</b> preserve the location of NaN values. This is somewhat different from <br>
+            <b>expanding() and rolling()</b> since NaN behavior is furthermore dictated by a <b>min_periods</b> parameter.</li>
+        <li>Here is a quick reference summary of common functions. Each also takes an optional level parameter which applies only of the<br>
+            object has a hierarchical index:</li>
+        <ul>
+            <li><b>count</b>: Number of non-NA observations</li>
+            <li><b>sum</b>: Sum of values</li>
+            <li><b>mean</b>: Mean of values</li>
+            <li><b>mad</b>: Mean absolute deviation</li>
+            <li><b>median</b>: Arithmetic median of values</li>
+            <li><b>min</b>: Minimum</li>
+            <li><b>max</b>: Maximum</li>
+            <li><b>mode</b>: Mode</li>
+            <li><b>abs</b>: Absolute value</li>
+            <li><b>prod</b>: Product of values</li>
+            <li><b>std</b>: Bessel-corrected sample standard deviation</li>
+            <li><b>var</b>: Unbiased variance</li>
+            <li><b>sem</b>: Standard error of the mean</li>
+            <li><b>skew</b>: Sample skewness(3rd moment)</li>
+            <li><b>kurt</b>: Sample kurtoris(4th moment)</li>
+            <li><b>quantile</b>: Sample quantile(value at %)</li>
+            <li><b>cumsum</b>: Cumulative sum</li>
+            <li><b>cumprod</b>: Cumulative product</li>
+            <li><b>cummax</b>: Cumulative maximum</li>
+            <li><b>cumin</b>: Cumulative minimum</li>
+        </ul>
+        <li>Note that by chance some Numpy methods, like <b>mean, std and sum</b>, Pandas will exclude NAs on Series input by default.</li>
+        <li><b>Series.nunique()</b> will return the number of unique non-NA values in a Series:</li>
+        <pre>
+            series = pd.Series(np.random.randn(500))
+            series[20:500] = np.nan
+            series[10:20] = 5
+            series.nunique()  # Out[]: 11
+        </pre>
+    </ul>
+<h2 style="color:blue">Summarizing data: describe</h2>
+    <ul>
+        <li>There is a convenient <b>describe()</b> function which computes a variety of summary statistics about a Series or the columns <br>
+            of a DataFrame(excluding NAs of course).</li>
+        <pre>
+            series = pd.Series(np.random.randn(1000))
+            series[::2] = np.nan # start from 0, step 2, assign value NaN
+            series.describe()
+            Out[]:
+            count    500.000000
+            mean      -0.021292
+            std        1.015906
+            min       -2.683763
+            25%       -0.699070
+            50%       -0.069718
+            75%        0.714483
+            max        3.160915
+            dtype: float64
+        </pre>
+        <li>You can specific percentiles to include in the output:</li>
+        <pre>
+            series.describe(percentiles=[0.05, 0.25, 0.75, 0.95])
+            Out[]:
+            count    500.000000
+            mean      -0.021292
+            std        1.015906
+            min       -2.683763
+            5%        -1.645423
+            25%       -0.699070
+            50%       -0.069718
+            75%        0.714483
+            95%        1.711409
+            max        3.160915
+            dtype: float64
+        </pre>
+        <li>By default, the median is always included.</li>
+        <li>For a non-numerical Series object, <b>describe()</b> will give a simple summary of the number of unique values and most <br>
+            frequently occuring values:</li>
+        <pre>
+            s = pd.Series(['a', 'a', 'b', 'b', 'a', 'a', np.nan, 'c', 'd', 'a'])
+            s.describe()
+            Out[]:
+            count     9
+            unique    4
+            top       a
+            freq      5
+            dtype: object
+        </pre>
+        <li>Note that on a mixed-type DataFrame object, <b>describe()</b> will restrict the summary to include only numerical<br>
+            columns or, if none are, only categorical columns:</li>
+        <pre>
+            frame = pd.DataFrame({'a': ['Yes', 'Yes', 'No', 'No'], 'b': range(4)})
+            frame.describe()
+            Out[]:
+                          b
+            count  4.000000
+            mean   1.500000
+            std    1.290994
+            min    0.000000
+            25%    0.750000
+            50%    1.500000
+            75%    2.250000
+            max    3.000000
+        </pre>
+        <li>This behavior can be controlled by providing a list of types as <b>include/ exclude</b> arguments. The special value <b>all</b><br>
+            can also be used:</li>
+        <pre>
+            frame.describe(include=['object'])
+            Out[]:
+                      a
+            count     4
+            unique    2
+            top     Yes
+            freq      2
+
+            frame.describe(include=['number'])
+            Out[]:
+                          b
+            count  4.000000
+            mean   1.500000
+            std    1.290994
+            min    0.000000
+            25%    0.750000
+            50%    1.500000
+            75%    2.250000
+            max    3.000000
+
+            frame.describe(include=['all'])
+            Out[]:
+                      a         b
+            count     4  4.000000
+            unique    2       NaN
+            top     Yes       NaN
+            freq      2       NaN
+            mean    NaN  1.500000
+            std     NaN  1.290994
+            min     NaN  0.000000
+            25%     NaN  0.750000
+            50%     NaN  1.500000
+            75%     NaN  2.250000
+            max     NaN  3.000000
+        </pre>
+        <li>That feature relies on select_dtypes. Refer to there for details about accepted inputs.</li>
+    </ul>
+<h2 style="color:blue">Index of min/ max values</h2>
+    <ul>
+        <li>The <b>idxmin() and idxmax()</b> functions on Series and DataFrame compute the index labels with the minimum and <br>
+            maximum corresponding values:</li>
+        <pre>
+            s1 = pd.Series(np.random.randn(5), index=list('abcde'))
+            s1.idxmin(), s1.idxmax()
+            Out[]: ('b', 'c') # return min and max index labels of s1
+            df1 = pd.DataFrame(np.random.randn(5,3), index=list('abcde'), columns=list('ABC'))
+            df1.idxmin(axis=0), df1.idxmin(axis=1)
+            (A    a
+             B    d
+             C    c
+             dtype: object,
+             a    C
+             b    C
+             c    C
+             d    B
+             e    A
+             dtype: object)
+        </pre>
+        <li>When there are multiple rows (or columns) matching the minimum or maximum value, <b>idxmin() and idxmax()</b> return the <br>
+            <b style="color:red"> first matching index.</b></li>
+        <li>idxmin() and idxmax() are called <b>argmin and argmax</b> in Numpy.</li>
+    </ul>
+<h2 style="color:blue">Value counts(histogramming)/ mode</h2>
+    <ul>
+        <li>The <b>value_counts()</b> Series method and top-level function computes a histogram of a 1D array of values. It can also be<br>
+            used as a function on regular arrays.</li>
+        <pre>
+            data = np.random.randint(0, 7, size=50)
+            s = pd.Series(data)
+            s.value_counts()
+            pd.value_counts(data) # similar result
+        </pre>
+        <li>The <b>value_counts()</b> method can be used to count combinations across multiple columns. By default all columns are used <br>
+            but a subset can be selected using the <b>subset</b> argument.</li>
+        <pre>
+            data = {'a': [1,2,3,4], 'b':['x', 'x', 'y', 'y']}
+            frame = pd.DataFrame(data)
+            frame.value_counts() # count frequency value's combination of columns a and b
+            frame.value_counts(subset='a') # count frequency of a's values
+            frame.value_counts(subset='b') # count frequency of b's values
+        </pre>
+        <li>Similarly, you can get the most frequently occuring values:</li>
+        <pre>
+            s5 = pd.Series([1,1,3,3,3,5,5,7,7,7])
+            s5.mode()
+            Out[]:
+            0   3
+            1   7
+        </pre>
+    </ul>
+<h2 style="color:blue">Discretization and quantiling</h2>
+    <ul>
+        <li>continuous values can be discretize using the <b>cut()</b> (bins based on values) and <b>qcut()</b> (bins based on <br>
+            quantiles) functions.</li>
+        <pre>
+            arr = np.array([1, 3, 5, 8])
+            factor = pd.cut(arr, 4) # based on arr's values (min to max), create 4 bins
+            Out[]:
+            [(0.993, 2.75], (2.75, 4.5], (4.5, 6.25], (6.25, 8.0]]
+                Categories (4, interval[float64, right]): [(0.993, 2.75] < (2.75, 4.5] < (4.5, 6.25] < (6.25, 8.0]]
+        </pre>
+        <li><b>qcut()</b> computes sample quantiles. We could slice up some normally distributed data into equal size quartiles:</li>
+        <pre>
+            factor2 = pd.qcut(arr1, 4)
+            factor2
+            Out[]:
+            [(0.999, 2.5], (2.5, 4.0], (4.0, 5.75], (5.75, 8.0]]
+                Categories (4, interval[float64, right]): [(0.999, 2.5] < (2.5, 4.0] < (4.0, 5.75] < (5.75, 8.0]]
+
+            arr1 = np.array([-2, 1, 2, 7, 9, 21, 27, 36])
+            factor2 = pd.qcut(arr1, [0, 0.25, 0.5, 0.75, 1])
+            factor2
+            Out[]:
+            [(-2.001, 1.75], (-2.001, 1.75], (1.75, 8.0], (1.75, 8.0], (8.0, 22.5], (8.0, 22.5], (22.5, 36.0], (22.5, 36.0]]
+                Categories (4, interval[float64, right]): [(-2.001, 1.75] < (1.75, 8.0] < (8.0, 22.5] < (22.5, 36.0]]
+        </pre>
+        <li>We can also pass infinite values to define the bins</li>
+        <pre>
+            factor2 = pd.cut(arr, [-np.inf, 0, np.inf]) # create default 3 bins based on arr's value
+            Out:[]
+            [(0.0, inf], (0.0, inf], (0.0, inf], (0.0, inf]]
+                Categories (2, interval[float64, right]): [(-inf, 0.0] < (0.0, inf]]
+        </pre>
+    </ul>
+<h2 style="color:blue">Function application</h2>
+    <ul>
+        <li>To apply your own or another library's functions to pandas objects, you should be aware of the three methods below.<br>
+            The appropriate method to use depends on whether your function expects to operate on an entire DataFrame or Series,<br>
+            row- cor column-wise, or element-wise.</li>
+        <h3 style="color:red">Table-wise function application</h3>
+        <li>DataFrames and Series can be passed into functions. However, if the function needs to be called in a chain, consider<br>
+            using the <b>pipe()</b> method.</li>
+        <pre>
+            def extract_city_name(df):
+                df['city_name'] = df['city_and_code'].str.split(',').get(0)
+                return df
+            def add_country_name(df, country_name=None):
+                col = 'city_name'
+                df['city_and_country'] = df.col + country_name
+                return df
+            df_p = pd.DataFrame({'city_and_code': 'Chicago, IL'})
+            add_city_name(extract_city_name(df_p), country_name='US')
+        </pre>
+        <li>Equivalent to:</li>
+        <pre>
+            df_p.pipe(extract_city_name).pipe(add_country_name, country_name='US')
+        </pre>
+        <li>Pandas encourages the second style, which is known as method chaining. <b>pipe</b> make it easy to use your own or another<br>
+            library's functions in method chains, alongside panda's methods.</li>
+        <li>Providing <b>pipe</b> with a tuple of (callable, data_keyword), <b>pipe</b> will route the DataFrame to the argument specified<br>
+            in the tuple.</li>
+        <li>We also can fit a regression using statsmodel. Their API expects a formula first and a DataFrame as the second argument, <b>data</b><br>
+            We pass in the function, keyword pair <b>(sm.ols, 'data') to pipe</b></li>
+        <pre>
+            import statsmodels.formular.api as sm
+            bb = pd.read_csv('data/baseball.csv', index_col='id')
+            (
+                bb.query('h'>0).assign(ln_h=lambda df: np.log(df.h))
+                                .pipe((sm.ols, 'data'), 'hr ~ ln_h + year + g + C(lg)')
+                                .fit().summary()
+                        )
+            Out[149]:
+            &ltclass 'statsmodels.iolib.summary.Summary'>
+            """
+                                        OLS Regression Results
+            ==============================================================================
+            Dep. Variable:                     hr   R-squared:                       0.685
+            Model:                            OLS   Adj. R-squared:                  0.665
+            Method:                 Least Squares   F-statistic:                     34.28
+            Date:                Sun, 17 Oct 2021   Prob (F-statistic):           3.48e-15
+            Time:                        14:57:32   Log-Likelihood:                -205.92
+            No. Observations:                  68   AIC:                             421.8
+            Df Residuals:                      63   BIC:                             432.9
+            Df Model:                           4
+            Covariance Type:            nonrobust
+            ===============================================================================
+                              coef    std err          t      P>|t|      [0.025      0.975]
+            -------------------------------------------------------------------------------
+            Intercept   -8484.7720   4664.146     -1.819      0.074   -1.78e+04     835.780
+            C(lg)[T.NL]    -2.2736      1.325     -1.716      0.091      -4.922       0.375
+            ln_h           -1.3542      0.875     -1.547      0.127      -3.103       0.395
+            year            4.2277      2.324      1.819      0.074      -0.417       8.872
+            g               0.1841      0.029      6.258      0.000       0.125       0.243
+            ==============================================================================
+            Omnibus:                       10.875   Durbin-Watson:                   1.999
+            Prob(Omnibus):                  0.004   Jarque-Bera (JB):               17.298
+            Skew:                           0.537   Prob(JB):                     0.000175
+            Kurtosis:                       5.225   Cond. No.                     1.49e+07
+            ==============================================================================
+
+            Notes:
+            [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+            [2] The condition number is large, 1.49e+07. This might indicate that there are
+            strong multicollinearity or other numerical problems.
+        </pre>
+        <li>The pipe method is inspired by unix pipes and more recently dplyr and magrittr, which have introduced the popular<br>
+            (%>%) (read pipe) operator for R. The implementation of pipe here is quite clean and feels right at home in Python.</li>
+        <h3 style="color:red">Row or column-wise function application</h3>
+        <li>Arbitrary functions can be applied along the axes of a DataFrame using the <b>apply()</b> method, which, like the <br>
+            descriptive statistics method, takes an optional <b>axis</b> argument.</li>
+        <pre>
+            df.apply(np.mean)
+            df.apply(np.mean, axis=1)
+            df.apply(lambda x: x.max() - x.min())
+            df.apply(np.cumsum)
+            df.apply(np.exp)
+        </pre>
+        <li>The <b>apply()</b> method will also dispatch on a string method name.</li>
+        <pre>
+            df.apply('mean')
+            df.apply('mean', axis=1)
+        </pre>
+        <li>The return type of the function passed to <b>apply()</b> affects the type of the final output from <b>DataFrame.apply()</b><br>
+             for the default behavior:</li>
+        <ul>
+            <li>If the applied functions returns a Series, the final output is a DataFrame. The columns match the index of the Series returned<br>
+                by the applied functions.</li>
+            <li>If the applied function returns any other type, the final output is a Series.</li>
+        </ul>
+        <li>This behaviour can be overridden using the <b>result_type</b>, which accepts three options: <b>reduce, broadcast, and expand</b><br>
+            These will determine how list-likes return values expand (or not) to a DataFrame.</li>
+        <li><b>apply()</b> combined with some cleverness can be used to answer many questions about a data set.</li>
+        <pre>
+            tsdf = pd.DataFrame(np.random.randn(1000, 3), columns=list('ABC'), index=pd.date_range('1/1/2000', periods=1000))
+            tsdf.apply(lambda x: x.idxmax())
+        </pre>
+        <li>You may also pass additional arguments and keyword arguments to the <b>apply()</b> method.</li>
+        <pre>
+            def subtract_divide(x, sub, divide=1):
+                return (x - sub / divide)
+            df.apply(subtract_divide, args = 5, divide =3)
+        </pre>
+        <li>Another useful feature is the ability to pass Series methods to carry out some Series operation on each column or row.</li>
+        <pre>
+            tsdf.apply(pd.Series.interpolate) # fill NA values inside tsdf, not at starting
+        </pre>
+        <li>Finally, <b>apply()</b> takes an argument <b>raw</b> which is False by default, which converts each orw or column into<br>
+            a Series before applying the function. When set to True, the passed function will stead receive an ndarray object, which<br>
+            has positive performance implications if you do not need the indexing functionality.</li>
+        <h3 style="color:red">Aggregation API</h3>
+        <li>The aggregation API allows one to express possibly multiple aggregation operations in single concise way. This API is similar<br>
+            across pandas objects. The entry point for aggregation is <b>DataFrame.aggregate(), or the alias DataFrame.agg().</b></li>
+        <pre>
+            tsdf = pd.DataFrame(np.random.randn(10, 3), columns=list('ABC'), index=pd.date_range('1/1/2000', periods=10))
+            tsdf.iloc[3:7] = np.nan
+            tsdf.agg('sum')
+            tsdf['A'].agg('sum')
+        </pre>
+        <li>Aggregating with multiple functions.</li>
+        <li>You can pass multiple aggregation arguments as a list. The results of each of the passed functions will be a row in the resulting<br>
+            DataFrame. These are naturally named from the aggregation function.</li>
+        <pre>
+            tsdf.agg(['sum']) # one row : sum values
+            tsdf.agg(['sum', 'mean']) # two rows : one for sum, one for mean
+            tsdf['A'].agg(['sum', 'mean'])
+            tsdf['A'].agg(['sum', lambda x: x.mean()]) # one named sum, one name &ltlambda>
+
+            def mean():
+                return x.mean()
+            tsdf.agg(['sum', mean])
+        </pre>
+        <li>Aggregation with dict: Passing a dictionary of column names to a scalar or a list of scalars, to DataFrame.agg allows you to customize<br>
+            which functions are applied to which columns. Note that the results are not in any particular order, you can use an OrderedDIct instead<br>
+            to guarantee ordering:</li>
+        <pre>
+            tsdf.agg({'A': 'mean', 'B':'sum'})
+            tsdf.agg({'A': ['mean', 'sum'], 'B': ['medium', 'mode']})
+        </pre>
+        <li>Mixed dtypes: When presented with mixed dtypes that can not aggregate, <b>.agg</b> will only take the valid aggregations. This is similar<br>
+            to how <b>.groupby.agg</b> work.</li>
+        <pre>
+            mdf = pd.DataFrame({'A': [1,2,3], 'B': [1.0, 2.0, 3.0], 'C': ['foo', 'bar', 'bax'], 'D': pd.date_range('20130101', periods=3)})
+            mdf.dtypes
+            mdf.agg['min', 'sum']
+            Out[]:
+                 A    B          C          D
+            min  1  1.0        bar 2013-01-01
+            sum  6  6.0  foobarbaz        NaT
+        </pre>
+        <li>Custom describe: With <b>.agg()</b> it is possible to easily create a custom describe functions, similar to the built in describe function.</li>
+        <pre>
+            from functools import partial
+            q_25 = partial(pd.Series.quantile, q=0.25)
+            q_25.__name__ = '25%'
+            q_75 = partial(pd.Series.quantile, q=0.75)
+            q_75.__name__ = '75%'
+            tsdf.agg(['count', 'mean', 'std', 'min', q_25, 'median', q_75, 'max'])
+            Out[184]:
+                           A         B         C
+            count   6.000000  6.000000  6.000000
+            mean    0.505601 -0.300647  0.262585
+            std     1.103362  0.887508  0.606860
+            min    -0.749892 -1.333363 -0.757304
+            25%    -0.239885 -0.979600  0.128907
+            median  0.303398 -0.278111  0.225365
+            75%     1.146791  0.151678  0.722709
+            max     2.169758  1.004194  0.896839
+        </pre>
+        <li>Transform API: The <b>transform()</b> method returns an object that is indexed the same(size) as the original. This API<br>
+            allows you to provide multiple operations at the same time rather than one-by-one. Its API is quite similar to the <b>.agg</b> API.</li>
+        <li>.transform() allows input functions as : a Numpy function, string functions and ufunc functions.</li>
+        <pre>
+            tsdf = pd.DataFrame(np.random.randn(10,3), columns=list('ABC'), index=pd.date_range('1/1/2000', periods=10))
+            tsdf.iloc[3:7] = np.nan
+            tsdf.transform(np.abs)
+            tsdf.transform('abs')
+            tsdf.transform(lambda x: x.abs())
+            np.abs(tsdf)
+            tsdf['A'].transform(np.abs)
+        </pre>
+        <li>Transform with multiple functions: Passing multiple functions will yield a column MultiIndexed DataFrame. The first level will be the<br>
+            the original frame column names, the second level will be the names of the transforming functions.</li>
+        <pre>
+            tsdf.transform([np.abs, lambda x: x + 1])
+            tsdf['A'].transform([np.abs, lambda x: x + 1])
+        </pre>
+        <li>Transform with a dict: Passing a dict of functions will allow selective transforming per column.</li>
+        <pre>
+            tsdf.transform({'A': np.abs, 'B': lambda x: x + 1})
+            tsdf.transform({'A': np.abs, 'B': [lambda x: x + 1, np.sqrt])
+        </pre>
+        <li>Applying element-wise functions</li>
+        <li>Since not all functions can be vectorized (accept Numpy arrays and return another array or value), the methods <b>applymap()</b><br>
+            on DataFrame and analogously <b>map()</b> on Series accept any Python function taking a single value and returning a single value.</li>
+        <pre>
+            df = pd.DataFrame({'one': pd.Series(np.random.randn(3), index=list('abc')),
+                                'two': pd.Series(np.random.randn(4), index=list('abcd')),
+                                'three': pd.Series(np.random.randn(3), index=list('bcd'))}, columns=['one', 'two', 'three'])
+            def f(x):
+                return len(str(x))
+            df['one'].map(f)
+            df.applymap(f)
+        </pre>
+        <li><b>Series.map()</b> has an additional feature, it can be used to easily 'link' or 'map' values defined by a secondary series.<br>
+            This is closely related to merging/ joining functionality:</li>
+        <pre>
+            s = pd.Series(['six', 'seven', 'six', 'seventh', 'six'], index=list('abcde'))
+            t = pd.Series({'six':6.0, 'seventh':7.0})
+            s.map(t)
+            Out[]:
+            a    6.0
+            b    7.0
+            c    6.0
+            d    7.0
+            e    6.0
+            dtype: float64
+        </pre>
+    </ul>
+<h2 style="color:blue">Reindexing and altering labels</h2>
+    <ul>
+        <li><b>reindex()</b> is the fundamental data alignment method in pandas. It is used to implement nearly all other features relying<br>
+            on label-alignment functionality. To reindex means to conform the data to match a given set of labels along a particular axis.<br>
+            This accomplishes several things:</li>
+        <ul>
+            <li><b>Reoders the existing data to match a new set of labels.</b></li>
+            <li><b>Inserts missing values (NA) markers in label locations where no data for that label existed.</b></li>
+            <li><b>If specified, fill data for missing labels using logic(highly relevant to working with time series data).</b></li>
+        </ul>
+        <pre>
+            s = pd.Series(np.random.randn(5), index=list('abcde'))
+            s.reindex(list('ebfd')) # temporary index. Don't change the original s
+            Out[207]:
+            e   -1.326508
+            b    1.328614
+            f         NaN
+            d   -0.385845
+            dtype: float64
+        </pre>
+        <li>With the DataFrame, you can simultaneously reindex index and column.</li>
+        <pre>
+            df = pd.DataFrame({'one': pd.Series(np.random.randn(3), index=list('abc')),
+                                'two': pd.Series(np.random.randn(4), index=list('abcd')),
+                                'three': pd.Series(np.random.randn(3), index=list('bcd'))}, columns=['one', 'two', 'three'])
+            df.reindex(index=list('cfb'), columns=['three', 'two', 'one'])
+                 three       two       one
+            c  1.227435  1.478369  0.695246
+            f       NaN       NaN       NaN
+            b -0.050390  1.912123  0.343054
+        </pre>
+        <li>You can also use <b>reindex</b> with axis argument:</li>
+        <pre>
+            df.reindex([1,2,3], axis='columns')
+            df.reindex(['cdf], axis='index')
+        </pre>
+        <li>Note that the Index objects containing the actual axis labels can be shared between objects. So if we have a Series<br>
+            and a DataFrame, the following can be done:</li>
+        <pre>
+            re = s.reindex(df.index)
+        </pre>
+        <li>This means that the re-indexed Series's index is the same Python object as the DataFrame's index.</li>
+        <li><b>DataFrame.reindex()</b> also supports an 'axis-style' calling convention, where you specify a single <b>labels</b> argument<br>
+            and the <b>axis</b> it applies to:</li>
+        <pre>
+            df.reindex(list('cdb'), axis='index')
+            df.reindex(['three', 'two', 'one'], axis='columns')
+        </pre>
+        <li>When writing performance-sensitive code, there is a good reason to spend some time becoming a reindexing ninja: <b>many operations<br>
+            are faster on pre-aligned data.</b> Adding two unaligned DataFrames internally triggers a reindexing step. For exploratory analysis, you<br>
+            will hardly notice the difference (because reindex has been heavily optimized), but when CPU cycles matter sprinkling a few explicit <br>
+            reindex calls here and there can have an impact.</li>
+    </ul>
+<h2 style="color:blue">Reindex to align with another object</h2>
+    <ul>
+        <li>You may want to take an object and reindex its axes to be labeled the same another object. While the syntax for this is straightfoward<br>
+            albeit verbose, it is a common enough operation that the <b>reindex_like()</b> method is available to make this simpler.</li>
+        <pre>
+            df = pd.DataFrame({'one': np.random.randn(3), 'two': np.random.randn(3)}, index=list('abc'))
+            df1 = pd.DataFrame({'one': np.random.randn(4), 'two': np.random.randn(4)}, index=list('abcd'))
+            df.reindex_like(df1)
+            Out[]:
+                one	        two
+            a	-1.223553	-0.933626
+            b	0.153022	-0.734949
+            c	0.632025	0.643872
+            d	NaN	NaN
+        </pre>
+    </ul>
+<h2 style="color:blue">Aligning object with each other with align</h2>
+    <ul>
+        <li>The <b>align()</b> method is the fasted way to simultaneously align two objects. It supports a <b>join</b> argument(related to joining and merging).</li>
+        <ul>
+            <li><b>join = 'outer'</b>: take the union of the indexes(default)</li>
+            <li><b>join = 'left'</b>: use the calling object's index</li>
+            <li><b>join = 'right'</b>: use the passed object's index</li>
+            <li><b>join = 'inner'</b>: intersect the indexes</li>
+        </ul>
+        <li>It returns a tuple with both of the reindexed Series:</li>
+        <pre>
+            s = pd.Series(np.random.randn(5), index=list('abcde'))
+            s1 = s[:4]
+            s2 = s[:1]
+            s1.align(s2) # return tuple with both reindexed Series
+            Out[]:
+            (a    0.539850
+             b    0.414409
+             c   -0.570011
+             d   -2.105304
+             e         NaN
+             dtype: float64,
+             a         NaN
+             b    0.414409
+             c   -0.570011
+             d   -2.105304
+             e   -0.569331
+             dtype: float64)
+            s1.align(s2, join='inner') # return tuple with both reindexed Series in common (bcd)
+            s1.align(s2, join='left') # return tuple with both reindexed Series in left (abcd)
+        </pre>
+        <li>For DataFrame, the join method will be applied to both the index and the columns by default:</li>
+        <pre>
+            df.align(df2, join='inner') # return tuple with both reindexed DataFrame in common
+            Out[]:
+            (        one       two
+                 a  1.394981  1.772517
+                 b  0.343054  1.912123
+                 c  0.695246  1.478369,
+                         one       two
+                 a  1.394981  1.772517
+                 b  0.343054  1.912123
+                 c  0.695246  1.478369)
+        </pre>
+        <li>You can also pass an <b>axis</b> argument</li>
+        <pre>
+            df.align(df2, join='inner', axis=0) # return tuple with both reindexed DataFrame in common index label)
+            Out[]:
+            (        one       two     three
+                 a  1.394981  1.772517       NaN
+                 b  0.343054  1.912123 -0.050390
+                 c  0.695246  1.478369  1.227435,
+                         one       two
+                 a  1.394981  1.772517
+                 b  0.343054  1.912123
+                 c  0.695246  1.478369)
+            # return tuple with both re-indexed DataFrame in common columns labels)
+            df.align(df1.reindex(index=list('def')), join='inner', axis=1)
+            Out[]:
+            (        one       two
+                 a  0.024418 -0.811628
+                 b -0.956274 -2.030362
+                 c  0.637963 -0.259776
+                 d       NaN -0.769439,
+                    one  two
+                 d  NaN  NaN
+                 e  NaN  NaN
+                 f  NaN  NaN)
+        </pre>
+    </ul>
+<h2 style="color:blue">Fill while reindexing</h2>
+    <ul>
+        <li><b>reindex()</b> take an optional parameter <b>method</b> which isa filling method chosen from the following:</li>
+        <ul>
+            <li><b>pad (firstfill)</b>: fill values forward</li>
+            <li><b>bfill (backfill)</b>: fill values backward</li>
+            <li><b>nearest</b>: fill from the nearest index value</li>
+        </ul>
+        <pre>
+            rng = pd.date_range('1/3/2000', periods=8)
+            ts = pd.Series(np.random.randn(8), index=rng)
+            ts2 = ts[[0, 3, 6]]
+            ts2.reindex(ts.index) # reindex ts2 with ts index
+            ts2.reindex(ts.index, method='ffill') # fill NA values in ts2 with forward value
+            ts2.reindex(ts.index, method='bfill') # fill NA values in ts2 with backward value
+            ts2.reindex(ts.index, method='nearest') # fill NA values in ts2 with nearest index value
+        </pre>
+        <li>Note that the same result can be achieved by using <b>fillna or interpolate</b>:</li>
+        <pre>
+            ts2.reindex(ts.index).fillna(method='ffill')
+        </pre>
+        <li><b>reindex()</b> will raise a ValueError if the index is not monotonically increasing or decreasing.<b>fillna() and interpolate()</b><br>
+            will not perform any checks on the other of the index.</li>
+    </ul>
+<h2 style="color:blue">Limit on filling while reindexing</h2>
+    <ul>
+        <li>The <b>limit and tolerance</b> arguments provide additional control over filling while reindexing. Limit specifies the maximum count<br>
+            of consecutive matches:</li>
+        <pre>
+            ts2.reindex(ts.index, method='ffill', limit=1) # if there's line of NA values, just fill one.
+            Out[]:
+            2000-01-03    0.183051
+            2000-01-04    0.183051
+            2000-01-05         NaN
+            2000-01-06    2.395489
+            2000-01-07    2.395489
+            2000-01-08         NaN
+            2000-01-09    0.733639
+            2000-01-10    0.733639
+            Freq: D, dtype: float64
+        </pre>
+        <li>In contrast, <b>tolerance</b> specifies the maximum distance between the index and indexer values:</li>
+        <pre>
+            ts2.reindex(ts.index, method='ffill', tolerance='1 day')
+            Out[]:
+            2000-01-03    0.183051
+            2000-01-04    0.183051
+            2000-01-05         NaN
+            2000-01-06    2.395489
+            2000-01-07    2.395489
+            2000-01-08         NaN
+            2000-01-09    0.733639
+            2000-01-10    0.733639
+            Freq: D, dtype: float64
+        </pre>
+        <li>Notice when used on a DatetimeIndex, TimedeltaIndex or PeriodIndex, tolerance will coerced into a Timedelta if possible.<br>
+            This allows you to specify tolerance with appropriate strings.</li>
+    </ul>
+<h2 style="color:blue">Dropping labels from an axis</h2>
+    <ul>
+        <li>A method closely related to <b>reindex</b> is <b>drop()</b> function. It removes a set of labels from an axis:</li>
+        <pre>
+            df.drop(['a', 'd'], axis=0) # delete row(index) a and d
+            df.drop(['one'], axis=1) # delete column 'one'
+        </pre>
+    </ul>
+<h2 style="color:blue">Renaming/ mapping labels</h2>
+    <ul>
+        <li>The <b>rename()</b> method allows you to relabel an axis based on some mapping (a dict or Series) or an arbitrary functions.</li>
+        <pre>
+            s.rename(str.upper)
+        </pre>
+        <li>If you pass a function, it must return a value when called with any of the labels (and must produce a set of unique values).<br>
+            A dict or Series can also be used:</li>
+        <pre>
+            df.rename(columns={'one': 'foo', 'two': 'bar'}, index={'a': 'apple', 'b': 'banana', 'c': 'durian'})
+        </pre>
+        <li>If the mapping doesn't include a column/ index label, it isn't renamed. Note that extra labels in the mapping don't throw an error.</li>
+        <li>DataFrame.rename() also supports an 'axis-style' calling convention, where you specify a single <b>mapper</b> and the axis to apply.</li>
+        <pre>
+            df.rename({'one': 'foo', 'two': 'bar'}, axis=1)
+            df.rename({'a': 'apple', 'b': 'banana', 'c': 'durian'}, axis=0)
+        </pre>
+        <li>The <b>rename()</b> method also provides an <b>inplace</b> named parameter that is by default <b>False</b> and copies the underlying<br>
+            data. Pass inplace = True to rename the data in place.</li>
+        <li>Finally, <b>rename()</b> also accepts a scalar or list-like for altering the Series.name attribute:</li>
+        <pre>
+            s.rename('scalar-name')
+            Out[]:
+            a   -0.186646
+            b   -1.692424
+            c   -0.303893
+            d   -1.425662
+            e    1.114285
+            Name: scalar-name, dtype: float64
+        </pre>
+        <li>The methods <b>DataFrame.rename_axis() and Series.rename_axis()</b> allow specific names of a <b>MultiIndex</b> to be changed (as opposed to the labels).</li>
+        <pre>
+            df = pd.DataFrame({'x': [1,2,3,4,5,6], 'y': [10, 20, 30, 40, 50, 60]},
+                                index=pd.MultiIndex.from_product([['a', 'b', 'c'], [1, 2]], names=['let', 'num'])
+            Out[]:
+                     x   y
+            let num
+            a   1    1  10
+                2    2  20
+            b   1    3  30
+                2    4  40
+            c   1    5  50
+                2    6  60
+            df.rename_axis(index={'let':'abc'}) # change index column 'let' into name 'abc'
+            Out[]:
+                     x   y
+            abc num
+            a   1    1  10
+                2    2  20
+            b   1    3  30
+                2    4  40
+            c   1    5  50
+                2    6  60
+            df.rename_axis(index=str.upper())
+        </pre>
+    </ul>
+<h2 style="color:blue">Iteration</h2>
+    <ul>
+        <li>The behavior of basic iteration over pandas objects depends on the type. When iterating over a Series, it is regarded as array-like<br>
+            , and basic iteration produces the values. DataFrames follow the dict-like convention of iterating over the 'keys' of the objects.</li>
+        <li>In short, basic iteration ( for in in object) produces:</li>
+        <ul>
+            <li><b>Series</b>: values</li>
+            <li><b>DataFrame</b>: column labels</li>
+        </ul>
+        <li>Thus, iterating over a DataFrame gives you the column names:</li>
+        <pre>
+            df = pd.DataFrame({'col1': np.random.randn(3), 'col2': np.random.randn(3)}, index=list('abc'))
+            for i in df:
+                print(i)
+            Out[]:
+            col1
+            col2
+        </pre>
+        <li>Pandas objects also have the dict-like <b>item()</b> method to iterate over the (key, value) pairs:</li>
+        <li>To iterate over the rows of a DataFrame, you can use the following methods:</li>
+        <ul>
+            <li><b>iterrow()</b>: Iterate over the rows of a DataFrame as (index, Series) pair. This converts teh rows to Series objects, which can change<br>
+                the dtypes and has some performance implications.</li>
+            <li><b>itertuples()</b>: Iterate over the rows of a DataFrame as namedtuples of the values. This is a lot faster than <b>iterrows()</b>, and is<br>
+                in most cases preferable to use to iterate over the values of a DataFrame.</li>
+        </ul>
+        <li>Iterating through pandas objects is generally slow. In many cases, iterating manually over the rows is not needed an can be avoided with <br>
+            one of the following approaches:</li>
+        <ul>
+            <li>Look for a vectorized solution: many operations can be performed using built-in methods or Numpy functions, (boolean) indxing, ...</li>
+            <li>When you have a function that can not work on teh full DataFrame/ Series at once, it is better to use <b>apply()</b> instead of iterating <br>
+                over teh values.</li>
+            <li>If you need to do iterative manipulations on the values but performance is importance, consider writing the inner loop with cython<br>
+                or numba.</li>
+            <li>You should <b>never modify</b> something you are iterating over. This is not guaranteed to work in all cases. Depending on the data types,<br>
+                the iterator returns a copy and not a view, and writing to it will have no effect.</li>
+            <pre>
+                df = pd.DataFrame({'a': [1,2,3], 'b': list('abc')})
+                for index, row in df.iterrow():
+                    row['a'] = 10
+                df
+                Out[]:
+                   a  b
+                0  1  a
+                1  2  b
+                2  3  c
+            </pre>
+        </ul>
+        <li><b>items</b> : Consistent with the dict-like interface, <b>items()</b> iterates through key-value pairs:</li>
+        <ul>
+            <li><b>Series</b>: (index, scalar value) pairs</li>
+            <li><b>DataFrame</b>: (column, Series) pair</li>
+        </ul>
+        <pre>
+            for label, ser in df.items():
+                print(label) # column name (a, b)
+            Out[]:
+            a
+            b
+                print(ser) # Series with index
+            Out[]:
+            0    1
+            1    2
+            2    3
+            Name: a, dtype: int64
+            0    d
+            1    e
+            2    f
+            Name: b, dtype: object
+        </pre>
+        <li><b>iterrows()</b>: allows you to iterate through the rows of a DataFrame as Series objects. It returns an iterator yielding<br>
+            each index values along with a Series containing the data in each row:</li>
+        <pre>
+            for row_index, row in df.iterrows():
+                print(row_index) # index label
+                print(row) # column label with data
+                print(row['a']) # column a
+                print(row['b']) # column b
+        </pre>
+        <li>Because <b>iterrows()</b> returns a Series for each row, it does not preserve dtypes across the rows(dtypes are preserved <br>
+            across columns for DataFrames).</li>
+        <pre>
+            df_orig = pd.DataFrame([[1, 1.5]], column = ['int', 'float'])
+            row = next(df.orig.iterrow())[1)
+            Out[]:
+            int      1.0
+            float    1.5
+            Name: 0, dtype: float64
+        </pre>
+        <li>All values in <b>row</b>, returned as a Series, are now upcasted to float, also the original integer value in column x</li>
+        <li>To preserve dtypes while iterating over the rows, it is better to use <b>itertuples</b> which returns namedtuples of the <br>
+            values and which is generally much faster than <b>iterrow()</b>.</li>
+        <pre>
+            df2 = pd.DataFrame([[1,4], [2,5], [3,6]], columns=list('xy'))
+            df2_t = pd.DataFrame({idx: value for idx, value in df2.iterrows()})
+            # it similar to df2.T
+        </pre>
+        <li><b>itertuples()</b>: will return an iterator yielding a namedtuple for each row in the DataFrame. The first element of the tuple<br>
+            will be the row's corresponding index value, while the remaining values are the row values.</li>
+        <pre>
+            for row in df.itertuples():
+                print(row)
+            Out[]:
+            Pandas(Index=0, a=1, b='a')
+            Pandas(Index=1, a=2, b='b')
+            Pandas(Index=2, a=3, b='c')
+        </pre>
+        <li>This method does not convert the row to a Series object, it merely returns the values inside a namedtuple. Therefore, <b>itertuples()</b><br>
+            preserves the data type of the values and is generally faster as <b>iterrows()</b>.</li>
+        <li>The column names will be renamed to positional names if they are invalid Python identifiers, repeated, or start with <br>
+            an underscore. With a large number of columns (>255), regular tuples are returned.</li>
+    </ul>
+<h2 style="color:blue">.dt accessor</h2>
+    <ul>
+        <li><b>Series</b> has an accessor to succinctly return datetime like properties for the values of the Series, if it is a datetime/period<br>
+            like Series. This will return a Series, its indexed like the existing Series.</li>
+        <pre>
+            s = pd.Series(pd.date_range('20130101 09:10:12', periods=4))
+            s.dt.hour
+            s.dt.second
+            s.dt.day
+            s[s.dt.day] = 2
+        </pre>
+        <li>You can easily produces tz aware transformations:</li>
+        <pre>
+            stz = s.dt.tz_localize('US/Eastern')
+            stz.dt.tz
+        </pre>
+        <li>You can also chain these types of operations:</li>
+        <pre>
+            s.dt.tz_localize('UTC').dt.tz_convert('US/Eastern')
+        </pre>
+        <li>You can also format datetime values as strings with <b>Series.dt.strftime()</b> which supports the same format as the standard<b> strftime().</b></li>
+        <pre>
+            s = pd.Series(pd.date_range('20130101', periods=4))
+            s.dt.strftime('%Y/%m/%d')
+        </pre>
+        <li>The <b>.dt</b> accessor works for period and timedelta dtypes:</li>
+        <pre>
+            s = pd.Series(pd.period_range('20130101', periods=4, freq='D')
+            s.dt.year
+            s.dt.day
+        </pre>
+        <pre>
+            s = pd.Series(pd.timedelta_range('1day 00:00:05', periods=4, freq='s'))
+            s.dt.days
+            s.dt.components
+            Out[297]:
+               days  hours  minutes  seconds  milliseconds  microseconds  nanoseconds
+            0     1      0        0        5             0             0            0
+            1     1      0        0        6             0             0            0
+            2     1      0        0        7             0             0            0
+            3     1      0        0        8             0             0            0
+        </pre>
+        <li><b>Series.dt</b> will raise a <b>TypeError</b> if you access with a non-datetime-like values.</li>
+    </ul>
+<h2 style="color:blue">Vectorized string methods</h2>
+    <ul>
+        <li>Series is equipped with a set of string processing methods that make it easy to operate on each element of the array.<br>
+            Perhaps most importantly, these methods exclude missing NA values automatically. These are accessed via the Series's <b>str</b><br>
+            attribute and generally have names matching the equivalent(scalar) built-in string methods.</li>
+        <pre>
+            s = pd.Series(['A', 'B', 'C', 'Aaba', 'Baca', np.nan, 'CABA', 'dog', 'cat'], dtype='string')
+            s.str.lower()
+        </pre>
+        <li>Powerful pattern-matching methods are provided as well, but note that pattern-matching generally uses regular expressions <br>
+            by default (and in some cases always uses them).</li>
+    </ul>
+<h2 style="color:blue">Sorting</h2>
+    <ul>
+        <li>Pandas supports three kinds of sorting: sorting by index labels, sorting by column values and sorting by a combination of both.</li>
+        <h3 style="color:red">By index</h3>
+        <li>The <b>Series.sort_index() and DataFrame.sort_index()</b> methods are used to sort a pandas object by its index levels:</li>
+        <pre>
+            df = pd.DataFrame({'one': pd.Series(np.random.randn(3), index=list('abc')),
+                                'two': pd.Series(np.random.randn(4), index=list('abcd')),
+                                'three': pd.Series(np.random.radn(3), index=list('bcd'))},
+                                columns=['one', 'two', 'three'])
+            unsorted_df = df.reindex(index=['a', 'd', 'c', 'b'], columns=['three', 'two', 'one'])
+            unsorted_df.sort_index() # sort by index labels
+            unsorted_df.sort_index(ascending=False) # sort descending index labels
+            unsorted_df.sort_index(axis=1) # sort by column labels
+            unsorted_df['three'].sort_index() # sort ascending column 'three'
+        </pre>
+        <li>Sorting by index also supports a <b>key</b> parameter that takes a callable function to apply to the index being sorted.<br>
+            For <b>MultiIndex</b> objects, the key is applied per-levels specified by level.</li>
+        <pre>
+            s1 = pd.DataFrame({'a': ['B', 'a', 'c'], 'b': [1,2,3], 'c':[2,3,4]}).set_index(list('ab'))
+            s1.sort_index(level='a') # uppercase first
+            Out[]:
+                 c
+            a b
+            B 1  2
+            C 3  4
+            a 2  3
+            s1.sort_index(level='a', key=lambda x: x.str.lower()) # covert to lower then sort
+            Out[]:
+                 c
+            a b
+            a 2  3
+            B 1  2
+            C 3  4
+        </pre>
+        <h3 style="color:red">By Values</h3>
+        <li>The <b>Series.sort_values()</b> method is used to sort a <b>Series</b> by it values. The <b>DataFrame.sort_values()</b> method is <br>
+            used to sort a <b>DataFrame</b> by its column or row values. The optional <b>by</b> parameter to <b>DataFrame.sort_values()</b> may <br>
+            used to specify one or more columns to use to determine the sorted order.</li>
+        <pre>
+            df1 = pd.DataFrame({'one': [2,1,1,1], 'two': [1,3,2,4], 'three': [5,4,3,2]})
+            df1.sort_values(by='two')
+            df1.sort_value('two')
+            df1.sort_values(by=['one', 'two'])
+            df1.sort_values(['one', 'two'])
+        </pre>
+        <li>These methods have special treatment of NA values via the <b>na_position</b> argument.</li>
+        <pre>
+            s = pd.Series(['A', 'B', 'C', 'Aaba', 'Baca', np.nan, 'CABA', 'dog', 'cat'], dtype='string')
+            s[2] = np.nan
+            s.sort_values()
+            s.sort_values(na_position='first')
+        </pre>
+        <li>Sorting also supports a <b>key</b> parameter that takes a callable function to apply to the values being sorted.</li>
+        <pre>
+            s1 = pd.DataFrame({'a': ['B', 'a', 'c'], 'b': [1,2,3], 'c':[2,3,4]}).set_index(list('ab'))
+            s1.sort_values('a', key=lambda x: x.str.lower()) # exchange into lower case then sort (similar to sort_index)
+        </pre>
+        <li><b>key</b> will be given the Series of values and should return a Series or array of the same shape with the transformed<br>
+            values. For DataFrame object, the key is applied per column, so the key should still expect a Series and return a Series.</li>
+        <pre>
+            df = pd.DataFrame({'a': ['B', 'a', 'C'], 'b': [1,2,3])
+            df.sort_values('a')
+            df.sort_values('a', key=lambda x: x.str.lower())
+        </pre>
+        <h3 style="color:red">By inexes and values</h3>
+        <li>String passed as the <b>by</b> parameter to <b>DataFrame.sort_values()</b> may refer to either column or index level names.</li>
+        <pre>
+            idx = pd.MultiIndex.from_tuples([('a', 1), ('a', 2), ('b', 2), ('b', 1), ('b', 1)])
+            idx.names = ['first', 'second']
+            df_multi = pd.DataFrame({'A': np.arange(6, 0, -1)}, index=idx)
+            df_multi.sort_values(['second', 'A'])
+        </pre>
+        <li>If a string matches both a column name and an index level name then a warning is issued and the column take precedence. This <br>
+            will result in an ambiguity error in future version.</li>
+        <h3 style="color:red">Smallest/ largest values</h3>
+        <li>Series has the <b>nsmallest() and nlargest()</b> methods which return the smallest or largest n values. For a large Series<br>
+            this can be much faster than sorting and calling head() on the result.</li>
+        <pre>
+            s = pd.Series(np.random.randn(10))
+            s.nsmallest(3) # 3 values smallest
+            s.nlargest(3) # 3 values largest
+        </pre>
+        <li>DataFrame also have <b>nsmallest() and nlargest()</b> methods.</li>
+        <pre>
+            df = pd.DataFrame({'a': [-2, -1, 1, 10, 8, 11, -1],
+                                'b': list('abcdefg'),
+                                'c': [1.0, 2.0, 4.0, 3.0, np.nan, 3.0, 4.0},)
+            df.nsmallest(3, 'a')
+            df.nsmallest(3, ['a', 'c']) # smallest combination of a & c
+            df.nlargest(4, 'a')
+            df.nlargest(4, ['a', 'c']) # largest combination of a & c
+        </pre>
+    </ul>
+<h2 style="color:blue">Copying</h2>
+    <ul>
+        <li>The <b>copy()</b> method on pandas objects copies the underlying data(though not the axis indexes, since they are immutable)<br>
+            and returns a new object. Note that <b>it is seldom necessary to copy objects</b>. These are only a handful of ways to alter<br>
+            a DataFrame in-place:</li>
+        <ul>
+            <li>Inserting, deleting or modifying a column</li>
+            <li>Assigning to the index or columns attribute</li>
+            <li>For homogeneous data, directly modifying the values via the 'values' attribute or advanced indexing</li>
+        </ul>
+        <li>To be clear, no pandas methods has the side effect of modifying your data, almost every method returns a new object, leaving the <br>
+            original object untouched. If the data is modified, it is because you did so explicitly.</li>
+        <h3 style="color:red">dtypes</h3>
+        <li>For the most part, pandas use Numpy arrays and dtypes for Series or individual columns of a DataFrame. Numpy provides support<br>
+            for <b>float, int, bool, timedelta64[ns], and datetime64[ns]</b> (note that Numpy does not support timezone-aware datetimes).</li>
+        <li>Pandas and third-party libraries extend Numpy's type sys in a few places. This section describes the extensions pandas has made<br>
+            internally.</li>
+        <li>The following lists all of pandas extension types. For methods requiring dtype arguments, strings can be specified as indicated.</li>
+        <img src="{% static 'IMG/table_1.png'%}">
+        <li>Pandas has two ways to store strings:</li>
+        <ul>
+            <li><b>object</b> dtype, which can hold any Python object, uncluding strings.</li>
+            <li><b>StringDtype</b>, which is dedicated to strings.</li>
+        </ul>
+        <li>Generally, we recommend using StringDtype.</li>
+        <li>Finally, arbitrary objects may be stored using the object dtype, but should be avoid the the extent possible(for  performance and <br>
+            interoperability with other libraries methods.</li>
+        <li>A convenient dtypes attribute for DataFrame returns a Series with the data type of each column.</li>
+        <pre>
+            dft = pd.DataFrame({'A': np.random.randn(3), 'B': 1, 'C': 'foo',
+                                'D': Timestamp('20010102'),
+                                'E': pd.Series([1.0]*3).astype('float32'),
+                                'F': False, 'G': pd.Series([1]*3, dtype='int8')})
+            dft.dtypes
+            dft['A'].dtype
+        </pre>
+        <li>If a pandas object contains data with multiple dtypes in a single column, the dtype of the column will be chosen to accommodate<br>
+            all of the data types(object is the most general).</li>
+        <pre>
+            s = pd.Series([1,2,3,4,5,6.0]) # force to 'float64'
+            s1 = pd.Series([1,2,3,4,5,'foo']) # force to 'object'
+        </pre>
+        <li>The number of columns of each type in a DataFrame can be found by calling <b>DataFrame.dtypes.value_counts().</b></li>
+        <pre>
+            df1 = pd.DataFrame(np.random.randn(8,1), columns=['A'], dtype='float32')
+            df1 # dtype: object with A: float32
+        </pre>
+        <li>By default integer types are int64 and float are float64, regardless of platform (32-bit and 64-bit).</li>
+        <li>Note that Numpy will choose platform-dependent types when creating arrays.</li>
+        <li>Types can potentially be upcasted when combined with other types, meaning they are promoted from the current type(int to float).</li>
+        <pre>
+            df3 = df1.reindex_like(df2, fill=0.0) + df2
+            df3 # dtype: object with column type: float32(64)
+        </pre>
+        <li><b>DataFrame.to_numpy()</b> will return the lower-common-denominator of the dtypes, meaning the dtype that can accommodate all<br>
+            of the types in the resulting homogeneous dtyped Numpy array. This can force some upcasting.</li>
+        <pre>
+            df3.to_numpy().dtype # upcast 'float64'
+        </pre>
+        <li><b>astype()</b> method used to explicitly convert dtypes from one to another. These will by default return a copy, even if the dtype<br>
+            was unchanged (pass <b>copy=False</b> to change this behavior). In addition, they will raise an exception if the <b>astype</b> operation is invalid.</li>
+        <li>Upcasting is always according to the Numpy rules. If two different dtypes are involved in an operation, then the more general one will be used as the<br>
+            result of operation.</li>
+        <pre>
+            df3.dtypes
+            Out[]:
+            A    float32
+            B    float64
+            C    float64
+            dtype: object
+            df3.astype('float32').dtypes
+            Out[370]:
+            A    float32
+            B    float32
+            C    float32
+            dtype: object
+        </pre>
+        <li>Convert a subset of columns to a specified type using <b>astype()</b>.</li>
+        <pre>
+            dft = pd.DataFrame({'a': [1,2,3], 'b': [3,4,5], 'c': [4, 4, 3]})
+            dft[['a', 'b']] = dft[['a', 'b']].astype('uint8')
+            dft.dtypes
+            Out[]:
+            a    uint8
+            b    uint8
+            c    int64
+            dtype: object
+            dft1 = dft.astype({'a': np.bool_, 'c': np.float64})
+            dft1.dtypes
+            Out[]:
+            a       bool
+            b      int64
+            c    float64
+            dtype: object
+        </pre>
+        <li>When trying to convert a subset of columns to a specified type using <b>astype() and loc()</b>, upcasting occur.</li>
+        <li><b>loc()</b> tries to fit in what we are assigning to the current dtypes, while [] will ovewrite them taking the <br>
+            dtype from the right hand side.</li>
+        <pre>
+            dft = pd.DataFrame({'a': [1,2,3], 'b':[4,5,6], 'c': [7,8,9]})
+            dft.loc[: ['a', 'b']].astype(np.uint8).dtypes
+            Out[]:
+            a    uint8
+            b    uint8
+            dtype: object
+            dft.loc[: ['a', 'b']] = dft.loc[:['a', 'b']].astype(np.uint8)
+            dft.dtypes
+            Out[]:
+            a    int64
+            b    int64
+            c    int64
+            dtype: object
+        </pre>
+        <li>Object conversion: Pandas offers various functions to try to force conversion of types from the <b>object</b> dtype to other types<br>
+            In cases where the data is already of the correct type, but stored in an object array, the <b>DataFrame.infer_objects() and Series.infer_objects()</b><br>
+            methods can be used to soft convert to the correct type.</li>
+        <pre>
+            import datetime
+            df = pd.DataFrame([[1,2], list('ab'), [datetime.datetime(2016,3,2), datetime.datetime(2016,3,3)]])
+            df.T # will change the object's type
+            df.dtypes
+            Out[]:
+            0            object
+            1            object
+            2    datetime64[ns]
+            dtype: object
+        </pre>
+        <li>Because the data was transposed the original inference stored all columns a object, which <b>infer_objects</b> will correct.</li>
+        <pre>
+            df.infer_objects().dtypes
+            Out[]:
+            0             int64
+            1            object
+            2    datetime64[ns]
+            dtype: object
+        </pre>
+        <li>The following function are available for one dimensional object arrays or scalars to perform hard conversion of objects to a specified type:</li>
+        <ul>
+            <li><b>to_numeric()</b>: conversion to numeric dtypes.</li>
+            <pre>
+                m = [1.1, 2, 3]
+                pd.to_numeric(m) # [1.1, 2., 3.]
+            </pre>
+            <li><b>to_datetime()</b>: conversion to datetime objects.</li>
+            <pre>
+                import datetime
+                m = ['2016-07-09', datetime.datetime(2016, 3, 2)]
+                pd.to_datetime(m) # DatetimeIndex(['2016-07-09', '2016-03-02'], dtype='datetime64[ns], freq=None)
+            </pre>
+            <li><b>to_timedelta()</b>: conversion to timedelta objects.</li>
+            <pre>
+                m = ['5us', pd.Timedelta('1day')]
+                pd.to_timedelta(m) # TimedeltaIndex([0 days 00:00:00.000005, '1 days 00:00:00'], dtype='timedelta64[ns], freq=None)
+            </pre>
+        </ul>
+        <li>To force a conversion, we can pass in an <b>errors</b> argument, which specifies how pandas should deal with elements that <br>
+            can not be converted to desired dtype or object. By default, <b>errors='raise'</b>, meaning that nay errors encountered will be<br>
+            raised during the conversion process. However, if <b>errors='coerce'</b>, these errors will be ignored and pandas will convert <br>
+            problematic elements to <b>pd.naT</b>(for datetime and timedelta) or <b>np.nan</b> (for numeric). This might be useful if you <br>
+            are reading in data which is mostly of the desired dtype, but occasionally has non-conforming elements intermixed that you want<br>
+            to represent as missing:</li>
+        <pre>
+            import datetime
+            m = ['apple', datetime.datetime(2016, 3, 2)]
+            pd.to_datetime(m, errors='coerce')
+            Out[]: DatetimeIndex(['NaT', '2016-03-02'], dtype='datetime64[ns]', freq=None)
+            pd.to_numeric(m, errors='coerce')
+            Out[]: array([nan, nan])
+            m1 = ['apple', pd.Timedelta('1 days')]
+            pd.to_timedelta(m1, errors='coerce')
+            Out[]: TimedeltaIndex([NaT, '1 days'], dtype='timedelta64[ns]', freq=None)
+        </pre>
+        <li>The <b>errors</b> parameter has a third option of <b>errors='ignore'</b>, which will simply return the passed in data if it encounters<br>
+            any errors with the conversion to a desired data type:</li>
+        <pre>
+            import datetime
+            m = ['apple', datetime.datetime(2016, 3, 2)]
+            pd.to_datetime(m, errors='ignored')
+            Out[]: Index(['apple', 2016-03-02 00:00:00], dtype='object')
+        </pre>
+        <li>In addition to object conversion, <b>to_numeric()</b> provides another argument <b>dowcast</b>, which gives the options of dowcasting<br>
+            the newly (or already) numeric data to a smaller dtype, which can conserve memory.</li>
+        <pre>
+            m = ['1', 2, 3]
+            pd.to_numeric(m, dowcast='integer')  # smallest signed int dtype
+            Out[]: array([1, 2, 3], dtype=int8)
+            pd.to_numeric(m, dowcast='signed') #same as integer
+            Out[]: array([1, 2, 3], dtype=int8)
+            pd.to_numeric(m, dowcast='unsigned') # smallest unsigned int dtype
+            Out[]: array([1, 2, 3], dtype=uint8)
+            pd.to_numeric(m, dowcast='float') # smallest float dtype
+            Out[]: array([1., 2., 3.], dtype=float32)
+        </pre>
+        <li>All these methods apply only to one-dimensional arrays, lists or scalars, they cannot be used directly on multi-dimensional objects such as <br>
+            DataFrame. However, with <b>apply()</b>, we can 'apply' the function over each column efficiently.</li>
+        <pre>
+            import datetime
+            df = pd.DataFrame([['2016-07-09', datetime.datetime(2016, 3, 2)]] * 2, dtype='O')
+            df.apply(pd.to_datetime)
+            df.apply(pd.to_numeric)
+            df.apply(pd.to_timedelta)
+        </pre>
+        <li><b>gotchas</b>: Performing selection operations on <b>integer</b> type data can easily upcast the data to <b>floating</b>. The dtype of the input<br>
+            data will be preserved in cases where <b>nans</b> are not introduced.</li>
+        <pre>
+            dfi = df3.astype(np.int32)
+            dfi['E'] = 1
+            dfi
+            Out[]:
+               A  B    C  E
+            0  1  0    0  1
+            1  3  1    0  1
+            2  0  0  255  1
+            3  0  1    0  1
+            4 -1 -1    0  1
+            5  1  0    0  1
+            6  0 -1    1  1
+            7  0  0    0  1
+            dfi.dtypes
+            Out[]:
+            A    int32
+            B    int32
+            C    int32
+            E    int64
+            dtype: object
+            casted = dfi[dfi>0]
+            casted
+            Out[]:
+                 A    B      C  E
+            0  1.0  NaN    NaN  1
+            1  3.0  1.0    NaN  1
+            2  NaN  NaN  255.0  1
+            3  NaN  1.0    NaN  1
+            4  NaN  NaN    NaN  1
+            5  1.0  NaN    NaN  1
+            6  NaN  NaN    1.0  1
+            7  NaN  NaN    NaN  1
+            casted.dtypes
+            Out[]:
+            A    float64
+            B    float64
+            C    float64
+            E      int64
+            dtype: object
+        </pre>
+        <li>While float dtypes are unchanged</li>
+        <pre>
+            dfa = df3.copy()
+            dfa['A'] = dfa['A'].astype(np.float32)
+            dfa.dtypes
+            Out[]:
+            A    float32
+            B    float64
+            C    float64
+            dtype: object
+            casted = dfa[dfa > 0]
+            casted
+            Out[436]:
+                      A         B      C
+            0  1.047606  0.256090    NaN
+            1  3.497968  1.426469    NaN
+            2       NaN       NaN  255.0
+            3       NaN  1.139976    NaN
+            4       NaN       NaN    NaN
+            5  1.346426  0.096706    NaN
+            6       NaN       NaN    1.0
+            7       NaN       NaN    NaN
+            casted.dtypes
+            Out[]:
+            A    float32
+            B    float64
+            C    float64
+            dtype: object
+        </pre>
+    </ul>
+<h2 style="color:blue">Selecting columns based on dtype</h2>
+    <ul>
+        <li>The <b>select_dtype()</b> method implements sub-setting of columns based on their <b>dtype</b>.</li>
+        <pre>
+            df = pd.DataFrame({"string": list("abc"),
+                                "int64": list(range(1, 4)),
+                                "uint8": np.arange(3, 6).astype("u1"),
+                                "float64": np.arange(4.0, 7.0),
+                                "bool1": [True, False, True],
+                                "bool2": [False, True, False],
+                                "dates": pd.date_range("now", periods=3),
+                                "category": pd.Series(list("ABC")).astype("category")})
+            df['tdelta'] = df.dates.diff() # current row value - previous row value
+            df['uint64'] = np.arange(3, 6).astype('u8')
+            df['other_dates'] = pd.date_range('20130101', periods=3)
+            df['tz_aware_dates'] = pd.date_range('20130101', periods=3, tz='US/Eastern')
+            df.dtypes
+            Out[]:
+            string                                object
+            int64                                  int64
+            uint8                                  uint8
+            float64                              float64
+            bool1                                   bool
+            bool2                                   bool
+            dates                         datetime64[ns]
+            category                            category
+            tdeltas                      timedelta64[ns]
+            uint64                                uint64
+            other_dates                   datetime64[ns]
+            tz_aware_dates    datetime64[ns, US/Eastern]
+            dtype: object
+        </pre>
+        <li><b>select_dtypes()</b> has two parameters <b>exclude and include</b> that allow you specify the type will be chosen:</li>
+        <pre>
+            df.select_dtypes(include=[bool])
+            df.select_dtypes(include=['bool']) # Numpy dtype hierarchy
+            Out[]:
+               bool1  bool2
+            0   True  False
+            1  False   True
+            2   True  False
+            df.select_dtype(include =['number', 'bool'], exclude=['unsignedinteger'])
+            Out[]:
+               int64  float64  bool1  bool2 tdeltas
+            0      1      4.0   True  False     NaT
+            1      2      5.0  False   True  1 days
+            2      3      6.0   True  False  1 days
+            df.select_dtypes(include=['object']
+            Out[]:
+              string
+            0      a
+            1      b
+            2      c
+        </pre>
+        <li>To see all the child dtypes of a generic dtype like numpy.number, you can define a function that returns a tree of child dtypes:</li>
+        <pre>
+            def subdtypes(dtype):
+                subs = dtype.__subclasses__()
+                if not subs:
+                    return dtype
+                return [dtype, [subdtypes(dt) for dt in subs]]
+        </pre>
+        <li>All numpy dtypes are subclasses of numpy.generic:</li>
+        <pre>
+            subdtypes(np.generic)
+            Out[450]:
+            [numpy.generic,
+             [[numpy.number,
+               [[numpy.integer,
+                 [[numpy.signedinteger,
+                   [numpy.int8,
+                    numpy.int16,
+                    numpy.int32,
+                    numpy.int64,
+                    numpy.longlong,
+                    numpy.timedelta64]],
+                  [numpy.unsignedinteger,
+                   [numpy.uint8,
+                    numpy.uint16,
+                    numpy.uint32,
+                    numpy.uint64,
+                    numpy.ulonglong]]]],
+                [numpy.inexact,
+                 [[numpy.floating,
+                   [numpy.float16, numpy.float32, numpy.float64, numpy.float128]],
+                  [numpy.complexfloating,
+                   [numpy.complex64, numpy.complex128, numpy.complex256]]]]]],
+              [numpy.flexible,
+               [[numpy.character, [numpy.bytes_, numpy.str_]],
+                [numpy.void, [numpy.record]]]],
+              numpy.bool_,
+              numpy.datetime64,
+              numpy.object_]]
+        </pre>
+        <li>Pandas also defines the types <b>category and datetime64[ns, tz]</b>, which are not integrated into the normal Numpy<br>
+            hierarchical and won't show up with the above function.</li>
+    </ul>
+</body>
+</html>

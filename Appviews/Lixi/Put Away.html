@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <style>
+        h2 {color: blue;}
+        h3 {color: red}
+        h4 {color: #8F3A84; font-size: 20px}
+        img {width: 100%}
+    </style>
+    <meta charset="UTF-8">
+    <title>PUT AWAY (STORE) PROCEDURE</title>
+</head>
+<body>
+<fieldset>
+    <legend><h2>QUY TRÌNH LÊN TỒN CHO HÀNG HÓA TỚI KHO</h2></legend>
+    <h3>I. LÊN TỒN HÀNG HÓA NHẬP KHO</h3>
+    <ul>
+        <h4>Bước 1: admin.lixibox.com &rarr; Kho Packing &rarr; Chọn kho &rarr; Relocation</h4>
+        <img src="{% static 'IMG/Lx_store_1.png'%}">
+        <h4>Bước 2: Input/ Scan Barcode sản phẩm &rarr; lấy vị trí lưu kho của sản phẩm đó hoặc thay đổi vị trí để thuận tiện cho việc sắp xếp trong kho.</h4>
+        <li style="color:red">Lưu ý: Số lượng hàng hóa đã được cộng vào kho khi nhập hàng.</li>
+        <img src="{% static 'IMG/Lx_store_2.png'%}">
+        <h4>Bước 3: Mang hàng hóa đã được xử lý nhập kho trên hệ thống tới vị trí lưu kho:</h4>
+        <ul>
+            <li>Kiểm tra lại số lượng hàng hóa tại vị trí đó.</li>
+            <li>Sắp xếp hàng hóa gọn gàng, ngăn nắp lên vị trí lưu kho.</li>
+        </ul>
+    </ul>
+    <h3>II. LÊN TỒN HÀNG HỦY SAU KHI LẤY HÀNG/ ĐÓNG GÓI/ CHỜ BÀN GIAO</h3>
+    <ul>
+        <h4>Bước 1: Nhận thông tin hàng bị Cancelled từ các bộ phận liên quan và tiến hành xử lý khi đơn hàng đang ở tại kho.</h4>
+        <img src="{% static 'IMG/Lx_store_1.png'%}">
+        <h4>Bước 2: admin.lixibox.com &rarr; Kho Packing &rarr; Chọn kho &rarr; Packing</h4>
+        <h4>Bước 3: Chọn Cancelled shipment &rarr; Reimburse.</h4>
+        <li>Trường hợp đơn hàng đã chuyển qua Packed/ Requested  &rarr; chọn đơn hàng &rarr; Cancel để đơn hàng chuyển qua cột Picked.</li>
+        <img src="{% static 'IMG/Lx_store_3.png'%}">
+        <h4>Bước 4: Tại Returning chọn:</h4>
+        <ul>
+            <li>Request Stock: Tạo bảng kê Re-check để re-check sản phẩm và xác nhận nhập kho lại những sản phẩm trong đơn hàng đã bị hủy.</li>
+            <li>Cancel: Tiếp tục đóng gói đơn hàng.</li>
+        </ul>
+        <img src="{% static 'IMG/Lx_recheck_4.png'%}">
+        <h4>Bước 5: admin.lixibox.com &rarr; Kho Packing &rarr; Chọn kho &rarr; Relocation</h4>
+        <img src="{% static 'IMG/Lx_store_1.png'%}">
+        <h4>Bước 6: Input/ Scan Barcode sản phẩm &rarr; lấy vị trí lưu kho của sản phẩm đó hoặc thay đổi vị trí để thuận tiện cho việc sắp xếp trong kho.</h4>
+        <li style="color:red">Lưu ý: Số lượng hàng hóa đã được cộng vào kho khi nhập hàng.</li>
+        <img src="{% static 'IMG/Lx_store_2.png'%}">
+        <h4>Bước 7: Mang hàng hóa đã được xử lý nhập kho trên hệ thống tới vị trí lưu kho:</h4>
+        <ul>
+            <li>Kiểm tra lại số lượng hàng hóa tại vị trí đó.</li>
+            <li>Sắp xếp hàng hóa gọn gàng, ngăn nắp lên vị trí lưu kho.</li>
+        </ul>
+    </ul>
+    <h3>II. LÊN TỒN HÀNG HÓA RETURNED/ EXCHANGE</h3>
+    <ul>
+        <h4>Bước 1: Mã hoàn trả sau khi được Reimburse sẽ cập nhật số lượng sản phẩm trong kho &rarr; Vào admin.lixibox.com &rarr; Kho Packing &rarr; Chọn kho &rarr; Relocation</h4>
+        <img src="{% static 'IMG/Lx_store_1.png'%}">
+        <h4>Bước 2: Input/ Scan Barcode sản phẩm &rarr; lấy vị trí lưu kho của sản phẩm đó hoặc thay đổi vị trí để thuận tiện cho việc sắp xếp trong kho.</h4>
+        <li style="color:red">Lưu ý: Số lượng hàng hóa đã được cộng vào kho khi nhập hàng.</li>
+        <img src="{% static 'IMG/Lx_store_2.png'%}">
+        <h4>Bước 3: Mang hàng hóa đã được xử lý nhập kho trên hệ thống tới vị trí lưu kho:</h4>
+        <ul>
+            <li>Kiểm tra lại số lượng hàng hóa tại vị trí đó.</li>
+            <li>Sắp xếp hàng hóa gọn gàng, ngăn nắp lên vị trí lưu kho.</li>
+        </ul>
+    </ul>
+</fieldset>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSV AND JSON</title>
+</head>
+<body>
+<h1 style="text-align:center">CSV FILES</h1>
+<h2 style="color:blue">1) The CSV File Format</h2>
+<textarea rows="2" cols="100">
+    2014-1-5,61,44,26,18,7,-1,56,30,9,30.34,30.27,30.15,,,,10,4,,0.00,0,,195
+</textarea>
+
+<ul><h3 style="color:purple">Parsing the CSV File Headers</h3></ul>
+<textarea rows="7" cols="50">
+        import csv
+        filename = 'sitka_weather_07-2014.csv'
+        with open(filename) as f:
+            reader = csv.reader(f)
+            header_row = next(reader)
+            print(header_row)
+</textarea>
+<textarea rows="7" cols="100">
+        ['AKDT', 'Max TemperatureF', 'Mean TemperatureF', 'Min TemperatureF',
+        'Max Dew PointF', 'MeanDew PointF', 'Min DewpointF', 'Max Humidity',
+        ' Mean Humidity', ' Min Humidity', ' Max Sea Level PressureIn',
+        ' Mean Sea Level PressureIn', ' Min Sea Level PressureIn',
+        ' Max VisibilityMiles', ' Mean VisibilityMiles', ' Min VisibilityMiles',
+        ' Max Wind SpeedMPH', ' Mean Wind SpeedMPH', ' Max Gust SpeedMPH',]
+</textarea>
+<p>The csv module contains a next() function, which returns the next line
+in the file when passed the reader object. <br>In the preceding listing we call
+next() only once so we get the first line of the file, which contains the file
+headers .<br> We store the data that’s returned in header_row. As you can see,
+header_row contains meaningful weather-related headers that tell us what
+information each line of data holds:
+</p>
+<ul><h3 style="color:purple">Printing the Headers and Their Positions</h3></ul>
+<textarea rows="8" cols="50">
+            with open(filename) as f:
+            reader = csv.reader(f)
+            header_row = next(reader)
+
+            for index, column_header in enumerate(header_row):
+                print(index, column_header)
+</textarea>
+<textarea rows="8" cols="50">
+        0 AKDT
+        1 Max TemperatureF
+        2 Mean TemperatureF
+        --snip--
+        21 Events
+        22 WindDirDegrees
+</textarea>
+<p>We use <span style="color:red"><b>enumerate()</b></span> u on the list to get the index of each item, as well
+as the value.<<br> (Note that we’ve removed the line print(header_row) in favor of
+this more detailed version.)</p>
+<ul><h3 style="color:purple">Extracting and Reading Data</h3></ul>
+<textarea rows="10" cols="50">
+        import csv
+        filename = 'sitka_weather_07-2014.csv'
+        with open(filename) as f:
+            reader = csv.reader(f)
+            header_row = next(reader)
+        highs = []
+        for row in reader:
+            highs.append(row[1])
+        print(highs)
+</textarea>
+
+<ul><h3 style="color:purple">The datetime Module</h3></ul>
+<textarea rows="4" cols="80">
+    from datetime import datetime
+    first_date = datetime.strptime('2014-7-1', '%Y-%m-%d')
+    print(first_date)
+</textarea>
+<p>We first import the datetime class from the datetime module. Then we
+call the method strptime() with the string containing the date we want to
+work with.</p>
+<ul style="color:red">
+    <b>
+%A : Weekday name, such as Monday<br>
+%B : Month name, such as January<br>
+%m : Month, as a number (01 to 12)<br>
+%d : Day of the month, as a number (01 to 31)<br>
+%Y : Four-digit year, such as 2015<br>
+%y : Two-digit year, such as 15<br>
+%H : Hour, in 24-hour format (00 to 23)<br>
+%I : Hour, in 12-hour format (01 to 12)<br>
+%p : am or pm<br>
+%M : Minutes (00 to 59)<br>
+%S : Seconds (00 to 61)<br>
+    </b>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

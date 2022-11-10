@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <style>
+        h2 {color: blue;}
+        h3 {color: red}
+    </style>
+    <meta charset="UTF-8">
+    <title>RETURN PROCEDURE</title>
+</head>
+<body>
+<fieldset>
+    <legend><h2>QUY TRÌNH TIẾP NHẬN VÀ XỬ LÝ HÀNG HOÀN</h2></legend>
+    <h3>I. TỪ HÃNG VẬN CHUYỂN</h3>
+        <ul>
+            <li>Khi tiếp nhận hàng hoàn từ hãng vận chuyển, nhân viên nhận hàng tiến hành nhận bàn giao trên PDA và ký xác nhận.</li>
+            <li>Lập biên bản hiện trạng, chụp hình, quay video và ký xác nhận với hãng nếu:</li>
+            <ul>
+                <li>Hàng hoá không có logo FFM, có dấu hiệu móp méo, hư hỏng, ướt rách.</li>
+                <li>Hàng hóa nghi ngờ không có hàng, mất hàng, tráo đổi hàng.</li>
+                <li>Hàng hóa nguyên đai nguyên kiện nhưng phát hiện tiếng động lạ (bể vỡ bên trong).</li>
+            </ul>
+            <li>Các đơn hàng hệ thống thông báo không tồn tại phải phân loại vào khu vực riêng, chờ liên hệ xử lý.</li>
+            <li>Đối với hàng không đi từ kho FFM, vẫn nhận bình thường. Nếu có vấn đề, phân loại vào khu vực riêng, chờ xử lý.</li>
+            <li>Liệt kê những đơn hàng không có thông tin nhận hoàn và làm việc với các bộ phận liên quan.</li>
+        </ul>
+    <h3>II.	KHÔNG BÀN GIAO ĐƯỢC</h3>
+    <ul>
+        <li>Nhân viên nhận hàng hoàn sẽ tới khu vực chứa hàng 'Cancel' khi bàn giao và tiến hành scan nhận hàng hoàn.</li>
+        <li>Kéo toàn bộ hàng đã được scan về khu vực hàng hoàn và tiến hành các bước tiếp theo.</li>
+        <li>Lưu ý: Khi nhận hàng phải có bộ phận bàn giao và tất cả đơn hàng huỷ khi bàn giao cần được đánh dấu đầy đủ.</li>
+    </ul>
+    <h3>III. PDA PROCEDURE - QUY TRÌNH XỬ LÝ HÀNG HOÀN KHÔNG LẬP BIÊN BẢN.</h3>
+        <ul>
+            <h4>Bước 1: Sử dụng PDA vào tính năng 'HÀNG HOÀN' để cập nhật đơn hàng hoàn vào hệ thống WMS.</h4>
+            <img src="{% static 'IMG/RT1.png'%}">
+            <h4>Bước 2: Tạo bảng kê của hãng vận chuyển hoàn trả.</h4>
+            <img src="{% static 'IMG/RT2.png'%}">
+            <img src="{% static 'IMG/RT3.png'%}">
+            <h4>Bước 3: Scan mã đơn hàng để nhận bàn giao từ hãng vận chuyển.</h4>
+            <img src="{% static 'IMG/RT4.png'%}">
+            <h4 style="color:red">Bước 4: Sau khi nhận xong, bấm XÁC NHẬN, ký nhận, chụp hình, điền thông tin bưu tá và hoàn tất nhận hàng.</h4>
+            <h4>Bước 5: Vào WMS &rarr; Nhập Hoàn &rarr; Kiểm hàng hoàn &rarr; Quét mã đơn hàng</h4>
+            <img src="{% static 'IMG/RT5.png'%}" width="1200">
+            <h4>Bước 6: Scan từng barcode sản phẩm trong mỗi đơn hàng, lưu ý :</h4>
+            <ul>
+                <li>Mỗi sản phẩm có thể có hơn 1 barcode, phải chọn đúng mã barcode cần scan.</li>
+                <li>Số lượng hàng tốt có thể đặt lên kệ lại</li>
+                <li>Số lượng hàng hư hỏng</li>
+                <li>Số lượng hàng mất mát, thiếu so với hệ thống</li>
+            </ul>
+            <img src="{% static 'IMG/RT6.png'%}" width="1200" height="450">
+            <img src="{% static 'IMG/RT7.png'%}" width="1200" height="450">
+            <h4>Bước 7: Bấm 'Cập nhật' để hoàn thành kiểm mã hàng, tiếp tục cho tới khi hoàn thành kiểm hoàn.<br>
+            <b style="color:red">Lưu ý: </b>Trường hợp đơn hàng chưa kiểm xong nhưng bị hết phiên làm việc <br>
+                WMS &rarr; Nhập hoàn &rarr; Danh sách kiểm hoàn &rarr; Quét mã đơn hàng </h4>
+            <img src="{% static 'IMG/RT8.png'%}" width="1200">
+            <h4>Bước 8: Phân loại hàng hoá (chủng loại, mã PA, ...), dán sticker với hàng hóa có yêu cầu để thuận tiện cho việc đặt hàng lên kệ.</h4>
+            <h4>Bước 9: Bàn giao cho Cheker theo sổ bàn giao lên tồn để xử lý các bước tiếp theo</h4>
+        </ul>
+    <h3>IV. PDA PROCEDURE - QUY TRìNH XỬ LÝ ĐỐI VỚI HÀNG HOÀN CHƯA XỬ LÝ ĐƯỢC</h3>
+    <ul>
+        <li>Hàng hoàn bị lập biên bản</li>
+        <li>Hàng hoàn có ngoại quan bình thường nhưng phát hiện hư hỏng trong quá trình kiểm hoàn</li>
+        <li>Hàng hoàn không xác định</li>
+        <li>Các trường hợp khác</li>
+    </ul>
+    <ul>
+        <p>Làm các bước giống như hàng hoàn bình thường, tiến hành thêm các bước sau:</p>
+        <ul>
+            <h4>Bước 1: Sử dụng PDA chụp hình sản phẩm, biên bản, quay phim đồng kiểm với hãng vận chuyển.</h4>
+            <h4>Bước 2: Sử dụng PDA tải thông tin lên WMS.</h4>
+            <img src="{% static 'IMG/RT9.png'%}">
+            <img src="{% static 'IMG/RT10.png'%}">
+            <h4>Bước 3: Tổng hợp lại thông tin, báo lại các bộ phận liên quan để xử lý và tiếp tục các bước khác như hàng bình thường.</h4>
+        </ul>
+    </ul>
+    <h3>V. PDA PROCEDURE - QUY TRÌNH LÊN TỒN CHO HÀNG HƯ HỎNG</h3>
+    <ul>
+        <h4>Bước 1: PDA &rarr; Lưu kho &rarr; Hàng hư hỏng.</h4>
+        <img src="{% static 'IMG/RT11.png'%}">
+        <img src="{% static 'IMG/RT12.png'%}">
+        <h4>Bước 2: Scan mã barcode của sản phẩm sau đó nhấp vào PA chứa sản phẩm hệ thống tìm thấy.</h4>
+        <img src="{% static 'IMG/RT13.png'%}">
+        <h4>Bước 3: Scan lại mã barcode của sản phẩm để xác nhận PA chứa sản phẩm đó.</h4>
+        <img src="{% static 'IMG/RT14.png'%}">
+        <h4>Bước 3: Kiểm tra lại mã barcode, số lượng, đi tới vị trí lưu hàng hư hỏng, scan mã vị trí, và đặt hàng đúng chỗ, gọn gàng lên vị trí.</h4>
+        <img src="{% static 'IMG/Return15.png'%}">
+    </ul>
+    <h3>VI.	CÁC TRƯỜNG HỢP CẦN LƯU Ý</h3>
+        <ul>
+            <h4>TH1: Hàng hoàn không xác định</h4>
+            <ul>
+                <li>Ghi nhận lại thông tin đơn hàng: mã đơn, ngày tháng, ...</li>
+                <li>Phân loại và để riêng ra một khu vực.</li>
+                <li>Gửi thông tin lên WMS, báo lại phụ trách và làm việc với các bộ phận liên quan và chờ xủ lý.</li>
+                <li><b>Lưu ý: </b>Quá 72h kể từ ngày nhận hoàn không nhận thông tin phản hồi từ các bộ phận liên quan, kho sẽ chuyển qua khu vực chờ tiêu hủy và không tiếp nhận xử lý lại.</li>
+            </ul>
+            <h4>TH2: Sản phẩm bị hư hỏng (không phát hiện khi nhận hàng hoàn), số lượng sản phẩm thiếu (mất) khi kiểm hàng</h4>
+            <ul>
+                <li>Lập biên bản, báo lại Leader và gửi thông tin lên WMS:</li>
+                <ul>
+                    <li>Mã vận đơn (ghi rõ mã FFM/ mã hãng vận chuyển).</li>
+                    <li>Hiện trạng hàng hóa kèm mã barcode sản phẩm, số lượng.</li>
+                    <li>Thời gian gửi thông tin<b>(Cùng ngày nhận hoàn, không quá 24 giờ)</b>.</li>
+                </ul>
+                <li>Sau khi thông báo xong, tiến hành kiểm hàng, cập nhật mã sản phẩm hư hỏng vào hệ thống.</li>
+                <li>Sản phẩm hư hỏng phải được phân loại riêng để đặt lên kệ chứa sản phẩm hư hỏng.</li>
+                <li>Sản phẩm hư hỏng khi kiểm xong phải được phân loại riêng để dễ dáng xử lý các bước tiếp theo.</li>
+            </ul>
+            <h4>TH3: Lỗi hệ thống (không được phép nhận hoàn)</h4>
+            <ul>
+                <li>Lên danh sách, báo lại Leader và chờ liên hệ kỹ thuật xử lý.</li>
+            </ul>
+        </ul>
+</fieldset>
+</body>
+</html>

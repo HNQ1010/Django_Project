@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <style>
+        h2 {color: blue;}
+        h3 {color: red}
+        h5 {color: #8F3A84}
+    </style>
+    <meta charset="UTF-8">
+    <title>CHECKER</title>
+</head>
+<body>
+<fieldset>
+    <legend><h2>QUY TRÌNH KIỂM TRA SẢN PHẨM</h2></legend>
+    <ul>
+    <h3>I. TIẾP NHẬN THÔNG TIN VÀ XỬ LÝ LÔ HÀNG</h3>
+    <ul>
+        <li>Nắm bắt thông tin về số lượng hàng hóa tới kho (nhận, hoàn), số lượng đơn hàng(packing) cần xử lý trong ngày.</li>
+        <li>Nhận hàng bàn giao từ các bộ phận liên quan để tiến hành QC.</li>
+        <li>Điều phối số lượng hàng hóa cần đóng gói, thúc đẩy và xử lý nhanh gọn, dứt điểm số lượng hàng hóa chưa được xử lý xong.</li>
+        <li>Theo dõi, ghi nhận vào sổ bàn giao các thông tin cần thiết để giải quyết với các bộ phận liên quan.</li>
+        <li>Báo cáo, bàn giao thông tin về tình trạng hàng hóa thiếu, thừa, kém chất lượng, trễ hạn lại cho quản lý để có những phương án điều chỉnh phù hợp. </li>
+    </ul>
+    <h3>II. BÀN GIAO CHO BỘ PHẬN WH CONTROLLER</h3>
+    <ul>
+        <li>Nhận bàn giao từ bộ phận Receiving và Return để tiến hành QC</li>
+        <li>Kiểm tra, kiểm đếm về tình trạng, sô lượng sản phẩm để bàn giao cho bộ phận WH Controller để tiến hành lên tồn cho hàng hóa tới kho.</li>
+        <li>Theo dõi, ghi nhận vào <b>sổ bàn giao lên tồn</b> các thông tin:</li>
+        <ul>
+            <li>Ngày tháng</li>
+            <li>Mã Shipment/ bảng kê</li>
+            <li>Số lượng mã Barcode sản phẩm</li>
+            <li>Số lượng sản phẩm</li>
+            <li>Tình trạng SM/ PA</li>
+            <li>Ký xác nhận</li>
+        </ul>
+        <li>Dán mã Shipment/ PA,  số lượng sản phẩm đã kiểm đếm và thông báo cho bộ phận WH Controller.</li>
+        <h4>Xử lý đối với những trường hợp phát sinh trong quá trình bàn giao:</h4>
+        <ul>
+            <li><b>Thiếu hàng:</b></li>
+            <ul>
+                <li>Xác nhận thiếu hàng trên hệ thống theo PK</li>
+                <li>Bàn giao cho bộ phận đóng gói</li>
+                <li>Sau khi kết thúc đóng gói, nhận bàn giao đơn hàng có sản phẩm thiếu từ bộ phận đóng gói</li>
+                <li>Bàn giao lại cho bộ phận WH Controller để tiến hành các bước tiếp theo</li>
+                <ul>
+                    <li>Nếu tìm thấy sản phẩm, WH Controller thông báo cho nhân viên lấy hàng, lấy và bàn giao lại cho Checker</li>
+                    <li>Nếu không tìm thấy hàng, WH Controller xác nhân mất và tiến hành trả sản phẩm của đơn hàng trên hệ thống</li>
+                </ul>
+            </ul>
+            <li><b>Thừa hàng:</b></li>
+            <ul>
+                <li>Ghi nhận mã PK và bàn giao cho bộ phận đóng gói</li>
+                <li>Sau khi kết thúc đóng gói, nhận bàn giao đơn hàng có sản phẩm dư từ bộ phận đóng gói</li>
+                <li>Bàn giao lại cho bộ phận WH Controller để tiến hành kiểm tồn sản phẩm</li>
+                <ul>
+                    <li>Nếu đủ hàng thì đặt hàng thủ công lên kệ để khớp tồn hệ thống</li>
+                    <li>Nếu dư hàng, tạo SM nhập kho cho sản phẩm dư đó</li>
+                </ul>
+            </ul>
+        </ul>
+    </ul>
+    <h3>III. BÀN GIAO CHO BỘ PHẬN ĐÓNG GÓI</h3>
+    <ul>
+        <li>Nhận bàn giao từ bộ phận lấy hàng tại khu vực chờ bàn giao để tiến hành QC hàng hóa theo thứ tự FIFO.</li>
+        <li>Kiểm tra, kiểm đếm về tình trạng, số lượng sản phẩm để bàn giao cho bộ phận đóng gói hoàn thiện đơn hàng.</li>
+        <li>Điều phối, thúc đẩy bộ phận đóng gói xử lý nhanh, dứt điểm lượng hàng hóa chưa xử lý xong.</li>
+        <li>Theo dõi, xác nhận vào <b>sổ theo dõi lấy hàng</b> các thông tin:</li>
+        <ul>
+            <li>Ngày tháng</li>
+            <li>Số hiệu bảng kê</li>
+            <li>Mã đơn hàng (đối với các sản phẩm bị thiếu, mất hàng)</li>
+            <li>Mã sản phẩm (đối với các sản phẩm bị thiếu, mất hàng)</li>
+            <li>Số lượng sản phẩm</li>
+            <li>Ký xác nhận</li>
+        </ul>
+        <li>Dán mã bảng kê, số lượng sản phẩm đã lấy lên xe lấy hàng và thông báo bàn giao cho bộ phận đóng gói.</li>
+        <li>Không đẩy xe hàng vào khu vực đóng gói.</li>
+    </ul>
+    <h3>IV. PDA PROCEDURE</h3>
+    <ul>
+        <li style="font-size: 20px">Bước 1: Đăng nhập vào PDA &rarr; Nhập mã PK cần kiểm</li>
+        <img src="{% static 'IMG/pic6.jpg'%}">
+        <br><br>
+        <li style="font-size: 20px">Bước 2: Sau khi kiểm đếm sản phẩm &rarr; Xác nhận và điền thông tin theo hiện trạng thực tế</li>
+        <img src="{% static 'IMG/pic7.jpg'%}">
+        <br><br>
+        <li style="font-size: 20px">Bước 3: Xác nhận đóng gói và bàn giao cho bộ phận đóng gói</li>
+        <img src="{% static 'IMG/pic5.jpg'%}">
+        <br><br>
+    </ul>
+    </ul>
+</fieldset>
+</body>
+</html>

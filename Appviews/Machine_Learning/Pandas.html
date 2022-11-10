@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<head>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css\style.css'%}">
+    <meta charset="UTF-8">
+    <title>PANDAS</title>
+</head>
+<body>
+<h1 style="color:blue; text-align:center">PANDAS</h1>
+<h1>Getting Started Tutorials</h1>
+    <ul>
+    <h2 style="color:blue">1) What kind of data does pandas handle?</h2>
+        <ul>
+            <li>The community agreed alias for pandas is pd, so loading pandas as pd is assumed standard practice for all of the pandas documentation.</li>
+            <li>To manually store data in a table, create a <b>DataFrame</b>. When using a Python dictionary of lists, the dictionary keys will be used as <br>
+            column headers and the values in each list as columns of the DataFrame.</li>
+            <pre>
+                >>>df = DataFrame({'Name' : ['Braund, Mr. Owen Harris',
+                                            'Allen, Mr. William Henry',
+                                            'Bonnell, Mis. Elizabeth'],
+                                    'Age' : [22, 35, 58],
+                                    'Sex' : ['male', 'male', 'female']
+                })
+                >>>df
+                                       Name  Age     Sex
+                0   Braund, Mr. Owen Harris   22    male
+                1  Allen, Mr. William Henry   35    male
+                2  Bonnell, Miss. Elizabeth   58  female
+            </pre>
+            <li>A <b>DataFrame</b> is a 2-dimensional data structure that can store data of different types (including char, integers, floating point values,<br>
+            categorical data, and more) in columns. It's similar to a spreadsheet, a SQL table or the data.frame in R.</li>
+            <p style="color:red">Each column in a DataFrame is a Series</p>
+            <li>When selecting a single column of a pandas <b>DataFrame</b>, the result is a pandas <b>Series</b>. To select the column, use the column label in between square brackets <b>[]</b></li>
+            <pre>
+                Int[]:df['Age']
+                Out[]:
+                0    22
+                1    35
+                2    58
+                Name: Age, dtype: int64
+            </pre>
+            <li>The selection of a single column is very similar to selection of dictionary values based on the key.</li>
+            <li>We can create a <b>Series</b> from scratch as well:</li>
+            <pre>
+                In[]: ages = pd.Series([22, 25, 58])
+                In[]: ages
+                Out[]:
+                0    22
+                1    35
+                2    58
+                Name: Age, dtype: int64
+            </pre>
+            <li>A pandas series has no column labels, as it is just a single column of DataFrame, a Series does have column labels.</li>
+            <li>Pandas provides a lot of functionality(max(), min, std(),...), each of them is a method you can apply to a <b>DataFrame</b> or <b>Series</b> and DO NOT FORGET THE PARENTHESES().</li>
+            <li>The <b>describe()</b> method provides a quick overview of the numerical data in a DataFrame.</li>
+            <h3 style="color:red">REMEMBER</h3>
+            <ul>
+                <li>A table of data is stored as a pandas DataFrame</li>
+                <li>Each column in a DataFrame is a Series</li>
+                <li>You can do things by applying a method to a DataFrame or Series</li>
+            </ul>
+        </ul>
+    <h2 style="color:blue">2) Read And Write Tabular Data</h2>
+        <ul>
+            <li>Pandas provides the <b>read_csv()</b> function to read data stored as a csv file into a pandas <b>DataFrame</b>.</li>
+            <li>Pandas supports many different file formats or data sources out of the box (csv, excel, sql, json, parquet,...) <b>with the prefix read_*</b>.</li>
+            <table>
+                <tr>
+                    <th>Format Type</th>
+                    <th>Data Description</th>
+                    <th>Reader</th>
+                    <th>Writer</th>
+                </tr>
+                <tr>
+                    <td>Text</td>
+                    <td>CSV</td>
+                    <td>read_csv</td>
+                    <td>to_csv</td>
+                </tr>
+                <tr>
+                    <td>Text</td>
+                    <td>JSON</td>
+                    <td>read_json</td>
+                    <td>to_json</td>
+                </tr>
+                <tr>
+                    <td>Text</td>
+                    <td>HTML</td>
+                    <td>read_html</td>
+                    <td>to_html</td>
+                </tr>
+                <tr>
+                    <td>Text</td>
+                    <td>Local Clipboard</td>
+                    <td>read_clipboard</td>
+                    <td>to_clipboard</td>
+                </tr>
+                <tr>
+                    <td>Binary</td>
+                    <td>MS Excel</td>
+                    <td>read_excel</td>
+                    <td>to_excel</td>
+                </tr>
+                <tr>
+                    <td>Binary</td>
+                    <td>OpenDocument</td>
+                    <td>read_excel</td>
+                    <td>NaN</td>
+                </tr>
+                <tr>
+                    <td>Binary</td>
+                    <td>HDF5 Format</td>
+                    <td>read_hdf</td>
+                    <td>to_hdf</td>
+                </tr>
+                <tr>
+                    <td>Binary</td>
+                    <td>Feather Format</td>
+                    <td>read_feather</td>
+                    <td>to_feather</td>
+                </tr>
+                <tr>
+                    <td>Binary</td>
+                    <td>Parquet Format</td>
+                    <td>read_parquet</td>
+                    <td>to_parquet</td>
+                </tr>
+                <tr>
+                    <td>Binary</td>
+                    <td>Msgpack</td>
+                    <td>read_msgpack</td>
+                    <td>to_msgpack</td>
+                </tr>
+                <tr>
+                    <td>Binary</td>
+                    <td>Stata</td>
+                    <td>read_stata</td>
+                    <td>to_stata</td>
+                </tr>
+                <tr>
+                    <td>Binary</td>
+                    <td>SAS</td>
+                    <td>read_sas</td>
+                    <td>NaN</td>
+                </tr>
+                <tr>
+                    <td>Binary</td>
+                    <td>Python Pickle Format</td>
+                    <td>read_pickle</td>
+                    <td>to_pickle</td>
+                </tr>
+                <tr>
+                    <td>SQL</td>
+                    <td>SQL</td>
+                    <td>read_sql</td>
+                    <td>to_sql</td>
+                </tr>
+                <tr>
+                    <td>SQL</td>
+                    <td>Google Big Query</td>
+                    <td>read_gbq</td>
+                    <td>to_gbq</td>
+                </tr>
+            </table>
+            <li>Make sure to always have a check on the data after reading in the data. When displaying pandas DataFrame, the first and last 5 rows will be shown by default.</li>
+            <li>Used <b>.head()</b> and <b>.tail()</b> to get the first or last rows as you wants.</li>
+            <li><b>.dtypes</b> attributed (without bracket) to check the types of data in DataFrame.</li>
+            <li>Whereas <b>read_*</b> functions are used to read data to pandas, the <b>to_*</b> methods are used to store data. For example, in Excel file:</li>
+            <li>When using <b>to_*</b> method, note that each object assigned with one name that saving just has one characteristic(in excel it's a sheet).<br>
+            If you use one name for a saving, it'll replace the old and create a new one.</li>
+            <pre>
+                # read passengers data sheet of titanic excel file into Pandas
+                titanic = pd.read_excel('titanic.xlsx', sheet_name = 'passengers')
+                # save passengers data into titanic excel file with sheet_name is copy of passengers
+                titanic.to_excel('titanic.xlsx', sheet_name = 'copy of passengers')
+                # Saving more data into excel file
+                titanic_passenger  = pd.to_excel('titanic.xlsx', sheet_name = 'Passengers'
+                titanic_fare = pd.to_excel('titanic.xlsx', sheet_name = 'Fare')
+            </pre>
+            <li>The method <b>info()</b> provides technical information about a DataFrame.</li>
+            <pre>
+                In[]: titanic.info()
+                <'pandas.core.frame.DataFrame'>
+                RangeIndex: 891 entries, 0 to 890
+                Data columns (total 12 columns):
+                 #   Column       Non-Null Count  Dtype
+                ---  ------       --------------  -----
+                 0   PassengerId  891 non-null    int64
+                 1   Survived     891 non-null    int64
+                 2   Pclass       891 non-null    int64
+                 3   Name         891 non-null    object
+                 4   Sex          891 non-null    object
+                 5   Age          714 non-null    float64
+                 6   SibSp        891 non-null    int64
+                 7   Parch        891 non-null    int64
+                 8   Ticket       891 non-null    object
+                 9   Fare         891 non-null    float64
+                 10  Cabin        204 non-null    object
+                 11  Embarked     889 non-null    object
+                dtypes: float64(2), int64(5), object(5)
+                memory usage: 83.7+ KB
+            </pre>
+            <h3 style="color:red">REMEMBER</h3>
+            <ul>
+                <li>Getting data into pandas from many different file formats or data source is supported by read_* functions.</li>
+                <li>Exporting data out of pandas is provided by different to_* methods.</li>
+                <li>The head()/ tail()/ info() methods and the dtypes (in Numpy is dtype) attribute are convenient for a first check.</li>
+            </ul>
+        </ul>
+    <h2 style="color:blue">3) Select a Subset of a DataFrame</h2>
+        <ul>
+            <li>To select a single column in DataFrame, use square bracket [] with the column_name of interest.</li>
+            <pre>
+                In[]: ages = titanic["Age"]
+
+                In[]: ages.head()
+                Out[]:
+                0    22.0
+                1    38.0
+                2    26.0
+                3    35.0
+                4    35.0
+                Name: Age, dtype: float64
+            </pre>
+            <li>Each column in a DataFrame is a Series. As a single column is selected, the returned object is a pandas Series. We can verify <br>
+                object type by checking the type of the output, and have a look at shape of it.</li>
+            <pre>
+                type(titanic['Age'])
+                titanic['Age'].shape
+            </pre>
+            <li><b>DataFrame.shape</b> is an attribute, so we can not use parentheses().</li>
+            <li>Pandas Series is 1-dimensional and only the number of rows is returned.</li>
+            <li>To select multiple column, use list of them.</li>
+            <pre>
+                age_sex = titanic[['Age', 'Sex']]
+            </pre>
+            <li>Inner bracket is used for list in Python and outer bracket is used to select data in DataFrame.</li>
+            <li>The multiple returned data in DataFrame, the result is DataFrame as well.</li>
+            <pre>
+                In[]: type(age_sex)
+                Out[]: pandas.core.frame.DataFrame
+            </pre>
+            <li style="color:red">Note that DataFrame is 2-dimensional with both  row and column dimensions.</li>
+            <h3 style="color:red">Filter Specific Rows From a DataFrame.</h3>
+                <ul>
+                    <pre>
+                        # return boolean Series (True| False with the condition)
+                        In[]: titanic['Age'] > 35
+                        # return the value Series satisfy the condition.
+                        In[]: titanic[titanic['Age'] > 35]
+                    </pre>
+                    <li>The output of the conditional expression (>, >=, ==, <, <= ...) is actually a pandas Series of boolean values (either True or False)<br>
+                     with the same number of rows as the original DataFrame. A series of boolean values can be used to filter DataFrame to choose the value we want.</li>
+                    <li>In case using set or list-like values, we can use the <b>isin()</b> conditional function that returns True for each row the values are in the provided list.<br>
+                    To use this function, use condition inside the square bracket [''] for both string and integer.</li>
+                    <pre>
+                        In[]: titanic['Age'].isin(['25', '50']) # return True or False
+                        In[]: titanic[titanic['Age'].isin(['25', '50'])] # return the row with True value
+                    </pre>
+                    <li>You can use <b>or (|)</b> operator for above example. They are equivalent.</li>
+                    <pre>
+                        In[]: titanic[titanic['Age'] == '25' | titanic['Age'] == '50']
+                    </pre>
+                    <li style="color:red">When combining multiple conditional statements, each conditions must be surrounded by parentheses (). Moreover, you can NOT use <br>
+                    or/ and but need to use the operator <b>|</b> and operator <b>&</b>.</li>
+                </ul>
+            <h3 style="color:red">Select Specific Rows and Columns From a DataFrame.</h3>
+                <ul>
+                    <li>In this case, just using square bracket [] is not sufficient anymore.</li>
+                    <li>We use <b>loc/ iloc</b> operators to require in front of the square bracket [].</li>
+                    <li>The part before commas in <b>loc/ iloc</b> is the rows you want. And the part after commas is the columns you want.</li>
+                    <pre>
+                        # return the column 'Name' with the rows have 'Age' > 35
+                        adult_name = titanic.loc[df['Age'] > 35, 'Name']
+                        row_25 = titanic.iloc[25, 1] # select row 25 and column 1
+                        group_of_row = titanic.iloc[9:25, 0:3] # select row 9 to 24 and column 0 to 2
+                    </pre>
+                    <li>When using the <b>loc</b>:</li>
+                        <ul>
+                            <li>Using the column_name, row labels or condition expression.</li>
+                            <li>For both part of the comma, you can use a single label, a list of labels, a lice of labels, a conditional expression or a colon.<br>
+                            Using a colon (:) that means you want to select all rows or columns.</li>
+                        </ul>
+                    <li>When using the <b>iloc</b>:</li>
+                        <ul>
+                            <li>Using the position of rows and columns.</li>
+                            <li>It similar to slicing 2D Numpy array.</li>
+                        </ul>
+                </ul>
+            <h3 style="color:red">Remember</h3>
+                <ul>
+                    <li>When selecting subsets of data, square bracket [] is used.</li>
+                    <li>Inside these brackets, you can use a single , a list, a slice, a conditional expression of column/row label or colon(all)</li>
+                    <li>Select specific rows/ columns using loc when using the row and column names.</li>
+                    <li>Select specific rows/ columns using iloc when using the positions in the table.</li>
+                    <li>You can assign new values to a selection based on loc/ iloc.</li>
+                </ul>
+        </ul>
+    <h2 style="color:blue">4) Create Plots in Pandas</h2>
+        <ul>
+            <pre>
+                air_quality = pd.read_csv('Book1.csv', index_col= 0, parse_dates = True)
+                air_quality.head(4)
+                                     station_antwerp  station_paris  station_london
+        datetime
+        2019-05-07 02:00:00              NaN            NaN            23.0
+        2019-05-07 03:00:00             50.5           25.0            19.0
+        2019-05-07 04:00:00             45.0           27.7            19.0
+        2019-05-07 05:00:00              NaN           50.4            16.0
+        2019-05-07 06:00:00              NaN           61.9             NaN
+            </pre>
+            <li>The usage of <b>index_col</b> and <b>parse_dates</b> parameters of the <b>pd.read_csv</b> function are to define the first (0th) column <br>
+            as index of the resulting DataFrame and convert the dates column to Timestamp objects.</li>
+            <pre>
+                air_quality.plot()
+            </pre>
+            <img src="{% static 'IMG/04_airqual_quick.png'%}">
+            <li>With a DataFrame, pandas creates by default one line plot for each of the columns with numeric data.</li>
+            <li>Plot one column:</li>
+            <pre>
+                air_quality.iloc[:, 1].plot() # or air_quality['column_name'].plot()
+            </pre>
+            <img src="{% static 'IMG/04_airqual_paris.png'%}">
+            <li>The <b>plot</b> method works on both Series and DataFrame.</li>
+            <li>Choosing London versus Paris</li>
+            <pre>
+                air_quality.plot.scatter(x = 'station_london', y = 'station_paris', alpha = 0.5)
+            </pre>
+            <img src="{% static 'IMG/04_airqual_scatter.png'%}">
+            <li>In development environments as well as Ipython and Jupyter Notebook, use the TAB button to get an overview of the available methods.</li>
+            <li>One of the options is <b>DataFrame.plot.box()</b>, which refers to a boxplot. The box method is applicable on the air quality example data:</li>
+            <pre>
+                air_quality.plot.box()
+            </pre>
+            <img src="{% static 'IMG/04_airqual_boxplot.png'%}">
+            <li>Separated subplot for each of the data columns are supported by the <b>subplots</b> argument of the <b>plot</b> functions.</li>
+            <pre> axs = air_quality.plot(figsize = (12,4), subplots = True)</pre>
+            <img src="{% static 'IMG/04_airqual_area_subplot.png'%}">
+            <li>Each of the plot objects created by Pandas is a <b>matplotlib</b> object. As Matplotlib provides plenty of options to customize plots,<br>
+            making the link between pandas and matplotlib explicit anables all the power of matplotlib to the lot.</li>
+            <pre>
+                fig, axs = plt.subplots(figsize=(12,4))
+                air_quality.plot.area(ax = axs)
+                axs.set_ylabel('NO$_2$ concentration')
+                fig.savefig('no2_concentration.png')
+            </pre>
+            <img src="{% static 'IMG/04_airqual_customized.png'%}">
+            <h3 style="color:red">Remember</h3>
+                <ul>
+                    <li>The <b>.plot.*</b> methods are applicable on both Series and DataFrame.</li>
+                    <li>By default, each of the columns is plotted as a different element (line, boxplot, ...).</li>
+                    <li>Any plot created by pandas is a Matplotlib object.</li>
+                </ul>
+        </ul>
+    <h2 style="color:blue">5) Create New Columns Derived From Existing Columns.</h2>
+        <ul>
+            <li>To create a new column, use the [] brackets with the new column name at the left side of the assignment.</li>
+            <pre>
+                air_quality['london_mg_per_cubic'] = air_quality['station_london']* 1.882
+            </pre>
+            <li>The calculation is done element-wise. This means all values in the 'station_london' column are multiply by 1.882 at once.<br>
+            You do not to use loop to iterate each of row.</li>
+            <li>Similarly, other mathematical operator (+, - , / ) or logical operator (>, <, =, ...) work element-wise.</li>
+            <li>If you need more advanced logic, you can use arbitrary Pyhon code via <b>apply()</b> function.</li>
+            <li>The <b>rename()</b> function can be used for both row labels and column labels. Provide a dictionary with the keys the <br>
+                current names and the values the new names to update the corresponding names.</li>
+            <li>rename() is applied for columns or index.</li>
+            <pre>
+                air_quality_renamed = air_quality.rename(
+                                columns = { 'station_antwerp' : 'BETR801',
+                                            'station_london' : 'London Westminster',
+                                            'station_paris' : 'FT04014'})
+                air_quality_renamed.head(4)
+
+                Out[]:
+                                        BETR801  FR04014  London Westminster  london_mg_per_cubic
+                datetime
+                2019-05-07 02:00:00      NaN      NaN                23.0               43.286
+                2019-05-07 03:00:00     50.5     25.0                19.0               35.758
+                2019-05-07 04:00:00     45.0     27.7                19.0               35.758
+                2019-05-07 05:00:00      NaN     50.4                16.0               30.112
+
+
+                air_quality_renamed = air_quality_renamed.rename(columns = str.lower)
+
+                Out[]:
+                                    betr801	ft04014	london westminster
+                datetime
+                2019-05-07 02:00:00	NaN	NaN	23.0
+                2019-05-07 03:00:00	50.5	25.0	19.0
+            </pre>
+            <h3 style="color:red">Remember</h3>
+                <ul>
+                    <li>Create a new column by assigning the output to the DataFrame with a new column name in between [].</li>
+                    <li>Operations are element-wise, no need to loop over rows.</li>
+                    <li>Use rename() function with a dictionary or other function (str.lower, str.upper, ...) to rename row labels or column names.</li>
+                </ul>
+        </ul>
+    <h2 style="color:blue">6) Calculate summary statistic</h2>
+        <ul>
+            <h3 style="color:red">Aggregating Statistic</h3>
+            <li>Different statistics are available and can be applied to columns with numerical data. Operations in general exclude mussing data and operate <br>
+            across rows by default.</li>
+            <pre>
+                titanic['Age', 'Fare'].mean()
+                titanic['Age', 'Fare'].median()
+            </pre>
+            <li>The statistic applied to multiple columns of a DataFrame is calculated for each numeric column. It's similar to describe() function.</li>
+            <li style="color:red">Instead of the predefined statistics, specific combinations of aggregating statistic for given columns can be defined <br>
+            using the <b>DataFrame.agg()</b> method.</li>
+            <pre>
+                titanic.agg({   'Age' : ['min', 'max', 'median', 'skew'],
+                                'Fare' : ['min', 'max', 'median', 'mean'] })
+                              Age        Fare
+                    min      0.420000    0.000000
+                    max     80.000000  512.329200
+                    median  28.000000   14.454200
+                    skew     0.389108         NaN
+                    mean          NaN   32.204208
+            </pre>
+            <h3 style="color:red">Aggregating Statistics Grouped By Category</h3>
+            <pre>
+                titanic[['Age', 'Sex']].groupby('Sex').mean()
+                Out[]:
+                            Age
+                    Sex
+                    female  27.915709
+                    male    30.726645
+            </pre>
+            <li>Calculating a given statistic (mean, median, ...) for each category in a column is a common pattern. The <b>groupby()</b> method <br>
+            is used to support this type of operations. More general, this fits in the more general <b>split-apply-combine</b> pattern.</li>
+            <ul>
+                <li><b>split </b>the data into groups.</li>
+                <li><b>apply</b>a function to each group independently.</li>
+                <li><b>combine</b>the results into a data structure.</li>
+            </ul>
+            <li>The apply and combine steps are typically done together in pandas.</li>
+            <li>If we don't explicitly select the columns, the statistic method will be applied to each column containing numerical data.</li>
+            <li>The selection of column is supported on the grouped data as well:</li>
+            <pre>
+                titanic.groupby('Sex').mean()
+
+                Out[]:
+                        PassengerId  Survived    Pclass        Age     SibSp     Parch       Fare
+                Sex
+                female   431.028662  0.742038  2.159236  27.915709  0.694268  0.649682  44.479818
+                male     454.147314  0.188908  2.389948  30.726645  0.429809  0.235702  25.523893
+
+                titanic.groupby('Sex')['Age', 'Survived'].mean()
+                # It's similar to df[['Age', 'Survived', 'Sex']].groupby('Sex').mean()
+                (Sex must occur in the group of columns)
+                Out[]:
+                    Sex
+                    female	27.915709	0.742038
+                    male	30.726645	0.188908
+                    Name: Age, dtype: float64
+            </pre>
+            <h3 style="color:red">Count Number of Records By Category</h3>
+            <li>The <b>value_counts()</b> method counts the number of records for each category in a column.</li>
+            <pre>
+                titanic['Pclass'].value_counts()
+                Out[]:
+                Pclass
+                1    216
+                2    184
+                3    491
+                Name: Pclass, dtype: int64
+            </pre>
+            <li>Both <b>size</b> and <b>count</b> can be used in combination with <b>groupby</b>. Whereas <b>size includes NaN value and just <br>
+            provides the number of rows (size of the table), count excludes the missing values.</b></li>
+            <li>In the value_counts() method, using <b>dropna</b> argument to include or exclude NaN values.</li>
+            <h3 style="color:red">Remember</h3>
+                <ul>
+                    <li>Aggregation statistics can be calculated on entire columns or rows.</li>
+                    <li>groupby provides the power of the split-apply-combine pattern.</li>
+                    <li>value_counts() is a convenient shortcut to count the number of entries in each category of a variable.</li>
+                </ul>
+        </ul>
+    <h2 style="color:blue">7) Reshape the Layout of Tables</h2>
+        <ul>
+            <h3 style="color:red">Sort table rows</h3>
+            <li>With <b>Series.sort_values()</b>, the rows in the table are sorted according to the defined column(s). The index will follow the row order.</li>
+            <li><b>sort_values()</b> method use parameter 'by' to specify the sorting object, and 'ascending = True | False' for types of sort.</li>
+            <pre>
+                titanic.sort_values(by = 'Age').head()
+                Out[]:
+                     PassengerId  Survived  Pclass                             Name     Sex   Age  SibSp  Parch  Ticket     Fare Cabin Embarked
+                803          804         1       3  Thomas, Master. Assad Alexander    male  0.42      0      1    2625   8.5167   NaN        C
+                755          756         1       2        Hamalainen, Master. Viljo    male  0.67      1      1  250649  14.5000   NaN        S
+                644          645         1       3           Baclini, Miss. Eugenie  female  0.75      2      1    2666  19.2583   NaN        C
+                469          470         1       3    Baclini, Miss. Helene Barbara  female  0.75      2      1    2666  19.2583   NaN        C
+                78            79         1       2    Caldwell, Master. Alden Gates    male  0.83      0      2  248738  29.0000   NaN        S
+
+                # Sort by Pclass and Age columns, descending type.
+                titanic.sort_value(by = ['Pclass', 'Age'], ascending = False)
+                Out[]:
+                     PassengerId  Survived  Pclass                       Name     Sex   Age  SibSp  Parch  Ticket    Fare Cabin Embarked
+                851          852         0       3        Svensson, Mr. Johan    male  74.0      0      0  347060  7.7750   NaN        S
+                116          117         0       3       Connors, Mr. Patrick    male  70.5      0      0  370369  7.7500   NaN        Q
+                280          281         0       3           Duane, Mr. Frank    male  65.0      0      0  336439  7.7500   NaN        Q
+            </pre>
+            <h3 style="color:red">Long to wide table format</h3>
+            <pre>
+                # filter for no2 only (index_col is date.utc)
+                no2 = air_quality[air_quality['parameter'] == 'no2']
+                # use 2 measurements (head) for each group (location)
+                no2_subset = no2.sort_index().groupby('location').head(2)
+                Out[]:
+                <span class="go">                                city country            location parameter  value   unit</span>
+                <span class="go">date.utc                                                                                </span>
+                <span class="go">2019-04-09 01:00:00+00:00  Antwerpen      BE             BETR801       no2   22.5  µg/m³</span>
+                <span class="go">2019-04-09 01:00:00+00:00      Paris      FR             FR04014       no2   24.4  µg/m³</span>
+                <span class="go">2019-04-09 02:00:00+00:00     London      GB  London Westminster       no2   67.0  µg/m³</span>
+                <span class="go">2019-04-09 02:00:00+00:00  Antwerpen      BE             BETR801       no2   53.5  µg/m³</span>
+                <span class="go">2019-04-09 02:00:00+00:00      Paris      FR             FR04014       no2   27.4  µg/m³</span>
+                <span class="go">2019-04-09 03:00:00+00:00     London      GB  London Westminster       no2   67.0  µg/m³</span>
+            </pre>
+            <li><b>sort_index()</b> method is used to sort object by labels (along an axis).</li>
+            <li>The <b>pivot()</b> function is purely reshaping of the data : a single value for each index/ column combination is required.</li>
+            <li>pivot() use two main parameters : columns and values</li>
+            <pre>
+                no2_subset.pivot(columns = 'location', values = 'value')
+                Out[]:
+                <span class="go">location                   BETR801  FR04014  London Westminster</span>
+                <span class="go">date.utc                                                       </span>
+                <span class="go">2019-04-09 01:00:00+00:00     22.5     24.4                 NaN</span>
+                <span class="go">2019-04-09 02:00:00+00:00     53.5     27.4                67.0</span>
+                <span class="go">2019-04-09 03:00:00+00:00      NaN      NaN                67.0</span>
+            </pre>
+            <li>As the Pandas support plotting multiple columns out of box, the conversion from long to wide table format enables the plotting of the time series at the same time.</li>
+            <pre>
+                no2_subset.pivot(columns = 'location', values = 'value').plot()
+            </pre>
+            <img src="{% static 'IMG/7_reshape_columns.png'%}">
+            <li>Note that, when index_col is not defined, the existing index (row labels) will be used.</li>
+            <h3 style="color:red">Pivot Table</h3>
+            <li>In the case of <b>pivot()</b>, the data is only rearranged. When multiple values need to be aggregated (the values in different time steps) <b>pivot_table()</b><br>
+            can be used, providing an aggregation function(mean, median,...) on how to combine these values.</li>
+            <li>Pivot table is a well known concept in spreadsheet software. When interested in summary columns for each variable separately as well, put the <b>margin</b> parameter to True:</li>
+            <pre>
+                air_quality.pivot_table(values = 'value',
+                                        index = 'location',
+                                        columns = 'parameter',
+                                        aggfunc = 'sum', # default : mean
+                                        margins = True) #subtotal or grand total
+                Out[]:
+                parameter                 no2       pm25        All
+                location
+                BETR801             26.950920  23.169492  24.982353
+                FR04014             29.374284        NaN  29.374284
+                London Westminster  29.740050  13.443568  21.491708
+                All                 29.430316  14.386849  24.222743
+            </pre>
+            <li>In the other hand, <b>pivot_table()</b> is similar to <b>groupby()</b>. The same result can be returned by group 'location' and 'parameter'.</li>
+            <pre>
+                air_quality.groupby(['location', 'parameter'])
+
+                Out[]:
+                <span class="go">                                   value       </span>
+                <span class="go">location           parameter                   </span>
+                <span class="go">BETR801            no2             26.950920   </span>
+                <span class="go">                   pm25            23.169492   </span>
+                <span class="go">FR04014            no2             29.374284   </span>
+                <span class="go">London Westminster no2             29.740050   </span>
+                <span class="go">                   pm25            13.443568   </span>
+            </pre>
+            <li style="color:red">Note that <b>pivot</b> use with single column, string or list of string while <b>pivot_table</b> can be used with multiple tables.</li>
+            <h3 style="color:red">Wide to Long Format</h3>
+            <li>The <b> pandas.melt()</b> method on a DataFrame converts th data table from wide to long format. The column headers become the variable names in a newly created column.</li>
+            <li>The method will melt all columns NOT mention in <b>id_vars</b> together into two columns.</li>
+            <pre>
+                no_2_pivoted = no2.pivot(columns = 'location', values = 'value').reset_index()
+                no_2_pivoted.head()
+
+                Out[]:
+                location                  date.utc  BETR801  FR04014  London Westminster
+                0        2019-04-09 01:00:00+00:00     22.5     24.4                 NaN
+                1        2019-04-09 02:00:00+00:00     53.5     27.4                67.0
+                2        2019-04-09 03:00:00+00:00     54.5     34.2                67.0
+                3        2019-04-09 04:00:00+00:00     34.5     48.5                41.0
+                4        2019-04-09 05:00:00+00:00     46.5     59.5                41.0
+
+                no_2 = no_2_pivoted.melt(id_vars = 'date.utc')
+                no_2.head()
+
+                Out[]:
+                                   date.utc location  value
+                0 2019-04-09 01:00:00+00:00  BETR801   22.5
+                1 2019-04-09 02:00:00+00:00  BETR801   53.5
+                2 2019-04-09 03:00:00+00:00  BETR801   54.5
+                3 2019-04-09 04:00:00+00:00  BETR801   34.5
+                4 2019-04-09 05:00:00+00:00  BETR801   46.5
+            </pre>
+            <li>The <b>.melt()</b> method can be defined in more details:</li>
+            <pre>
+                no_2 = no_2_pivoted.melt(id_vars = 'date.utc',
+                                        value_vars = ['BETR801', 'FR04014', 'London Westminster'],
+                                        value_name = 'NO_2',
+                                        var_name = 'id_location')
+                no_2.head()
+
+                Out[]:
+                                   date.utc id_location  NO_2
+                0 2019-04-09 01:00:00+00:00     BETR801  22.5
+                1 2019-04-09 02:00:00+00:00     BETR801  53.5
+                2 2019-04-09 03:00:00+00:00     BETR801  54.5
+                3 2019-04-09 04:00:00+00:00     BETR801  34.5
+                4 2019-04-09 05:00:00+00:00     BETR801  46.5
+            </pre>
+            <ul>
+                <li><b>value_vars</b> : defines explicitly which columns to melt together.</li>
+                <li><b>value_name</b> : provides the custom name for the values columns. default: value</li>
+                <li><b>var_name</b> : provide the custom name for the column that collecting column headers. default: variable or index_name.</li>
+            </ul>
+            <li>Hence, the arguments <b>value_name</b> and <b>var_name</b> are user-defined names for the two generated columns. Th columns to melt are defined by <b>id_vars</b> and <b>value_vars</b>.</li>
+            <h3 style="color:red">Remember</h3>
+            <ul>
+                <li>Sorting by one or more columns is supported by sort_value().</li>
+                <li>The pivot function is purely restructuring of the data not duplicated, pivot_table function supports aggregations.</li>
+                <li>The reverse of pivot (long to wide format) is melt (wide to long format).</li>
+            </ul>
+        </ul>
+    <h2 style="color:blue">8) Combine Data From Multiple Tables.</h2>
+        <ul>
+            <h3 style="color:red">Concatenating Objects</h3>
+            <li>The <b>concat()</b> function performs concatenation operations of multiple tables along one of the axis (row-wise or column-wise).</li>
+            <li>By default, axis is 0. </li>
+            <pre>
+                # We have 2 DataFrame : air_quality_pm25 and air_quality_no2
+
+                air_quality = pd.concat(['air_quality_pm25', 'air_quality_no2']) # axis = 0
+
+                print('Shape of the ``air_quality_pm25`` table: ', air_quality_pm25.shape)
+                Out[]:
+                Shape of the ``air_quality_pm25`` table:  (1110, 4)
+
+                print('Shape of the ``air_quality_no2`` table: ', air_quality_no2.shape)
+                Out[]:
+                Shape of the ``air_quality_no2`` table:  (2068, 4)
+
+                print('Shape of the resulting ``air_quality`` table: ', air_quality.shape)
+                Out[]:
+                Shape of the resulting ``air_quality`` table:  (3178, 4)
+            </pre>
+            <li>With <b>concat()</b> method, the 'parameter' column provided by data ensures that each of the original table can be identified.<br>
+            To avoid ambiguous combinations, the <b>concat()</b> method provides a convenient solution with parameter 'keys', adding an additional(hierarchical) row index. </li>
+            <pre>
+                air_quality = pd.concat(['air_quality_pm25', 'air_quality_no2'], keys = ['pm25', 'no2'])
+                Out[]:
+                                         date.utc location parameter  value
+                PM25 0  2019-06-18 06:00:00+00:00  BETR801      pm25   18.0
+                     1  2019-06-17 08:00:00+00:00  BETR801      pm25    6.5
+                     2  2019-06-17 07:00:00+00:00  BETR801      pm25   18.5
+                     3  2019-06-17 06:00:00+00:00  BETR801      pm25   16.0
+                     4  2019-06-17 05:00:00+00:00  BETR801      pm25    7.5
+            </pre>
+            <h3 style="color:red">Joining Tables Using a Common Identifier.</h3>
+            <pre>
+                stations_coord = pd.read_csv('data/air_quality_station.csv')
+                stations_coord.head()
+                Out[]:
+                  location  coordinates.latitude  coordinates.longitude
+                0  BELAL01              51.23619                4.38522
+                1  BELHB23              51.17030                4.34100
+                2  BELLD01              51.10998                5.00486
+                3  BELLD02              51.12038                5.02155
+                4  BELR833              51.32766                4.36226
+
+                air_quality.head()
+                Out[]:
+                                       date.utc            location parameter  value
+                2067  2019-05-07 01:00:00+00:00  London Westminster       no2   23.0
+                1003  2019-05-07 01:00:00+00:00             FR04014       no2   25.0
+                100   2019-05-07 01:00:00+00:00             BETR801      pm25   12.5
+                1098  2019-05-07 01:00:00+00:00             BETR801       no2   50.5
+                1109  2019-05-07 01:00:00+00:00  London Westminster      pm25    8.0
+
+                air_quality = pd.merge(air_quality, stations_coord, how = 'left', on ='location')
+                Out[]:
+                                    date.utc            location parameter  value  coordinates.latitude  coordinates.longitude
+                0  2019-05-07 01:00:00+00:00  London Westminster       no2   23.0              51.49467               -0.13193
+                1  2019-05-07 01:00:00+00:00             FR04014       no2   25.0              48.83724                2.39390
+                2  2019-05-07 01:00:00+00:00             FR04014       no2   25.0              48.83722                2.39390
+                3  2019-05-07 01:00:00+00:00             BETR801      pm25   12.5              51.20966                4.43182
+                4  2019-05-07 01:00:00+00:00             BETR801       no2   50.5              51.20966                4.43182
+            </pre>
+            <li>Using the <b>merge()</b> function: </li>
+                <ul>
+                    <li>For each of the rows in the 'air_quality' table, the corresponding coordinates are added from the 'air_quality_stations_coord' table</li>
+                    <li>Both table have the column 'location' in common, which is used as a key to combine the information.</li>
+                    <li>By choosing the <b>how = 'left'</b>, only the locations available in the 'air_quality' (left) table, end up in the resulting table.</li>
+                    <li>The <b>merge()</b> function supports multiple join options similar to database-style operations.</li>
+                </ul>
+            <pre>
+                air_quality_parameters = pd.read_csv('data/air_quality_parameters.csv')
+                air_quality_parameters.head()
+                Out[]:
+                     id                                        description  name
+                0    bc                                       Black Carbon    BC
+                1    co                                    Carbon Monoxide    CO
+                2   no2                                   Nitrogen Dioxide   NO2
+                3    o3                                              Ozone    O3
+                4  pm10  Particulate matter less than 10 micrometers in...  PM10
+
+                air_quality = pd.merge(air_quality, air_quality_parameter, how = 'left', left_on = 'parameter', right_on = 'id')
+                Out[25]:
+                                    date.utc            location parameter  ...    id                                        description   name
+                0  2019-05-07 01:00:00+00:00  London Westminster       no2  ...   no2                                   Nitrogen Dioxide    NO2
+                1  2019-05-07 01:00:00+00:00             FR04014       no2  ...   no2                                   Nitrogen Dioxide    NO2
+                2  2019-05-07 01:00:00+00:00             FR04014       no2  ...   no2                                   Nitrogen Dioxide    NO2
+                3  2019-05-07 01:00:00+00:00             BETR801      pm25  ...  pm25  Particulate matter less than 2.5 micrometers i...  PM2.5
+                4  2019-05-07 01:00:00+00:00             BETR801       no2  ...   no2                                   Nitrogen Dioxide    NO2
+            </pre>
+            <li>In this case:</li>
+            <ul>
+                <li>There is no common column_name.</li>
+                <li>The parameter column in air_quality table and the id column in air_quality_parameter are in common format.</li>
+                <li>The left_on specifies the column join in air_quality (left) table.</li>
+                <li>The right_on specifies the column join in air_quality_parameters (right) table.</li>
+                <li>The 'left_on' and the 'right_on' used to make the link between two table (instead of 'on' in the first example).</li>
+            </ul>
+            <h3 style="color:red">Remember</h3>
+                <ul>
+                    <li>Multiple tables can be concatenated both column-wise and row-wise using concat() function.</li>
+                    <li>For database-like merging/ joining of tables, use the <b>merge()</b> function.</li>
+                </ul>
+        </ul>
+    <h2 style="color:blue">9) Handle Time Series Data With Ease.</h2>
+        <ul>
+            <h3 style="color:red">Using Pandas Datetime Properties</h3>
+            <pre>
+                air_quality.rename(columns = {'date.utc':'datetime'})
+                air_quality['datetime'] = pd.to_datetime(air_quality['datetime'])
+                air_quality['datetime'].head()
+                Out[]:
+                0      2019-06-21 00:00:00+00:00
+                1      2019-06-20 23:00:00+00:00
+                2      2019-06-20 22:00:00+00:00
+                3      2019-06-20 21:00:00+00:00
+                4      2019-06-20 20:00:00+00:00
+            </pre>
+            <li>Initially, the value of datetime is character strings and do not provide any datetime operations (extract year, month, ...).</li>
+            <li>By applying <b>to_datetime</b> function, Pandas interprets the strings and convert these to datetime (datetime64[ns,UTC]) objects.</li>
+            <li>In Pandas, these datetime objects similar to datetime.datetime from the standard library pandas.timestamp.</li>
+            <li>You can also use the parameter <b>parse_dates</b> in <b>read_*</b> function instead.</li>
+            <pre>pd.read_csv('..data/air_quality.csv', parse_dates = ['datetime'])</pre>
+            <li>Using pandas.Timestamp for datetime enable us to calculate with date information and make them comparable.</li>
+            <pre>
+                air_quality['datetime'].min(), air_quality['datetime'].max()
+                Out[]:
+                (Timestamp('2019-05-07 01:00:00+0000', tz='UTC'),
+                 Timestamp('2019-06-21 00:00:00+0000', tz='UTC'))
+
+                air_quality['datetime'].max() - air_quality['datetime'].min()
+                Out[]: Timedelta('44 days 23:00:00')
+            </pre>
+            <li>The result is a pandas.Timedelta object, it's similar to <b>datetime.timedelta</b> from the standard Python library and defining a time duration. </li>
+            <li>By using the Timestamp objects for dates, a lot of time-related properties are provided by pandas (month, year, weekofyear, ...). And all of these<br>
+                properties are accessible by <b>dt accessor</b> attribute.</li>
+            <pre>
+                air_quality['month'] = air_quality['datetime'].dt.month
+                air_quality.head()
+                Out[12]:
+                    city country                  datetime location parameter  value   unit  month
+                0  Paris      FR 2019-06-21 00:00:00+00:00  FR04014       no2   20.0  µg/m³      6
+                1  Paris      FR 2019-06-20 23:00:00+00:00  FR04014       no2   21.8  µg/m³      6
+                2  Paris      FR 2019-06-20 22:00:00+00:00  FR04014       no2   26.5  µg/m³      6
+                3  Paris      FR 2019-06-20 21:00:00+00:00  FR04014       no2   24.9  µg/m³      6
+                4  Paris      FR 2019-06-20 20:00:00+00:00  FR04014       no2   21.4  µg/m³      6
+
+                air_quality.groupby([air_quality['datetime'].dt.weekday, 'location'])['value'].mean()
+                Out[]:
+                datetime  location
+                0         BETR801               25.065657
+                          FR04014               29.495417
+                          London Westminster    21.173077
+                1         BETR801               32.423077
+                          FR04014               34.402381
+                Name: value, dtype: float64
+            </pre>
+            <li>Or we can use the split-apply-combine (groupby) to calculate a statistic for each hour of the day and plot it.</li>
+            <pre>
+                fig, axs = pd.subplots(figsize = (12,5))
+                air_quality.groupby([air_quality['datetime'].dt.hour)['value'].mean().plot(kind = 'bar', rot=0, ax = axs)
+            </pre>
+            <img src="{% static 'IMG/09_bar_chart.png' %}">
+            <h3 style="color:red">Datetime as Index</h3>
+            <pre>
+                no_2 = air_quality.pivot(index = 'datetime', columns = 'location', values = 'value')
+                no_2.head()
+                Out[]:
+                location                   BETR801  FR04014  London Westminster
+                datetime
+                2019-05-07 01:00:00+00:00     50.5     25.0                23.0
+                2019-05-07 02:00:00+00:00     45.0     27.7                19.0
+                2019-05-07 03:00:00+00:00      NaN     50.4                19.0
+                2019-05-07 04:00:00+00:00      NaN     61.9                16.0
+                2019-05-07 05:00:00+00:00      NaN     72.4                 NaN
+            </pre>
+            <li>By pivoting the data, the datetime information became the index of the table. In general, setting an index for a table need through out the set_index() function.</li>
+            <li>Working with a datetime index provides powerful functionality. We don't need dt accessor to get the time series, it's available in the index directly.</li>
+            <pre>
+                no_2.index.year, no_2.index.weekday
+                Out[]:
+                (Int64Index([2019, 2019, 2019, 2019, 2019, 2019, 2019, 2019, 2019, 2019,
+                             ...
+                             2019, 2019, 2019, 2019, 2019, 2019, 2019, 2019, 2019, 2019],
+                            dtype='int64', name='datetime', length=1033),
+                 Int64Index([1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                             ...
+                             3, 3, 3, 3, 3, 3, 3, 3, 3, 4],
+                            dtype='int64', name='datetime', length=1033))
+            </pre>
+            <li>Some other advantages are the convenient sub-setting of time period or the adapted time scale on plots.</li>
+            <pre>
+                no_2['2019-05-20':'2019-05-21'].plot()
+            </pre>
+            <img src="{% static 'IMG/09_time_section.png'%}">
+            <li>By providing a string that parses to a datetime, a specific subset of the data can be selected on a <b>Datetimeindex</b>.</li>
+            <h3 style="color:red">Re-sample a Time Series to Another Frequency</h3>
+            <li>A very powerful method on time series data with a datetime index is the ability of <b>resample()</b> time series to another frequency.</li>
+            <li>The <b>resample()</b> similar to a <b>groupby</b> operation:</li>
+                <ul>
+                    <li>It provides a time-based grouping, using a string(M, 5H,..) that defines the target frequency.</li>
+                    <li>It requires an aggregation function such as mean, max, ...</li>
+                </ul>
+            <pre>
+                monthly_max = no_2.resample('M').max()
+                monthly_max
+                Out[23]:
+                location                   BETR801  FR04014  London Westminster
+                datetime
+                2019-05-31 00:00:00+00:00     74.5     97.0                97.0
+                2019-06-30 00:00:00+00:00     52.5     84.7                52.0
+            </pre>
+            <li>When defined, the frequency of the time series is provided by the <b>freq</b> attribute.</li>
+            <pre>
+                monthy_max.index.freq
+                Out[]:
+                MonthEnd
+            </pre>
+            <li>Make the plot of 'daily mean' (many values in a different times in a day):</li>
+            <pre>
+                no_2.resample('D').mean().plot(style = '-o', figsize = (12,4))
+            </pre>
+            <img src="{% static 'IMG/09_resample_mean.png'%}">
+            <h3 style="color:red">Remember</h3>
+                <ul>
+                    <li>Valid date strings can be converted to datetime objects using to_datetime function or as part of read_* function.</li>
+                    <li>Datetime objects in pandas support calculations, logical operations and convenient date-related properties using the dt accessor.</li>
+                    <li>A datetimeindex contains these date-related properties and supports convenient slicing.</li>
+                    <li>resample is a powerful method to change the frequency of a time series.</li>
+                </ul>
+        </ul>
+    <h2 style="color:blue">10) Manipulate Textual data.</h2>
+        <ul>
+            <pre>
+                titanic['Name'].str.lower()
+                Out[]:
+                0                                braund, mr. owen harris
+                1      cumings, mrs. john bradley (florence briggs th...
+                2                                 heikkinen, miss. laina
+                3           futrelle, mrs. jacques heath (lily may peel)
+                4                               allen, mr. william henry
+                                             ...
+                886                                montvila, rev. juozas
+                887                         graham, miss. margaret edith
+                888             johnston, miss. catherine helen "carrie"
+                889                                behr, mr. karl howell
+                890                                  dooley, mr. patrick
+                Name: Name, Length: 891, dtype: object
+            </pre>
+            <li>To change Name column into lowercase, select the column name, add the <b>str</b> accessor and apply the <b>lower</b> method. Each of string is converted element-wise.</li>
+            <li>Similar to datetime object that use <b>dt</b> accessor, string object use the <b>str</b>accessor.</li>
+            <pre>
+                titanic['surname'] = titanic['Name'].str.split(',')
+                titanic['surname']
+                Out[]:
+                0                             [Braund,  Mr. Owen Harris]
+                1      [Cumings,  Mrs. John Bradley (Florence Briggs ...
+                2                              [Heikkinen,  Miss. Laina]
+                3        [Futrelle,  Mrs. Jacques Heath (Lily May Peel)]
+                4                            [Allen,  Mr. William Henry]
+                                             ...
+                886                             [Montvila,  Rev. Juozas]
+                887                      [Graham,  Miss. Margaret Edith]
+                888          [Johnston,  Miss. Catherine Helen "Carrie"]
+                889                             [Behr,  Mr. Karl Howell]
+                890                               [Dooley,  Mr. Patrick]
+                Name: Name, Length: 891, dtype: object
+            </pre>
+            <li>If you want to split the first part in surname(element 0), you can use the <b>str.get()</b> method.</li>
+            <pre>
+                titanic['surname'].str.get(0)
+                Out[]:
+                0         Braund
+                1        Cumings
+                2      Heikkinen
+                3       Futrelle
+                4          Allen
+                         ...
+                886     Montvila
+                887       Graham
+                888     Johnston
+                889         Behr
+                890       Dooley
+                Name: surname, Length: 891, dtype: object
+            </pre>
+            <li>Or do at once. split then get:</li>
+            <pre>
+                titanic['Name'].str.split(',').str.get(0).head(2)
+                Out[]:
+                0         Braund
+                1        Cumings
+            </pre>
+            <li style="color:red">Note that when combining two methods, we have to use two <b>str</b> accessor.</li>
+            <li>The <b>.str.contains()</b> method checks for each of the values in the column. If the string contains the value, the row will be returned <br>
+                True and False(not contain the value). This output can be used to sub-select the data using conditional (boolean) indexing.</li>
+            <pre>
+                titanic['Name'].str.contains('Countess').head(2)
+                Out[]:
+                0      False
+                1      False
+
+                titanic[titanic['Name'].str.contain('Countess')]
+                Out[]:
+                    PassengerId	Survived	Pclass	Name	                                            Sex	    Age
+                759	        760	1	        1	    Rothes, the Countess. of (Lucy Noel Martha Dye...	female	33.0
+            </pre>
+            <li>See also <b>str.exact()</b></li>
+            <li>The get the longest name preferably the index label (get the label), we combine <b>len()</b> and <b>idxmax()</b> methods.</li>
+            <pre>
+                titanic.loc[titanic['Name'].str.len().idxmax()]
+                Out[]:
+                PassengerId                                                  308
+                Survived                                                       1
+                Pclass                                                         1
+                Name           Penasco y Castellana, Mrs. Victor de Satode (M...
+                Sex                                                       female
+                Age                                                           17
+                SibSp                                                          1
+                Parch                                                          0
+                Ticket                                                  PC 17758
+                Fare                                                       108.9
+                Cabin                                                        C65
+                Embarked                                                       C
+                surname        [Penasco y Castellana,  Mrs. Victor de Satode ...
+                Name: 307, dtype: object
+            </pre>
+            <li>Whereas the <b>replace()</b> is not a string method, it still provides a convenient way to use mappings or vocabularies to translate <br>
+            certain values. It requires a <b>dictionary</b> to define the mapping {from, to}</li>
+            <pre>
+                titanic['sex_short'] = titanic['Sex'].str.replace('Female', 'F')
+                titanic['sex_short'] = titanic['Sex'].str.replace('Male', 'M')
+            </pre>
+            <li style="color:red">When using with string object, you need to use <b>str</b> accessor to apply the function.(str.replace)</li>
+            <h3 style="color:red">Remember</h3>
+                <ul>
+                    <li>String methods are available using the str accessor.</li>
+                    <li>String methods work element-wise and can be used for conditional indexing.</li>
+                    <li>The replace() method is a convenient method to convert values according to a given dictionary.</li>
+                    <li>The idxmax() method return the label of index (coordination).</li>
+                </ul>
+        </ul>
+    </ul>
+</body>
+</html>

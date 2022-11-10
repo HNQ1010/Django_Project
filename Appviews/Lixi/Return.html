@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <style>
+        h2 {color: blue;}
+        h3 {color: red}
+        h4 {color: #8F3A84; font-size: 20px}
+    </style>
+    <meta charset="UTF-8">
+    <title>RETURN/ EXCHANGE PROCEDURE</title>
+</head>
+<body>
+<fieldset>
+    <legend><h2>QUY TRÌNH NHẬN HOÀN/ ĐỔI TRẢ</h2></legend>
+        <h4>Bước 1: Nhận hàng hóa trả về từ Shipper: </h4>
+        <ul>
+            <li>Đồng kiểm số lượng, tình trạng của đơn hàng.</li>
+            <li>Lập biên bản nếu hàng hóa hư hỏng, có vấn đề để làm căn cứ xác định bồi thường.</li>
+        </ul>
+        <h4>Bước 2: Tìm kiếm order/ Tracking Number trên hệ thống &rarr; Customer Returns &rarr; Create New Customer Return</h4>
+        <img src="{% static 'IMG/Lx_return_1.png'%}">
+        <h4>Bước 3: Xử lý các thông tin được yêu cầu:</h4>
+        <ul>
+            <li>Chọn các sản phẩm có trong đơn hàng trả về</li>
+            <li><b>Warehouse</b>:</li>
+            <ul>
+                <li>Packing Warehouse: (SG Warehouse, HN Warehouse) sản phẩm có thể lưu kho bán tiếp.</li>
+                <li>Damaged Warehouse: Hàng hư hỏng.</li>
+                <li>Warranty Warehouse: Hàng bảo hành, đổi trả.</li>
+            </ul>
+            <li>Chọn lý do hoàn trả hàng.</li>
+            <li>Xác nhận <b>Tạo Customer return</b> để tạo mã Return cho đơn hàng hoàn trả.</li>
+        </ul>
+        <img src="{% static 'IMG/Lx_return_2.png'%}">
+        <h4>Bước 4: Vào Mã Return tương ứng với đơn hàng trả đã được tạo trên hệ thống &rarr; chọn <b>Reimburse Type</b> &rarr; Cập nhật Reimbursement &rarr; Reimburse.</h4>
+        <img src="{% static 'IMG/Lx_return_3.png'%}">
+</fieldset>
+</body>
+</html>

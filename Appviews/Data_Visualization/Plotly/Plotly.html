@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+    {% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <meta charset="UTF-8">
+    <title>PLOTLY</title>
+</head>
+<body>
+<h1 style="color:blue; text-align:center">GETTING STARTED WITH PLOTLY</h1>
+    <ul>
+    <h2>Overview</h2>
+        <ul>
+            <li>Plotly is an interactive, open-source plotting library that supports over 40 unique chart types covering a wide range of <br>
+            statistical, financial, geographic, scientific and 3-dimensional use-cases.</li>
+            <li>Plotly enables Python users to create beautiful interactive web-based visualizations that can be displayed in Jupyter notebooks,<br>
+                saved to standalone HTML files, or served as part of pure Python-build web applications using Dash.</li>
+        </ul>
+    <h2>Installation</h2>
+        <ul>
+            <h3 style="color:red">Running Dash inside JupyterLab</h3>
+            <ul>
+                <li>First install Dash by command : <b>pip install jupyter-dash</b></li>
+                <li>Second, check whether Nodejs and NPM already installed in virtual environment or not. If not, install them first by the command :<br>
+                <b>pip install nodejs=14.7.0 -c conda-forge</b>. This command will install both of them and satisfy the requirement of the sys(Nodejs 5+).</li>
+                <li>Third, check the version of Node.js and NPM to make sure they already be installed.(command : <b>node -v or npm -v</b>).</li>
+            <h3 style="color:red">Running Plotly in Lab</h3>
+                <ul>
+                    <li>To run Plotly figures inside Jupyter Lab, you have to make sure these:</li>
+                    <ul>
+                        <li>ipywidgets > 7.5 (if not, do the command: <b>pip install ipywidgets>=7.5).</b></li>
+                        <li>So far, these steps will allow plotly running in Lab, but if there're issues, do this command (support Python >= 3.5)<br>
+                        <b>jupyter labextension install jupyterlab-plotly@4.8.2</b> (this command also require node.js and npm).</li>
+                    </ul>
+                </ul>
+            <h3 style="color:red">Useful CMD Commands</h3>
+                <ul>
+                    <li><b>pip update --all</b> : update all pip stuffs.</li>
+                    <li><b>pip list</b> : see version of all stuffs.</li>
+                    <li><b>jupyter labextension list</b> : see all lab extensions.</li>
+                </ul>
+            </ul>
+        </ul>
+    <h2>Plotly Express</h2>
+        <li>High level interface for rapid figure generation.</li>
+        <pre>import plotly.express as px</pre>
+        <table>
+            <tr>
+                <th>Method</th>
+                <th>Description (Each row of DataFrame is represented by)</th>
+            </tr>
+            <tr>
+                <td>scatter</td>
+                <td>A symbol</td>
+            </tr>
+            <tr>
+                <td>scatter_3d</td>
+                <td>A symbol mark in 3D space</td>
+            </tr>
+            <tr>
+                <td>scatter_polar</td>
+                <td>A symbol mark in polar coordinates</td>
+            </tr>
+            <tr>
+                <td>scatter_ternary</td>
+                <td>A symbol mark in ternary coordinates</td>
+            </tr>
+            <tr>
+                <td>scatter_mapbox</td>
+                <td>A symbol mark on a Mapbox map</td>
+            </tr>
+            <tr>
+                <td>scatter_geo (georaphic)</td>
+                <td>A symbol mark on a map</td>
+            </tr>
+            <tr>
+                <td>line (2D)</td>
+                <td>Vertex of a polyline mark in 2D space</td>
+            </tr>
+            <tr>
+                <td>line_3d</td>
+                <td>Vertex of a polyline mark in 3D space</td>
+            </tr>
+            <tr>
+                <td>line_polar</td>
+                <td>Vertex of a polyline mark in polar coordinates</td>
+            </tr>
+            <tr>
+                <td>line_ternary</td>
+                <td>Vertex of a polyline mark in ternary coordinates</td>
+            </tr>
+            <tr>
+                <td>line_mapbox</td>
+                <td>Vertex of a polyline mark on a Mapbox map</td>
+            </tr>
+            <tr>
+                <td>line_geo</td>
+                <td>Vertex of a polyline mark on a Geographic map</td>
+            </tr>
+            <tr>
+                <td>area</td>
+                <td>Vertex of a polyline mark in 2D space and the area between successive polylines is filled</td>
+            </tr>
+            <tr>
+                <td>bar</td>
+                <td>A rectangular mark</td>
+            </tr>
+            <tr>
+                <td>timeline</td>
+                <td>A rectangular mark on an x axis of type date, spanning from x_start to x_end</td>
+            </tr>
+            <tr>
+                <td>bar_polar</td>
+                <td>Wedge mark in polar coordinates</td>
+            </tr>
+            <tr>
+                <td>violin</td>
+                <td>Rows of data_frame are grouped together into a curved mark to visualize their distribution</td>
+            </tr>
+            <tr>
+                <td>box</td>
+                <td>Rows of data_frame are grouped together into a box-and-whisker mark to visualize their distribution</td>
+            </tr>
+            <tr>
+                <td>edcf (Empirical Cumulative Distribution Function)</td>
+                <td>Row of the data_frame are sorted by the value x (or y if orientation is 'h') and their cumulative count is drawn as a line</td>
+            </tr>
+            <tr>
+                <td>strip</td>
+                <td>Jitered mark within categories</td>
+            </tr>
+            <tr>
+                <td>histogram</td>
+                <td>Rows of data_frame are grouped together into a rectangular mark to visualize 1D distribution of an aggregate function histfunc of the value y</td>
+            </tr>
+            <tr>
+                <td>pie</td>
+                <td>Sector of a pie</td>
+            </tr>
+            <tr>
+                <td>treemap</td>
+                <td>A treemap plot represents hierarchical data as nested rectangular sectors</td>
+            </tr>
+            <tr>
+                <td>sunburst</td>
+                <td>A sunburst represents hierarchical data as sectors laid out over several levels of concentric rings</td>
+            </tr>
+            <tr>
+                <td>icicle</td>
+                <td>An icicle plot represents hierarchical data with adjoined rectangular sectors that all cascade from root down to leaf in one direction</td>
+            </tr>
+            <tr>
+                <td>funnel</td>
+                <td>A rectangular sector of a funnel</td>
+            </tr>
+            <tr>
+                <td>funnel_area</td>
+                <td>A trapezoidal sector of a funnel</td>
+            </tr>
+            <tr>
+                <td>scatter_matrix</td>
+                <td>A multiple sumbol marks, one in each cell of a grid of 2D scatter plots, which plot each pair of dimensions against each other</td>
+            </tr>
+            <tr>
+                <td>parallel_coordinates</td>
+                <td>A polyline mark which traverses a set of parallel axes, one for each of the dimensions</td>
+            </tr>
+            <tr>
+                <td>parallel_categories</td>
+                <td>Each of row of data_frame is grouped with other rows that share the same values of dimensions and then plotted as a polyline mark through<br>
+                    a set of parallel axes, one for each of the dimensions</td>
+            </tr>
+            <tr>
+                <td>choropleth</td>
+                <td>A colored region mark on a map</td>
+            </tr>
+            <tr>
+                <td>choropleth_mapbox</td>
+                <td>A colored region on a Mapbox map</td>
+            </tr>
+            <tr>
+                <td>density_cotour</td>
+                <td>Rows of data_frame are grouped together into contour marks to visualize the 2D distribution of an aggregate function histfunc of the value z</td>
+            </tr>
+            <tr>
+                <td>density_heatmap</td>
+                <td>Rows of data_frame are agrouped together into colored rectangular tiles to visualize the 2D distribution of an aggregate function hisfunc of the value z</td>
+            </tr>
+            <tr>
+                <td>density_mapbox</td>
+                <td>Each row of data_frame contributes to the intensity of the color of the region around the corresponding point on the map</td>
+            </tr>
+            <tr>
+                <td>imshow</td>
+                <td>Display an image data on a 2D regular raster</td>
+            </tr>
+            <tr>
+                <td>set_mapbox_access_token(parameter : token)</td>
+                <td>A mapbox token to be used</td>
+            </tr>
+            <tr>
+                <td>get_trendline_result(fig)</td>
+                <td>Extract fit statistic for trendlines (when applied figures generated with the 'trendline' argument set to 'ols'</td>
+            </tr>
+        </table>
+    <h2>make_subplot</h2>
+        <pre>from plotly.subplots import make_subplots</pre>
+        <li>Return an instance of plotly.graph_objects. Figure with predefined subplots configured in 'layout'.</li>
+        <li>Parameters:</li>
+        <ul>
+            <li><b>row(int)</b> :Default 1. Number of rows in the subplot grid. Must be greater than 0.</li>
+            <li><b>cols(int)</b> :Default 1. Number of cols in the subplot grid. Must be greater than 0.</li>
+            <li><b>shared_xaxes(boolean or str)</b> :Default False. Assign shared (linked) x-axes for 2D cartesian subplots.
+                <ul>
+                    <li>True or 'column': Share axes among subplots in the same column.</li>
+                    <li>'rows': Share axes among subplots in the same row.</li>
+                    <li>'all': Share axes across all subplots in the grid.</li>
+                </ul></li>
+            <li><b>share_yaxes(boolean or str)</b> :Default False. Assign shared (linked) y-axes for 2D cartesian subplots.
+                <ul>
+                    <li>'columns' : Share axes among subplots in the same column.</li>
+                    <li>True or 'rows': Share axes among subplots in the same row.</li>
+                    <li>'all': Share axes cross all subplots in the grid.</li>
+                </ul></li>
+            <li><b>start_cell('bottom-left' or 'top-left')</b> :Default 'top-left'. Choose the starting cell in teh subplot grid <br>
+                used to set the domains_grid of the subplots.
+                <ul>
+                    <li>top_left : Subplots are numbered with (1,1) in the top.</li>
+                    <li>bottom_left: Subplots are numbered with (1,1) in teh bottom left corner.</li>
+                </ul></li>
+            <li><b>print_grid(boolean)</b> :Default True. If True, prints a string representation of the plot grid. Grid also be printed<br>
+                using the Figure.print_grid() method on the resulting figure.</li>
+            <li><b>horizontal_spacing(float between 0 and 1)</b> :Default 0.2/cols. Space between subplot columns in normalized plot coordinates.</li>
+            <li><b>vertical_spacing(float between 0 and 1)</b> :Default 0.3/rows. Space between subplot rows in normalized plot coordinates.</li>
+            <li><b>subplot_titles(list of str or None)</b> :Default None. Title of each subplot as a list in row-major ordering. Empty string('')<br>
+                can be included in the list if no subplot title is desired in that space so that the titles are properly indexed.</li>
+            <li><b>specs(list of lists of dict or None)</b> :Default None. Per subplot specifications of subplot type, row/column spanning, and spacing.<br>
+                <ul>
+                    <li>Ex1 : specs = [[{}, {}], [{'colspan': 2}, None]]</li>
+                    <li>Ex2: specs = [['rowspan': 2, {}], [None, {}]]</li>
+                    <li>Indices of the outer list correspond to subplot grid rows starting from the top, if start_cell = 'top-left', or bottom.<br>
+                        If start_cell = 'bottom_left', the number of rows in 'specs' must be equal to 'rows'.</li>
+                    <li>Indices of the inner lists correspond to subplot grid columns starting from the left. The number of columns in 'specs' must be equal to 'cols'.</li>
+                    <li>Each item in the 'specs' list corresponds to one subplot in a subplot grid. (N.B. The subplot grid has exactly 'rows' times 'cols' cells.</li>
+                    <li>Use None for a blank a subplot cell (or to move past a col/ row span).</li>
+                    <li>Note that specs[0][0] has the specs of the 'start_cell' subplot.</li>
+                    <li>Each item in 'specs' is a dictionary.</li>
+                    <li>The available keys are: <b>*type(string, default 'xy')</b>. Subplot type:</li>
+                        <ul>
+                            <li>'xy': 2D cartesian subplot type for scatter, bar, etc.</li>
+                            <li>'scene': 3D cartesian subplot for scatter3d, cone, etc.</li>
+                            <li>'polar': Polar subplot for scatterpolar, barpolar, etc.</li>
+                            <li>'ternary': Ternary subplot for scatterternary.</li>
+                            <li>'mapbox': Mapbox subplot for scattermapbox.</li>
+                            <li>'domain': Subplot type for traces that are individually positioned. Pie, parcoords, parcats, etc.</li>
+                            <li>trace type: A trace type which will be used to determine the appropriate subplot type for that trace.</li>
+                            <li>secondary_y(bool): Default False. If True, create a secondary y-axis positioned on the right side of the subplot. Only valid with 'xy' type.</li>
+                            <li>colspan(int): Default 1. Number of subplot columns for this subplot to span.</li>
+                            <li>rowspan(int): Default 1. Number of subplot row for this subplot to span.</li>
+                            <li>l (float). Default 0.0 . Padding left of cell.</li>
+                            <li>r (float). Default 0.0 . Padding right of cell.</li>
+                            <li>t (float). Default 0.0 . Padding top of cell.</li>
+                            <li>b (float). Default 0.0 . Padding bottom of cell.</li>
+                        </ul>
+                    <li>Note: Use 'horizontal_spacing' and 'vertical_spacing' to adjust the spacing in between the subplots.</li>
+                </ul></li>
+            <li><b>insets(list of dict or None)</b> : Default None. Inset specifications. Insets are subplots that overlay grid subplots.<br>
+                Each item in 'insets' is a dictionary. The available keys are:
+                    <ul>
+                        <li>cell(tuple): Default (1, 1). (row, col) index of the subplot cell to overlay inset axes onto.</li>
+                        <li>type(str): Default 'xy'. Subplot type.</li>
+                        <li>l (float): Default 0.0. Padding left of inset in fraction of cell width.</li>
+                        <li>w (float or 'to_end'). Default 'to_end'. Inset width in fraction of cell width ('to_end': to cell right edge).</li>
+                        <li>b (float): Default 0.0. Padding bottom of inset in fraction of cell height.</li>
+                        <li>h (float or 'to_end'): Default 'to_end'. Inset height in fraction of cell height ('to_end': to cell top edge).</li>
+                    </ul>
+                </li>
+            <li><b>column_widths (list of numbers or None)</b> :Default None. List of length cols of the relative heights of each row of subplots.<br>
+                If start_cell = 'top-left' then row heights are applied top to bottom. Otherwise, if start_cell = 'bottom-left' then row heights <br>
+                are applied bottom to top.</li>
+            <li><b>row_heights(list of numbers or None)</b> :Default None. List of length rows of the relative heights of each row of subplots.<br>
+                If start_cell = 'top-left' then row heights are applied top to bottom. Otherwise, if start_cell = 'bottom-left' then row heights <br>
+                are applied bottom to top. For backward compatibility, may also use the row_width. If specified as row_width, then the width values <br>
+                are applied from bottom to top regardless of the value of start_cell. This matches the legacy behavior of the row_width argument.</li>
+            <li><b>column_titles(list of str or None)</b> :Default None. List of length cols of titles to place above the top subplot in each column.</li>
+            <li><b>row_titles(list of str or None)</b> :Default None. List of length rows of titles to place on teh right side of each row of subplots.<br>
+                If start_cell = 'top-left' then row titles are applied top to bottom. Otherwise, if start_cell = 'bottom-left' then row titles are applied bottom to top.</li>
+            <li><b>x_title(str or None)</b> :Default None. Title to place below the bottom row of subplots, centered horizontally.</li>
+            <li><b>y_title(str or None)</b> :Default None. Title to place to the left of the left column of subplots, centered vertically.</li>
+            <li><b>figure(go.Figure or None)</b> :Default None. If None, a new go.Figure instance will be created and its aes will be populated with those<br>
+                corresponding to the requested subplot geometry and this new figure will be returned. If a go.Figure instance, the axes will be added to the layout<br>
+                of this figure and this figure will be returned. If the figure already contains axes, they will be overwritten.</li>
+        </ul>
+    <h2>Basic Charts</h2>
+        <ul>
+            <li><a href="scatter">Scatter Plots</a></li>
+            <li><a href="line">Line Charts</a></li>
+            <li><a href="bar">Bar Charts</a></li>
+            <li><a href="pie">Pie Charts</a></li>
+            <li><a href="bubble">Bubble Chart</a></li>
+            <li><a href="dot">Dot Plots</a></li>
+            <li><a href="fill_area">Filled Area Plots</a></li>
+            <li><a href="horizontal_bar">Horizontal Bar Charts</a></li>
+            <li><a href="gantt">Gantt Charts</a></li>
+            <li><a href="">Sunburst Charts</a></li>
+            <li><a href="">Tables</a></li>
+            <li><a href="">Sankey Diagram</a></li>
+            <li><a href="">Treemap Charts</a></li>
+            <li><a href="">WebGL vs SVG</a></li>
+            <li><a href="">Figure Factory Tables</a></li>
+            <li><a href="">Categorical Axes</a></li>
+            <li><a href="">Icicle Charts</a></li>
+            <li><a href="">Patterns, Hatching, Texture</a></li>
+        </ul>
+    </ul>
+</body>
+</html>

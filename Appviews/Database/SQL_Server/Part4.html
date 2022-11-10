@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>SQL Server Indexes</title>
+</head>
+<body>
+<h1 style="text-align:center; color:red">SQL Server Indexes</h1>
+    <ul>
+        <li>Indexes are special data structures associated with tables or views that help speed up the query. </li>
+        <li>If a table does not have primary key, SQL server will stores its rows in an unordered structure called a heap.</li>
+        <li>When you query data from the table, the query optimizer needs to scan the whole table to locate the correct one.</li>
+        <li>If you display the estimated execution plan in SSMS, you can see how SQL Server cam up with the query plan.</li>
+        <img src="{% static 'IMG\SQL-Server-Clustered-Index-Table-Scan-1.png'%}">
+        <li>Note that to display the estimated execution plan in SQL Server Management Studio, you click the Display Estimated Execution<br>
+            Plan button or select the query and press the keyboard shortcut Ctrl+L:</li>
+        <li>If the table have a small number of rows, the query will execute fast. However, if the table contains a large number of rows, it will<br>
+        take a lot of time and resources to search for data.</li>
+        <li>To resolve this issue, SQL Server provide a dedicated structure to speed up retrieval of rows from a table called index.</li>
+        <li>SQL Server provides two types of indexes: clustered index and non-clustered index.</li>
+            <ul>
+                <li>Clustered index</li>
+                <li>Non-clustered index</li>
+            </ul>
+        <h3 style="color:red">1) Clustered Indexes</h3>
+            <ul>
+                <li>A clustered index stores data rows in a sorted structure based on its key values.</li>
+                <li>Each table has only one clustered index because data rows can be only sorted in one order.</li>
+                <li>The table has a clustered index is called a clustered table</li>
+                <img src="{% static 'IMG\SQL-Server-Clustered-B-Tree.png'%}">
+                <li>A clustered index organizes data using a special structured so-called B-tree (or balanced tree) which enables searches, inserts, updates, and deletes in logarithmic amortized time.</li>
+                <li>In the B-tree:</li>
+                    <ul>
+                        <li>The root node and intermediate level nodes contain index pages that hold index rows.</li>
+                        <li>The leaf nodes contain the data pages of the underlying table. </li>
+                        <li>The pages in each level of the index are linked using another structure called a doubly-linked list.</li>
+                    </ul>
+                <h4 style="color:blue"><b>* SQL Server Clustered Index and Primary key constraint</b></h4>
+                    <ul>
+                        <textarea rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            CREATE CLUSTERED INDEX index_name
+                            ON schema_name.table_name (column_list);
+                        </textarea>
+                        <ul>
+                            <li>First, specify the name of the clustered index after the CREATE CLUSTERED INDEX clause.</li>
+                            <li>Second, specify the schema and the table name on which you want to create the index.</li>
+                            <li>Third, list one or more columns included in the index.</li>
+                        </ul>
+
+                    </ul>
+                <h4 style="color:blue"><b>* SQL Server Clustered Index and Primary key constraint</b></h4>
+                    <ul>
+                        <li style="color:red">When you create a table with a primary key, SQL Server automatically creates a corresponding clustered index based on columns included in the primary key.</li>
+                        <li>If you add a primary key constraint to an existing table that already has a clustered index, SQL Server will enforce the primary key using a non-clustered index.</li>
+                    </ul>
+                <h4 style="color:blue"><b>* SQL Server Clustered Index and Primary key constraint</b></h4>
+                    <ul>
+                        <li>In case a table does not have a primary key, which is very rare, you can use the CREATE CLUSTERED INDEX statement to define a clustered index for the table.</li>
+                        <textarea rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            CREATE CLUSTERED INDEX ix_parts_id
+                            ON production.parts (part_id);
+                        </textarea>
+                        <li>When you execute the query, SQL Server traverses the index (Clustered index seek) to locate the row, which is faster than scanning the whole table.</li>
+                    </ul>
+            </ul>
+        <h3 style="color:red">2) Non-clustered Indexes</h3>
+            <ul>
+                <li>A non-clustered index is a data structure that improves the speed of data retrieval from tables.</li>
+                <li>Unlike a clustered index, a non-clustered index sorts and stores data separately from the data rows in the table. </li>
+                <li style="color:red">It is a copy of selected columns of data from a table with the links to the associated table.</li>
+                <li>Similar to a clustered index, a non-clustered index uses the B-tree structure to organize its data.</li>
+                <li>A table may have one or more non-clustered indexes and each non-clustered index may include one or more columns of the table.</li>
+                <img src="{% static 'IMG\SQL-Server-nonclustered-index.png'%}">
+                <li>Besides storing the index key values, the leaf nodes also store row pointers to the data rows that contain the key values. These row pointers are also known as row locators.</li>
+                <li>If the underlying table is a clustered table, the row pointer is the clustered index key. </li>
+                <li>If the underlying table is a heap, the row pointer points to the row of the table.</li>
+                <h4 style="color:blue"><b>* SQL Server CREATE INDEX statement</b></h4>
+                    <ul>
+                        <textarea rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            CREATE [NONCLUSTERED] INDEX index_name
+                            ON table_name(column_list);
+                        </textarea>
+                        <ul>
+                            <li>First, specify the name of the index after the CREATE NONCLUSTERED INDEX clause. Note that the NONCLUSTERED keyword is optional.</li>
+                            <li>Second, specify the table name on which you want to create the index and a list of columns of that table as the index key columns.</li>
+                        </ul>
+                    </ul>
+                <h4 style="color:blue"><b>*  Using the SQL Server CREATE INDEX statement to create a non-clustered index for one column.</b></h4>
+                    <ul>
+                        <textarea rows= "8" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                customer_id,
+                                city
+                            FROM
+                                sales.customers
+                            WHERE
+                                city = 'Atwater';
+                        </textarea>
+                        <img src="{% static 'IMG\SQL-Server-CREATE-INDEX-on-one-column-index-scan.png'%}">
+                        <li>If a table has primary key, SQL Server automatically create a clustered index for this table. In case that table has no non clustered index,<br>
+                        When you execute query to get more columns in the table, SQL will scan the clustered index to find the rows.</li>
+                        <li>To improve the speed of query, you can create a new index for that column.</li>
+                        <textarea rows= "3" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            CREATE INDEX ix_customers_city
+                                ON sales.customers(city);
+                        </textarea>
+                        <li>Now, if you query again, you will find that the query optimizer uses the non-clustered index ix_customers_city:</li>
+                        <img src="{% static 'IMG\SQL-Server-CREATE-INDEX-one-column-index-seek.png'%}">
+                    </ul>
+                <h4 style="color:blue"><b>*  Using SQL Server CREATE INDEX statement to create a nonclustered index for multiple columns.</b></h4>
+                    <ul>
+                        <textarea rows= "10" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                customer_id,
+                                first_name,
+                                last_name
+                            FROM
+                                sales.customers
+                            WHERE
+                                last_name = 'Berg' AND
+                                first_name = 'Monika';
+                        </textarea>
+                        <img src="{% static 'IMG\SQL-Server-CREATE-INDEX-on-one-column-index-scan.png'%}">
+                        <li>To speed up the retrieval of data, you can create a non-clustered index that includes both last_name and first_name columns:</li>
+                        <textarea rows= "3" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            CREATE INDEX ix_customers_name
+                                ON sales.customers(last_name, first_name);
+                        </textarea>
+                        <li>Now, query again, you will get the result:</li>
+                        <img src="{% static 'IMG\SQL-Server-CREATE-INDEX-on-multiple-columns-index-seek.png'%}">
+                        <li>When you create the index that consists of multiple columns, the order of the columns in the index is very important.<br>
+                        You should place the columns that you often use to query data at the beginning of the column list.</li>
+                        <li>In the above example, because the last_name is the first condition, so the query optimizer can leverage the index and uses <span style="color:red">the index seek method for searching</span>.</li>
+                        <li>Otherwise, the query optimizer will scan whole index for searching, which is slower than index seek.</li>
+                        <textarea rows= "9" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                customer_id,
+                                first_name,
+                                last_name
+                            FROM
+                                sales.customers
+                            WHERE
+                                first_name = 'Adam';
+                        </textarea>
+                        <img src="{% static 'IMG\SQL-Server-CREATE-INDEX-multiple-columns-not-leftmost-column-index-scan.png'%}">
+                    </ul>
+            </ul>
+        <h3 style="color:red">3) Rename Indexes</h3>
+            <ul>
+                <h4 style="color:blue"><b>* Renaming an index using the system stored procedure sp_rename</b></h4>
+                    <ul>
+                        <li style="color:red">The sp_rename is a system stored procedure that allows you to rename any user-created object in the current database including table, index, and column.</li>
+                        <textarea rows= "5" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            EXEC sp_rename
+                                index_name,
+                                new_index_name,
+                                N'INDEX';
+                        </textarea>
+                        <textarea rows= "5" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            EXEC sp_rename
+                                @objname = N'index_name',
+                                @newname = N'new_index_name',
+                                @objtype = N'INDEX';
+                        </textarea><br>
+                        <textarea rows= "5" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            EXEC sp_rename
+                                @objname = N'sales.customers.ix_customers_city',
+                                @newname = N'ix_cust_city' ,
+                                @objtype = N'INDEX';
+                        </textarea>
+                        <textarea rows= "5" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            EXEC sp_rename
+                                N'sales.customers.ix_customers_city',
+                                N'ix_cust_city' ,
+                                N'INDEX';
+                        </textarea><br>
+                    </ul>
+                <h4 style="color:blue"><b>* Renaming an index using the system stored procedure sp_rename</b></h4>
+                    <ul>
+                        <li>First, navigate to the database, table name, and indexes.</li>
+                        <li>Second, right-click on the index which you want to change the name and choose the rename menu item.</li>
+                        <li>Third, type the new name and press enter.</li>
+                    </ul>
+            </ul>
+        <h3 style="color:red">4) Disable Indexes</h3>
+            <ul>
+                <li>Disable an index:</li>
+                <textarea rows= "4" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    ALTER INDEX index_name
+                        ON table_name
+                        DISABLE;
+                </textarea>
+                <li>Disable all index:</li>
+                <textarea rows= "3" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    ALTER INDEX ALL ON table_name
+                    DISABLE;
+                </textarea>
+                <li>When you disable an index on a table, SQL Server keeps the index definition in the metadata and the index statistics<br>
+                    in non-clustered indexes. However, if you disable a non-clustered or clustered index on a view, SQL Server will physically delete all the index data.</li>
+                <li style="color:red">If you disable a clustered index of a table, you cannot access the table data using data manipulation <br>
+                    language such as SELECT, INSERT, UPDATE, and DELETE until you rebuild or drop the index.</li>
+            </ul>
+        <h3 style="color:red">5) Enable Indexes</h3>
+            <ul>
+                <li>Sometimes, you need to disable an index before doing a large update on a table. By disabling the index, you can speed up the update process by avoiding the index writing overhead.</li>
+                <li>After completing the update to the table, you need to enable the index.</li>
+                <li style="color:red">Since the index was disabled, you can rebuild the index but cannot just simply enable it. Because after the update operation, the index needs to be rebuilt to reflect the new data in the table.</li>
+                <li>In SQL Server, you can rebuild an index by using the ALTER INDEX statement or DBCC DBREINDEX command.</li>
+                <h4 style="color:blue"><b>* Enable index using ALTER INDEX and CREATE INDEX statements</b></h4>
+                    <ul>
+                        <li>This statement uses the ALTER INDEX statement to “enable” or rebuild an index on a table.</li>
+                        <textarea rows= "4" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            ALTER INDEX index_name
+                                ON table_name
+                                REBUILD;
+                        </textarea>
+                        <li>The following statement uses the ALTER INDEX statement to enable all disabled indexes on a table.</li>
+                        <textarea rows= "3" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            ALTER INDEX ALL ON table_name
+                            REBUILD;
+                        </textarea>
+                        <li>This statement uses the CREATE INDEX statement to enable the disabled index and recreate it.</li>
+                        <textarea rows= "4" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            CREATE INDEX index_name
+                                ON table_name(column_list)
+                                WITH(DROP_EXISTING=ON)
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>* Enable indexes using DBCC DBREINDEX statement</b></h4>
+                    <ul>
+                        <li>This statement uses the DBCC DBREINDEX to enable an index on a table.</li>
+                        <textarea rows= "2" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            DBCC DBREINDEX (table_name, index_name);
+                        </textarea>
+                        <li>This statement uses the DBCC DBREINDEX to enable all index on a table.</li>
+                        <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            DBCC DBREINDEX (table_name, " ");
+                        </textarea>
+                    </ul>
+            </ul>
+        <h3 style="color:red">6) Unique Indexes</h3>
+            <ul>
+                <li>A unique index ensures the index key columns do not contain any duplicate values.</li>
+                <li>Similar to primary key, a unique index may consist of one or many columns. If a unique index has one column, <br>
+                    the values in this column will be unique. In case the unique index has multiple columns,<br>
+                    the combination of values in these columns is unique.</li>
+                <li>Any attempt to insert or update data into the unique index key columns that causes the duplicate will result in an error.</li>
+                <li>A unique index can be clustered or non-clustered.</li>
+                <li>To create a unique index, you use the CREATE UNIQUE INDEX statement.</li>
+                <textarea rows= "3" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE UNIQUE INDEX index_name
+                        ON table_name(column_list);
+                </textarea>
+                <h4 style="color:blue"><b>* SQL Server unique index for one column.</b></h4>
+                    <ul>
+                        <textarea rows= "8" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                customer_id,
+                                email
+                            FROM
+                                sales.customers
+                            WHERE
+                                email = 'caren.stephens@msn.com';
+                        </textarea>
+                        <img src="{% static 'IMG\SQL-Server-UNIQUE-Index-Clustered-Index-Scan.png'%}">
+                        <li>To speed up the retrieval of the query, you can add a non-clustered index to the email column.</li>
+                        <li>However, with the assumption that each customer will have a unique email, you can create a unique index for the email column.</li>
+                        <li>After checking for duplicated data in email column, you can go ahead to create a unique index for email column.</li>
+                        <textarea rows= "3" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            CREATE UNIQUE INDEX ix_cust_email
+                                ON sales.customers(email);
+                        </textarea>
+                        <li>From now on, the query optimizer will leverage the ix_cust_email index and use the index seek method to search for row by email.</li>
+                    </ul>
+                <h4 style="color:blue"><b>* SQL Server unique index for one column.</b></h4>
+                    <ul>
+                        <li>With table t1 and 2 columns a and b:</li>
+                        <textarea rows= "3" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            CREATE UNIQUE INDEX ix_uniq_ab
+                                ON t1(a, b);
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>* SQL Server unique index and NULL</b></h4>
+                    <ul>
+                        <li>NULL is special. It is a marker that indicates the missing information or not applicable.</li>
+                        <li>NULL is even not equal to itself. However, when it comes to unique index, SQL Server treats NULL values the same.<br>
+                            It means that if you create a unique index on a nullable column, you can only have only one NULL value in this column.</li>
+                        <textarea rows= "7" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            CREATE TABLE t2(
+                                a INT
+                                );
+
+                            CREATE UNIQUE INDEX a_uniq_t2
+                            ON t2(a);
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>* SQL Server unique index and NULL</b></h4>
+                    <ul>
+                        <li>Both unique index and UNIQUE constraint enforce the uniqueness of values in one or many columns.</li>
+                        <li>SQL Server validates duplicates in the same manner for both unique index and unique constraint.</li>
+                        <li>When you create a unique constraint, behind the scene, SQL Server creates a unique index associated with this constraint.</li>
+                        <li>However, creating a unique constraint on columns make the objective of the unique index clear.</li>
+                    </ul>
+            </ul>
+        <h3 style="color:red">7) Drop Indexes</h3>
+            <ul>
+                <li>The DROP INDEX statement removes one or more indexes from the current database.</li>
+                <textarea rows= "3" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    DROP INDEX [IF EXISTS] index_name
+                        ON table_name;
+                </textarea>
+                    <ul>
+                        <li>First, specify the name of the index that you want to remove after the DROP INDEX clause.</li>
+                        <li>Second, specify the name of the table to which the index belongs.</li>
+                    </ul>
+                <li>Removing a non-existing index will result in an error. However, you can use the IF EXISTS option to conditionally drop the index and avoid the error.</li>
+                <li style="color:red">The DROP INDEX statement does not remove indexes created by PRIMARY KEY or UNIQUE constraints. <br>
+                To drop indexes associated with these constraints, you use the ALTER TABLE DROP CONSTRAINT statement.</li>
+                <li>To remove multiple indexes from one or more tables at the same time, you specify a comma-separated list of index names with the corresponding table names after the DROP INDEX clause.</li>
+                <textarea rows= "5" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    DROP INDEX [IF EXISTS]
+                        index_name1 ON table_name1,
+                        index_name2 ON table_name2,
+                        ...;
+                </textarea>
+            </ul>
+        <h3 style="color:red">8) Indexes With Included columns</h3>
+            <ul>
+                <textarea rows= "8" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE [UNIQUE] INDEX index_name
+                        ON table_name(key_column_list)
+                        INCLUDE(included_column_list);
+                </textarea>
+                    <ul>
+                        <li>First, specify the name of the index after CREATE INDEX clause. If the index is unique, you need to add the UNIQUE keyword.</li>
+                        <li>Second, specify the name of the table and a list of key column list for the index after the ON clause.</li>
+                        <li>Third, list a comma-separated list of included columns in the INCLUDE clause.</li>
+                    </ul>
+                <li>With sales.customers table and unique index ix_cust_email:</li>
+                <textarea rows= "8" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        first_name,
+                        last_name,
+                        email
+                    FROM
+                        sales.customers
+                    WHERE email = 'aide.franco@msn.com';
+                </textarea>
+                <img src="{% static 'IMG\index-with-included-columns-key-lookup.png'%}">
+                    <ul>
+                        <li>First, the query optimizer uses the index seek to find email and customer_id.</li>
+                        <li>Second, the query optimizer uses the key lookup on the clustered index to find first_name and last_name by customer_id.</li>
+                        <li>Third, for each row found in non-clustered index, it matches with row found in clustered index using nested loop.</li>
+                    </ul>
+                <li>But you can see, the cost for key lookup is about 50% of the query, which quite expensive.</li>
+                <li>To help reduce this key lookup cost, SQL Server allows you to extend the functionality of a non-clustered index by including non-key columns.</li>
+                <li>By including non-key columns in non-clustered indexes, you can create non-clustered indexes that cover more queries.</li>
+                <li style="color:red">Note that when an index contains all the columns referenced by a query, the index is typically referred to as covering the query.</li>
+                <textarea rows= "6" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    DROP INDEX ix_cust_email
+                        ON sales.customers;
+                    CREATE UNIQUE INDEX ix_cust_email_inc
+                        ON sales.customers(email)
+                        INCLUDE(first_name,last_name);
+                </textarea>
+                <li>Now, the query optimizer will solely use the non-clustered index to return the requested data of the query:</li>
+                <img src="{% static 'IMG\index-with-included-columns-example.png'%}">
+            </ul>
+        <h3 style="color:red">9) Filtered Indexes</h3>
+            <ul>
+                <li>A non-clustered index, when used properly, can greatly improve the performance of queries.</li>
+                <li>However, the benefits of non-clustered indexes come at costs: storage and maintenance.</li>
+                    <ul>
+                        <li>First, it takes additional storage to store the copy of data of the index key columns.</li>
+                        <li>Second, when you insert, update, or delete rows from the table, SQL Server needs to update the associated non-clustered index.</li>
+                    </ul>
+                <li>It would be inefficient if applications just query a portion of rows of a table. This is why the filtered indexes come into play.</li>
+                <li>A filtered index is a non-clustered index with a predicate that allows you to specify which rows should be added to the index.</li>
+                <textarea rows= "4" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE INDEX index_name
+                    ON table_name(column_list)
+                    WHERE predicate;
+                </textarea>
+                    <ul>
+                        <li>First, specify the name of the filtered index after the CREATE INDEX clause.</li>
+                        <li>Second, list the table name with a list of key columns that will be included in the index.</li>
+                        <li>Third, use a WHERE clause with a predicate to specify which rows of the table should be included in the index.</li>
+                    </ul>
+                <textarea rows= "14" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        SUM(CASE
+                                WHEN phone IS NULL
+                                THEN 1
+                                ELSE 0
+                            END) AS [Has Phone],
+                        SUM(CASE
+                                WHEN phone IS NULL
+                                THEN 0
+                                ELSE 1
+                            END) AS [No Phone]
+                    FROM
+                        sales.customers;
+                </textarea>
+                <li>Phone column is a good candidate for filtered index</li>
+                <textarea rows= "4" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE INDEX ix_cust_phone
+                    ON sales.customers(phone)
+                    WHERE phone IS NOT NULL;
+                </textarea><br>
+                <textarea rows= "8" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        first_name,
+                        last_name,
+                        phone
+                    FROM
+                        sales.customers
+                    WHERE phone = '(281) 363-3309';
+                </textarea><br>
+                <img src="{% static 'IMG\SQL-Server-Filtered-Index-example.png'%}">
+                <li>The query optimizer will leverage ix_cust_phone for searching.</li>
+                <li>Note that to improve the key lookup, you can use an index with included columns, which includes both first_name and last_name columns in the index:</li>
+                <textarea rows= "5" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE INDEX ix_cust_phone
+                    ON sales.customers(phone)
+                    INCLUDE(first_name, last_name)
+                    WHERE phone IS NOT NULL;
+                </textarea>
+            </ul>
+        <h3 style="color:red">10) Indexes On Computed Columns</h3>
+            <ul>
+                <textarea rows= "11" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        first_name,
+                        last_name,
+                        email
+                    FROM
+                        sales.customers
+                    WHERE
+                        SUBSTRING(email, 0,
+                            CHARINDEX('@', email, 0)
+                        ) = 'garry.espinoza';
+                </textarea>
+                <img src="{% static 'IMG\SQL-Server-Index-on-computed-column-clustered-index-scan.png'%}">
+                <li>As clearly shown in the output, the query optimizer needs to scan the whole clustered index for locating the customer, which is not efficient.</li>
+                <li>In SQL Server, you can use an index to index the result of a function or an expression which will improve the performance of queries<br>
+                    whose WHERE clause contains the function and expression.</li>
+                    <ul>
+                        <li>First, create a computed column based on the expression on the WHERE clause.</li>
+                        <li>Second, create a non-clustered index for the computed column.</li>
+                    </ul>
+                <li>First, add a new computed column to the sales.customers table:</li>
+                <textarea rows= "8" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    ALTER TABLE sales.customers
+                        ADD
+                            email_local_part AS
+                                SUBSTRING(email,
+                                    0,
+                                    CHARINDEX('@', email, 0)
+                                );
+                </textarea>
+                <li>Then, create an index on the email_local_part column:</li>
+                <textarea rows= "3" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    CREATE INDEX ix_cust_email_local_part
+                        ON sales.customers(email_local_part);
+                </textarea><br>
+                <textarea rows= "9" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        first_name,
+                        last_name,
+                        email
+                    FROM
+                        sales.customers
+                    WHERE
+                        email_local_part = 'garry.espinoza';
+                </textarea>
+                <img src="{% static 'IMG\SQL-Server-Index-on-computed-column-index-seek.png'%}">
+                <h4 style="color:blue"><b>* Requirements for indexes on computed columns</b></h4>
+                    <ul>
+                        <li>The functions involved in the computed column expression must have the same owner as the table.</li>
+                        <li>The computed column expression must be deterministic. It means that expression always returns the same result for a given set of inputs.</li>
+                        <li>The computed column must be precise, which means its expression must not contain any FLOAT or REAL data types.</li>
+                        <li>The result of the computed column expression cannot evaluate to the TEXT, NTEXT, or IMAGE data types.</li>
+                        <li>The ANSI_NULLS option must be set to ON when the computed column is defined using the CREATE TABLE or ALTER TABLE statement. <br>
+                        In addition, the options ANSI_PADDING, ANSI_WARNINGS, ARITHABORT, QUOTED_IDENTIFIER, and CONCAT_NULL_YIELDS_NULL must also be set to ON,<br>
+                            and NUMERIC_ROUNDABORT must be set to OFF.</li>
+                    </ul>
+            </ul>
+    </ul>
+</body>
+</html>

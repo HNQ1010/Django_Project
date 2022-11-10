@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css\style.css'%}">
+    <meta charset="UTF-8">
+    <title>SQL Server String Functions</title>
+</head>
+<body>
+<h1 style="color:red; text-align:center"><b>SQL Server String Functions</b></h1>
+    <ul>
+        <table>
+            <tr>
+                <th>Function</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>ASCII</td>
+                <td>Return the ASCII code value of a character.</td>
+            </tr>
+            <tr>
+                <td>CHAR</td>
+                <td>Convert an ASCII to a character.</td>
+            </tr>
+            <tr>
+                <td>CHARINDEX</td>
+                <td>Search for a substring inside a string starting from a specified location and return the position of the substring.</td>
+            </tr>
+            <tr>
+                <td>CONCAT</td>
+                <td>Join two or more strings into one string.</td>
+            </tr>
+            <tr>
+                <td>CONCAT_WS</td>
+                <td>Concatenate multiple strings with a separator into a single string.</td>
+            </tr>
+            <tr>
+                <td>DIFFERENCE</td>
+                <td>Compare the SOUNDEX() values of two strings.</td>
+            </tr>
+            <tr>
+                <td>SOUNDEX</td>
+                <td>Return a four-character (SOUNDEX) code of a string based on how it is spoken.</td>
+            </tr>
+            <tr>
+                <td>LEFT</td>
+                <td>Extract a given a number of characters from a character string starting from the left.</td>
+            </tr>
+            <tr>
+                <td>LEN</td>
+                <td>Return a number of character of a character string.</td>
+            </tr>
+            <tr>
+                <td>LOWER</td>
+                <td>Convert a string to lowercase.</td>
+            </tr>
+            <tr>
+                <td>LTRIM</td>
+                <td>Return a new string from a specified string after removing all leading blanks.</td>
+            </tr>
+            <tr>
+                <td>NCHAR</td>
+                <td>Return the Unicode character with the specified integer code, as defined by the Unicode standard.</td>
+            </tr>
+            <tr>
+                <td>PATINDEX</td>
+                <td>Returns the starting position of the first occurrence of a pattern in a string.</td>
+            </tr>
+            <tr>
+                <td>QUOTENAME</td>
+                <td>Returns a Unicode string with the delimiters added to make the input string a valid delimited identifier.</td>
+            </tr>
+            <tr>
+                <td>REPLACE</td>
+                <td>Replace all occurrences of a substring, within a string with another substring.</td>
+            </tr>
+            <tr>
+                <td>REPLICATE</td>
+                <td>Return a string repeated a specified number of times.</td>
+            </tr>
+            <tr>
+                <td>REVERSE</td>
+                <td>Return the reverse order of a character string.</td>
+            </tr>
+            <tr>
+                <td>RIGHT</td>
+                <td>Extract a given number of characters from a character string starting from the right.</td>
+            </tr>
+            <tr>
+                <td>RTRIM</td>
+                <td>Return a new string from a specified string after removing all trailing blanks.</td>
+            </tr>
+            <tr>
+                <td>SPACE</td>
+                <td>Returns a string of repeated spaces.</td>
+            </tr>
+            <tr>
+                <td>STR</td>
+                <td>Returns character data converted from numeric data.</td>
+            </tr>
+            <tr>
+                <td>STRING_AGG</td>
+                <td>Concatenate rows of strings with a specified separator into a new string.</td>
+            </tr>
+            <tr>
+                <td>STRING_ESCAPE</td>
+                <td>Escape special characters in a string and returns a new string with escaped characters.</td>
+            </tr>
+            <tr>
+                <td>STRING_SPLIT</td>
+                <td>A table-valued function that splits a string into rows of substrings based on a specified separator.</td>
+            </tr>
+            <tr>
+                <td>STUFF</td>
+                <td>Delete a part of a string and then insert another substring into the string.</td>
+            </tr>
+            <tr>
+                <td>SUBSTRING</td>
+                <td>Extract a substring within a string starting from a specified location with a specified length.</td>
+            </tr>
+            <tr>
+                <td>TRANSLATE</td>
+                <td>Replace several single-characters, one-to-one translation in one operation.</td>
+            </tr>
+            <tr>
+                <td>TRIM</td>
+                <td>Return a new string from a specified string after removing all leading and trailing blanks.</td>
+            </tr>
+            <tr>
+                <td>UNICODE</td>
+                <td>Returns the integer value, as defined by the Unicode standard, of a character.</td>
+            </tr>
+            <tr>
+                <td>UPPER</td>
+                <td>Convert a string to UPPERCASE</td>
+            </tr>
+        </table>
+        <h3 style="color:red">1) ASCII</h3>
+            <ul>
+                <li>ASCII stands for American Standard Code for Information Interchange.</li>
+                <li>It serves as a character encoding standard for modern computers.</li>
+                <li>Returns the ASCII code value of the leftmost character of a character expression.</li>
+                <li>ASCII is a 7-bit character set. Extended ASCII or High ASCII is an 8-bit character set that is not handled by the ASCII function.</li>
+                <li>For more processing the out of range ASCII, you can use UNICODE function to handle Extended ASCII or High ASCII.</li>
+                <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    ASCII(character_expression)
+                </textarea>
+                    <ul>
+                        <li>Return type: int</li>
+                        <li>character_expression: type CHAR or VARCHAR.</li>
+                    </ul>
+                <textarea rows= "5" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT      ASCII('A') as result1,      --result1: 65
+                                ASCII('B') as result2,      --result2: 66
+                                ASCII(1) as result3,        --result3: 97
+                                ASCII('ab') as result4;     --result4: 49
+                </textarea>
+                <li>A 7-bit ASCII value is returned correctly, but an 8-bit Extended ASCII value is not handled.</li>
+                <textarea rows= "5" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT      ASCII('A') as result1,      --result1: 65
+                                ASCII('æ') as result2,      --result2: 195
+                </textarea>
+                <li>When using nchar to convert ASCII value to character, you can get these results:</li>
+                <textarea rows= "5" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT      NCHAR(65) as result1,      --result1: A
+                                NCHAR(195) as result2,      --result2: Ã
+                </textarea>
+                <li>This is because ASCII function is capable of reading the first 7-bit stream, but not the extra bit.</li>
+                <li>The correct code point for character 'æ' can be found for using the UNICODE function, which is capable or returning the correct char code point.</li>
+                <textarea rows= "5" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT      NCHAR(65) as result1,       --result1: A
+                                UNICODE('æ') as result2,    --result2: 230
+                                NCHAR(230) as result3;      --result3: æ
+                </textarea>
+            </ul>
+        <h3 style="color:red">2) CHAR</h3>
+            <ul>
+                <li>Returns the single-byte character with the specified integer code, as defined by the character set and encoding of the default collation of the current database.</li>
+                <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    CHAR(integer_expression)
+                </textarea>
+                    <ul>
+                        <li>Return type: CHAR</li>
+                        <li>integer_expression: an INTEGER from 0 through 255. Many common character sets share ASCII as a sub-set and will return the same character for integer range 0 through 127.</li>
+                        <li style="color:red">CHAR return NULL value for the value out this range or not representing a complete character.</li>
+                        <li style="color:red">CHAR also return NULL if the character exceeds the length of the return type.</li>
+                        <li>Use special of CHAR function to insert control characters into character strings.</li>
+                        <table>
+                            <tr>
+                                <th>Control Character</th>
+                                <th>Value</th>
+                            </tr>
+                            <tr>
+                                <td>TAB</td>
+                                <td>CHAR(9)</td>
+                            </tr>
+                            <tr>
+                                <td>Line feed</td>
+                                <td>CHAR(10)</td>
+                            </tr>
+                            <tr>
+                                <td>Carriage return</td>
+                                <td>CHAR(13)</td>
+                            </tr>
+                        </table>
+
+                    </ul>
+                <h4 style="color:blue"><b>* Using CHAR to return single-byte characters</b></h4>
+                    <ul>
+                        <textarea rows= "10" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            Create database [multibyte-char-context]
+                              COLLATE Japanese_CI_AI
+                            GO
+                            USE [multibyte-char-context]
+                            GO
+                            SELECT
+                              CHAR(188) AS result1,                             --output: ｼ
+                              CHAR(0xBC) AS result2;                            --output: ｼ
+                        </textarea>
+                        <li>This example use integer and hex values in the valid range for ASCII and output Japanese character</li>
+                    </ul>
+                <h4 style="color:blue"><b>* Using CHAR to return multi-byte characters</b></h4>
+                    <ul>
+                        <textarea rows= "5" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            USE [multibyte-char-context]
+                            GO
+                            SELECT      CHAR(129) AS result1,               --output: NULL
+                                        CHAR(0x81) AS result2;              --output: NULL
+                        </textarea>
+                        <li>This example use integer and hex values in the valid range for Extended ASCII and output Japanese character</li>
+                        <li>However, the CHAR function return NULL because the parameter represents only the first byte of a multiple byte character.</li>
+                        <li>The CHAR(2) double byte cannot be partially represent nor divided without some conversion operation. The individual bytes of a<br>
+                            double byte character don't generally represent valid CHAR(1) values.</li>
+                    </ul>
+                <h4 style="color:blue"><b>* Using CONVERT instead of CHAR to return multiple byte character.</b></h4>
+                    <ul>
+                        <textarea rows= "6" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            USE [multibyte-char-context]
+                            GO
+                            SELECT      NCHAR(0x266A) AS result1,                       --output: ♪
+                                        CONVERT(CHAR(2), 0x81F4) AS result2,            --output: ♪
+                                        CAST(0x81F4 AS CHAR(2)) AS result3;             --output: ♪
+                        </textarea>
+                        <li>This example accepts the binary value as an encoded multi-byte character consistent with the default codepage of the <br>
+                        current database, subject to validation.</li>
+                        <li>Character conversion is more broadly supported and may be an alternative to working with encoding at a lower level.</li>
+                    </ul>
+                <h4 style="color:blue"><b>* Using NCHAR instead of CHAR to look up UTF-8 characters</b></h4>
+                    <ul>
+                        <textarea rows= "18" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            ; WITH uni(c) AS (
+                                    -- BMP character
+                                    SELECT NCHAR(9835)
+                                    UNION ALL
+                                    -- non-BMP supplementary character or, under downlevel collation, NULL
+                                    SELECT NCHAR(127925)
+                                  ),
+                                  enc(u16c, u8c) AS (
+                                    SELECT c, CONVERT(VARCHAR(4), c COLLATE Latin1_General_100_CI_AI_SC_UTF8)
+                                    FROM uni
+                                  )
+                                  SELECT u16c AS [Music note]
+                                    , u8c AS [Music note (UTF-8)]
+                                    , UNICODE(u16c) AS [Code Point]
+                                    , CONVERT(VARBINARY(4), u16c) AS [UTF-16LE bytes]
+                                    , CONVERT(VARBINARY(4), u8c)  AS [UTF-8 bytes]
+                                  FROM enc
+                        </textarea>
+                        <pre>
+                            Music note Music note (UTF-8) Code Point  UTF-16LE bytes UTF-8 bytes
+                            ---------- ------------------ ----------- -------------- -----------
+                            ♫          ♫                  9835        0x6B26         0xE299AB
+                            🎵         🎵                 127925      0x3CD8B5DF     0xF09F8EB5
+                        </pre>
+                    </ul>
+            </ul>
+        <h3 style="color:red">3) CHARINDEX</h3>
+            <ul>
+                <li>This function searches for one character expression inside an other character expression and returning the position of it. </li>
+                <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    CHARINDEX(expressionToFind, expressionToSearch [ , start_location ] )
+                </textarea>
+                    <ul>
+                        <li><b>expressionToFind</b> : A character expression containing the sequence to find. Has 8000 character limit.</li>
+                        <li><b>expressionToSearch</b> : A character expression for searching.</li>
+                        <li><b>start_location</b> : An INTEGER or BIGINT expression at which the search start. IF it not specified, negative or 0, the search will start at beginning of the expressionToSearch.</li>
+                        <li style="color:red">Returns BIGINT if expressionToSearch has nvarchar(max), varchar(max) or varbinary(max) data type, and INT otherwise.</li>
+                        <li>If either expressionToFind or expressionToSearch has Unicode data type (nchar or nvarchar), the function will convert it to a Unicode data type.</li>
+                        <li>CHARINDEX can not be using with image, ntext or text data type.</li>
+                        <li>If two expression have NULL value, the result will return NULL.</li>
+                        <li>CHARINDEX performs comparisons based on the input collation. To perform collation, use COLLATE to apply an explicit collation to the input.</li>
+                        <li>The starting position returned is 1-based, not 0-based.</li>
+                        <li>0x0000 (or CHAR(0)) is an undefined character in Windows collation and can not be included in CHARINDEX.</li>
+                        <li>When using SC collations, both start_location and the return value count surrogate pairs as one character, not two.</li>
+                    </ul>
+                <textarea rows= "5" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    DECLARE @document VARCHAR(64);
+                    SELECT @document = 'Reflectors are vital safety' + ' components of your bicycle.';
+                    SELECT  CHARINDEX('bicycle', @document),                --output:48
+                            CHARINDEX('bicycle', @document, 5);             --output:48
+                </textarea>
+                <h4 style="color:blue"><b>* CASE-SENSITIVE SEARCH</b></h4>
+                <textarea rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT CHARINDEX('bicycle', @document
+                        COLLATE Latin1_General_CS_AS)                    --output: 0
+                </textarea><br>
+                <textarea rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT CHARINDEX('bicycle', @document
+                        COLLATE Latin1_General_CI_AS)                    --output: 48
+                </textarea>
+            </ul>
+        <h3 style="color:red">4) CONCAT</h3>
+            <ul>
+                <li>This function returns a string resulting from the concatenation, or joining of two or more string values in an end-to-end manner.</li>
+                <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    CONCAT(string_value1, string_value2 [, string_valueN])
+                </textarea>
+                    <ul>
+                        <li><b>string_value</b>: A string value to concatenate to the other string value. CONCAT() requires at least two string_value and no more than 254 string_value.</li>
+                        <li>Returns string value whose length and type depend on the input.</li>
+                        <li>CONCAT() implicitly converts all arguments to string types before concatenation.</li>
+                        <li>If CONCAT() receives arguments exist NULL values, it will ignore values at those position.</li>
+                        <li>If CONCAT() receives arguments with all NULL values, it will return an empty string of type VARCHAR(1).</li>
+                        <li>CONCAT() can affect the length of the result, other data type have different lengths when implicitly converted to strings.</li>
+                        <textarea rows= "6" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            CREATE table_name (
+                                column_name3 int(2),                    --with value 100, output:100 (length=3)
+                                column_name1 int(3),                    --with value 43, output: 43 (length=2)
+                                column_name2 int(5) ZEROFILL            --with value 43, output: 00043 (length=5)
+                                );
+                        </textarea>
+                            <ul>
+                                <li>Storage size of INT type still is 4 bytes.</li>
+                                <li>With the value have length > n(2,3,5) , SQL still display the largest value.</li>
+                                <li>(3), (5) is not the maximum size for the column, but simply a parameter to tell SQL what width to display column.</li>
+                                <li>If none of argument has a supported large object(LOB) type, then the return type truncates to 8000 characters in length, regardless of the return type.</li>
+                                <li>Some SQL version don't support this type.</li>
+                            </ul>
+                    </ul>
+                <textarea rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT      CONCAT('Happy ', 'Birthday', 11, '/', 25) as result1,        --result1: Happy Birthday 11/25
+                                CONCAT('Happy ', 'Birthday', NULL, NULL) as result2,         --result2: Happy Birthday
+                </textarea>
+            </ul>
+        <h3 style="color:red">5) CONCAT_WS (with separator)</h3>
+            <ul>
+                <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    CONCAT_WS(separator, argument1, argument2 [, argumentN])
+                </textarea>
+                    <ul>
+                        <li><b>separator</b> : An expression of any character type (char, varchar, nchar, nvarchar)</li>
+                        <li><b>argument</b> : An expression of any character. CONCAT_WS() requires at least two arguments and no more than 254 arguments.</li>
+                        <li>Return type: String_value which length and type based on data input.</li>
+                    </ul>
+                <li>CONCAT_WS() ignores SET CONCAT_NULL_YIELDS_NULL{ON|OFF} setting. If receiving NULL values, it will return empty string of type VARCHAR(1).</li>
+                <textarea rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT      CONCAT(' - ','1 ', 'Name') as result1,                    --result1: 1 - Name
+                                CONCAT(' - ', '2', NULL, 'Birth date') as result2;        --result2: 2 - Birth date
+                </textarea>
+                <li>Use CONCAT to generate a list:</li>
+                <textarea rows= "12" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT  CONCAT_WS(',',database_id,recovery_model_desc,containment_desc,char(13))
+                        AS DatabaseInfo
+                    FROM sys.databases
+
+                    Output:
+                            DatabaseInfo
+                            ------------
+                            1,SIMPLE,NONE
+                            2,SIMPLE,NONE
+                            3,FULL,NONE
+                            4,SIMPLE,NONE
+                </textarea>
+                <li>You can use ISNULL function to handle NULL values.</li>
+                <textarea rows= "5" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT      CONCAT_WS( ',', database_id, ISNULL(recovery_model_desc,''),
+                                ISNULL(containment_desc,'N/A'),
+                                char(13)) AS DatabaseInfo
+                    FROM sys.databases;
+                </textarea>
+            </ul>
+        <h3 style="color:red">6) DIFFERENCE</h3>
+            <ul>
+                <li>Returns an integer value measuring the difference between the SOUNDEX() values of two different character expressions.</li>
+                <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    DIFFERENCE(character_expression, character_expression)
+                </textarea>
+                    <ul>
+                        <li>An alphanumeric of character data. character_expression can be a consonant, variable or column.</li>
+                        <li>Return type: int</li>
+                        <li>The returned value measures the degree that the SOUNDEX values match, <span style="color:red"><b>on a scale of 0 to 4.</b></span> </li>
+                        <li>0 indicates weak or no similarity between the SOUNDEX values, 4 indicates strongly similar, or even identically matching.</li>
+                        <li style="color:red"><b>DIFFERENCE and SOUNDEX have collation sensitivity.</b></li>
+                    </ul>
+                <textarea rows= "4" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT  SOUNDEX('Green') result1,                   --result1: G650
+                            SOUNDEX('Greene') result2,                  --result2: G650
+                            DIFFERENCE('Green', 'Greene') result3;      --result3: 4
+                </textarea>
+            </ul>
+        <h3 style="color:red">7) SOUNDEX</h3>
+            <ul>
+                <li>Returns a four-character (SOUNDEX) code to evaluate the similarity of two strings.</li>
+                <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SOUNDEX(character_expression)
+                </textarea>
+                    <ul>
+                        <li><b>character_expression</b>: is an alphanumeric expression of character data. It can be a constant, variable, or column.</li>
+                        <li><b>Return type</b>: VARCHAR</li>
+                    </ul>
+                <li>SOUNDEX() converts an alphanumeric string to a four-character code that is based on how the string sounds when spoken in English.</li>
+                <li>The first character of the code is the first character of character_expression converted to upper case.</li>
+                <li>The second through fourth characters of the code are numbers that represent the letters in the expression.</li>
+                <li>The letters A, E, I, O, U, H, W, Y are ignored unless they are the first letter of the string.</li>
+                <li>Zeros (0) are added at the end if necessary to produce a four-character code. See more in The SOUNDEX Indexing SYS.</li>
+                <li style="color:red"><b>SOUNDEX() is collation sensitive, string functions can be nested.</b></li>
+                <li>Under database compatibility level 110 or higher, SQL Server applies a more complete set of the rules.</li>
+                <li>After upgrading to compatibility or higher, you may need to rebuild the indexes, heaps, or CHECK constraints that use the SOUNDEX functin.</li>
+                    <ul>
+                        <li>A heap that contains a persisted computed column defined with SOUNDEX cannot be queried until it is rebuilt by running:</li>
+                            <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                ALTER TABLE table_name REBUILD;
+                            </textarea>
+                        <li>CHECK constraints defined with SOUNDEX are disabled upon upgrade. To enable the constraint, run the statement:</li>
+                            <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                ALTER TABLE table_name WITH CHECK CONSTRAIN ALL;
+                            </textarea>
+                        <li>Indexes (including index views) that contain a persisted computed column defined with SOUNDEX cannot be queried until the index is rebuilt:</li>
+                             <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                ALTER INDEX ALL ON object REBUILD;
+                            </textarea>
+                    </ul>
+                <textarea rows= "4" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT  SOUNDEX ('Smith') result1,              --result1: S530
+                            SOUNDEX ('Smythe') result2,             --result2: S530
+                            DIFFERENCE('Smith', 'Smythe') result3   --result3: 4
+                </textarea>
+            </ul>
+        <h3 style="color:red">8) FORMAT</h3>
+            <ul>
+                <li>Returns a value formatted with the specified format and optional culture.</li>
+                <li>For general data type conversions, use CAST or CONVERT.</li>
+                <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    FORMAT(value, format [, culture])
+                </textarea>
+                    <ul>
+                        <li><b>value</b> : Expression of a supported data type to format.</li>
+                        <li><b>format</b> : NVARCHAR format pattern.</li>
+                        <li><b>culture</b> : optional NVARCHAR argument specifying a culture.</li>
+                        <li>Return type: NVARCHAR or NULL</li>
+                        <li>If culture is not valid, FORMAT() will return NULL for error.</li>
+                    </ul>
+                <h4 style="color:blue"><b>* DATE FORMAT (see datetime type)</b></h4>
+                    <ul>
+                        <li style="color:red">If you just only want to return time value, ignore period and colon by escape character</li>
+                        <textarea rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            FORMAT('10:50', 'hh:mm')
+                            FORMAT(cast('10:50 as time),'hh\:mm)
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>* NUMERIC FORMAT</b></h4>
+                <table>
+                    <tr>
+                        <th>Format Specifier</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Example</th>
+                    </tr>
+                    <tr>
+                        <td>'C' or 'c'</td>
+                        <td>Currency</td>
+                        <td>A currency value</td>
+                        <td>format(123.456, 'c', 'en-US') -> $123.456 <br>
+                            format(123.456, 'c6', 'en-US') ->$123.456000</td>
+                    </tr>
+                    <tr>
+                        <td>'D' or 'd'</td>
+                        <td>Decimal</td>
+                        <td>Integer digits with optional negative sign</td>
+                        <td>format(123, 'D') -> 1234<br>
+                            format(-1234, 'D6') ->-001234</td>
+                    </tr>
+                    <tr>
+                        <td>'E' or 'e'</td>
+                        <td>Exponential (scientific)</td>
+                        <td>Exponential notation (precision default: 6)</td>
+                        <td>format(2.4343243, 'E') -> 2.434324E + 000<br>
+                            format(2.4343243, 'E3') -> 2.434E + 000</td>
+                    </tr>
+                    <tr>
+                        <td>'F' or 'f'</td>
+                        <td>Fixed-point</td>
+                        <td>Integral and decimal digits with optional negative sign.</td>
+                        <td>format(1234.567, 'F') -> 1234.57<br>
+                            format(1234.567, 'F4') -> 1234.5670</td>
+                    </tr>
+                    <tr>
+                        <td>'N' or 'n'</td>
+                        <td>Number</td>
+                        <td>Integral and decimal digits, group separators, and a decimal <br>
+                            separator with optional negative sign.</td>
+                        <td>format(1234.567, 'N', 'en-US') -> 1,234.57<br>
+                            format(-1234.567, 'N5', 'en-US') -> -1,234.56700</td>
+                    </tr>
+                    <tr>
+                        <td>'P' or 'p'</td>
+                        <td>Percent</td>
+                        <td>Number multiplied with 100 and displayed with a percent symbol.</td>
+                        <td>format(1234.567, 'P', 'en-US') -> 123,456.70%<br>
+                            format(-1234.567, 'P3', 'en-US') -> -123,456.700%</td>
+                    </tr>
+                    <tr>
+                        <td>'R' or 'r'</td>
+                        <td>Round-trip (types: single, double, bigInteger)</td>
+                        <td>A string that can round-trip to an identical number.</td>
+                        <td>format(1234.567, 'R') -> 1234.567</td>
+                    </tr>
+                    <tr>
+                        <td>'x' or 'X'</td>
+                        <td>Hexadecimal (type:int only)</td>
+                        <td>A hexadecimal string</td>
+                        <td>format(255, 'X') -> FF</td>
+                    </tr>
+                </table>
+                <h4 style="color:blue"><b>* CUSTOM NUMERIC FORMAT</b></h4>
+                    <table>
+                        <tr>
+                            <th>Format Specifier</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Examples</th>
+                        </tr>
+                        <tr>
+                            <td>0</td>
+                            <td>Zero Place holder (INT)</td>
+                            <td>Replace the zero with the corresponding digit if one is present.<br>
+                                Otherwise, zero appear in result string.</td>
+                            <td>format(132.45, '00000') -> 00132<br>
+                                format(12323,'000') ->12323<br>
+                                format(0.32, '000') ->000</td>
+                        </tr>
+                        <tr>
+                            <td>#</td>
+                            <td>Digit placeholder (INT)</td>
+                            <td>Replace the # symbol with the corresponding digit if one is present.<br>
+                                Otherwise, no digit appears in the result string.</td>
+                            <td>format(1234,'#####') ->1234</td>
+                        </tr>
+                        <tr>
+                            <td>.</td>
+                            <td>Decimal point</td>
+                            <td>Determines the location of the decimal separator in the result string.</td>
+                            <td>format(1.2345, '00.00') -> 1.24<br>
+                                format(1.2345, '##.###) -> 1.235</td>
+                        </tr>
+                        <tr>
+                            <td>,</td>
+                            <td>Group separator and number scaling.</td>
+                            <td>Serves as both a group separator and a number scaling specifier.<br>
+                                As a group separator, it inserts a localized group separator.<br>
+                                As a number scaling specifier, it divides a number by 1000 for <br>
+                                each comma specifier.</td>
+                            <td>Group separator specifier: <br>
+                                format(123456789, '#,#', 'en-US) ->123,456,789<br>
+                                Scaling specifier: <br>
+                                format(123456789, '#,#,', 'en-US) ->123,456</td>
+                        </tr>
+                        <tr>
+                            <td>%</td>
+                            <td>Percentage placeholder</td>
+                            <td>Multiplies a number by 100 and inserts a localized percentage symbol in result.</td>
+                            <td>format(0.35343, '%#.##', 'en-US) ->%35.34<br>
+                                format(0.35343, '00.00%', 'en-US) ->35.34%</td>
+                        </tr>
+                        <tr>
+                            <td>‰</td>
+                            <td>Per mile placeholder</td>
+                            <td>Multiplies a number by 1000 and inserts a localized per mile symbol in the result.</td>
+                            <td>format(0.35343, '‰#.###', 'en-US) ->‰353.43<br>
+                                format(0.35343, '00.00#‰', 'en-US) ->353.430‰</td>
+                        </tr>
+                        <tr>
+                            <td>'E0' or 'e0'<br>
+                                'E+0' or 'e+0'<br>
+                                'E-0' or 'e-0'</td>
+                            <td>Exponential notation</td>
+                            <td>'E' or 'e' indicates the case exponential notation.<br>
+                                The number 0 follow 'E' or 'e' determines the number of digits in exponent.<br>
+                                A (+ : positive) or (- : negative) is a sign always precedes the exponent.</td>
+                            <td>format(123456, '#0E - #0', 'en-US') -> 1234e-56<br>
+                                format(123456, '#0e + #0', 'en-US') -> 1234e+56</td>
+                        </tr>
+                        <tr>
+                            <td>\</td>
+                            <td>Escape character</td>
+                            <td>Causes the next character to be interpreted as a literal rather than as a custom<br>
+                                format specifier.</td>
+                            <td>format(12345, '\##\#') -> #12345#</td>
+                        </tr>
+                        <tr>
+                            <td>string</td>
+                            <td>Literal string delimiter</td>
+                            <td>Indicates that the enclosed characters should be copied to the result string unchanged.</td>
+                            <td>format(123,'# degrees') ->123 degrees</td>
+                        </tr>
+                        <tr>
+                            <td>;</td>
+                            <td>Section separator</td>
+                            <td>Defines sections with separate format strings for positive, negative and zero numbers.</td>
+                            <td>format(12, '#0.0#; (#0.0#); \0') ->12<br>
+                                format(-12, '#0.0#; (#0.0#); \0') ->(12)<br>
+                                format(0, '#0.0#; (#0.0#); \0') ->0</td>
+                        </tr>
+                    </table>
+            </ul>
+        <h3 style="color:red">9) LEFT</h3>
+            <ul>
+                <li>Returns the left part of a character string with the specified number of character.</li>
+                    <textarea rows= "3" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        LEFT(character_expression, integer_expression)
+                    </textarea>
+                        <ul>
+                            <li><b>character_expression</b> : is an expression of character or binary data. It can be constant, variable or column.</li>
+                            <li>character_expression can be of any data type, except text or ntex, that can be implicitly converted to varchar or nvarchar.</li>
+                            <li>Otherwise, use CAST or CONVERT function to explicitly convert character_expression.</li>
+                            <li><b>Integer_expression</b> : is a positive integer that specifies how many characters of the character_expression wil be returned.</li>
+                            <li>Return type: varchar or nvarchar</li>
+                            <li>When using SC collation, integer_expression parameter counts a UTF-16 surrogate pair as one character.</li>
+                        </ul>
+                    <textarea rows= "4" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                        SELECT  LEFT(name, 4),
+                                LEFT('This is a text', 5);
+                        FROM Production.Product;
+                    </textarea>
+            </ul>
+        <h3 style="color:red">10) LEN</h3>
+            <ul>
+                <li>Returns the number of characters of the specified string expression, excluding trailing spaces.</li>
+                <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    LEN(string_expression)
+                </textarea>
+                    <ul>
+                        <li>string_expression: can be a constant, variable or column.</li>
+                        <li>Data type: bigint if expression are varchar(max), nvarchar(max) or varbinary(max). Otherwise INT</li>
+                        <li>If you use SC collation, the returned value count UTF16 surrogate pairs as a single character.</li>
+                        <li>LEN exclude the spaces, if it's problem, use DATALENGTH which does not trim the string.</li>
+                        <li>If processing a unicode string, DATALENGTH return a number that may not equal to the number of characters.</li>
+                    </ul>
+                <textarea rows= "9" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    DECLARE     @v1 VARCHAR(40),
+                                @v2 NVARCHAR(40);
+                    Set @v1 = 'Test of 22 characters.'
+                        @v2 = 'Test of 22 characters.'
+                    SELECT  LEN(@v1),
+                            LEN(@v2),
+                            DATALENGTH(@v1),
+                            DATALENGTH(@v2);
+                </textarea>
+            </ul>
+        <h3 style="color:red">11) LOWER</h3>
+            <ul>
+                <li>Returns a character expression after converting uppercase character data to lowercase.</li>
+                <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    LOWER(character_expression);
+                </textarea>
+                    <ul>
+                        <li>character_expression: constant, variable or column.</li>
+                        <li>character_expression must be of a data type that is implicitly convertible to varchar.Otherwise, use CAST or CONVERT.</li>
+                        <li>Return type: varchar or nvarchar.</li>
+                    </ul>
+                <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT LOWER('ABC');   --output:abc
+                </textarea>
+            </ul>
+        <h3 style="color:red">12) LTRIM</h3>
+            <ul>
+                <li>Returns a character expression after it removes leading blanks.</li>
+
+                <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    LTRIM(character_expression);
+                </textarea>
+                <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT LTRIM('      ABC');   --output:ABC
+                </textarea>
+            </ul>
+        <h3 style="color:red">13) NCHAR</h3>
+            <ul>
+                <li>Returns the Unicode character with the specified integer code, as defined by the Unicode standard.</li>
+                <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    NCHAR(integer_expression)
+                </textarea>
+                    <ul>
+                        <li>When the collation of the database does not contain the SC(supplementary character) flag, range integer from 0 to 65535 (0 through 0xFFFF)</li>
+                        <li>When the collation of the database supports the SC flag, the range from 0 through 1114111 (0 through 0x10FFFF).</li>
+                        <li>If the value out of these ranges, NULL will return.</li>
+                        <li>Return type: nchar(1) without SC, and nvarchar(2) with SC.</li>
+                    </ul>
+                <textarea rows= "9" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    DECLARE     @string NCHAR(7), @position int;
+                    SELECT      @string = 'Ba#rker',
+                                @position = 1;
+                    WHILE @position <= DATALENGTH(@string)
+                        BEGIN
+                            SELECT  @position as position,
+                                    UNICODE(SUBSTRING(@string, @position, 1) as Unicode_value,
+                                    NCHAR(UNICODE(SUBSTRING(@string, @position, 1) as Nchar_value;
+                </textarea><br>
+                <img src="{% static 'IMG\Screenshot 2021-09-15 000902.png'%}" width="400" height="300">
+            </ul>
+        <h3 style="color:red">14) PATINDEX</h3>
+            <ul>
+                <li>Returns the starting position of the first occurrence of a pattern in a specified expression, or zeros if the pattern is not found.</li>
+                <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    PATINDEX('%pattern%', expression)
+                </textarea>
+                    <ul>
+                        <li><b>pattern</b> : is a character expression that contains the sequence to be found. Wildcard characters can be used.<br>
+                        However the % character must come before and follow pattern (except when you search for first or last character)</li>
+                        <li>pattern is an expression of the character string data type category, and is limited to 8000 characters.</li>
+                        <li>expression : typically a column that is searched for the specified pattern and is of the character string data type category.</li>
+                        <li>Return type: bigint if expression is of the varchar(max), nvarchar(max), otherwise int.</li>
+                        <li>If pattern is NULL, PATINDEX is also NULL.</li>
+                        <li>the starting position for PATINDEX is 1.</li>
+                        <li>PATINDEX perform comparison based on the collation of the input, you can use COLLATE to apply an explicit collation to the input.</li>
+                        <li>When using SC collation, the return value will count any UTF-16 surrogate pairs as a single character.</li>
+                        <li>CHAR(0) (0x0000) is an undefined character in Windows collations and can not be included in PATINDEX.</li>
+                    </ul>
+                <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    PATINDEX('%^[0-9A-z ]', 'This is a text!')      --output:15
+                </textarea>
+            </ul>
+        <h3 style="color:red">15) QUOTENAME</h3>
+            <ul>
+                <li>Returns a Unicode string with the delimiters added to make the input string a valid SQL Server delimited identifier.</li>
+                <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    QUOTENAME('character_string' [, 'quote_character']
+                </textarea>
+                    <ul>
+                        <li><b>character_string</b> : Is a string of Unicode character data. Character_string is sysname and is limited to 128 characters.</li>
+                        <li>Inputs greater than 128 character will return NULL.</li>
+                        <li><b>quote_character</b> : is a one-character string to use as identifier. It can be:</li>
+                            <ul>
+                                <li>single quotation (')</li>
+                                <li>double quotation(")</li>
+                                <li>left or right parentheses (())</li>
+                                <li>greater than or less than (><)</li>
+                                <li>left or right brace ({})</li>
+                                <li>a backtick (`)</li>
+                                <li>If quotation is not specified, brackets are used.</li>
+                                <li>NULL return if an unacceptable character is supplied.</li>
+                                <li style="color:red">If you add the same quote_character inside the character_string, the left sign will be a literal character,<br>
+                                    but the right sight will double number of character. Or total quote_character = number of quote_character * 2 + 2</li>
+                                    <textarea rows= "5" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                        SELECT  QUOTENAME('abc[]def'),      --output: [abc[]]def]
+                                                QUOTENAME('abc()def',')'),  --output: (abc())abc)
+                                                QUOTENAME(']'),             --output:[]]] (length=1*2+2)
+                                                QUOTENAME(']]'),            --output:[]]]]] (length = 2*2 +2)
+                                    </textarea>
+                                <li>Back from the output results, the double of the right quote_characters indicate the escape characters.</li>
+                                <li style="color:blue"><b>QUOTENAME SPECIAL single_quote(') escape character: Just use with different quote_character.</b></li>
+                                    <ul>
+                                        <li>When using single-quote(') as a quote_character, you have to add two singe-quotes as quote_character('''') </li>
+                                        <li>And when you use single-quote inside character_string, use two single-quote('') which SQL Server will treat as literal character.</li>
+                                        <textarea rows= "4" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                            DECLARE @columnName NVARCHAR(255)='user''s "custom" name'
+                                            SELECT  QUOTENAME(@columnName)                  --output: [user's "custom" name]
+                                                    QUOTENAME(@columnName, '"')             --output: ["user's "custom" name"]
+                                        </textarea>
+                                    </ul>
+                            </ul>
+                        <li>Return type: nvarchar(258)</li>
+                    </ul>
+            </ul>
+        <h3 style="color:red">16) REPLACE</h3>
+            <ul>
+                <li>Replaces all occurrences of a specified string value with another value.</li>
+                <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    REPLACE(string_expression, string_pattern, string_replacement)
+                </textarea>
+                    <ul>
+                        <li><b>string_expression</b> : expression to be searched and can be of a character or binary type.</li>
+                        <li><b>string_pattern</b> : is the sub-string to be found and can be of a character or binary type.</li>
+                        <li>string_pattern must not exceed the maximum number of bytes that fits on a page. If it's a empty(''), string_expression return unchanged.</li>
+                        <li><b>string_replacement</b> : is the replacement string and can be of a character or binary type.</li>
+                        <li>return type: nvarchar if input arguments is of the nvarchar data type. Otherwise, varchar</li>
+                        <li>REPLACE performs comparisons based on the collation of the input. You can use COLLATE to apply an explicit collation.</li>
+                    </ul>
+                <textarea rows= "4" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT
+                        REPLACE('This is a case study!', 'this', 'Object')                      --output:Object is a case study.
+                        REPLACE('This is a test' COLLATE Latin1_General_BIN, 'test', 'desk')    --output: This is a desk
+                </textarea>
+                <li>With the spaces in expression, REPLACE'S not count the space at the end of expression.</li>
+                <textarea rows= "7" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    DECLARE @str varchar(100), @len1 int, @len2 int;
+                    SET @str = 'This is an example of replace function.         '
+                    SET @len1 = len(@str);
+                    SET @str = REPLACE(@str, ' ','');
+                    SET @len2 = len(@str);
+                    SELECT @len1-@len2 as spaces_number;        --output:6
+                </textarea>
+            </ul>
+        <h3 style="color:red">17) REPLICATE</h3>
+            <ul>
+                <li>Repeats a string value a specified number of times.</li>
+                <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    REPLICATE(string_expression, integer_expression)
+                </textarea>
+                    <ul>
+                        <li><b>string_expression</b> : is an expression of a character string or binary data type.</li>
+                        <li><b>integer_expression</b> : is an integer type, if it's negative, return NULL.</li>
+                        <li>Return type: string expression.</li>
+                    </ul>
+                <textarea rows= "14" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    IF EXISTS   (SELECT * FROM sys.tables
+                                    WHERE name = 't1')
+                    DROP TABLE t1;
+                    GO
+                    CREATE TABLE t1 (
+                            c1 VARCHAR(3),
+                            c2 CHAR(3));
+                    GO
+                    INSERT INTO t1 VALUES   ('2', '2'),
+                                            ('37', '37'),
+                                            ('597', '597');
+                    SELECT REPLICATE('0', 3-datalength(c1)) + c1 as 'varchar_column',
+                            REPLICATE('0', 3-datalength(c2)) + c2 as 'char_column';
+                </textarea>
+                <pre>
+                    Varchar Column        Char Column
+                    --------------------  ------------
+                    002                   2
+                    037                   37
+                    597                   597
+
+                    (3 row(s) affected)
+                </pre>
+            </ul>
+        <h3 style="color:red">18) REVERSE</h3>
+            <ul>
+                <li>Returns the reverse order of a string value.</li>
+                <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    REVERSE(string_expression)
+                </textarea>
+                <li><b>string_expression</b> : string or binary type, can be constant, variable or column.</li>
+                <li>Return type: varchar or nvarchar.</li>
+                <li>string_expression must be of a data type that is implicitly convertible to varchar. Otherwise, use CAST or CONVERT.</li>
+                <li>When using SC collation, the REVERSE function will not reverse two halves of surrogate pair.</li>
+                <textarea rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    DECLARE @var varchar(10) = 'sdrawkcaB';
+                    SELECT REVERSE(@var) as 'reverse_case';     --output: Backwards
+                </textarea>
+            </ul>
+        <h3 style="color:red">19) RIGHT</h3>
+            <ul>
+                <li>Returns the right part of a character string with the specified number of characters.</li>
+                <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    RIGHT(character_expression, integer_expression)
+                </textarea>
+                <li>character_expression: character or binary type, and can be a constant, variable and column.</li>
+                <li>text and ntext can be implicitly converted to varchar or nvarchar. Otherwise, use CAST or CONVERT.</li>
+                <li>integer_expression: positive integer that specifies how many characters will be returned. Error return if negative number.</li>
+                <li>Return type: varchar(non-Unicode) and nvarchar(Unicode)</li>
+                <li>When using SC collation, UTF-16 will be count as single character.</li>
+                <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    RIGHT('black hole', 4)   --output: black
+                </textarea>
+            </ul>
+        <h3 style="color:red">20) RTRIM</h3>
+            <ul>
+                <li>Returns a character string after truncating all trailing spaces.</li>
+                <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    RTRIM(character_expression)
+                </textarea>
+                <li>character_expression : character or binary data type, can be a constant, variable or column.</li>
+                <li>With other data type, use CAST or CONVERT.</li>
+                <li>Return type: varchar or nvarchar.</li>
+                <textarea rows= "4" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    DECLARE @string_to_trim VARCHAR(60) = 'Four spaces are after the period in this sentence.    ';
+                    SELECT  RTRIM(@string_to_trim) + ' Next string:'
+                    --Output: Four spaces are after the period in this sentence. Next string:
+                </textarea>
+            </ul>
+        <h3 style="color:red">21) SPACE</h3>
+            <ul>
+                <li>Returns a string of repeated spaces.</li>
+                <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SPACE(integer_expression)
+                </textarea>
+                <li>integer_expression: positive integer that indicates the number of spaces. NULL return if negative integer.</li>
+                <li>Return type: varchar</li>
+                <li>To include spaces in Unicode daa, or to return more than 8000 characters spaces, use REPLICATE instead of SPACE.</li>
+                <textarea rows= "3" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT 'First_name' + SPACE(1) + 'and Last_name';
+                    --output: First_name and Last_name
+                </textarea>
+            </ul>
+        <h3 style="color:red">22) STR</h3>
+            <ul>
+                <li>Returns character data converted from numeric data. The character data is right-justify, with a specified length and decimal precision.</li>
+                <textarea rows= "2" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    STR(float_expression, [, length[, decimal]])
+                </textarea>
+                    <ul>
+                        <li><b>float_expression</b> : is an expression of approximate numeric(float) data type with a decimal point.</li>
+                        <li><b>length</b> : (or precision) is the total length. This include decimal point, sign, digit and space. THE DEFAULT is 10.</li>
+                        <li><b>decimal</b> : Is the number of places to the right of the decimal point. It must be <=16. If decimal >16, the result will truncate to 16.</li>
+                        <li>Return type: varchar.</li>
+                    </ul>
+                <li>If supplied, the length and decimal should be positive.</li>
+                <li>If the decimal greater than input expression, the result will add 0 at the end.</li>
+                <li>The number will process with INT PART if the decimal is not supply or =0.</li>
+                <li>If the length > the length of INT value, the return will add spaces at the first.</li>
+                <li>If the length < the length of INT value, the return will set to  **</li>
+                <li>If the input can not implicitly convert to float, the error will be raise.</li>
+                <textarea rows= "7" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT  STR('123.456', 5, 2),                   --output: 123.4 (length and decimal > 0)
+                            STR('123.456', 8, 4),                   --output: 123.4560 (add 0 to the end)
+                            STR('123.456',3)                        --output: 123
+                            REPLACE(STR('123.456', 5), ' ', 'A'))   --output: AA123(check spaces)
+                            STR('123.456', 2),                      --output: ** (length < length of INT)
+                            STR('road');        --expression can not convert to float. Raise error
+                </textarea>
+            </ul>
+        <h3 style="color:red">23) STRING_AGG</h3>
+            <ul>
+                <li>Concatenates the values of string expression and places separator values between them.</li>
+                <li style="color:red">The separator is not added at the end of string. That means you can not set the new line with char(10) or char(13).</li>
+                <textarea rows= "4" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    STRING_AGG(expression, separator) [order_clause]
+                        (order_clause :: =
+                            WITHIN GROUP(ORDER BY expression_list [ASC|DESC])
+                </textarea>
+                <ul>
+                    <li><b>expression</b> : is an expression of any type and are implicitly converted to varchar or nvarchar type. Non-string are converted to nvarchar.</li>
+                    <li><b>separator</b> : varchar or nvarchar type that is used as separator for concatenated strings and can be a literal or VARIABLE.</li>
+                    <li>order_clause: optionally specify order of concatenated results using WITHIN GROUP clause.</li>
+                    <li>expression_list: a list of non-constant expressions used for sorting results. Only one expression is allowed per query. The default is ascending.</li>
+                    <li>Return type: depends on expression (varchar(max), nvarchar(max), varchar(8000), nvarchar(4000))</li>
+                </ul>
+                <li style="color:red">STRING_AGG is an aggregate function that take all expressions from rows and concatenates them into a single string.</li>
+                <li>NULL values are ignored and the corresponding separator is not added. Use ISNULL to placeholder NULL values.</li>
+                <li>Using ORDER_CLAUSE</li>
+                <textarea rows= "8" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT  top 10  City,
+                                    STRING_AGG(convert(NVARCHAR(max), EmailAddress), ';')
+                                        WITHIN GROUP(ORDER BY EmailAddress) as emails
+                    FROM Person.BusinessEntityAddress as BEA
+                    INNER JOIN Person.Address as A ON BEA.AddressID = A.AddressID
+                    INNER JOIN Person.EmailAddress as EA ON BEA.AddressID = EA.BusinessEntityID
+                    Group by City;
+                </textarea>
+            </ul>
+        <h3 style="color:red">24) STRING_ESCAPE</h3>
+            <ul>
+                <li>Escapes specials characters in texts and returns text with escaped characters. It's a DETERMINISTIC function.</li>
+                <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    STRING_ESCAPE(text, type)
+                </textarea>
+                    <ul>
+                        <li><b>text</b> : is a nvarchar expression obtaining the object that should be escape.</li>
+                        <li><b>type</b> : Escaping rules that will be applied. Currently the value supported is JSON.</li>
+                        <li>Return type: nvarchar(max) text with escaped special and control characters. Currently can only escape JSON character shown as:</li>
+                        <table>
+                            <tr>
+                                <th>Special Character</th>
+                                <th>Encoded Sequence</th>
+                            </tr>
+                            <tr>
+                                <td>Quotation mark(")</td>
+                                <td>\"</td>
+                            </tr>
+                            <tr>
+                                <td>Reverse solidus(\)</td>
+                                <td>\\</td>
+                            </tr>
+                            <tr>
+                                <td>Solidus</td>
+                                <td>\/</td>
+                            </tr>
+                            <tr>
+                                <td>Backspace</td>
+                                <td>\b</td>
+                            </tr>
+                            <tr>
+                                <td>Form feed</td>
+                                <td>\f</td>
+                            </tr>
+                            <tr>
+                                <td>New line</td>
+                                <td>\n</td>
+                            </tr>
+                            <tr>
+                                <td>Carriage return</td>
+                                <td>\r</td>
+                            </tr>
+                            <tr>
+                                <td>Horizontal tab</td>
+                                <td>\t</td>
+                            </tr>
+                            <tr>
+                                <td>CHAR(0)</td>
+                                <td>\u0000</td>
+                            </tr>
+                            <tr>
+                                <td>...</td>
+                                <td>...</td>
+                            </tr>
+                            <tr>
+                                <td>CHAR(31)</td>
+                                <td>\u001f</td>
+                            </tr>
+                        </table><br>
+                    </ul>
+                <textarea rows= "3" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT('\   /
+                    \\  "   ', 'json')
+                </textarea>
+                <pre>
+                        escapedText
+                        -------------------------------------------------------------
+                        \\\t\/\n\\\\\t\"\t
+                </pre>
+                <h4 style="color:blue"><b>* FORMAT JSON Object</b></h4>
+                    <ul>
+                        <li>Creates JSON text from number and string variables, and escapes any special JSON character in variables.</li>
+                        <textarea rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            SET @json = FORMATMESSAGE('{ "id": %d , "name": "%s", "surname": "%s" }',
+                                            17, STRING_ESCAPE(@name, 'json', STRING_ESCAPE(@surname, 'json') );
+                        </textarea>
+                    </ul>
+            </ul>
+        <h3 style="color:red">25) STRING_SPLIT</h3>
+            <ul>
+                <li>A TABLE-VALUED FUNCTION that splits a string into rows of substrings, based on a specified separator character.</li>
+                <li>STRING_SPLIT requires compatibility to level 130, when level is less than, you cannot find the STRING_SPLIT function.</li>
+                <li>To see compatibility level, do a command:</li>
+                <textarea rows= "3" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT compatibility_level
+                    FROM sys.databases;
+                </textarea>
+                <li>And set the compatibility_level as you want:</li>
+                <textarea rows= "3" cols="80" style="color:#1F0221; font-family:Times New Roman">
+                    ALTER DATABASE database_name
+                    SET compatibility_level = 150 | 140| 130| 120| 110| 90 (use one of these)
+                </textarea>
+                <li> (see supported compatibility level at https://docs.microsoft.com/en-us/sql/t-sql/statements/alter-database-transact-sql-compatibility-level?view=sql-server-ver15</li>
+                <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    STRING_SPLIT(string, separator)
+                </textarea>
+                    <ul>
+                        <li><b>string</b> : is an expression of any character type (char, varchar, nchar, nvarchar)</li>
+                        <li><b>separator</b> : is a single character expression of any character type (nvarchar(1), varchar(1), char(1) or nchar(1))</li>
+                        <li>Return type: return a single column table whose contains the substring of string.</li>
+                        <li>The name of the output column is call VALUE.</li>
+                        <li>You can override the sort order by using :</li>
+                        <textarea rows= "4" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT *
+                            FROM STRING_SPLIT(expression, separator)
+                            ORDER BY value ASC| DESC;
+                        </textarea>
+                        <li>CHAR(0) (0x0000) is an undefined character in Windows collations and cannot be included in STRING_SPLIT</li>
+                        <li>Avoiding substring with zero-length, you can use :</li>
+                        <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            WHERE value <> ' ';
+                        </textarea>
+                        <li>If string is NULL, result is empty table.</li>
+                    </ul>
+                <textarea rows= "5" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    DECLARE @tags NVARCHAR(400) = 'clothing, road,, touring, bike'
+                    SELECT value
+                    FROM STRING_SPLIT(@tags)
+                    WHERE value <> '';
+                </textarea><br>
+                <textarea rows= "6" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT ProductId, name, value
+                    FROM Product
+                        CROSS APPLY STRING_SPLIT(Tags, ',');
+                    -- Tags is a column in Product table. CROSS APPLY combine each row in STRING_SPLIT(tvf)
+                    with each row matched in Product table.
+                </textarea>
+                <li>Aggregation by value</li>
+                <textarea rows= "8" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT  VALUE as name,
+                            COUNT(*) as number
+                    FROM Product
+                        CROSS APPLY STRING_SPLIT(Tags, ',')
+                    GROUP BY VALUE
+                        HAVING COUNT(*) > 2
+                    ORDER BY COUNT(*) DESC;
+                </textarea>
+                <li>Search by value</li>
+                <textarea rows= "8" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT  ProductID, name, value
+                    FROM Product
+                        CROSS APPLY STRING_SPLIT(Tags, ',')
+                    WHERE value in ('clothing', 'road')
+                    --Or WHERE value = 'clothing'
+                </textarea><br>
+                <textarea rows= "8" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        SELECT  ProductID, name, Tags
+                        FROM Product
+                        WHERE 'clothing' IN (SELECT value FROM STRING_SPLIT(Tags, ','));
+                    Or
+                        SELECT *
+                        FROM Product
+                        WHERE EXISTS (SELECT * FROM STRING_SPLIT(Tags, ',') WHERE value = 'clothing')
+                </textarea>
+                <h4 style="color:blue"><b>* Find row by list of values and dynamic SQL </b></h4>
+                    <ul>
+                        <textarea rows= "4" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT * FROM Product
+                            JOIN STRING_SPLIT('1,2,3', ',')
+                            ON value = ProductID;
+                        </textarea>
+                        <li>With an anti-pattern can involve the creation of a dynamic SQL, you can use LIKE operator as:</li>
+                        <textarea rows= "4" cols="80" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT * FROM Product
+                            WHERE ('1,2,3') like '%, + CAST(ProductID AS VARCHAR(10) + ,%'
+                            ON value = ProductID;
+                        </textarea>
+                    </ul>
+            </ul>
+        <h3 style="color:red">26) STUFF</h3>
+            <ul>
+                <li>The STUFF function inserts a string into another string. It deletes a specified length of character at the specified <br>
+                    position in the string_expression and insert the new string into string_expression at the specified position.</li>
+                <textarea rows= "2" cols="80" style="color:#1F0221; font-family:Times New Roman">
+                    STUFF(character_expression, start, length, replaceWith_expression)
+                </textarea>
+                    <ul>
+                        <li><b>character_expression</b> : character or binary data and can be a constant, variable or column</li>
+                        <li><b>start</b> : is an integer value specified location that deletion and insertion. start must be positive and <br>
+                            inside the range of character_expression's length. Otherwise, NULL will be returned.</li>
+                        <li><b>length</b> : is an integer value that specified the number of character to delete. If length is exceed of character_length, deletion delete to first character.</li>
+                        <li><b>replaceWith_expression</b> : character or binary type and can be a constant, variable or column to insert into start position.<br>
+                        It provides NULL as an option to remove character without insert anything.</li>
+                        <li>Return type: character_expression or binary data. If the resulting returned is larger than supported by return type, the error will be raise.</li>
+                        <li>With SC collation, surrogate pairs is single character.</li>
+                    </ul>
+                <textarea rows= "2" cols="80" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT STUFF('abcdef', 2, 3, 'ijklmn');  --Output: abijklmnef
+                </textarea>
+            </ul>
+        <h3 style="color:red">27) SUBSTRING</h3>
+            <ul>
+                <li>Returns part of a character, binary, text or image expression in SQL Server.</li>
+                <textarea rows= "2" cols="80" style="color:#1F0221; font-family:Times New Roman">
+                    SUBSTRING(expression, start, length)
+                </textarea>
+                    <ul>
+                        <li><b>expression</b> : is a character, binary, text or image expression.</li>
+                        <li><b>start</b> : Is an integer or bigint value that specifies where the returned character start.(Begin with 1)</li>
+                        <li><b>length</b> : is a positive int or bigint that specifies the number of character will be returned. Error will be raised if length < 0</li>
+                        <li style="color:red"><b>If the start less than 1, the number character returned is the largest value of start + length -1.</b></li>
+                        <li style="color:red"><b>If start + length is greater than length of expression, all value from the start will be returned.</b></li>
+                        <li>When using SC collation, surrogate pairs is counted as a single character.</li>
+                        <li>Return type: text is returned as varchar, image returned as varbinary. Otherwise, return string based on input data.</li>
+                    </ul>
+                <textarea rows= "5" cols="80" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT  SUBSTRING('This is a case.', 6, 4),     --Output: 'is a'
+                            SUBSTRING('This is a case.', 2, 20),    --Output: 'his a case.'
+                            SUBSTRING('This is a case.', -2, 2),    --Output: '' (-2+2-1 = -1)
+                            SUBSTRING('This is a case.', -2, 4 );   --Output: 'T' (-2+4-1 = 1)
+                </textarea>
+            </ul>
+        <h3 style="color:red">28) TRANSLATE</h3>
+            <ul>
+                <li>Returns the string provided as a first argument after some characters specifies in second argument are translate into a destination set of characters specified in the third argument.</li>
+                <textarea rows= "2" cols="80" style="color:#1F0221; font-family:Times New Roman">
+                    TRANSLATE(input_String, characters, translations)
+                </textarea>
+                    <ul>
+                        <li><b>input_String</b> : is the string_expression to be searched. char, varchar, nchar, nvarchar.</li>
+                        <li><b>characters</b> : is the characters should be replaced.</li>
+                        <li><b>translations</b> : is the replacement characters. Data types and length must be same as characters.</li>
+                        <li>Return type: same as input_String.</li>
+                        <li>Return NULL if character and translation are different length or one of arguments is NULL</li>
+                        <li>The behavior of TRANSLATE is similar to REPLACE. However, TRANSLATE can replace a single value in the character<br>
+                            argument multiple times in input_String.</li>
+                            <textarea rows= "3" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                                SELECT  TRANSLATE('2*[3+4]/{7-2}', '[]{}', '()()');
+                                --Output: 2*(3+4)/(7-2)
+                            </textarea>
+                        <li>It similar to :</li>
+                            <textarea rows= "9" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                                SELECT  REPLACE(
+                                            REPLACE(
+                                                REPLACE(
+                                                    REPLACE('2*[3+4]/{7-2}', '[', '(')
+                                                , ']', ')')
+                                            , '{', '(')
+                                        , '}', ')')
+                                            ;       --Output: 2*(3+4)/(7-2)
+                            </textarea>
+                        <li>TRANSLATE is always SC collation aware.</li>
+                        <textarea rows= "5" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT  TRANSLATE('[''1'' : ''item''], [''2'' : ''Grocery''], '[:]', {:}),
+                                    TRANSLATE('[''1'' ''item''], [''2'' ''Grocery''], '[ ]', {:});
+                            --Output:   {'1': 'item'}, {'2': 'Grocery'}
+                                        {'1': 'item'}, {'2': 'Grocery'}
+                        </textarea>
+                    </ul>
+            </ul>
+        <h3 style="color:red">29) TRIM</h3>
+            <ul>
+                <li>Removes the space character char(32) or other specified characters from the start and ending of a string.</li>
+                <h4 style="color:blue"><b>* Syntax for SQL Server and Azure SQL</b></h4>
+                    <ul>
+                        <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            TRIM( [characters FROM] string)
+                        </textarea>
+                    </ul>
+
+                <h4 style="color:blue"><b>* Syntax for Azure Synapse Analytics.</b></h4>
+                    <ul>
+                        <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            TRIM(string)
+                        </textarea>
+                    </ul>
+                    <ul>
+                        <li><b>characters</b> : is a literal, variable or function call NON-LOB character type(nvarchar, varchar, char, nchar)<br>
+                        containing character should be removed. NVARCHAR(MAX) and VARCHAR(MAX) aren't allowed.</li>
+                        <li><b>string</b> : char, nchar, varchar or nvarchar where character should be removed.</li>
+                        <li><b>Return type: type of string argument. If input string is NULL, return NULL.</b></li>
+                        <li>By default, TRIM is equivalent to LTRIM and RTRIM.</li>
+                    </ul>
+                    <textarea rows= "5" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                        SELECT  TRIM(',.! ' FROM '     #     test.') result1,
+                                TRIM('    #   test   .  ') result2;
+                        --result1: #     test
+                        --result2: #     test   .
+                    </textarea>
+            </ul>
+        <h3 style="color:red">30) UNICODE</h3>
+            <ul>
+                <li>Returns integer value, as defined by Unicode Standard, for the first character of the input expression.</li>
+                <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    UNICODE('nCharacter_expression')
+                </textarea>
+                <li><b>nCharacter_expression</b> : is an NCHAR or NVARCHAR expression.</li>
+                <li>Return type : INT</li>
+                <li>In SQL Server earlier than 2012, UNICODE function returns a UCS-2 codepoint in the range 000000 through 00FFFF <br>
+                    which is capable of representing the 65,535 characters in the Unicode Basic Multilingual Plane (BMP). When using 2012 version<br>
+                    with Supplementary Character (SC) enable collations, UNICODE function returns a UTF-16 codepoint in the range 000000 through 10FFFF</li>
+                <textarea rows= "13" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    DECLARE @position int, @nString nchar(12)
+                    SET @position =1;
+                    SET @nString = N'Åkergatan 24;
+                    Print 'Character #' + ' ' + 'Unicode Character' + ' ' + 'UNICODE Value';
+                    WHILE @position <= len(@nString)
+                    BEGIN
+                        SELECT
+                            @position,
+                            SUBSTRING(@nString, @position, 1) 'Unicode_Character',
+                            UNICODE(SUBSTRING(@nString, @position, 1) 'Unicode_value';
+                        SET @position = @position + 1;
+                    END
+                </textarea>
+                <pre>
+                    Character #     Unicode Character   UNICODE Value
+
+                        ----------- ----------------- -----------
+                        1           Å                 197
+                        ----------- ----------------- -----------
+                        2           k                 107
+                        ----------- ----------------- -----------
+                        3           e                 101
+                        ----------- ----------------- -----------
+                        4           r                 114
+                        ----------- ----------------- -----------
+                        5           g                 103
+                        ----------- ----------------- -----------
+                        6           a                 97
+                        ----------- ----------------- -----------
+                        7           t                 116
+                        ----------- ----------------- -----------
+                        8           a                 97
+                        ----------- ----------------- -----------
+                        9           n                 110
+                        ----------- ----------------- -----------
+                        10                            32
+                        ----------- ----------------- -----------
+                        11          2                 50
+                        ----------- ----------------- -----------
+                        12          4                 52
+                </pre>
+            </ul>
+        <h3 style="color:red">31) UPPER</h3>
+            <ul>
+                <li>Returns a character expression with lowercase character data converted to uppercase.</li>
+                <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    UPPER(character_expression)
+                </textarea>
+                <li><b>character_expression</b> : can be a constant, variable or column of either character or binary type.</li>
+                <li>Return type: varchar or nvarchar</li>
+                <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                    SELECT  UPPER(TRIM('This is a              )) 'upper_case'  --Output: THIS IS A
+                </textarea>
+            </ul>
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

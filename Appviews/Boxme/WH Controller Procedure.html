@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <style>
+        h2 {color: blue;}
+        h3 {color: red}
+        h5 {color: #8F3A84}
+    </style>
+    <meta charset="UTF-8">
+    <title>WAREHOUSE CONTROLLER</title>
+</head>
+<body>
+<fieldset>
+    <legend><h2>QUY TRÌNH KIỂM SOÁT KHO</h2></legend>
+    <h3>I. CÔNG TÁC CHUẨN BỊ VÀ TIẾP NHẬN THÔNG TIN</h3>
+    <ul>
+        <li>Chuẩn bị công cụ dụng cụ cần thiết phục vụ cho công việc hàng ngày (xe nâng, pallet, tay kéo, bao tay bảo hộ…).</li>
+        <li>Tiếp nhận thông tin và các yêu cầu từ các bộ phận liên quan (nếu có) về công việc hàng ngày.</li>
+        <li>Họp định kỳ để phân công, sắp xếp nhân sự, đề xuất giải pháp để giải quyết các vấn đề liên quan tới công việc hàng ngày.</li>
+        <li>Ghi nhận, phản ánh thông tin liên quan tới hoạt động kho cho người quản lý trong các cuộc họp định kỳ.</li>
+    </ul>
+    <h3>II. PUT AWAY - LÊN TỒN HÀNG HÓA</h3>
+    <ul>
+        <li>Tiếp nhận thông tin và hàng hóa bàn giao từ Checker theo <b>sổ bàn giao lên tồn</b></li>
+        <ul>
+            <ul>
+                <li>Ngày tháng</li>
+                <li>Mã Shipment/ bảng kê</li>
+                <li>Số lượng mã Barcode sản phẩm</li>
+                <li>Số lượng sản phẩm</li>
+                <li>Tình trạng SM/ PA</li>
+                <li>Ký xác nhận</li>
+            </ul>
+        </ul>
+        <li>Lên tồn hàng hóa đã được xử lý, giải quyết ngay lập tức khi phát sinh chênh lệch về số lượng, chất lượng hàng hóa khi bàn giao và lập biên bản khi không giải quyết được.</li>
+        <li>Đưa ra yêu cầu cần thiết và làm việc với các bộ phận liên quan về hàng hóa khi bàn giao.</li>
+        <li>Lên tồn theo vị trí ưu tiên, sắp xếp thuận tiện cho việc lấy hàng.</li>
+        <li>Sử dụng thành thạo các tính năng hệ thống để hỗ trợ cho công việc hàng ngày: gom hàng, vị trí ưu tiên, ...</li>
+        <ul>
+            <h4 style="font-size: 30px">Bước 1: Vào PDA &rarr; Lưu kho</h4>
+                <img src="{% static 'IMG/receiving_198_1.png'%}">
+                <img src="{% static 'IMG/put_away_198_1.png'%}">
+            <ul>
+                <li><b>Nếu là hàng nhập chờ lưu kho:&rarr; </b><span style="font-size: 30px">Nhập Kho</span></li>
+                <li><b>Nếu là hàng hoàn chờ lưu kho:&rarr; </b><span style="font-size: 30px">Nhập Hoàn</span></li>
+                <li><b>Nếu là hàng xác nhận mất chờ trả hàng:&rarr; </b><span style="font-size: 30px">Hoàn Trả</span></li>
+                <img src="{% static 'IMG/put_away_198_3.png'%}">
+                <img src="{% static 'IMG/put_away_198_4.png'%}">
+                <img src="{% static 'IMG/put_away_198_2.png'%}">
+            </ul>
+            <h4 style="font-size: 30px">Bước 2:SAU KHI CHỌN ĐÚNG LOẠI SẢN PHẨM CẦN LÊN TỒN &rarr; Scan mã barcode của sản phẩm sau đó nhấp vào thông tin hệ thống tìm thấy</h4>
+            <img src="{% static 'IMG/Putaway_4.png'%}">
+            <h4 style="font-size: 30px">Bước 3: Đi tới vị trí gợi ý của hệ thống, kiểm tra lại barcode, số lượng, scan mã vị trí, và đặt hàng gọn gàng lên vị trí.</h4>
+            <img src="{% static 'IMG/Put_away_5.png'%}">
+            <h4 style="font-size: 30px">Bước 4: Đối với hàng hoàn chờ lưu kho, 1 sản phẩm có thể có nhiều số lượng ở nhiều PA khác nhau, yêu cầu team hàng hoàn phân loại theo PA và các yêu cầu khác nếu có trước khi bàn giao.</h4>
+            <img src="{% static 'IMG/Putaway_6.png'%}">
+        </ul>
+    </ul>
+    <h3>III. SẮP XẾP VÀ GIÁM SÁT TÌNH TRẠNG LƯU KHO CỦA CÁC SẢN PHẨM</h3>
+    <ul>
+        <li>Thanh tra, kiểm tra tình trạng lưu kho của các sản phẩm về tình trạng lưu kho, tối ưu vị trí, ...</li>
+        <li>Lên kế hoạch và giải quyết các vấn đề liên quan tới các sản phẩm lưu kho khi có vấn đề.</li>
+        <li>Đưa ra ý kiến và làm việc với các bộ phận liên quan khi có các hoạt động ảnh hưởng tới tịnh trạng lưu kho của các sản phẩm.</li>
+        <li>Sử dụng thành thạo các tính năng hệ thống để hỗ trợ cho công tác sắp xếp trong kho: </li>
+        <ul>
+            <li style="color:red"><b>Gom vị trí</b></li>
+            <img src="{% static 'IMG/cycle_count_8.png'%}" width="1200">
+            <img src="{% static 'IMG/cycle_count_7.png'%}" width="1200">
+            <li style="color:red"><b>Đổi vị trí: Đang cập nhật ...</b></li>
+        </ul>
+        <li>Tổng hợp thông tin và báo cáo lại trong các cuộc họp định kỳ.</li>
+    </ul>
+    <h3>IV. XỬ LÝ CÁC TRƯỜNG HỢP HÀNG THIẾU, MẤT</h3>
+    <ul>
+        <li>Tiếp nhận thông tin từ Checker về các trường hợp hàng thiếu, hàng mất từ bộ phận lấy hàng.</li>
+        <li>Tìm kiếm, kiểm tra kỹ lưỡng tại các vị trí lưu kho, các vị trí sắp xếp hàng hóa chồng lấn, lộn xộn.</li>
+        <li>Xử lý hàng sau khi có kết quả:</li>
+        <ul>
+            <li><b>Trường hợp tìm thấy hàng: </b>
+                <ul>
+                    <li>Đặt sản phẩm lại đúng vị trí, thông báo thông tin cho Checker và bộ phận lấy hàng.</li>
+                    <li>PDA &rarr; Lấy hàng &rarr; Nhập mã PK &rarr; Nhấp vào mã PK hệ thống tìm thấy&rarr; Có vấn đề &rarr; Xác nhận đóng gói</li>
+                </ul>
+            <li><b>Trường hợp xác nhận mất hàng: </b>
+                <ul>
+                    <li>PDA &rarr; Lấy hàng &rarr; Nhập mã PK &rarr; Nhấp vào mã PK hệ thống tìm thấy&rarr; Có vấn đề &rarr; Xác nhận mất hàng</li>
+                    <li>Trả sản phẩm của đơn hàng bị mất hàng lên kệ theo hệ thống.</li>
+                </ul>
+        </ul>
+        <img src="{% static 'IMG/Miss-lost.png'%}">
+        <img src="{% static 'IMG/Miss-lost1.png'%}">
+        <img src="{% static 'IMG/Miss-lost2.png'%}">
+        <li>Làm việc với các bộ phận liên quan để giải quyết các vấn đề liên quan tới hàng hóa, tồn kho sản phẩm.</li>
+        <li>Tổng hợp thông tin, báo cáo lại trong các cuộc họp định kỳ.</li>
+        <p style="color:red">Lưu ý: thời gian tìm hàng tối đa 12 giờ để chuyển từ trạng thái thiếu hàng sang trạng thái mất hàng.</p>
+    </ul>
+    <h3>V. CÔNG TÁC KIỂM TỒN</h3>
+    <ul>
+        <li>Tiếp nhận thông tin từ các bộ phận khác đối với các khách hàng có yêu cầu.</li>
+        <li>Làm việc với quản lý về thông tin, kế hoạch để đáp ứng các yêu cầu về thời gian, nhân lực và các yêu cầu khác.</li>
+        <li>Triển khai công việc theo kế hoạc đã vạch ra và đưa ra phản hồi đúng tiến độ.</li>
+        <li>Tổng hợp lại thông tin sau các đợt kiểm tồn để lên kế hoạch cải thiện và tối ưu cho những lần tiếp theo.</li>
+        <h4>PDA Procedure</h4>
+        <ul>
+            <h4>Bước 1: Thu thập và chuẩn bị dữ liệu về mã hàng hóa, vị trí lưu kho của khách hàng có yêu cầu kiểm tồn.</h4>
+            <h4>Bước 2: Vào PDA &rarr; Kiểm kho</h4>
+            <img src="{% static 'IMG/cycle_count_1.png'%}">
+            <h4>Bước 3: Tick chọn dấu '+'</h4>
+            <img src="{% static 'IMG/cycle_count_2.png'%}">
+            <h4>Bước 4: Đi tới những vị trí lưu kho của nhà bán hàng và scan mã vị trí cần kiểm &rarr; Scan thực tế tất cả các mã sản phẩm tại vị trí đó.</h4>
+            <img src="{% static 'IMG/cycle_count_3.png'%}" width="500" height="300">
+            <h4>Bước 5: Sau khi scan xong tất cả sản phẩm, bấm xác nhận để hoàn tất kiểm tồn tại vị trí đó và di chuyển sang vị trí khác cho tới khi kiểm xong.</h4>
+            <h4>Bước 6: Khi kiểm xong tất cả các vị trí, vào giao diện Web để xác minh lại các vị trí sai lệch trong quá trình kiểm.</h4>
+            <ul>
+                <li>Bước 1: Kiểm kho &rarr; Xem mã chênh lệch &rarr; Xem chi tiết các mã chênh lệch.</li>
+                <img src="{% static 'IMG/cycle_count_4.png'%}" width="1000" height="300">
+                <li>Bước 2: Tại vị trí hiện ra trên màn hình, nếu:</li>
+                <ul>
+                    <li><b>Yêu cầu kiểm lại:</b> Mang PDA tới vị trí đó tiến hành scan lại toàn bộ barcode sản phẩm sau đó bấm 'Cập nhật theo số kiểm' tại vị trí đó.</li><br>
+                    <img src="{% static 'IMG/cycle_count_5.png'%}" width="1000" height="300">
+                    <li><b>Nếu kiểm đếm thủ công:</b> Tới vị trí cẩn kiểm, kiểm đếm lại số sản phẩm xem có khớp với số trên hệ thống không.</li><br>
+                    <ul>
+                        <li>Nếu khớp: Bấm 'Cập nhật theo số kiểm'.</li>
+                        <li>Nếu không khớp: tiến hành chỉnh sửa sau đó bấm 'Cập nhật theo số kiểm'.</li>
+                    </ul>
+                    <img src="{% static 'IMG/cycle_count_6.png'%}" width="1000" height="300">
+                </ul>
+            </ul>
+            <h4>Bước 7: Sau khi hoàn tất các công đoạn báo lại ngay cho các bộ phận liên quan để tiến hành xác nhận kiểm tồn xong và mở khóa hệ thống.</h4>
+            <h2>Lưu ý: Trường hợp không thông báo kịp thời cho kỹ thuật, kết quả kiểm tồn sẽ bị hủy bỏ và kiểm lại từ đầu.</h2>
+        </ul>
+    </ul>
+</fieldset>
+</body>
+</html>

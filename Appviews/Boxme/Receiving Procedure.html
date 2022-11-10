@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <style>
+        h2 {color: blue;}
+        h3 {color: red}
+        h4 {color: #8F3A84}
+    </style>
+    <meta charset="UTF-8">
+    <title>RECEIVING PROCEDURE</title>
+</head>
+<body>
+<fieldset>
+    <legend><h2>QUY TRÌNH NHẬN HÀNG</h2></legend>
+    <h3>I. CÔNG TÁC CHUẨN BỊ VÀ TIẾP NHẬN THÔNG TIN</h3>
+    <ul>
+        <li>Chuẩn bị công cụ dụng cụ cần thiết để sẵn sàng tiếp nhận khi hàng hoá tới kho (xe nâng, pallet, tay kéo, bao tay bảo hộ…).</li>
+        <li>Tiếp nhận thông tin và các yêu cầu từ các bộ phận liên quan (nếu có) về các lô hàng sẽ được chuyển tới kho hàng ngày.</li>
+        <li>Họp định kỳ phân công, sắp xếp nhân sự, đề xuất giải pháp để giải quyết các vấn đề liên quan tới các lô hàng.</li>
+        <li>Ghi nhận, lưu trữ thông tin Shipment nhập kho.</li>
+    </ul>
+    <h3>II. SẮP XẾP VÀ NHẬN HÀNG</h3>
+    <ul>
+        <li>Khi hàng hóa tới kho:</li>
+        <ul>
+            <li>Tiếp nhận thông tin lô hàng tới kho theo mã Shipment hoặc có thông báo trước từ cấp trên, tuyệt đối không nhận hàng không có thông tin.</li>
+            <li>Nhận bàn giao từ đơn vị vận chuyển tại cổng nhận hàng, không tự ý bốc dỡ hàng hóa và đi ra khỏi khu vực nhận hàng.</li>
+        </ul>
+        <li>Khi nhận hàng:</li>
+        <ul>
+            <li>Sắp xếp, phân loại, tránh để lẫn các loại hàng hoá với nhau gây khó kiểm đếm (theo mã hàng, box, hạn sử dụng, ...).</li>
+            <li>Sắp xếp hàng hóa lên pallet phải cẩn thận, tránh hư hỏng móp méo hộp hàng.</li>
+            <li>Kích thước, khối lượng mỗi pallet phải tuân thủ hướng dẫn số lượng thùng tối đa trên một pallet (chiều cao tối đa, số tầng tối đa...).</li>
+            <li>Đưa lô hàng vào khu vực chờ kiểm theo thứ tự ưu tiên, không được để lộn xộn hàng hoá tại khu vực chờ kiểm.</li>
+        </ul>
+        <li>Khi kết thúc nhận hàng:</li>
+        <ul>
+            <li>Ký xác nhận với tài xế về số lượng, tình trạng của hàng khi nhận vào kho.</li>
+            <li>Cập nhật trạng thái lô hàng đã nhận vào kho kèm theo phiếu giao hàng, biên bản, hình ảnh cần thiết khi nhận hàng xong.</li>
+            <li>Cập nhật thông tin lô hàng tới kho cho các bộ phận liên quan (nếu có yêu cầu).</li>
+            <li>Tiến hành thưc hiện dịch vụ đi kèm (in dán barcode, tem phụ, ...) đối với hàng hóa có yêu cầu.</li>
+        </ul>
+    </ul>
+    <h3>III. KIỂM HÀNG</h3>
+    <ul>
+        <li>Kiểm hàng theo BOX hoặc theo sản phẩm tùy vào tình trạng hàng hóa tới kho.</li>
+        <li>Khi nhập hàng cập nhật đầy đủ, chính xác các thông tin gồm:</li>
+        <ul>
+            <li>Kích thước</li>
+            <li>Khối lượng</li>
+            <li>Số lượng</li>
+            <li>Ngày sản xuất</li>
+            <li>Hạn sử dụng</li>
+            <li>Dịch vụ đi kèm (in, dán nhãn, barcode, tem phụ, ...).</li>
+        </ul>
+        <li>Bàn giao lên tồn trong vòng 48h kể từ khi hàng hoá được nhận vào kho. Lưu ý: không áp dụng với hàng hoá chưa đủ điều kiện nhập kho(thiếu tem, nhãn, barcode, ...).</li>
+        <li>Tổng hợp thông tin, gom hàng, ghi chú lại, để vào khu vực quy định và báo lại các bộ phận liên quan về các lô hàng:</li>
+        <ul>
+            <li>Có số lượng, chủng loại hàng thực tế khác với thông tin trên hệ thống.</li>
+            <li>Hàng hóa bên trong bị hư hỏng khi bàn giao tại kho.</li>
+            <li>Các vấn đề phát sinh khác.</li>
+        </ul>
+        <li><b style="color:red">Lưu ý:</b> Sau 2 ngày làm việc, nếu không có phản hồi từ các bộ phận liên quan, kho sẽ không chịu trách nhiệm đối với bất kỳ vấn đề nào xảy ra với lô hàng đó.</li>
+    </ul>
+    <h3>IV. XỬ LÝ ĐỐI VỚI CÁC TRƯỜNG HỢP HÀNG HÓA CHƯA ĐẠT TIÊU CHUẨN NHẬP KHO FFM:</h3>
+    <ul>
+        <h4>Kiểm hàng nhập kho theo tiêu chuẩn phân loại hàng hóa đã ban hành theo QUY CHUẨN NHẬP KHO(A, D1, D2, D3).</h4>
+        <h4>Dán nhãn phụ,dán tem cảnh báo, ...</h4>
+        <h4>Đóng set (combo)</h4>
+        <h4>Gia cố</h4>
+        <h4>Đồng kiểm</h4>
+        <h4>Các yêu cầu khác</h4>
+    </ul>
+    <ul>
+        <li>Tiếp nhận thông tin từ các bộ phận khác đối với các khách hàng có yêu cầu.</li>
+        <li>Phân công nhân sự dán nhãn phụ, đóng set. Các sản phẩm lẻ, nhóm theo số lượng (5,10,20, ...) để tiện cho việc kiểm đếm.</li>
+        <li>Thực hiện đúng yêu cầu của khách hàng, không dán nghiêng ngả hoặc đè lên các thông tin quan trọng : hạn sử dụng, nhãn phụ, ...</li>
+        <li>Xác nhận khi hoàn thành công việc để đảm bảo chính xác số lượng sản phẩm, số nhãn phụ, tem, nhãn cần dán.</li>
+        <li>Trường hợp đóng combo, phải có hướng dẫn chi tiết để đảm bảo đúng yêu cầu, quy định nhập kho và phải kiểm tra lại nếu chênh lệch.</li>
+        <li><b>Trường hợp Barcode thùng giống Barcode sản phẩm bên trong, tiến hành dán tem cảnh báo trước khi bàn giao nhập kho lô hàng đó.</b></li>
+        <li>Đối với các sản phẩm chưa thể tiến hành nhập kho, phải ghi chú lại thông tin, để vào khu vực quy định kèm theo ghi chú để dễ dàng kiểm tra, nhận biết.</li>
+        <li>Các vấn đề phát sinh khác báo lại cho Leader để tiến hành giải quyết.</li>
+    </ul>
+    <h3>IV. PDA - WEB PROCEDURE: QUY TRÌNH XỬ LÝ HÀNG TRÊN PDA - WEB</h3>
+    <ul>
+        <h4 style="font-size: 30px">Bước 1: Mở PDA &rarr; Nhận Hàng &rarr; Scan mã SM để nhập kho SM vào hệ thống</h4>
+        <img src="{% static 'IMG/receiving_20_1.png'%}">
+        <img src="{% static 'IMG/receiving__198_2.png'%}">
+        <img src="{% static 'IMG/receiving_20_3.png'%}">
+        <h4 style="font-size: 30px">Bước 2: Mở trình duyệt WMS &rarr; Nhập Kho &rarr; Kiểm Hàng Nhập Kho &rarr; Scan hoặc nhập mã SM muốn kiểm</h4>
+        <img src="{% static 'IMG/receiving_198_4.png'%}"><br>
+        <img src="{% static 'IMG/receiving_198_5.png'%}">
+        <h4 style="font-size: 30px">Bước 3: Tùy vào hàng hóa thực tế &rarr; Chọn kiểm hàng theo Box hoặc theo sản phẩm (mã Barcode).</h4>
+        <img src="{% static 'IMG/receiving_198_6.png'%}">
+        <h4 style="font-size: 30px">Bước 4: Tại giao diện kiểm hàng, lưu ý các điểm sau:</h4>
+        <ul>
+            <li><b>Đủ tiêu chuẩn (hàng loại A):</b>Số lượng hàng hóa đạt chuẩn nhập kho.</li>
+            <li><b>Hư hỏng D1 (Damaged level 1):</b> Hàng hơi móp méo, trầy xước bao bì, vỏ hộp, sản phẩm bên trong (tem, seal) còn nguyên vẹn: dán tem 'D1', nhập hư hỏng và lên tồn tại khư vực quy định.</li>
+            <li><b>Hư hỏng D2 (Damaged level 2):</b> Hàng hư hỏng bao bì, vỏ hộp, sản phẩm bên trong (tem, seal) còn nguyên vẹn: </li>
+            <ul>
+                <li>Nếu <b>có thể lưu kho theo sản phẩm</b>, dán tem 'D2', nhập hư hỏng và lên tồn tại khu vực quy định.</li>
+                <li>Nếu không lưu kho theo sản phẩm được chuyển qua loại D3.</li>
+            </ul>
+            <li><b>Hư hỏng D3 (Damaged level 3):</b> Hàng hư hỏng: thì dán tem 'D3', nhập hư hỏng và lưu kho tại khu vực quy định.</li>
+            <li><b>Không nhận được:</b>Số lượng hàng hóa thực tế thiếu so với số lượng trên Shipment.</li>
+            <li><b>Hạn sử dụng:</b>Hạn sử dụng của sản phẩm.</li>
+            <li><b>Mã vạch trên sản phẩm:</b>Mã barcode của sản phẩm.</li>
+            <li><b>Khối lượng: </b>Khối lượng của 1 sản phẩm.</li>
+            <li><b>Kích thước (dài, rộng, cao):</b>Kích thước của 1 sản phẩm.</li>
+            <li><b>Dịch vụ kèm theo:</b> Tick chọn đối với các dịch vụ kèm theo khi nhận hàng.</li>
+            <li><b>Ghi chú: </b>Số lượng thừa, thiếu, hư hỏng, sai lệch mã vạch và các vấn đề phát sinh khi kiểm hàng.</li>
+        </ul>
+        <img src="{% static 'IMG/receiving_198_7.png'%}">
+        <h4 style="font-size: 30px">Bước 5: Sau khi hoàn tất kiểm hàng và điền đầy đủ các thông tin, bấm 'CẬP NHẬT' để hoàn tất kiểm hàng và tiếp tục cho Box hoặc mã hàng khác cho đến khi hoàn tất Shipment.</h4>
+        <h4 style="font-size: 30px">Bước 6: Bàn giao cho bộ phận liên quan để tiến hành lên tồn.</h4>
+    </ul>
+</fieldset>
+</body>
+</html>

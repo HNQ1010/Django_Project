@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <style>
+      pre {
+        font-family: Times new roman;
+      }
+      h2 {color: red;}
+      h3 {color: blue;}
+      h4 {color: #004D40;}
+      p {color: #FF5722 ;}
+    </style>
+    <meta charset="UTF-8">
+    <title>Descriptive Statistic</title>
+</head>
+<body>
+<h1 style="text-align: center; color:blue">Descriptive Statistics</h1>
+<h2>Type of Data</h2>
+<ul>
+    <li>Categorical: Represent groups or categories.</li>
+    <pre>
+        Example:
+        1. Car brands: Audi, BMW and Mercedes.
+        2. Answers to yes/ no questions: yes and no
+    </pre>
+    <li>Numerical: represents numbers. It is divided into two groups: discrete and continuous. Discrete data can be <br>
+    usually counted in a finite matter, while continuous is infinite and impossible to count.</li>
+    <pre>
+        Example:
+        Discrete: # children you want to have, SAT scores.
+        Continuous: weight, height.
+    </pre>
+</ul>
+<h2>Levels of measurement</h2>
+<ul>
+    <h3>Qualitative</h3>
+    <ul>
+        <p>There are two qualitative levels:
+        <li>Nominal</li>
+        <li>Ordinal</li>
+        <p>The nominal level represents categories that can not put in any order, while ordinal represents categories<br>
+        that can be ordered.</p>
+        <pre>
+            Nominal: four seasons (winter, spring, summer, autumn)
+            Ordinal: rating your meal(disgusting, unappetizing, neutral, tasty, delicious)
+        </pre>
+    </ul>
+    <h3>Quantitative</h3>
+    <ul>
+        <p>There are two quantitative levels:</p>
+        <li>Interval</li>
+        <li>Ratio</li>
+        <p>They both represent 'numbers', however, ratios have a <b>true zero</b> while intervals don't.</p>
+        <pre>
+            Interval: degrees Celsius and Fahrenheit.
+            Ratio: degree Kelvin, length.
+        </pre>
+    </ul>
+</ul>
+<h2>Graphs and tables that represent categorical variables.</h2>
+<ul>
+    <li>Frequency distribution tables: show the category and its corresponding absolute frequency.</li>
+    <li>Bar charts: are very common. Each bar represents a category (On the y-axis we have the absolute frequency).</li>
+    <li>Pie charts: are used when we want to see the share of an item as a part of the total. Market share is almost<br>
+    always represented with a pie chart.</li>
+    <li>Pareto diagrams: Pareto diagram is a special type of bar chart where the categories are showing descending <br>
+    order of frequency, and a separate curve shows the cumulative frequency.</li>
+</ul>
+<h2>Graphs and tables that represent categorical variables. Excel formulas.</h2>
+<ul>
+    <li>Frequency distribution tables: In excel, we can either hard code the frequencies or count them with a count<br>
+    function. This will come up later on. Total formula: SUM().</li>
+    <li>Bar charts: Bar charts are also called clustered column charts in Excel. Choose your data, Insert->Charts-><br>
+    Clustered column or Bar chart.</li>
+    <li>Pie charts: are created in the following way: Choose your data->Charts->Pie chart.</li>
+    <li>Creating Pareto diagrams in Excel:</li>
+    <ul>
+        <li>Order the data in your frequency distribution table in descending order.</li>
+        <li>Create a bar chart.</li>
+        <li>Add a column in you frequency distribution table that measures the cumulative frequency.</li>
+        <li>Select the plot area of the chart in Excel and Right click.</li>
+        <li>Choose Select Series -> Add</li>
+        <li>For Series values choose the cells that refer to the cumulative frequency then click OK. You should see<br>
+        two side-by-side bars.</li>
+        <li>Select the plot area of the chart and Right click -> Change chart type -> Combo. Your initial categories<br>
+        should be 'Clustered Column'. Change the second series, that you called 'Line' to 'Line'.</li>
+    </ul>
+</ul>
+<h2>Numerical variables. Frequency distribution table and histogram.</h2>
+<ul>
+    <li>Frequency distribution tables for numerical variables are different than the ones for categorical. Usually,<br>
+    they are divided into intervals of equal (or unequal) length. The tables show the interval, the absolute frequency<br>
+    and sometimes it is useful to also include the relative (and cumulative) frequencies.</li>
+    <li>The interval width is calculated using the following formula:</li>
+    <pre>
+        Interval width = (Largest number - smallest number)/ Number of desired intervals
+    </pre>
+    <h3>Creating the frequency distribution table in Excel:</h3>
+    <ul>
+        <li>1. Decide on the number of intervals you would like to use.</li>
+        <li>2. Find the interval width (using a the formula above).</li>
+        <li>3. Start your 1st interval at the lowest values in your dataset.</li>
+        <li>4. Finish your 1st interval at the lowest value + the interval width.(= start_interval_cell + <br>
+        interval_width_cell).</li>
+        <li>5. Start you 2nd interval where the 1st stops (that's a formula as well - just ake the starting cell of <br>
+        interval 2 = the ending of interval 1).</li>
+        <li>6. Continue in this way until you have created the desired number of intervals.</li>
+        <li>7. Count the absolute frequencies using the following COUNTIF formula.</li>
+        <pre>
+            = COUNTIF(dataset_range, '>=' & interval start) - COUNTIF(dataset_range, '>=' & interval end)
+        </pre>
+        <li>8. In order to calculate the relative frequencies, use the following formula:</li>
+        <pre> = absolute_frequency_cell / number_of_observations</pre>
+        <li>9. In order to calculate the cumulative frequencies:</li>
+        <ul>
+            <li>i. The first cumulative frequency is equal to the relative frequency.</li>
+            <li>ii. Each consequitive cumulative frequency = previous cumulative frequency + the respective relative<br>
+            frequency.</li>
+        </ul>
+    </ul>
+    <h3>Histogram</h3>
+    <ul>
+        <p>Histograms are the one of most common ways to represent numerical data. Each bar has width equal to the width<br>
+        of the interval. The bars are touching as there is continuation between intervals: where one ends->the other begins.</p>
+        <li>Creating a histogram in Excel:</li>
+        <li>Choose your data.</li>
+        <li>Insert -> Charts -> Histogram.</li>
+        <li>To change the number of bins (intervals):</li>
+        <ul>
+            <li>1. Select the x-axis.</li>
+            <li>2. Click Chart Tools -> Format -> Axis options.</li>
+            <li>3. You can select the bin width (interval width), number of bins, etc.</li>
+        </ul>
+    </ul>
+</ul>
+<h2>Graphs and tables for relationships between variables. Cross tables.</h2>
+<ul>
+    <p>Cross tables (or contingency tables) are used to represent categorical variables. One set of categories is <br>
+    labeling the rows and another is labeling the columns. We then fill in the table with the applicable data. It is<br>
+    good idea to calculate the totals. Sometimes, these tables are constructed with the relative frequencies as shown<br>
+    in the table below.</p>
+    <p>A common way to represent the data from a cross table is by using a side-by-side bar chart.</p>
+    <h3>Creating a side-by-side chart in Excel.</h3>
+    <li>1. Choose your data.</li>
+    <li>2. Insert -> Charts -> Clustered Column. Selecting more than one Series (groups of data) will automatically<br>
+    prompt Excel to create a side-by-side bar (column) chart.</li>
+</ul>
+<h2>Graphs and tables for relationships between variables. Scatter plots.</h2>
+<ul>
+    <p>When we want to represent two numerical variables on the same graph, we usually use a scatter plot. Scatter plots are useful especially later on,<br>
+    when we talk about regression analysis, as they help us detect pattern (linearity, homoscedasticity). Scatter plot usually represent lots and lots<br>
+    of data. Typically, we are not interested in single observations, but rather in the structure of the dataset.</p>
+    <h3>Creating a scatter plot in Excel.</h3>
+    <ul>
+        <li>1. Choose the two datasets you want to plot.</li>
+        <li>2. Insert -> Charts ->Scatter</li>
+        <p>The scatter plot represents data that doesn't have a pattern. Completely vertical 'forms' show a association.</p>
+        <p>Conversely, the plot shows a linear pattern, meaning that the observations move together.</p>
+    </ul>
+</ul>
+<h2>Mean, median and mode</h2>
+<ul>
+    <li>Mean: the mean is the most widely spread measure of central tendency. It is the simple average of the dataset and easily affected by outliers.</li>
+    <pre>
+        The formula to calculate the mean is:
+        <img src="{% static 'IMG/mean.png'%}" width="250" height="150">
+        In Excel, the mean is calculated by
+        = AVERAGE()
+    </pre>
+    <li>Median: The median is the midpoint of the ordered dataset. It is not as popular as the mean, but it often used in academia and data science. <br>
+    That is since it is not affected by outliers. In an ordered dataset, the median is the number at position (n + 1)/2. If this position is not a whole<br>
+    number, the median is the simple average of the two numbers at positions closest to the calculated value.</li>
+    <pre>
+        The formula to calculate the median(position of median position)
+        (n + 1) /2
+        In Excel, the median is calculated by:
+        = MEDIAN()
+    </pre>
+    <li>Mode: The mode is the value that occurs most often. A dataset can have 0 modes, 1 mode, or multiple modes. The mode is calculated simply by<br>
+    finding the value with the highest frequency.</li>
+    <pre>
+        In Excel, the mode is calculated by:
+         = MODE.SNGL() -> returns one mode
+         = MODE.MULT() ->returns an array with the modes. It is used when we have more than 1 mode
+    </pre>
+</ul>
+<h2>Skewness</h2>
+<ul>
+    <li>Skewness is a measure of asymmetry that indicates whether the observations in a dataset are concentrated on one side.</li>
+    <li>Right (positive) skewness looks like the one in the graph. It means that the outliers are to the right (long tail to the right).</li>
+    <li>Left (negative) skewness means that the outliers are to the left.</li>
+    <li>Usually, you will use software to calculate skewness.</li>
+    <pre>
+        Formula to calculate skewness:
+        <img src="{% static 'IMG/skewness.png'%}" width="250" height="150">
+        Calculating skewness in Excel:
+         = SKEW()
+    </pre>
+</ul>
+<h2>Variance and standard deviation</h2>
+<ul>
+    <li>Variance and standard deviation measure the dispersion of a set of data points around its mean value.</li>
+    <li>There are different formulas for population and sample variance & standard deviation. This is due to the fact<br>
+    that the sample formulas are the unbiased estimators of the population formulas.</li>
+    <pre>
+        Sample variance formula:
+        <img src="{% static 'IMG/sample_var.png'%}" width="220" height="70">
+        Population variance formula:
+        <img src="{% static 'IMG/Population_var.png'%}" width="220" height="70">
+        Sample standard deviation formula:
+        <img src="{% static 'IMG/sample_std.png'%}" width="220" height="70">
+        Population standard deviation formula:
+        <img src="{% static 'IMG/Population_std.png'%}" width="220" height="70">
+        Calculating variance in Excel
+        Sample variance = VAR.S()
+        Population variance: =VAR.P()
+        Sample standard deviation: = STDEV.S()
+        Population standard deviation: =STDEV.P()
+    </pre>
+</ul>
+<h2>Covariance and correlation</h2>
+<ul>
+    <h3>Covariance</h3>
+    <li>Covariance is a measure of the joint variability of two variables.</li>
+    <ul>
+        <li>A positive covariance means that the two variables move together.</li>
+        <li>A covariance of 0 means that the two variables are independent.</li>
+        <li>A negative covariance means that the two variables move in opposite directions.</li>
+    </ul>
+    <li>Covariance can take on values from -∞ to +∞. This is a problem as it is very hard to put such numbers into <br>
+    perspective.</li>
+    <pre>
+        Sample covariance formula:
+        <img src="{% static 'IMG/sample_cov.png'%}" width="250" height="80">
+        Population covariance formula:
+        <img src="{% static 'IMG/Population_cov.png'%}" width="250" height="80">
+        In Excel, the covariance is calculated by:
+        Sample covariance: = COVARIANCE.S()
+        Population covariance: = COVARIANCE.P()
+    </pre>
+    <h3>Correlation</h3>
+    <li>Correlation is a measure of the joint variability of two variables. Unlike covariance, correlation could be <br>
+    thought of a sa standardized measure. It take on values between -1 and 1, Thus it is easy for us to interpret the<br>
+    result.</li>
+    <ul>
+        <li>A correlation of 1, known as perfect positive correlation, means that one variables is perfectly explained<br>
+        by the other.</li>
+        <li>A correlation of 0 means that the variables are independent.</li>
+        <li>A correlation of -1, known as perfect negative correlation, means that one variable is explaining the <br>
+        other one perfectly, but they move in opposite directions.</li>
+    </ul>
+    <pre>
+        Sample correlation formula:
+        <img src="{% static 'IMG/sample_correl.png'%}" width="80" height="40">
+        Population correlation formula:
+        <img src="{% static 'IMG/pol_correl.png'%}" width="80" height="40">
+        In Excel, correlations is calculated by:
+        = CORREL()
+    </pre>
+</ul>
+<h1 style="text-align: center; color:blue">INFERENTIAL STATISTICS</h1>
+<h2>Distribution</h2>
+<ul>
+    <h3>Definition</h3>
+    <ul>
+        <li>In statistics, when we talk about distributions, we usually mean probability distributions.</li>
+        <li>Definition (informal): A distribution is a function that shows the possible values for a variable and how<br>
+        often they occur.</li>
+        <li>Definition(Wikipedia): In probability theory and statistics, a probability distribution is a mathematical<br>
+        function that, stated in simple terms, can be thought of as providing the probabilities of occurrence of <br>
+        different possible outcomes in an experiment.</li>
+        <li>Types of distribution: Normal distribution, Student's T distribution, Poisson distribution, Uniform<br>
+        distribution, Binomial distribution.</li>
+    </ul>
+    <h3>Graphic representation</h3>
+    <ul>
+        <li>It is a common mistake to believe that the distribution is the graph. In fact the distribution is the <br>
+        rule that determines how values are positioned relation to each other.</li>
+        <li>Very often, we use a graph to visualize the data. Since different distributions have a particular graphical<br>
+        representation, statisticians like to plot them.</li>
+    </ul>
+</ul>
+<h2>The Normal Distribution</h2>
+<ul>
+    <li>The normal distribution is also known as Gaussian distribution or the Bell curve. It is one of the most <br>
+    common distributions due to the following reasons:</li>
+    <ul>
+        <li>It approximates a wide variety of random variables.</li>
+        <li>Distributions of sample means with large enough samples sizes could be approximated to normal.</li>
+        <li>All computable statistics are elegant.</li>
+        <li>Heavily used in regression analysis.</li>
+        <li>Good track record.</li>
+        <pre>
+            Example:
+            Biology. Most biological measures are normally distributed, such as: height, length of arms, legs, <br>
+            nails, blood pressure, thickness of tree barks, etc.
+            IQ tests.
+            Stock market information.
+        </pre>
+        <h4>𝑁~(𝜇, 𝜎<sup>2</sup>)</h4>
+            <ul>
+                <li>N stands for normal;</li>
+                <li>~ stands for a distribution;</li>
+                <li>μ is the mean;</li>
+                <li>𝜎<sup>2</sup>: is the variance.</li>
+            </ul>
+    </ul>
+    <li>Controlling for the standard deviation, keeping the standard deviation constant, the graph of a normal <br>
+    distribution with:</li>
+    <img src="{% static 'IMG/nor_graph.png'%}">
+    <ul>
+        <li>A smaller mean would look in the same way, but be situated to the left (in gray).</li>
+        <li>A larger mean would look in the same way, but the situated to the right (in red).</li>
+    </ul>
+    <li>Controlling the mean, keeping the mean constant, a normal distribution with:</li>
+    <img src="{% static 'IMG/nor_graph2.png'%}">
+    <ul>
+        <li>A smaller standard deviation would be situated in the same plot, but have a higher pick and thinner <br>
+        tails (in red).</li>
+        <li>A larger standard deviation would be situated in the same spot, but have a lower peak and fatter <br>
+        tails (in gray).</li>
+    </ul>
+</ul>
+<h2>The Standard Normal Distribution</h2>
+<ul>
+    <pre>𝑁~(0,1)</pre>
+    <li>The Standard Normal distribution is a particular case of the Normal distribution. It has a mean of 0 and<br>
+    a standard deviation of 1.</li>
+    <li>Every Normal distribution can be 'standardized' using the standardization formula:</li>
+    <pre>
+        z = (𝑥 − 𝜇)/𝜎
+    </pre>
+    <li>A variable following the Standard Normal distribution is denoted with the letter z.</li>
+    <li>Standardization allows us to:</li>
+    <ul>
+        <li>Compare different normally distributed datasets.</li>
+        <li>Detect normality.</li>
+        <li>Detect outliers.</li>
+        <li>Create confident intervals.</li>
+        <li>Test hypotheses.</li>
+        <li>Perform regression analysis.</li>
+    </ul>
+    <li>Rationale of the formula for standardization: we want to transform a random variable from N~(μ, 𝜎<sup>2</sup>)<br>
+    to 𝑁~(0,1). Subtracting the mean from all observations would cause a transformation from N~(μ, 𝜎<sup>2</sup>)<br>
+    to N~ (0, 𝜎<sup>2</sup>), moving the graph to the origin. Subsequently, dividing all observations by the <br>
+    standard deviation would cause a transformation from N~(μ, 𝜎<sup>2</sup>) to N~(0,1), standardizing the peak<br>
+    and the tails of the graph.</li>
+</ul>
+<h2>Standard Error</h2>
+<ul>
+    <pre>
+        Formula for standard error: = standard deviation/ sqrt(sample_size)
+    </pre>
+</ul>
+<h2>Central Limit Theorem</h2>
+<ul>
+    <li>The Central Limit Theorem (CLT) is one of the greatest statistical insights. It states that no matter the<br>
+    underlying distribution of the dataset, the sampling distribution of the means would approximate a normal <br>
+    distribution. Moreover, the mean of the sampling distribution would be equal to the mean of the original <br>
+    distribution and the variance would be n times smaller, where n is the size of the samples. The CLT applies<br>
+    whenever we have a sum or an average of many variables (e.g. sum of rolled numbers when rolling dice).</li>
+    <h3>The theorem</h3>
+    <ul>
+        <li>No matter the distribution.</li>
+        <li>The distribution of 𝑥1, 𝑥2, 𝑥3, 𝑥4, ..., 𝑥𝑘 would tend to 𝑁~(μ, 𝜎<sup>2</sup>/n)</li>
+        <li>The more samples, the closer to Normal (k -> ∞).</li>
+        <li>The bigger the samples, the closer to Normal (n -> ∞).</li>
+    </ul>
+    <h3>Why is it useful?</h3>
+    <ul>
+        <li>The CLT allows us to assume normality for many different variables. That is very useful for confident<br>
+        intervals, hypothesis testing, and regression analysis. In fact, the Normal distribution is so predominantly<br>
+        observed around us due to the fact that following the CLT, many variables converge to Normal.</li>
+    </ul>
+    <h3>Where can we see it?</h3>
+    <ul>
+        <li>Since many concepts and events are a sum or an average of different effects, CLT applies and we observe <br>
+        normality all the time. For example, in regression analysis, the dependent variable is explained through<br>
+        the sum of error terms.</li>
+    </ul>
+</ul>
+<h2>Estimators and Estimates</h2>
+<ul>
+    <h3>Estimators</h3>
+    <ul>
+        <li>Broadly, an estimator is a mathematical function that approximates a population parameter depending only<br>
+        on sample information.</li>
+        <li>Example of estimators and corresponding parameters.</li>
+        <img src="{% static 'IMG/estimator.png'%}" width="250" height="100">
+        <li>Estimators have two important properties:</li>
+        <ul>
+            <li>Bias: The expected value of an unbiased estimator is the population parameter. The bias in this case<br>
+            is 0. If the expected value of an estimator is (parameter + b), then the bias is b.</li>
+            <li>Efficiency: The most efficient estimator is the one with the smallest variance.</li>
+        </ul>
+    </ul>
+    <h3>Estimates</h3>
+    <ul>
+        <li>An estimate is the output that you get from the estimator (when you apply the formula). There are two <br>
+        types of estimates: point estimates and confidence interval estimates.</li>
+        <li>Point estimates: A single value (1,5, 122.67, 0.32).</li>
+        <li>Confidence intervals: An interval ((1,5), (12,33), (221.78, 745.66), (-0.71, 0.11)).</li>
+        <li>Confidence intervals are much more precise than point estimates. That is why they are preferred when <br>
+        making inferences.</li>
+    </ul>
+</ul>
+<h2>Confidence Intervals and the Margin of Error.</h2>
+<ul>
+    <li>Definition: A confidence interval is an interval within which we are confident(with a certain percentage of <br>
+    confidence) the population will fall.</li>
+    <li>We build the confidence interval around the point estimate.</li>
+    <li>(1 - α) is the level of confidentce. We are (1 - α)*100% confident that the population parameter will fall in<br>
+    the specified interval. Common aplphas are: 0.01, 0.05, 0.1.</li>
+    <li>General formula: </li>
+    <img src="{% static 'IMG/confid.png'%}" width="800" height="100">
+</ul>
+<h2>Student's T Distribution</h2>
+<ul>
+    <li>The Student's T distribution is used predominantly for creating confidence intervals and testing hypotheses<br>
+    with normally distributed populations when the sample sizes are small. It is particularly useful when we don't<br>
+    have enough information or it is too costly to obtain it.</li>
+    <li>All else equal, the Student's T distribution has fatter tails than the Normal distribution and a lower peak.<br>
+    This is to reflect the higher level of uncertainty, caused by the small sample size.</li>
+    <li>A random variable following the t-distribution is denoted t<sub>v,α</sub>, where v are the degrees of freedoom.</li>
+    <li>We can obtain the Student's T for a variable with a Normal distributed population using the formula:</li>
+    <img src="{% static 'IMG/studentT.png'%}">
+</ul>
+<h2>Formulas for Confidence Intervals</h2>
+<ul>
+    <h3>One data set</h3>
+    <ul>
+        <h4>Population Variance known</h4>
+        <ul>
+            <li>Calculate the mean</li>
+            <li>Calculate the standard deviation based on the given variance.</li>
+            <li>Calculate the standard error : = standard deviation / sqrt(sample_size of data).</li>
+            <li>Cause of variance known, using the Z table to find out Z_score (sum of 2 row and column indexes at the<br>
+            value of 1- α/2 (the value of (1 - confident rate)/2).</li>
+            <li>Calculate the ME(margin error): = z_score * standard error.</li>
+            <li>Calculate the Confident Interval: CI = mean +- ME</li>
+        </ul>
+        <h4>Population Variance unknown</h4>
+        <ul>
+            <li>Calculate the mean.</li>
+            <li>Calculate the sample variance of the dataset.</li>
+            <li>Calculate the standard deviation of the dataset.</li>
+            <li>Calculate the standard error: = standard deviation / sqrt(sample_size of data)</li>
+            <li>Because the variance is unknown, use T table to find out T-score (the value at row label (sample <br>
+            size - 1) and column label (the value of (1 - confident rate)/2).</li>
+            <li>Calculate the ME (margin error): = standard error * T-score.</li>
+            <li>Calculate the CI: = mean +- ME</li>
+        </ul>
+    </ul>
+    <h3>Two data set</h3>
+    <ul>
+        <h4>Dependent sample</h4>
+        <ul>
+            <li>Calculate the different column values : = values of sample 1 - values of sample 2.</li>
+            <li>Calculate the mean, variance, standard deviation of the different column.</li>
+            <li>Calculate the standard error of different column: = standard deviation/ sqrt(different column size)</li>
+            <li>Dependent sample, use T-table to find out T-score value (value at row label(sample1 + sample 2 - 2)<br>
+            and column label (1 - confident rate)/2.</li>
+            <li>Calculate ME (margin error): T-score * standard error.</li>
+            <li>Calculate the CI (confident interval): = mean of different column +- ME.</li>
+        </ul>
+        <h4>Independent sample, population variance known.</h4>
+        <ul>
+            <li>Calculate the mean of sample 1 and sample 2.</li>
+            <li>Based on given variance (or given standard deviation), calculate the standard error:</li>
+            <pre>
+                = sqrt(Var1/sample_size1 + Var2/sample_size2)
+            </pre>
+            <li>Population variance known, using Z-table to find out Z-score (the sum of row and column indexes at<br>
+            value of 1 - α/2 (the value of (1-confident rate)/2).</li>
+            <li>Calculate the ME (margin error): = standard error * Z-score.</li>
+            <li>Calculate the CI (confident interval): = (mean1 - mean2) +- ME.</li>
+        </ul>
+        <h4>Independent sample, population variance unknown, assumed to be equal.</h4>
+        <ul>
+            <li>Calculate the sample mean1, sample mean2, sample var1, sample var2, sample_size1(n1), sample_size2(n2),<br>
+            degrees freedoom(v).</li>
+            <li>Population variance assumed to be equal, so we have to calculate the common variance of two sample:</li>
+            <pre>
+                = ((n1-1)* var1 + (n2-1)* var2) / (n1 + n2 -2)
+            </pre>
+            <li>Calculate the standard error: = sqrt(common variance/ n1 + common variance/ n2)</li>
+            <li>Population variance unknown, using T table to find out T-score (the value of row label v(n1+n2-2) and<br>
+            column label ((1 - confident rate)/2).</li>
+            <li>Calculate the ME (margin error): = standard error * T-score.</li>
+            <li>Calculate the CI (confident interval): = (mean1 - mean2) +- ME.</li>
+        </ul>
+        <h4>Independent sample, population variance unknown, assumed different.</h4>
+        <ul>
+            <li>Calculate mean1, mean2, var1, var2, sample size 1(n1), sample size 2(n2), degrees freedoom(v).</li>
+            <li>Calculate the standard error: = sqrt(var1/n1 + var2/n2)</li>
+            <li>Population variance unknown, using T table to find out T-score (the value of row label v(n1+n2-2) and<br>
+            column ((1 - confident rate)/2).</li>
+            <li>Calculate the ME (margin error): = standard error * T-score.</li>
+            <li>Calculate the CI (confident interval): = (mean1-mean2) +- ME.</li>
+        </ul>
+    </ul>
+<img src="{% static 'IMG/cf.png'%}" width="800" height="400">
+</ul>
+<h1 style="text-align: center; color:blue">Hypotheses Testing</h1>
+<h2>Scientific Method</h2>
+<ul>
+    <li>The scientific method is a procedure that has characterized natural science since the 17th century. It consists<br>
+    in systematic observation, measurement, experiment, and the formulation, testing and modification of hypotheses.</li>
+    <li>Since then we've evolved to the point where most people and especially professionals realize that pure observation<br>
+    can be deceiving. Therefore, business decisions are increasingly driven by data. That's also the purpose of data science.</li>
+</ul>
+<h2>Hypothesis</h2>
+<ul>
+    <li>A hypothesis is an idea that can be tested. It is a supposition or proposed explanation made on the basis of <br>
+    limited evidence as a starting point for further investigation.</li>
+    <h3>Null hypotheses (H<sub>0</sub>)</h3>
+    <ul>
+        <li>The null hypotheses is the hypothesis to be tested.</li>
+        <li>It is the status-quo. Everything which was believed until now that we are contesting with our tests.</li>
+        <li>The concept of the null is similar to: innocent until proven guilty. We assume innocence until we have <br>
+        enough evidence to prove that a suspect is guilty.</li>
+    </ul>
+    <h3>Alternative hypothesis (H<sub>1</sub> or H<sub>A</sub>)</h3>
+    <ul>
+        <li>The alternative hypothesis is the change or innovation that is contesting the status-quo.</li>
+        <li>Usually the alternative is our own opinion. The idea is: if the null is the status-quo(i.e, what is <br>
+        generally believed), then the act of performing a test, shows we have doubts, about the truthfulness of the<br>
+        null. More often than not the researcher's opinion is contained in the alternative hypothesis..</li>
+    </ul>
+</ul>
+<h2>Decisions you can take</h2>
+<ul>
+    <li>When testing, there are two decisions that can be made: to accept the null hypothesis or to reject the null<br>
+    hypothesis.</li>
+    <li>To accept the null means that there's not enough data to support the change or the innovation brought by the<br>
+    alternative.</li>
+    <li>To reject the null means that there's enough statistical evidence that the status-quo is not representative<br>
+    of the truth.</li>
+    <img src="{% static 'IMG/hypo.png'%}" width="400" height="200">
+    <li>Given a two-tailed test:</li>
+    <li>Graphically, the tails of the distribution show when we reject the null hypothesis ('rejection region').</li>
+    <li>Everything which remains in the middle is the 'acceptance region'.</li>
+    <li>The rationale is: if the observed statistic is too far away from 0 (depending on the significance level), we<br>
+    reject the null. Otherwise, we accept it.</li>
+    <li>Different ways of reporting the result:</li>
+    <ul>
+        <p><b>Accept:</b></p>
+        <li>At x% significance, we accept the null hypothesis.</li>
+        <li>At x% significance, A is not significantly different from B.</li>
+        <li>At x% significance, there's not enough statistical evidence that...</li>
+        <li>At x% significance, we cannot reject the null hypothesis.</li>
+        <p><b>Reject:</b></p>
+        <li>At x% significance, we reject the null hypothesis.</li>
+        <li>At x% significance, A is significantly different from B.</li>
+        <li>At x% significance, there's is enough statistical evidence...</li>
+        <li>At x% significance, we cannot say that *restate the null*</li>
+    </ul>
+</ul>
+<h2>Level of significance and types of tests.</h2>
+<ul>
+    <li>Level of significance (α): The probability of rejecting a null hypothesis that is true; the probability of <br>
+    making this error.</li>
+    <li>Common significance levels: 0.10, 0.05 and 0.01</li>
+    <li>Two-sided (two-tailed) test: used when the null contains an equality(=) or an inequality (≠).</li>
+    <li>One-sided (one-tailed) test: used when the null doesn't contain quality or inequality sign(<, > , <=, >=).</li>
+    <img src="{% static 'IMG/sidetest.png'%}" width="800" height="200">
+</ul>
+<h2>Statistical errors (Type I error and Type II error)</h2>
+<ul>
+    <li>In general, there're two types of errors we can make while testing: Type I error(False positive) and Type II<br>
+    error(False negative).</li>
+    <li>Statisticians summarize the errors in the following table:</li>
+    <img src="{% static 'IMG/errortype.png'%}" width="400" height="200">
+    <li>And table with example:</li>
+    <img src="{% static 'IMG/exerror.png'%}" width="400" height="200">
+    <li>The probability of committing Type I error(False positive) is equal to the significance level (α).</li>
+    <li>The probability of committing Type II error(False negative) is equal to the beta (β).</li>
+</ul>
+<h2>P-value</h2>
+<ul>
+    <li>P-value: is the smallest level of significance at which we can still reject the null hypothesis, given the <br>
+    observed sample statistic.</li>
+    <li>Notable p-value:</li>
+    <ul>
+        <li>0.000: When we are testing a hypothesis, we always strive for those 'three zeros after the dot'. This <br>
+        indicates that we reject the null at all significance levels.</li>
+        <li>0.05: is often the 'cut-off line'. If our p-value is higher than 0.05 we would normally accept the null <br>
+        hypothesis (equivalent to testing at 5% significance level). If the p-value is lower than 0.05 would would<br>
+        reject the null.</li>
+    </ul>
+    <li>Where and how are p-values used?</li>
+    <ul>
+        <li>Most statistical software calculates p-values for each test.</li>
+        <li>The researcher can decide the significance level post-factum.</li>
+        <li>p-values are usually found with 3 digits after the dot (x.xxx).</li>
+        <li>The closer to 0.000 the p-value, the better.</li>
+    </ul>
+    <li>Should you need to calculate a p-value 'manually', we suggest using an online p-value calculator. See website.</li>
+</ul>
+<h2>Formulae for Hypothesis Testing</h2>
+<ul>
+    <h3>One data set</h3>
+    <ul>
+        <h4>Population variance known</h4>
+        <li>Calculate the mean, standard deviation of the dataset.</li>
+        <li>Calculate the standard error: = standard deviation/ sqrt(sample size of dataset)</li>
+        <li>Population variance known, that's Z statistic with Z =(mean of dataset - mean of test)/ standard error.</li>
+        <img src="{% static 'IMG/ztest.png'%}">
+        <li>Use Z-score to calculate p-value of the test then compare it to each significant levels(5% and 1%).</li>
+        <h4>Population variance unknown</h4>
+        <li>Calculate the mean, variance, std, and std error of the variance of the dataset.</li>
+        <li>Calculate the standard error: = standard deviation / sqrt(sample size of dataset).</li>
+        <li>Population variance unknown, this's T statistic with T =(mean of data - test's mean) / standard error.</li>
+        <img src="{% static 'IMG/ztest1.png'%}">
+        <li>Use T-score to calculate the p-value of the test then compare it to significance levels(5% and 1%).</li>
+    </ul>
+    <h3>Two datasets</h3>
+    <ul>
+        <h4>Dependent sample</h4>
+        <li>Calculate the difference column of two dataset.</li>
+        <li>Calculate the mean, variance, standard deviation, of difference column.</li>
+        <li>Calculate the standard error of difference column: = standard deviation / sqrt(size of difference column).</li>
+        <li>Data is samples, this's T statistic with T = (difference's mean - test's mean) / standard error.</li>
+        <img src="{% static 'IMG/2sampletest.png'%}">
+        <li>Use T-score to calculate the p-value of the test then compare to each significance levels(5% and 1%).</li>
+        <h4>Population variance known, independent samples.</h4>
+        <li>Calculate the mean1, mean2, sample size 1(n1), sample size 2(n2) of the two datasets.</li>
+        <li>Calculate standard error: = sqrt(var1/ n1 + var2/n2)</li>
+        <li>Population variance known, this's Z statistic with Z = ((mean1 - mean2) - test's mean)/ standard error.</li>
+        <img src="{% static 'IMG/2sampletest1.png'%}">
+        <li>Calculate the p-value based on Z-score and compare to significance levels(5% and 1%).</li>
+        <h4>Variance unknown (assumed to be equal), independent sample</h4>
+        <li>Calculate the sample mean1, mean2, var1, var2, size 1(n1), size 2(n2).</li>
+        <li>Variance assumed to be equal, calculate the common variance: = ((n1-1)*var1 + (n2-1)*var2)/ (n1+n2-2).</li>
+        <li>Calculate the standard error: = sqrt(common var/ n1 + common var/ n2).</li>
+        <li>Variance unknown, this's T statistic with T = ((mean1-mean2) - test's mean) / standard error.</li>
+        <img src="{% static 'IMG/2sampletest2.png'%}">
+    </ul>
+    <li>Based on calculation Z(or T statistic), there are several ways to phrase the decision rule and they all have<br>
+    the same meaning.</li>
+    <li style="color:red">Reject the null if:</li>
+    <ul>
+        <li>1. |test statistic| (Z or T score) > |critical value| (Z or T score of CI rate).</li>
+        <li>2. The absolute value of the test statistic is bigger than the absolute critical value (literal of 1).</li>
+        <li>3. p-value < some significance level (most often 0.05 or 5%).</li>
+    </ul>
+    <li>Usually, you will be using the p-value to make a decision.</li>
+    <img src="{% static 'IMG/Hypotesting.png'%}" width="800" height="400">
+</ul>
+<h2>Straight Line Basis</h2>
+<ul>
+    <h3>What is the Straight Line Basis?</h3>
+    <li>The straight line basis is a method used to determine an asset's rate of reduction in value over its useful<br>
+    lifespan. Other common methods used to calculate depreciation expenses of fixed assets are sum of year's digits, <br>
+    double-declining balance, and units produced.</li>
+    <img src="{% static 'IMG/straight-line-basis-1024x682.png'%}" width="400" height="400">
+    <li>Straight line basis is the simplest technique used to compute the value loss of an asset over its useful life.<br>
+    Also called straight line depreciation, straight line basis charges an equal expense amount to each accounting <br>
+    period. It assumes that the asset's value diminished equally over each accounting period during useful life.</li>
+    <li style="color:red"><b>Summary</b></li>
+    <ul>
+        <li>Straight line basis is a depreciation method used to calculate the wearing out of an asset's value over <br>
+        its serviceable lifespan by assuming an equal depreciation expense each accounting periods.</li>
+        <li>Companies use the straight line basis to expense the value of an asset over accounting periods to reduce<br>
+        net income.</li>
+        <li>Accountants prefer the straight line basis to calculate an asset's depreciated value because it is simple<br>
+        and easy to use.</li>
+    </ul>
+    <h3>Understanding the Straight Line Basis method.</h3>
+    <li>Recoding depreciation and amortization is in accordance with accounting's matching principle. The matching <br>
+    principle is the basis of accrual accounting, which requires expenses that are incurred to be recorded in the <br>
+    same period as the revenues earned. The convention is meant to match sales and expenses to the period in which <br>
+    they occurred, as opposed to when payment was made or collected.</li>
+    <li>Depreciation and amortization are the conventions companies use to attain the matching objective. Intangible<br>
+    assets are only amortized if they have limited useful years. Straight line basis is also used to amortize fixed<br>
+    and intangible assets, such as software and patents. Depreciation of fixed assets is similar to amortization, <br>
+    and in both, the straight line basis is commonly used to calculate the expense amount.</li>
+    <li>Companies use depreciation and amortization to expense an asset over a long period of time, as opposed to <br>
+    deducting the full cost of the asset in the period it was purchased. The latter being done under the cash basis <br>
+    of accounting. The straight line basis simply allocates the expense equally into each period of its useful life,<br>
+    which smooths the expense and ultimately net income.</li>
+    <h3>How to calculate the straight line basis</h3>
+    <li>Companies use the straight line basis method to determine the amount to be expensed over accounting periods. <br>
+    To calculate the depreciation of an asset, an asset's salvage value is deducted from its purchase price the <br>
+    difference is then divided by the estimated useful years of the asset.</li>
+    <h3>Practical Example</h3>
+    <li>Assume that Company X purchases an asset at the cost of $20500. The asset's life expectancy<br>
+    is 20 years, with $1500 as the estimated salvage value. First, the difference between the purchase price of the <br>
+    asset and the salvage value is calculated. This difference is sometimes called the depreciable base. The difference<br>
+    is then divided by the asset's expected life to find the annual depreciation expense amount. The asset's straight<br>
+    line depreciation is:</li>
+    <pre>
+        Depreciable Base = $20,500 - $1,500 = $19,000
+        Straight Line Depreciation = %19,000 / 20 = $950
+    </pre>
+    <li>Thus, company X only needs to expense $950 instead of writing off the asset's full cost in the current <br>
+    accounting period, which is what would happen under the cash basis of accounting. Furthermore, the company will<br>
+    continue to expense $950 annually until the book value of the asset reaches the salvage value of $1,500.</li>
+    <h3>Advantages and Disadvantages of Straight Line Basis</h3>
+    <h4>Advantages</h4>
+    <li>Accountants prefer the straight line basis because it is easy to calculate and understand. The method allocates<br>
+    an even amount to each accounting period over the asset's useful life making it a predictable expense, and allows<br>
+    for the smoothing of net income.</li>
+    <h4>Disadvantages</h4>
+    <li>On the downside, the straight line basis method's major pitfalls lie in simplicity. One of the most obvious<br>
+    disadvantages is that the asset's useful life is based on guesswork. For example, the risk of an asset becoming<br>
+    obsolete earlier than anticipated due to the transformative nature of innovative technology is not considered.</li>
+    <li>Additionally, the straight line basis method does not factor in the actual physical rapid loss of an asset's <br>
+    value in the early years of its life. At the same time, it does not take into consideration the fact that an asset<br>
+    will likely require more maintenance as it ages.</li>
+    <h3>Special Considerations</h3>
+    <li>Straight line basis is also applied in operating leases, where it is used to calculate the amount of rental<br>
+    payments due under a lease agreement. The payments will be equal for each period until the end of the lease.</li>
+</ul>
+<h2>Moving Average, Exponential Moving Average Methods</h2>
+<ul>
+    <li>A moving average is a technical indicator that market analysts and investors may use to determine the direction<br>
+    of a trend. It sums up the data points o a financial security over a specific time period and divides the total by<br>
+    the number of data points to arrive at an average. It is called a ;moving' average because it is continually <br>
+    recalculated based on the latest price data.</li>
+    <li>Analysts use the moving average to examine support and resistance by evaluating the movements of an asset's <br>
+    price. A moving average reflects the previous price action/ movement of a security. Analysts or investors then use<br>
+    the information to determine the potential direction of the asset price. It is known as a lagging indicator because<br>
+    it trails the price action of the underlying asset to produce a signal or show the direction of a given trend.</li>
+    <li><b>Summary</b></li>
+    <ul>
+        <li>A moving average is a technical indicator that investors and traders use to determine the trend direction<br>
+        of securities.</li>
+        <li>It is calculated by adding up all the data points during a specific period and dividing the sum by the <br>
+        number of time periods.</li>
+        <li>Moving averages help technical traders to generate trading signals.</li>
+    </ul>
+    <li>Type of Moving Averages</li>
+    <h3>Simple Moving Average (SMA)</h3>
+    <li>The simple moving average (SMA) is a straightforward technical indicator that is obtained by summing the recent<br>
+    data points in a given set and dividing the total by the number of time periods. Traders use the SMA indicator to<br>
+    generate signals on when to enter or exit a market. An SMA is backward-looking, as it relies on the past price data<br>
+    for a given period. It can be computed for different types of prices, i.e, high, low, open and close.</li>
+    <li>In financial markets, analysts and investors use the SMA indicator to determine buy and sell signals for securities.<br>
+    The SMA helps to identify support and resistance prices to obtain signals on where to enter or exit a trade.</li>
+    <li>When generating the SMA, traders must first calculate this average by adding prices over a given period and<br>
+    dividing the total by the total number of periods. The information is then plotted on a graph.</li>
+    <li>The formula for SMA is written as follows:</li>
+    <pre>
+        SMA = (A1 + A2 + ... + An) / n
+        Where:
+        A : is an average in period n
+        n : is the number of periods
+    </pre>
+    <li><b>Example: </b>A stock trader, wants to calculate the simple moving average for Stock ABC by looking at the<br>
+    closing prices of the stock for the last five days. The closing prices for Stock ABC for the last five days are as<br>
+    follows: [23, 23.4, 23.2, 25, 25.5] ($). The SMA is then calculated as:</li>
+    <pre>
+        SMA = (23 + 23.4 + 23.2 + 25 + 25.5)/ 5
+        SMA = 23.82 ($)
+    </pre>
+    <h3>Exponential Moving Average (EMA)</h3>
+    <li>The other type of moving average is the exponential moving average (EMA), which gives more weight to the most<br>
+    recent price points to make it more responsive to recent data points. An exponential moving average tends to be <br>
+    more responsive to recent price changes, as compared to the simple moving average which applies equal weight to <br>
+    all price changes in the given period.</li>
+    <li>When calculating the exponential moving average, the following three steps are used:</li>
+    <h4>Calculate the simple moving average for the period.</h4>
+    <li>The EMA needs to start somewhere, and the simple moving average is used as the previous period's EMA. It is<br>
+    obtained by taking the sum of the security's closing prices for the period in question and dividing the total by<br>
+    the number of periods.</li>
+    <h4>Calculate the multiplier for weighting the exponential moving average</h4>
+    <li>The formula for calculating the multiplier is as follows:</li>
+    <pre>
+        Multiplier = [2 / (Selected Time Period + 1)]
+        For example, if the time period in question is 10, the multiplier will be calculated as follows:
+        Multiplier = (2 / (10+1)) = 0.1818
+    </pre>
+    <h4>The last step calculates the current EMA by taking the period from the initial EMA until the most recent time<br>
+    period, using the price, multiplier, and the previous period's EMA value. It is computed using the following formula:</h4>
+    <pre>
+        Current EMA = [Closing Price - EMA(Previous Time Period)] x Multiplier + EMA(Previous Time Period)
+    </pre>
+    <li>The weighting given to recent price data is higher for a longer-period EMA than a shorter-period EMA. A multiplier<br>
+    of 18.18% is applied to the recent price points of a 10-period EMA, whereas a 8.52% multiplier is applied<br>
+    for the recent price points of a 20-period EMA.</li>
+    <h3>Exponential Moving Average and Simple Moving Average</h3>
+    <li>The main difference between the two technical indicators is the sensitivity that they place on price changes.<br>
+    The exponential moving average tends to show more sensitivity to recent price point changes. This makes the EMA <br>
+    more responsive to the latest price changes.</li>
+    <li>The formula for calculating the EMA tends to be complicated, but most charting tools make it easy for traders<br>
+    follow an EMA. In contrast, the SMA applies equal weighting to all observations in the data set. It is easy to <br>
+    calculate, being obtained by taking the arithmetic mean of prices during the time period in question.</li>
+</ul>
+<h2>Linear Regression</h2>
+<ul>
+    <h3>Regression</h3>
+    <ul>
+        <h4>What is Regression?</h4>
+        <li>Regression searches for relationships among variables.</li>
+        <li>For example, you can observe several employees of some company and try to understand how their salaries<br>
+        depend on the features, such as experience, level of education, role, cty they work in, and so on.</li>
+        <li>This is a regression problem where data related to each employee represent one observation. The presumption<br>
+        is that the experience, education, role and city are the independent features, while the salary depends on them.</li>
+        <li>Similarly, you can try to establish a mathematical dependence of the prices of houses on their areas, <br>
+        numbers of bed rooms, distances to the city center, and so on.</li>
+        <li>Generally, in regression analysis, you usually consider some phenomenon of interest and have a number of<br>
+        observations. Each observation has two or more features. Following the assumption that (at least) one of the<br>
+        features depends on the others, you try tto establish a relation among them.</li>
+        <li>In other words, you need to find a function that maps some features or variables to others sufficiently well.</li>
+        <li>The dependent features are called the dependent variables, outputs, or responses.</li>
+        <li>The independent features are called the independent variables, inputs or predictors.</li>
+        <li>Regression problems usually have one continuous and unbounded dependent variable. The inputs, however, can<br>
+        be continuous, discrete, or even categorical data such as fender nationality, brand, and so on.</li>
+        <li>It is a common practice to denote the outputs with y and inputs with x. If there are two or more independent<br>
+        variables, they can be represented as the vector x=(x1, ...,xr), where r is the number of inputs.</li>
+        <h4>When do you need Regression?</h4>
+        <li>Typically, you need regression to answer whether and how some phenomenon influences the other or how several<br>
+        variables are related. For example, you can use it to determine if and to what extent the experience or gender<br>
+        impact salaries.</li>
+        <li>Regression is also useful when you want to forecast a response using a new set of predictors. For example,<br>
+        you could try to predict electricity consumption of a household for the next hour given the outdoor temperature,<br>
+        time of day, and number of residents in that household.</li>
+        <li>Regression is used in many different fields: economy, computer science, social sciences, and so on. Its <br>
+        importance rises every day with the availability of large amounts of data and increased awareness of the <br>
+        practical value of data.</li>
+    </ul>
+    <h3>Linear Regression</h3>
+    <p>Linear regression is probably one of the most important and widely used regression techniques. It's among the <br>
+    simplest regression methods. One of its main advantages is the ease of interpreting results.</p>
+    <ul>
+        <h4>Problem Formulation</h4>
+        <li>When implementing linear regression of some dependent variable y on the set of independent variables <br>
+        x = (x1, x2, ..., xr), where r is the number of predictors, you assume a linear relationship between y and x:</li>>
+        <pre>
+            y=  𝛽₀ + 𝛽₁𝑥₁ + ⋯ + 𝛽ᵣ𝑥ᵣ + 𝜀
+        </pre>
+        <li>This equation is the regression equation. 𝛽₀, 𝛽₁, …, 𝛽ᵣ are the regression coefficients, and 𝜀 is the random<br>
+        error.</li>
+        <li>Linear regression calculates the estimators of the regression coefficients or simply the predicted weights,<br>
+        denotes with 𝑏₀, 𝑏₁, …, 𝑏ᵣ. They define the estimated regression function f(x) = 𝑏₀ + 𝑏₁𝑥₁ + ⋯ + 𝑏ᵣ𝑥ᵣ. This <br>
+        function should capture the dependencies between the inputs and output sufficiently well.</li>
+        <li>The estimated or predicted response, f(𝐱ᵢ), for each observation i = 1, ..., n, should be as close as <br>
+        possible to the corresponding actual response 𝑦ᵢ. The differences 𝑦ᵢ - 𝑓(𝐱ᵢ) for all observations i = 1, ..,n <br>
+        are called the residuals. Regression is about determining the best predicted weights, that is the weights <br>
+        corresponding to the smallest residuals.</li>
+        <li>To get the best weights, you usually minimize the sum of squared residuals (SSR) for all observations <br>
+        i = 1, ..., n:</li>
+        <pre>
+             SSR = Σᵢ(𝑦ᵢ - 𝑓(𝐱ᵢ))²
+        </pre>
+        <li>This approach is called the method of ordinary least squares.</li>
+        <h4>Regression Performance</h4>
+        <li>The variation of actual responses 𝑦ᵢ, i = 1, ...,n , occurs partly due to the dependence on the predictors<br>
+        𝐱ᵢ. However, there is also an additional inherent variance of the output.</li>
+        <li>The coefficient of determination, denoted as 𝑅², tells you which amount of variation in y can be explained<br>
+        by the dependence on x using the particular regression model. Larger 𝑅² indicates a better fit and mean that<br>
+        the model can better explain the variation of the output with different inputs.</li>
+        <li>The value 𝑅² = 1 corresponds to SSR = 0, that is to the perfect fit since the value of predicted and actual<br>
+        responses fir completely to each other.</li>
+        <h4>Simple Linear Regression</h4>
+        <li>Simple or single-variate linear regression is the simplest case of linear regression with a single independent<br>
+        variable, x = x.</li>
+        <li>The following figure illustrates simple linear regression:</li>
+        <img src="{% static 'IMG/fig-lin-reg.a506035b654a.png'%}" width="600" height="300">
+        <li>When implementing simple linear regression, you typically start with a given set of input-output(x-y) pairs<br>
+        (green circles). These pairs are your observations. For example, the leftmost observation (green circle) has<br>
+        the input x = 5 and the actual output (response) y = 5. The next one has x = 15 and y = 20, and so on.</li>
+        <li>The estimated regression function (black line) has the equation f(x) =  𝑏₀ + 𝑏₁𝑥. Your goal is to calculate<br>
+        the optimal values of the predicted weights 𝑏₀ and 𝑏₁ that minimize SSR and determine the estimated regression <br>
+        function. The value of  𝑏₀ also called the intercept, shows the point where the estimated regression line <br>
+        crosses the y axis. It is value of the estimated response f(x) for x=0. The value of 𝑏₁ determines the slope of<br>
+        the estimated regression line.</li>
+        <li>The predicted responses (red squares) are the points on the regression line that correspond to the input <br>
+        values. For example, for the input x=5, the predicted response is f(5) = 8.33 (represented with the leftmost <br>
+        red square).</li>
+        <li>The residuals (vertical dashed gray lines) can be calculated as:</li>
+        <pre>
+             𝑦ᵢ - 𝑓(𝐱ᵢ) = 𝑦ᵢ - 𝑏₀ - 𝑏₁𝑥ᵢ for i = 1, ..., n
+        </pre>
+        <li>They are distances between the green circles and red squares. When you implement linear regression, yo are<br>
+        actually trying to minimize these distances and make the red squares as close the the predefined green circles<br>
+        as possible.</li>
+        <h4>Multiple Linear Regression</h4>
+        <li>Multiple ỏ multivariate linear regression í a case ò linear regression with two or more independent variables.</li>
+        <li>If there are just two independent variables, the estimated regression function is f(x1, x2) = 𝑏₀ + 𝑏₁𝑥₁ + 𝑏₂𝑥₂.<br>
+        It represents a regression plane in a three-dimensional space. The goal of regression is to determine the values<br>
+        of the weights 𝑏₀, 𝑏₁ and 𝑏₂ such that this plane is as close as possible to the actual responses and yield the<br>
+        minimal SSR.</li>
+        <li>The case of more than two independent variables is similar, but more general. The estimated regression<br>
+        function is f(x1,...,x2) = 𝑏₀ + 𝑏₁𝑥₁ + ⋯ +𝑏ᵣ𝑥ᵣ, and there're r+1 weights to be determined when the number of <br>
+        inputs is r.</li>
+        <h4>Polynominal Regression</h4>
+        <li>You can regard polynomial regression as a generalized case of linear regression. You assume the polynomial<br>
+        dependence between the output and inputs and, consequently, the polynomial estimated regression function.</li>
+        <li>In other words, in addition to linear terms like 𝑏₁𝑥₁, your regression function f can include non-linear<br>
+        terms such as  𝑏₂𝑥₁², 𝑏₃𝑥₁³, or even 𝑏₄𝑥₁𝑥₂, 𝑏₅𝑥₁²𝑥₂, and so on.</li>
+        <li>The simplest example of polynomial regression has a single independent variable, and the estimated regression<br>
+        function is a polynomial of degree 2: f(x) = 𝑏₀ + 𝑏₁𝑥 + 𝑏₂𝑥².</li>
+        <li>Keeping in mind, compare the previous regression function with the function 𝑓(𝑥₁, 𝑥₂) = 𝑏₀ + 𝑏₁𝑥₁ + 𝑏₂𝑥₂ <br>
+        used for linear regression. They look very similar and are both linear functions of the unknowns 𝑏₀, 𝑏₁, and 𝑏₂.<br>
+        This is why you can solve the polynomial regression problem as a linear problem with the term 𝑥² regarded as an<br>
+        input variable.</li>
+        <li>In the case of two variables and the polynomial of degree 2, the regression function has this form:</li>
+        <pre>
+            𝑓(𝑥₁, 𝑥₂) = 𝑏₀ + 𝑏₁𝑥₁ + 𝑏₂𝑥₂ + 𝑏₃𝑥₁² + 𝑏₄𝑥₁𝑥₂ + 𝑏₅𝑥₂²
+        </pre>
+        <li>The procedure for solving the problem is identical to the previous case. You apply linear regression for<br>
+        five inputs:<b>𝑥₁, 𝑥₂, 𝑥₁², 𝑥₁𝑥₂, and 𝑥₂².</b> What you get as the result of regression are the values of six<br>
+        weights which minimize SSR: 𝑏₀, 𝑏₁, 𝑏₂, 𝑏₃, 𝑏₄, and 𝑏₅.</li>
+        <li>Of course, there're more general problems, but this should be enough to illustrate the point.</li>
+        <h4>Underfitting and Overfitting</h4>
+        <li>One very important question that might arise when you;re implementing polynomial regression is related to<br>
+        the choice of the optimal degree of the polynomial regression function.</li>
+        <li>There's no straightforward rile ofr doing this. It depends on the case. You should, however, be aware of<br>
+        two problems that might follow the choice of the degree: underfitting and overfitting.</li>
+        <li>Underfitting occurs when a model can't accurately capture the dependencies among data, usually as a consequence<br>
+        of its own simplicity. It often yields a low 𝑅² with known data and bad generalization capabilities when applied<br>
+        with new data.</li>
+        <li>Overfitting happens when a model learns both dependencies among data and random fluctuations. In other <br>
+        words, a model learns the existing data too well. Complex models, which have many features or terms, are often<br>
+        prone to overfitting. When applied to known data, such models usually yield high 𝑅². However, they often don't<br>
+        generalize well and have significantly lower 𝑅² when used with new data.</li>
+        <li>The next figure illustrates the underfitted, well-fitted, and overfitted models.</li>
+        <img src="{% static 'IMG/poly-reg1.png'%}" width="700" height="800">
+        <li>The top left plot show a linear regression line that has a low 𝑅². It might also be important that a straight<br>
+        line can't take nto account the fact that the actual response increases as x moves away from 25 towards zero.<br>
+        This is likely an example of underfitting.</li>
+        <li>The top right plt illustrates polynomial regression with the degree equal to 2. In this instance, this might<br>
+        be the optimal degree for modeling this data. The model has a values of 𝑅² that satisfactory in many cases and<br>
+        shows trends nicely.</li>
+        <li>The bottom left plot presents polynomial regression with the degree equal to 3. The value of 𝑅² is higher<br>
+        than in the preceding cases. This model behaves better with known data than the previous ones. However, it shows<br>
+        some signs of overfitting, especially for the input values close to 60 where the line starts decreasing, although<br>
+        actual data don't show that.</li>
+        <li>Finally, one the bottom right plot, you can see the perfect fit: six points and the polynomial line of the<br>
+        degree 5 (or higher) yield 𝑅² = 1. Each actual response equals its corresponding prediction.</li>
+        <li>In some situations, this might be exactly what your're looking for. In many cases, however, this is an <br>
+        overfitted model. It is likely to have poor behavior with unseen data, especially with the inputs larger than 50.</li>
+        <li>For example, it assumes, without any evidence, that there's a significant drop in responses for x>50 and<br>
+        that y reaches zero for x near 60. Sch behavior is the consequence of excessive effort to learn and fit the<br>
+        existing data.</li>
+    </ul>
+    <h3>Implementing Linear Regression in Python</h3>
+    <ul>
+        <h4>Python packages for Linear Regression</h4>
+        <li>The package Numpy is a fundamental Python scientific package that allows many high-performance operations<br>
+        on single- and multi-dimensional arrays. It also offers many mathematical routines.</li>
+        <li>The package scikit-learn is a widely used Python library for machine learning, built on top of Numpy and<br>
+        some other packages. It provides the means for pre-processing data, reducing dimensionality, implementing <br>
+        regression, classification, clustering, and more.</li>
+        <li>If you want to implement linear regression and need the functionality beyond the scope of scikit-learn, you<br>
+        should consider statsmodels. It's a powerful Python package for the estimation of statistical model, performing<br>
+        tests, and more.</li>
+        <h4>Simple Linear Regression with scikit-learn</h4>
+        <li>Let's start with the simplest case, which is simple linear regression.</li>
+        <li>There are five basic steps when you're implementing linear regression:</li>
+        <ul>
+            <li>Import the packages and classes you need.</li>
+            <li>Provide data to work with and eventually do appropriate transformations.</li>
+            <li>Create a regression model and fit it with existing data.</li>
+            <li>Check the results of model fitting to know whether the model is satisfactory.</li>
+            <li>Apply the model for predictions.</li>
+        </ul>
+        <li>These steps are more or less general for most of the regression approaches and implementations.</li>
+        <p><b>Step 1: Import packages and classes.</b></p>
+        <li>The first step is to import the package numpy and the class LinearRegression from sklearn.linear_model:</li>
+        <pre>
+            import numpy as np
+            from sklearn.linear_model import LinearRegression
+        </pre>
+        <li>Now, you have all the functionalities you need to implement linear regression.<li>
+        <li>The fundamental data type of Numpy is the array type called numpy.ndarray. The rest of this article uses<br>
+        the term 'array' to refer to instances of the type 'numpy.ndarray'.</li>
+        <li>The class sklearn.liner_model.LinearRegression will be used to perform linear and polynomial regression<br>
+        and make predictions accordingly.</li>
+        <p><b>Step 2: Provide data.</b></p>
+        <li>The second step is defining data to work with. The inputs (regressors, x) and output(predictor, y) should<br>
+        be arrays (the instances of the class numpy.ndarray) or similar objects. This is simplest way of providing data<br>
+        for regression:</li>
+        <pre>
+            x = np.array([5, 15, 25, 35, 45, 55]).reshape((-1,1)) # 2-d (6,1)
+            y = np.array([5, 20, 14, 32, 22, 38]) # 1-d array (6,)
+        </pre>
+        <li>Now, you have two arrays: the input x and output y. You should call .reshape() on x because this array is<br>
+        required to be two-dimensional, or to be more precise, to have one column and as many rows as necessary. That's<br>
+        exactly what the argument (-1, 1) of .reshape() specifies.</li>
+        <p><b>Step 3: Create a model and fit it.</b></p>
+        <li>The next step is to create a linear regression model and fit it using the existing data.</li>
+        <li>Let's create an instance of the class LinearRegression, which will represent the regression model.</li>
+        <pre>
+            model = LinearRegression()
+        </pre>
+        <li>This statement creates the variable model as the instance of LinearRegression. You can provide several<br>
+        optional parameters to LinearRegression:</li>
+        <ul>
+            <li><b>fit_intercept</b> is a Boolean(True by default) that decides whether to calculate the intercept 𝑏₀<br>
+            (True) or consider it equal to zero (False).</li>
+            <li><b>normalize</b> is a Boolean (False by default) that decides whther to normalize the input variables<br>
+            (True) or not (False).</li>
+            <li><b>copy_X</b> is a Boolean (True by default) that decides whether to copy (True) or overwrite the input<br>
+            variables (False).</li>
+            <li><b>n_jobs</b> is an integer or None (default) and represents the number of jobs used in parallel <br>
+            computation. None usually means one job and -1 to use all processors.</li>
+        </ul>
+        <li>This example uses the default values of all parameters.</li>
+        <li>It's time to start using the model. First, you need to call <b>.fit()</b> on model:</li>
+        <pre>
+            model.fit(x,y)
+        </pre>
+        <li>With <b>.fit()</b>, you calculate the optimal values of the weights 𝑏₀ and 𝑏₁, using the existing input and<br>
+        output (x adn y) as the arguments. In other words, <b>.fit()</b> fits the model. It returns 'self', which is<br>
+        the variable 'model' itself. That's why you can replace the last two statements with this one:</li>
+        <pre>
+            model = LinearRegression().fit(x,y)
+        </pre>
+        <li>This statement does the same thing as the previous two. It's just shorter.</li>
+        <p><b>Step 4: Get results.</b></p>
+        <li>Once you have your model fitted, you can get the results to check whether the model works satisfactorily<br>
+        and interpret it.</li>
+        <li>You can obtain the coefficient of determination (𝑅²) with .score() called on model:</li>
+        <pre>
+            r_sq = model.score(x, y)
+            print('coefficient of determination: ', r_sq)
+
+            Output[]:
+            coefficient of determination:  0.715875613747954
+        </pre>
+        <li>When you're applying .score(), the arguments are also the predictor x and regressor y, and the return value<br>
+        is 𝑅².</li>
+        <li>The attributes of model are .intercept_, which represents the coefficient, 𝑏₀ and .coef_, which represents 𝑏₁:</li>
+        <pre>
+            print('intercept: ', model.intercept_)
+            print('slope:', model.coef_)
+
+            Output[]:
+            intercept:  5.633333333333329
+            slope:  [0.54]
+        </pre>
+        <li>The code above illustrates how to get b₀ and 𝑏₁. You can notice that .intercept_ is a scalar, while .coef_ <br>
+        is an array.</li>
+        <li>The value b₀ = 5.63(approximately) illustrates that your model predicts the response 5.63 when x is zero. The<br>
+        value 𝑏₁ = 0.54 means that the predicted response rises by 0.54 when x is increased by one.</li>
+        <li>You should notice that you can provide y as a 2-d array as well. In this case, you'll get a similar result.<br>
+        This is how it might look:</li>
+        <pre>
+            new_model = LinearRegression().fit(x,y.reshape((-1,1)))
+            print('intercept: ', new_model.intercept_)
+            print('slope: ', new_model.coef_)
+
+            Output[]:
+            intercept:  [5.63333333]
+            slope:  [[0.54]]
+        </pre>
+        <li>As you can see, this example is very similar to the previous one, but in this case, .intercept_ is a 1d <br>
+        array with the single element 𝑏₀, and .coef_ is a 2-d array with the single element 𝑏₁.</li>
+        <p><b>Step 5: Predict response.</b></p>
+        <li>Once there's is a satisfactory model, you can use it for predictions with either existing or new data.</li>
+        <li>To obtain the predicted response, use .predict():</li>
+        <pre>
+            y_pred = model.predict(x)
+            print('predicted response: ', y_pred, sep='\n')
+            Output[]:
+            array([ 8.33333333, 13.73333333, 19.13333333, 24.53333333, 29.93333333, 35.33333333])
+        </pre>
+        <li>When applying .predict(), you pass the regressor as the argument and get the corresponding predicted response.</li>
+        <li>This is nearly identical way to predict the response.</li>
+        <pre>
+            y_pred = model.intercept_ + model.coef_ * x
+            print('predicted response: ', y_pred)
+            Output[]:
+            array([ 8.33333333, 13.73333333, 19.13333333, 24.53333333, 29.93333333, 35.33333333])
+        </pre>
+        <li>In this case, you multiply each element of x with model.coef_ and add model.intercept_ to the product.</li>
+        <li>The output here differs from the precious example only in dimensions. The predicted response is now a 2-d<br>
+        array, while in the previous case, it had 1-d.</li>
+        <li>If you reduce the number of dimensions of x to one, these two approaches will yield the same result. You<br>
+        can do this by replacing x with x.reshape(-1), x.flatten(), or x.ravel() when multiplying it with model.coef_.</li>
+        <li>In practice, regression models are often applied for forecasts. This means that you can use fitted models<br>
+        to calculate the outputs based on some other, new inputs:</li>
+        <pre>
+            x_new = np.arange(5).reshape((-1,1))
+            y_new = model.predict(x_new)
+            Output[]:
+            array([5.63333333, 6.17333333, 6.71333333, 7.25333333, 7.79333333])
+        </pre>
+        <li>Here .predict() is applied to the new regressor x_new and yields the response y_new. This example conveniently<br>
+        uses arange() from numpy to generate an array with the elements from 9 (inclusive) to 5(exclusive), that is <br>
+        0, 1, 2, 3 and 4.</li>
+        <h4>Multiple Linear Regression with scikit-learn</h4>
+        <li>You can implement multiple linear regression following the same steps as you would for simple regression.</li>
+        <p>Steps 1 and 2: Import packages and classes, and provide data.</p>
+        <pre>
+            import numpy as np
+            from sklearn.linear_model import LinearRegression
+            x = [[0, 1], [5, 1], [15, 2], [25, 5], [35, 11], [45, 15], [55, 34], [60, 35]]
+            y = [4, 5, 20, 14, 32, 22, 38, 43]
+            x, y = np.array(x), np.array(y)
+        </pre>
+        <li>That's a simple way to define the input x and output y. You can print x and y to see how they look now.</li>
+        <li>In multiple linear regression, x is a 2-d array with at least 2 columns, while y is usually a 1-d array.<br>
+        This is a simple example of multiple linear regression, and x has exactly 2 columns.</li>
+        <p>Step 3: Create model and fit it.</p>
+        <li>The next step is to create the regression model as an instance of LinearRegression and fit it with .fit().</li>
+        <pre>
+            model = LinearRegression().fit(x,y)
+        </pre>
+        <li>The result of this statement is the variable model referring to the object of type LinearRegression. It<br>
+        represents the regression model fitted with existing data.</li>
+        <p>Step 4: Get results</p>
+        <li>You can obtain the properties of the model the same way as in the case of simple linear regression.</li>
+        <pre>
+            r_sq = model.score(x, y)
+            print('coefficient of determination: ', r_sq)
+            print('intercept: ', model.intercept_)
+            print('slope: ', model.coef_)
+
+            Output[]:
+            coefficient of determination:  0.8615939258756775
+            intercept:  5.52257927519819
+            slope:  [0.44706965 0.25502548]
+        </pre>
+        <li>You obtain the value of 𝑅² using '.score()' and the values of the estimators of regression coefficients<br>
+        with '.intercept_' and '.coef_'. Again, '.intercept_' hold the bias 𝑏₀, while now '.coef_' is an array containing<br>
+        𝑏₁ and 𝑏₂ respectively.</li>
+        <li>In this example, the intercept is approximately 5.53, and this is the value of the predicted response when<br>
+        𝑥₁ = 𝑥₂ = 0. The increase of 𝑥₁ by 1 yields the rise of the predicted response by 0.45. Similarly, when 𝑥₂ grows<br>
+        by 1, the response rises by 0.26.</li>
+        <p>Step 5: Predict response</p>
+        <li>Predictions also work the same way as in the case of simple linear regression:</li>
+        <pre>
+            y_pred = model.predict(x)
+            print('predicted response: ', y_pred)
+            Output[]:
+            array([ 5.77760476,  8.012953  , 12.73867497, 17.9744479 , 23.97529728, 29.4660957 , 38.78227633, 41.27265006])
+        </pre>
+        <li>The predicted response is obtained with .predict(), which is very similar to the following.</li>
+        <pre>
+            y_pred = model.intercept_ + np.sum(model.coef_ * x, axis=1)
+            print('predicted response: ', y_pred, sep='\n')
+            Output[]:
+            predicted response:
+            [ 5.77760476  8.012953   12.73867497 17.9744479  23.97529728 29.4660957  38.78227633 41.27265006]
+        </pre>
+        <li>You can predict the output values by multiplying each column of the input with the appropriate weight, <br>
+        summing the results and adding the intercept to the sum.</li>
+        <li>You can apply this model to new data as well:</li>
+        <pre>
+            x_new = np.arange(10).reshape((-1,2))
+            y_new = model.predict(x_new)
+            y_new
+            Output[]:
+            array([ 5.77760476,  7.18179502,  8.58598528,  9.99017554, 11.3943658 ])
+        </pre>
+        <li>That's the prediction using a linear regression model.</li>
+        <h4>Polynominal Regression with scikit-learn</h4>
+        <li>Implementing polynomial regression with scikit-learn is very similar to linear regression. There is only<br>
+        one extra step: you need to transform the array of inputs to include non-linear terms such as 𝑥².</li>
+        <p>Step 1: Import packages and classes.</p>
+        <li>In addition to numpy and sklearn.linear_model.LinearRegression, you should also import the class <br>
+        PolynomialFeatures from sklearn.preprocessing.</li>
+        <pre>
+            import numpy as np
+            from sklearn.linear_model import LinearRegression
+            from sklearn.preprocessing import PolynomialFeatures
+        </pre>
+        <li>The import is now done, and you have everything you need to work with.</li>
+        <p>Step 2a: Provide data.</p>
+        <li>This step defines the input and output and is the same as in the case of linear regression.</li>
+        <pre>
+            x = np.array([5, 15, 25, 35, 45, 55]).reshape((-1,1))
+            y = np.array([15, 11, 2, 8, 25, 32])
+        </pre>
+        <li>Now, you have the input and output in a suitable format. Keep in mind that you need the input to be a 2-d<br>
+        array. That's why .reshape() is used.</li>
+        <p>Step 2b: Transform input data.</p>
+        <li>This is the NEW STEP you need to implement for polynomial regression.</li>
+        <li>As you've seen earlier, you need to include 𝑥²(and perhaps other terms) as additional features when <br>
+        implementing polynomial regression. For that reason, you should transform the input array x to contain the<br>
+        additional column(s) with the values of 𝑥² (adn eventually more features).</li>
+        <li>It's possible to transform the input array in several wats (lke using insert() from numpy), but the class<br>
+        PolynomialFeatures is very convenient for this purpose. Let's create an instance of this class.</li>
+        <pre>
+            transformer = PolynomialFeatures(degree=2, include_bias=False)
+        </pre>
+        <li>The variable transformer refers to an instance of PolynomialFeatures which you can use to transform the<br>
+        input x.</li>
+        <li>you can provide several optional parameters to PolynomialFeatures:</li>
+        <ul>
+            <li><b>degree</b> is an integer (2 by default) that represents the degree of the polynomial regression function.</li>
+            <li><b>interaction_only</b> is a Boolean (False by default) that decides whether to include only interaction<br>
+            features (True) or all features (False).</li>
+            <li><b>include_bias</b> is a Boolean (True by default) that decides whether to include the bias (intercept)<br>
+            column of ones (True) or not (False).</li>
+        </ul>
+        <li>This example uses the default values of all parameters, but you'll sometimes want to experiment with the<br>
+        degree of the function, and it can be beneficial to provide this argument anyway.</li>
+        <li>Before applying transformer, you need to fit it with .fit():</li>
+        <pre>
+            transformer.fit(x)
+        </pre>
+        <li>Once transformer is fitted, it's ready to create a new, modified input. You apply .transform() to do that.</li>
+        <pre>
+            x_ = transformer.transform(x)
+            print(x_)
+            Output[]:
+            [[   5.   25.]
+             [  15.  225.]
+             [  25.  625.]
+             [  35. 1225.]
+             [  45. 2025.]
+             [  55. 3025.]]
+        </pre>
+        <li>That's the transformation of the input array with .transform(). It takes the input array as the argument and<br>
+        returns the modified array.</li>
+        <li>You can also use .fit_transform() to replace the three previous statements with only one.</li>
+        <pre>
+            transformer = PolynomialFeatures(degree=2, include_bias=False).fit(x).fit_transform(x)
+        </pre>
+        <li>That's fitting and transforming the input array in one statement with .fit_transform(). It also takes the<br>
+        input array and effectively does the same thing as .fit() and .transform() called in that order. It also returns<br>
+        the modified array.</li>
+        <li>The modified input array contains 2 columns: one with original inputs and the other with their squares.</li>
+        <p>Step 3: Create a model and fit it.</p>
+        <li>This step is also the same as in the case of linear regression. You create and fit the model.</li>
+        <pre>
+            model = LinearRegression().fit(x_, y)
+        </pre>
+        <li>The regression model is now created and fitted. It's ready for application.</li>
+        <li>You should keep in mind that the first argument of .fit() is the modified input array x_ and not the<br>
+        original x.</li>
+        <p>Step 4: Get results.</p>
+        <li>You can obtain the properties of the model the same way as in the case of linear regression.</li>
+        <pre>
+            r_sq = model.score(x_, y)
+            print('coefficient of determination: ', r_sq)
+            print('intercept: ', model.intercept_)
+            print('coefficient: ', model.coef_)
+
+            Output[]:
+            coefficient of determination:  0.8908516262498564
+            intercept:  21.372321428571425
+            coefficient:  [-1.32357143  0.02839286]
+        </pre>
+        <li>Again, .score() returns 𝑅². Its first argument is also the modified input x_, not x. The values of the<br>
+        weights are associated to .intercept_ and .coef_: .intercept_ represents 𝑏₀ while .coef_ references the array<br>
+        that contains 𝑏₁ and 𝑏₂ respectively.</li>
+        <li>You can obtain a very similar result with different transformation and regression arguments.</li>
+        <pre>
+            x_ = PolynomialFeatures(degree=2, include_bias=False).fit_transform(x)
+        </pre>
+        <li>If you call PolynomialFeatures with the default parameter include_bias = True (or if you just omit it), <br>
+        you'll obtain the new input array x_ with the additional leftmost column containing only ones. This column <br>
+        corresponds to the intercept. This is how the modified input array looks in this case.</li>
+        <pre>
+            print(x_)
+            Output[]:
+            [[1.000e+00 5.000e+00 2.500e+01]
+             [1.000e+00 1.500e+01 2.250e+02]
+             [1.000e+00 2.500e+01 6.250e+02]
+             [1.000e+00 3.500e+01 1.225e+03]
+             [1.000e+00 4.500e+01 2.025e+03]
+             [1.000e+00 5.500e+01 3.025e+03]]
+        </pre>
+        <li>The first column of x_ contains ones, the second has the value of x, and the third holds the square of x.</li>
+        <li>The intercept is already included with the leftmost column of ones, and you don't need to include it again<br>
+        when creating the instance of LinearRegression. Thus, you can provide fit_intercept = False. This is how the next<br>
+        statement looks.</li>
+        <pre>
+            model = LinearRegression(fit_intercept=False).fit(x_, y)
+        </pre>
+        <li>The variable model again corresponds to the new input array x_. Therefore x_ should be passed as the first<br>
+        argument instead of x.</li>
+        <li>This approach yields the following results, which are similar to the previous case.</li>
+        <pre>
+            r_sq = model.score(x_, y)
+            print('coefficient of determination: ', r_sq)
+            print('intercept: ', model.intercept_)
+            print('coefficients: ', model.coef_)
+
+            Output[]:
+            coefficient of determination:  0.8908516262498565
+            intercept:  0.0
+            coefficient:  [21.37232143 -1.32357143  0.02839286]
+        </pre>
+        <li>You see that now .intercept_ is zero, but .coef_ actually contains 𝑏₀ as its first element. Everything else<br>
+        is the same.</li>
+        <p>Step 5: Predict response.</p>
+        <li>If you want to get the predicted response, just use .predict(), but remember that the argument should be<br>
+        the modified input x_ instead of the old x.</li>
+        <pre>
+            y_pred = model.predict(x_)
+            print('predict response: ', y_pred, sep='\n')
+        </pre>
+        <li>As you can see, the prediction works almost the same way sas tn the case of linear regression. It just<br>
+        requires the modified input instead of the original.</li>
+        <li>You can apply the identical procedure if you have several input variables. You'll have an input array with<br>
+        more than one column, but everything else is the same.</li>
+        <pre>
+            # Step 1: Import packages
+            import numpy as np
+            from sklearn.linear_model import LinearRegression
+            from sklearn.preprocessing import PolynomialFeatures
+
+            # Step 2a: Provide data
+            x = [[0, 1], [5, 1], [15, 2], [25, 5], [35, 11], [45,15], [55, 34], [60, 35]]
+            y = [4, 5, 20, 14, 32, 22, 38, 43]
+
+            # Step 2b: Transform input data.
+            x_ = PolynomialFeatures(degree=2, include_bias=False).fit_transform(x)
+
+            # Step 3: Create a model and fit it
+            model = LinearRegression().fit(x_,y)
+
+            # Step 4: Get results
+            r_sq = mode.score(x_,y)
+            intercept, coefficient = model.intercept_, model.coef_
+
+            # Step 5: Predict
+            y_pred = model.predict(x_) # or y_pred = model.intercept_ + model.coef_ * x_
+        </pre>
+        <li>This regression example yields the following results and predictions.</li>
+        <pre>
+            print('coefficient of determination: ', model.score(x_, y), sep='\n')
+            print('intercept: ', model.intercept_, sep='\n')
+            print('coefficient: ', model.coef_, sep='\n')
+            print('predict_responses: ', model.predict(x_), sep='\n')
+
+            Output[]:
+            coefficient of determination:
+            0.9453701449127822
+            intercept:
+            0.8430556452395734
+            coefficient:
+            [ 2.44828275  0.16160353 -0.15259677  0.47928683 -0.4641851 ]
+            predict_responses:
+            [ 0.54047408 11.36340283 16.07809622 15.79139    29.73858619 23.50834636
+             39.05631386 41.92339046]
+        </pre>
+        <li>In this case, there're six regression coefficients (including the intercept), as shown in the estimated<br>
+        regression function f(𝑥₁, 𝑥₂) = 𝑏₀ + 𝑏₁𝑥₁ + 𝑏₂𝑥₂ + 𝑏₃𝑥₁² + 𝑏₄𝑥₁𝑥₂ + 𝑏₅𝑥₂².</li>
+        <li>You can also notice that polynomial regression yielded a higher coefficient of determination than multiple<br>
+        linear regression for the same problem. At first, you could think that obtaining such a large 𝑅² is an excellent<br>
+        result. It might be.</li>
+        <li>However, in real-world situations, having a complex model and 𝑅² very close to 1 might also be a sign of<br>
+        overfitting. To check the performance of a mode, you should test it with new data, that is with observations<br>
+        not used to fit(train) the model. To learn how to split your dataset into the training and test subsets, check<br>
+        out 'scikit-learns's train_test_split()'.</li>
+        <h4>Advanced Linear Regression with statsmodels</h4>
+        <li>You can implement linear regression in Python relatively easily by using the package statsmodels as well.<br>
+        Typically, this is desirable when there's a need for more detailed results.</li>
+        <li>The procedure is similar to that of scikit-learn.</li>
+        <p>Step 1: Import packages</p>
+        <li>First, you need to do some imports. In addition to numpy, you need to import statsmodels.api.</li>
+        <pre>
+            import numpy as np
+            import statsmodels.api as sm
+        </pre>
+        <p>Step 2: Provide data and transform inputs.</p>
+        <li>You can provide the inputs and outputs the same way as you did when you were using scikit-learn:</li>
+        <pre>
+            x = [[0, 1], [5, 1], [15, 2], [25, 5], [35, 11], [45, 15], [55, 34], [60, 35]]
+            y = [4, 5, 20, 14, 32, 22, 38, 43]
+            x, y = np.array(x), np.array(y)
+        </pre>
+        <li>The input and output arrays are created, but the job is not done yet.</li>
+        <li>You need to add the column of ones to the inputs if you want statsmodels to calculate the intercept 𝑏₀. It<br>
+        doesn't take 𝑏₀ into account by default. This is just one function call:</li>
+        <pre>
+            x = sm.add_constant(x)
+        </pre>
+        <li>That's how you add the column of ones to x with add_constant(). It takes the input array x as an argument<br>
+        and returns a new array with the column of ones inserted at the beginning.</li>
+        <li>You can see that the modified x has three columns: the first column of ones (corresponding to 𝑏₀ and <br>
+        replacing the intercept) as well as two columns of the original features.</li>
+        <p>Step 3: Create a model and fit it.</p>
+        <li>The regression model based on ordinary least squares is an instance of the class:</li>
+        <pre>
+            statsmodels.regression.linear_model.OLS.
+        </pre>
+        <li>This how you can obtain one:</li>
+        <pre>
+            model = sm.OLS(y,x)
+        </pre>
+        <li>You should be careful here! Please, notice that the first argument is the output, followed with the input.<br>
+        There're several more optional parameters.</li>
+        <li>Once your model is created, you can apply .fit() on it:</li>
+        <pre>
+            results = model.fit()
+        </pre>
+        <li>By calling .fit(), you obtain the variable results, which is an instance of the class:</li>
+        <pre>
+            statsmodels.regression.linear_model.RegressionResultsWrapper
+        </pre>
+        <li>This object holds a lot of information about the regression model.</li>
+        <p>Step 4: Get results</p>
+        <li>The variable results refers to the object that contains detailed information about the results of linear<br>
+        regression. Explaining them is far beyond the scope of linear regression, but you'll learn how to extract them.</li>
+        <li>Call .summary() to get the table with the results of linear regression.</li>
+        <pre>
+            print(results.summary())
+                                                   OLS Regression Results
+            ==============================================================================
+            Dep. Variable:                      y   R-squared:                       0.862
+            Model:                            OLS   Adj. R-squared:                  0.806
+            Method:                 Least Squares   F-statistic:                     15.56
+            Date:                Thu, 09 Dec 2021   Prob (F-statistic):            0.00713
+            Time:                        18:14:22   Log-Likelihood:                -24.316
+            No. Observations:                   8   AIC:                             54.63
+            Df Residuals:                       5   BIC:                             54.87
+            Df Model:                           2
+            Covariance Type:            nonrobust
+            ==============================================================================
+                             coef    std err          t      P>|t|      [0.025      0.975]
+            ------------------------------------------------------------------------------
+            const          5.5226      4.431      1.246      0.268      -5.867      16.912
+            x1             0.4471      0.285      1.567      0.178      -0.286       1.180
+            x2             0.2550      0.453      0.563      0.598      -0.910       1.420
+            ==============================================================================
+            Omnibus:                        0.561   Durbin-Watson:                   3.268
+            Prob(Omnibus):                  0.755   Jarque-Bera (JB):                0.534
+            Skew:                           0.380   Prob(JB):                        0.766
+            Kurtosis:                       1.987   Cond. No.                         80.1
+            ==============================================================================
+
+            Notes:
+            [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+        </pre>
+        <li>This table is very comprehensive. You can find many statistical values associated with linear regression<br>
+        including 𝑅², 𝑏₀, 𝑏₁, and 𝑏₂.</li>
+        <li>In this particular case, you might obtain the warning related to kurtosistest. This is due to the small<br>
+        number of observation provided.</li>
+        <li>You can extract any of the values from the table above.</li>
+        <pre>
+            print('coefficient of determination: ', results.rsquared)
+            print('adjusted coefficient of determination: ', results.rsquared_adj)
+            print('regression coefficient: ', results.params)
+
+            Output[]:
+            coefficient of determination:  0.8615939258756777
+            adjusted coefficient of determination:  0.8062314962259488
+            regression coefficient:  [5.52257928 0.44706965 0.25502548]
+        </pre>
+        <li>That's how you obtain some of the results of linear regression:</li>
+        <ul>
+           <li><b>.rsquared</b> holds 𝑅².</li>
+           <li><b>.rsquared_adj</b> represents adjusted 𝑅²(𝑅² corrected according to the number of input features).</li>
+           <li><b>.params</b> refers the array with 𝑏₀, 𝑏₁, and 𝑏₂ respectively.</li>
+        </ul>
+        <li>You can also notice that these results are identical to those obtained with scikit-learn for the same problem.</li>
+        <p>Step 5: Predict response.</p>
+        <li>You can obtain the predicted response on the input values used for creating the model using .fittedvalues<br>
+        or .predict() with the input array as the argument.</li>
+        <pre>
+            print('predicted response: ', results.fittedvalues, sep='\n')
+            print('predicted response: ', results.predict(x), sep='\n')
+
+            Out[]:
+            predicted response:
+            [ 5.77760476  8.012953   12.73867497 17.9744479  23.97529728 29.4660957
+             38.78227633 41.27265006]
+            predicted response:
+            [ 5.77760476  8.012953   12.73867497 17.9744479  23.97529728 29.4660957
+             38.78227633 41.27265006]
+        </pre>
+        <li>This is the predicted response for known inputs. If you want predictions with new regressors, you can also <br>
+        apply .predict() with new data as the argument</li>
+        <pre>
+            x_new = sm.add_constant(np.arange(10).reshape((-1,2)))
+            results.predict(x_new)
+
+            Out[]:
+            array([ 5.77760476,  7.18179502,  8.58598528,  9.99017554, 11.3943658 ])
+        </pre>
+        <li>You can notice that the predicted results are the same as those obtained with scikit-learn for the same<br>
+        problem.</li>
+    </ul>
+    <h3>Beyond Linear Regression</h3>
+    <ul>
+        <li>Linear regression is sometimes not appropriate, especially for non-linear models of high completely.</li>
+        <li>Fortunately, there're other regression techniques suitable for the cases where linear regression doesn't<br>
+        work well. Some of hem are support vector machines, decision tree, random forest, and neural networks.</li>
+        <li>There're numerous Python libraries for regression using these techniques. Most of them are free and <br>
+        open-source. That's one of the reasons why Python is among the main programming languages for machine learning.</li>
+        <li>The package scikit-learn provides the means for using other regression techniques in a very similar way to<br>
+        what you've seen. It contains tha classes for support vector machines, decision trees, random forest, and more,<br>
+        with the methods .fit(), .predict(), .score() and so on.</li>
+    </ul>
+    <h3>Conclusion</h3>
+    <ul>
+        <li>You now know what linear regression is and how you can implement it with Python and three open-source <br>
+        packages: <b>Numpy, scikit-learn, and statsmodels</b>.</li>
+        <li>You use Numpy for handling arrays.</li>
+        <li>Linear regression is implemented with the following:</li>
+        <ul>
+            <li><b>scikit-learn</b> if you don't need detailed results and want to use the approach consistent with other<br>
+            regression techniques.</li>
+            <li><b>statsmodels</b> if you need the advanced statistical parameters of a model.</li>
+        </ul>
+        <li>Both approaches are worth learning how to use and exploring further.</li>
+        <li>When performing linear regression in Python, you can follow these steps:.</li>
+        <ul>
+            <li>1. Import the packages and classes you need.</li>
+            <li>2. Provide data to work with and eventually do appropriate transformations.</li>
+            <li>3. Create a regression model and fit it with existing data.</li>
+            <li>4. Check the results of model fitting to know whether the model is satisfactory.</li>
+            <li>5. Apply the model for predictions.</li>
+        </ul>
+    </ul>
+</ul>
+<h2></h2>
+<ul>
+    <li></li>
+</ul>
+</body>
+</html>

@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css\style.css'%}">
+    <meta charset="UTF-8">
+    <title>SQL Server Date Functions</title>
+</head>
+<body>
+<h1 style="color:red; text-align:center"><b>SQL Server Date Functions</b></h1>
+<img src="{% static 'IMG\SQL-Server-Date-Functions-1.png'%}">
+    <ul>
+        <h3 style="color:red">1) Returning the current date and time</h3>
+            <ul>
+                <table>
+                    <tr>
+                        <th>Function</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td>CURRENT_TIMESTAMP</td>
+                        <td>Returns the current sys date and time without the time zone part.</td>
+                    </tr>
+                    <tr>
+                        <td>GETUTCDATE</td>
+                        <td>Returns a date of a date as an integer number.</td>
+                    </tr>
+                    <tr>
+                        <td>GETDATE</td>
+                        <td>Return the current sys date and time of the operating sys on which the SQL server is running.</td>
+                    </tr>
+                    <tr>
+                        <td>SYSDATETIME</td>
+                        <td>Returns the current sys date and time with more fractional seconds precision than the GETDATE() function.</td>
+                    </tr>
+                    <tr>
+                        <td>SYSUTCDATETIME</td>
+                        <td>Returns the current sys date and time in UTC time.</td>
+                    </tr>
+                    <tr>
+                        <td>SYSDATETIMEOFFSET</td>
+                        <td>Returns the current sys date and time with the time zone.</td>
+                    </tr>
+                </table>
+                <h4 style="color:blue"><b>* CURRENT_TIMESTAMP()</b></h4>
+                    <ul>
+                        <textarea rows= "9" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            CREATE TABLE current_timestamp_demos
+                                (
+                                    id         INT IDENTITY,
+                                    msg        VARCHAR(255) NOT NULL,
+                                    created_at DATETIME NOT NULL
+                                                DEFAULT CURRENT_TIMESTAMP,
+                                    PRIMARY KEY(id)
+                                );
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>* GETUTCDATE()</b></h4>
+                    <ul>
+                        <li>The GETUTCDATE() function returns the current UTC time.</li>
+                        <li>The GETUTCDATE() function calculates this value from the operating sys on which SQL Server is running.</li>
+                        <textarea rows= "18" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            DECLARE
+                                @local_time DATETIME,
+                                @utc_time DATETIME;
+
+                            SET @local_time = GETDATE();
+                            SET @utc_time = GETUTCDATE();
+
+                            SELECT
+                                CONVERT(VARCHAR(40), @local_time)
+                                    AS 'Server local time';
+                            SELECT
+                                CONVERT(VARCHAR(40), @utc_time)
+                                    AS 'Server UTC time'
+                            SELECT
+                                CONVERT(VARCHAR(40), DATEDIFF(hour, @utc_time, @local_time))
+                                    AS 'Server time zone';
+                            GO
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>* GETDATE()</b></h4>
+                    <ul>
+                        <li>The GETDATE() function returns the current system timestamp as a DATETIME value without the database time zone offset.</li>
+                        <li>The DATETIME value is derived from the Operating System (OS) of the server on which the instance of SQL Server is running.</li>
+                        <textarea rows= "5" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                CONVERT(TIME,GETDATE()),
+                                TRY_CONVERT(TIME, GETDATE()),
+                                CAST(GETDATE() AS TIME);
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>* SYSDATETIME()</b></h4>
+                    <ul>
+                        <li>The SYSDATETIME() function returns a value of DATETIME2 that represents the current system date and time<br>
+                            of the server on which the SQL Server instance is running.</li>
+                        <li style="color:red">Note that the SYSDATETIME() function has more fractional seconds precision than the GETDATE() function.</li>
+                        <li style="color:red">The SYSDATETIME() is a nondeterministic function, therefore, views and columns <br>
+                            that have expressions reference this function cannot be indexed.</li>
+                        <textarea rows= "5" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                CONVERT(TIME,GETDATE()),
+                                TRY_CONVERT(TIME, GETDATE()),
+                                CAST(GETDATE() AS TIME);
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>* SYSUTCDATETIME()</b></h4>
+                    <ul>
+                        <li>The SYSDATETIME() function returns a value of DATETIME2 that represents the current system date and time<br>
+                            of the server on which the SQL Server instance is running.<span style="color:red">The datetime is in Coordinated Universal Time(UTC).</span></li>
+                        <li style="color:red">Notice that the SYSUTCDATETIME() function has more fractional seconds precision than the GETUTCDATE() function.</li>
+                    </ul>
+                <h4 style="color:blue"><b>* SYSDATETIMEOFFSET()</b></h4>
+                    <ul>
+                        <li>The SYSDATETIMEOFFSET() function returns a value of DATETIMEOFFSET(7) that represents the current system date and time,<br>
+                            which also includes the time zone, of the computer on which the SQL Server instance is running.</li>
+                        <textarea rows= "4" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                SYSDATETIMEOFFSET() AS [System DateTime Offset],
+                                DATEPART(TZoffset, SYSDATETIMEOFFSET()) AS [Timezone Offset];
+                        </textarea>
+                        <li>You can also use the FORMAT() function to return the time zone offset as a string by.</li>
+                        <textarea rows= "5" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                SYSDATETIMEOFFSET() AS 'System Date Time Offset',
+                                FORMAT(SYSDATETIMEOFFSET(), 'zz') AS 'zz',
+                                FORMAT(SYSDATETIMEOFFSET(), 'zzz') AS 'zzz';
+                        </textarea>
+                    </ul>
+            </ul>
+        <h3 style="color:red">2) Returning the date and time Parts</h3>
+            <ul>
+                <table>
+                    <tr>
+                        <th>Function</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td>DATENAME</td>
+                        <td>Returns a date part of a date as a character string.</td>
+                    </tr>
+                    <tr>
+                        <td>DATEPART</td>
+                        <td>Returns a date part of a date as an integer number.</td>
+                    </tr>
+                    <tr>
+                        <td>DAY</td>
+                        <td>Returns the day of a specified date as an integer.</td>
+                    </tr>
+                    <tr>
+                        <td>MONTH</td>
+                        <td>Returns the month of a specified date as an integer.</td>
+                    </tr>
+                    <tr>
+                        <td>YEAR</td>
+                        <td>Returns the year of a specified date as an integer.</td>
+                    </tr>
+                </table>
+                <h4 style="color:blue"><b>* DATENAME()</b></h4>
+                    <ul>
+                        <li>The DATENAME() function returns a string, NVARCHAR type, that represents a specified date part of a specified date.</li>
+                        <textarea rows= "4" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            DATENAME(date_part,input_date)
+                        </textarea>
+                            <ul>
+                                <li><b>date_part</b> : is a part of the date that you want to return.</li>
+                                <li><b>input_date</b> : is a literal date or an expression that can resolve to a time, date.</li>
+                            </ul>
+                        <table>
+                            <tr>
+                                <th>date_part</th>
+                                <th>abbreviation</th>
+                            </tr>
+                            <tr>
+                                <td>year</td>
+                                <td>yy, yyyy</td>
+                            </tr>
+                            <tr>
+                                <td>quarter</td>
+                                <td>qq, q</td>
+                            </tr>
+                            <tr>
+                                <td>month</td>
+                                <td>mm, m</td>
+                            </tr>
+                            <tr>
+                                <td>dayofyear</td>
+                                <td>dy, y</td>
+                            </tr>
+                            <tr>
+                                <td>day</td>
+                                <td>dd, d</td>
+                            </tr>
+                            <tr>
+                                <td>week</td>
+                                <td>wk, ww</td>
+                            </tr>
+                            <tr>
+                                <td>weekday</td>
+                                <td>dw</td>
+                            </tr>
+                            <tr>
+                                <td>hour</td>
+                                <td>hh</td>
+                            </tr>
+                            <tr>
+                                <td>minute</td>
+                                <td>mi, n</td>
+                            </tr>
+                            <tr>
+                                <td>second</td>
+                                <td>ss, s</td>
+                            </tr>
+                            <tr>
+                                <td>milisecond</td>
+                                <td>ms</td>
+                            </tr>
+                            <tr>
+                                <td>microsecond</td>
+                                <td>mcs</td>
+                            </tr>
+                            <tr>
+                                <td>nanosecond</td>
+                                <td>ns</td>
+                            </tr>
+                            <tr>
+                                <td>TZoffset</td>
+                                <td>tz</td>
+                            </tr>
+                            <tr>
+                                <td>ISO_WEEK</td>
+                                <td>isowk, isoww</td>
+                            </tr>
+                        </table><br>
+                        <li style="color:red">Note that DATENAME() is similar to the DATEPART() except for the return type.<br>
+                            The DATENAME() function returns the date part as a character string whereas the DATEPART() returns the date part as an integer.</li>
+                        <textarea rows= "4" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                DATEPART(year, '2018-05-10') + '1' [datepart],      --2019
+                                DATENAME(year, '2018-05-10') + '1' [datename] ;     --20181
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>* DATEPART()</b></h4>
+                    <ul>
+                        <li>Returns an integer which is a part of a date such as day, month, year.</li>
+                        <li>The rest, similar to DATENAME() funcion.</li>
+                    </ul>
+                <h4 style="color:blue"><b>* DAY()</b></h4>
+                    <ul>
+                        <li>Returns integer value which represents the day of the month(1-31) of a specified date.</li>
+                        <li>Syntax DAY(input_date), and it similar as DATEPART(day, input_date)</li>
+                        <li>The DAY() function will return 1 if input value has only time part.</li>
+                        <textarea rows= "3" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                DAY('10:30:29') DAY    --output: 1
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>* MONTH()</b></h4>
+                    <ul>
+                        <li>Similar to DAY() function.</li>
+                    </ul>
+                <h4 style="color:blue"><b>* YEAR()</b></h4>
+                    <ul>
+                        <li>Similar to DAY() and MONTH() function.</li>
+                        <li>With just time part, it will return 1900.</li>
+                        <textarea rows= "3" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                YEAR('10:30:29') DAY    --output : 1900
+                        </textarea>
+                    </ul>
+            </ul>
+        <h3 style="color:red">3) Returning a difference between two dates</h3>
+            <ul>
+                <li><b>DATEDIFF</b>: Returns a difference in date part between two dates.</li>
+                <textarea rows= "2" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    DATEDIFF( date_part , start_date , end_date)
+                </textarea>
+                    <ul>
+                        <li><b>date_part</b> : is the part of date that you want to compare between start_date and end_date.<br>
+                        See valid date in returning date and time parts.</li>
+                        <li><b>start_date and end_date</b> : are the dates to be compare and in these type: DATE, DATETIME, DATETIMEOFFSET, DATETIME2, SMALLDATETIME or TIME.</li>
+                    </ul>
+                <textarea rows= "16" cols="70" style="color:#1F0221; font-family:Times New Roman">
+                    DECLARE
+                        @start_dt DATETIME2= '2019-12-31 23:59:59.9999999',
+                        @end_dt DATETIME2= '2020-01-01 00:00:00.0000000';
+
+                    SELECT
+                        DATEDIFF(year, @start_dt, @end_dt) diff_in_year,
+                        DATEDIFF(quarter, @start_dt, @end_dt) diff_in_quarter,
+                        DATEDIFF(month, @start_dt, @end_dt) diff_in_month,
+                        DATEDIFF(dayofyear, @start_dt, @end_dt) diff_in_dayofyear,
+                        DATEDIFF(day, @start_dt, @end_dt) diff_in_day,
+                        DATEDIFF(week, @start_dt, @end_dt) diff_in_week,
+                        DATEDIFF(hour, @start_dt, @end_dt) diff_in_hour,
+                        DATEDIFF(minute, @start_dt, @end_dt) diff_in_minute,
+                        DATEDIFF(second, @start_dt, @end_dt) diff_in_second,
+                        DATEDIFF(millisecond, @start_dt, @end_dt) diff_in_millisecond;
+                </textarea>
+            </ul>
+        <h3 style="color:red">4) Modifying dates</h3>
+            <ul>
+                <table>
+                    <tr>
+                        <th>Function</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td>DATEADD</td>
+                        <td>Adds a value to a date part of a date and return the new date value.</td>
+                    </tr>
+                    <tr>
+                        <td>EOMONTH</td>
+                        <td>Returns the last day of the month containing the specified date, with an optional offset.</td>
+                    </tr>
+                    <tr>
+                        <td>SWITCHOFFSET</td>
+                        <td>Changes the time zone offset of a DATETIMEOFFSET value and preserves the UTC value.</td>
+                    </tr>
+                    <tr>
+                        <td>TODATETIMEOFFSET</td>
+                        <td>Transforms a DATETIME2 value into a DATETIMEOFFSET value.</td>
+                    </tr>
+                </table>
+                <h4 style="color:blue"><b>* DATEADD()</b></h4>
+                    <ul>
+                        <li>The DATEADD() function adds a number to a specified date part of an input date and returns the modified value.</li>
+                        <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            DATEADD (date_part , value , input_date )
+                        </textarea>
+                            <ul>
+                                <li><b>date_part</b> : is the part of date to which the DATEADD() function will add the value.</li>
+                                <li><b>value</b> : is an INTEGER number to be added to the date_part of the input_date.<br>
+                                <span style="color:red">If the value is a decimal or float, DATEADD() will truncate the decimal fraction part. It will not round the number.</span></li>
+                                <li><b>input_date</b> : is a literal date value or an expression which can resolve to valid type: DATE, DATETIME, DATETIMEOFFSET, DATETIME2, SMALLDATETIME, TIME.</li>
+                            </ul>
+                        <textarea rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                DATEADD(second, 1, '2018-12-31 23:59:59') result;       -output: 2019-01-01 00:00:000
+                        </textarea>
+                        <li>If you add a number of month to a date and the day of the date result does not exist, the DATEADD() will return the last day of the returned month.</li>
+                        <textarea rows= "4" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                           SELECT
+                                DATEADD(month, 4, '2019-05-31') AS result,          --output: 2019-09-30 00:00:000
+                                DATEADD(month, 4, '2019-05-30') AS result;          --output: 2019-09-30 00:00:000
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>* EOMONTH()</b></h4>
+                    <ul>
+                        <li>The EOMONTH() function returns the last day of the month of a specified date, with an optional offset.</li>
+                        <textarea rows= "4" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                           EOMONTH(start_date [, offset] );
+                        </textarea>
+                            <ul>
+                                <li><b>start_date</b> : is a date expression that evaluates to a date.</li>
+                                <li><b>offset</b> : (optional) is an integer that specifies the number of months to add to the start_date.</li>
+                            </ul>
+                        <textarea rows= "5" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                EOMONTH('2019-02-15') end_of_month_feb2019,             --output: 2019-02-28
+                                DAY(EOMONTH('2020-02-09')) days,                                --output: 2020-02-29
+                                EOMONTH('2019-02-15', 2) eomonth_next_2_months;     --output: 2019-04-30
+                        </textarea>
+
+                    </ul>
+                <h4 style="color:blue"><b>* SWITCHOFFSET()</b></h4>
+                    <ul>
+                        <li>The SWITCHOFFSET() function returns a DATETIMEOFFSET changed from the stored time zone offset to a new time zone offset.</li>
+                        <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            SWITCHOFFSET( expression, time_zone )
+                        </textarea>
+                            <ul>
+                                <li><b>expression</b> : is an expression that can resolve to a DATETIMEOFFSET value.</li>
+                                <li><b>time_zone</b> : can be a character string in the format {+|-}TZH:TZM, or a signed integer of minutes.(E.g: +08:00, -07:00, or 120).</li>
+                            </ul>
+                        <textarea rows= "4" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                SWITCHOFFSET('2019-03-06 09:20:00.0000000 +07:00', '-08:00')
+                            --output: 2019-03-06 09:20:00.0000000 -08:00
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>* TODATETIMEOFFSET()</b></h4>
+                    <ul>
+                        <li>The TODATETIMEOFFSET() translates a DATETIME2 value into a DATETIMEOFFSET value.</li>
+                        <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            TODATETIMEOFFSET(expression, time_zone)
+                        </textarea>
+                            <ul>
+                                <li><b>expression</b> : is an expression that can resolve to a DATETIME2 value.</li>
+                                <li><b>time_zone</b> : can be a integer or string in form {+|-}TZH:TZM. The range of {+|-}TZH:TZM between +14:00 to -14:00.</li>
+                            </ul>
+                        <textarea rows= "7" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                TODATETIMEOFFSET ('2019-03-06 07:43:58','-08:00') result1,
+                                TODATETIMEOFFSET (GETDATE(), -180) result2;
+                            --output:
+                                    result1 : 2019-03-06 07:43:58.0000000 -08:00
+                                    result2: GETDATE()VALUE -03:00
+                        </textarea>
+                    </ul>
+            </ul>
+        <h3 style="color:red">5) Constructing date and time from their parts</h3>
+            <ul>
+                <table>
+                    <tr>
+                        <th>Function</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td>DATEFROMPARTS</td>
+                        <td>Return a DATE value from the year, month, day.</td>
+                    </tr>
+                    <tr>
+                        <td>DATETIME2FROMPARTS</td>
+                        <td>Returns DATETIME2 value from the date and time arguments.</td>
+                    </tr>
+                    <tr>
+                        <td>DATETIMEOFFSETFROMPARTS</td>
+                        <td>Returns a DATETIMEOFFSET value from the date and time arguments.</td>
+                    </tr>
+                    <tr>
+                        <td>TIMEFROMPARTS</td>
+                        <td>Returns a TIME value from the time parts with the precisions.</td>
+                    </tr>
+                </table>
+                <h4 style="color:blue"><b>* DATEFROMPART()</b></h4>
+                    <ul>
+                        <li>The DATEFROMPART returns a date from year, month and day values.</li>
+                        <li>If any argument is NULL, the function will return NULL</li>
+                        <li>IF any argument is out of range, the function will raise an error.</li>
+                        <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            DATEFROMPART(year, month, day)
+                        </textarea><br>
+                        <textarea rows= "5" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                DATEFROMPARTS(2020,12,31) a_date,       --output: 2020-12-31
+                                DATEFROMPARTS(2020,null,31) a_date,     --output: NULL
+                                DATEFROMPARTS(2020,20,-1) a_date;       --Raise error
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>* DATETIME2FROMPART()</b></h4>
+                    <ul>
+                        <li>The DATEFTIME2ROMPART returns a DATETIME2 from year, month, day, hour, minute, second, fraction and precision values.</li>
+                        <li>If any argument is NULL, the function will return NULL</li>
+                        <li>IF any argument is out of range, the function will raise an error.</li>
+                        <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            DATETIME2FROMPART(year, month, day, hour, minute, second, fraction, precision)
+                        </textarea><br>
+                        <textarea rows= "6" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                DATEFROMPARTS(2020,02,28,12,11,14,0,0) a_date,       --output: 2020-02-28 12:11:14
+                                DATEFROMPARTS(2020,02,28,12,11,14,123,4) a_date,     --output: 2020-02-28 12:11:14.0123
+                                DATEFROMPARTS(2020,02,28,12,11,NULL,0,0) a_date,     --output: NULL
+                                DATEFROMPARTS(2020,02,30,12,11,14,0,0) a_date,       --Raise error
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>* DATETIMEOFFSETFROMPART()</b></h4>
+                    <ul>
+                        <li>The DATEFTIMEOFFSETROMPART returns a DATETIMEOFFSET from specified date and time arguments.</li>
+                        <li>If any argument is NULL, the function will return NULL</li>
+                        <li>IF any argument is out of range, the function will raise an error.</li>
+                        <textarea rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            DATETIMEOFFSETFROMPARTS(year,month,day,hour,minute,seconds,fractions,hour_offset,minute_offset,precision)
+                        </textarea><br>
+                            <textarea rows= "11" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                DATETIMEOFFSETFROMPARTS(2020,02,28,12,11,14,5000,10,30,4) Result1,
+                                DATETIMEOFFSETFROMPARTS(2020,02,28,12,11,14,5000,10,30,5) Result2,
+                                DATETIMEOFFSETFROMPARTS(2020,02,28,NULL,11,14,5000,10,30,4) Result3,
+                                DATETIMEOFFSETFROMPARTS(2020,02,30,12,11,14,5000,10,30,4) Result4;
+                            --Output:
+                                    Result1: 2020-02-28 12:11:14.5000 +10:30
+                                    Result2: 2020-02-28 12:11:14.05000 +10:30
+                                    Result3: NULL
+                                    Result4: Raise error
+                        </textarea>
+                    </ul>
+                <h4 style="color:blue"><b>* TIMEFROMPARTS()</b></h4>
+                    <ul>
+                        <li>The TIMEFROMPARTS() function returns a fully initialized time value. It requires five arguments.</li>
+                        <li>If any argument is NULL, the function will return NULL</li>
+                        <li>IF any argument is out of range, the function will raise an error.</li>
+                        <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            TIMEFROMPARTS ( hour, minute, seconds, fractions, precision )
+                        </textarea><br>
+                        <textarea rows= "11" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                            SELECT
+                                TIMEFROMPARTS(12,11,14,5000,4) Result1,
+                                TIMEFROMPARTS(22,11,14,5000,5) Result2,
+                                TIMEFROMPARTS(NULL,11,14,5000,4) Result3,
+                                TIMEFROMPARTS(24,11,14,5000,4) Result4;
+                            --Output:
+                                    Result1: 12:11:14.5000
+                                    Result2: 22:11:14.05000
+                                    Result3: NULL
+                                    Result4: Raise error
+                        </textarea>
+                    </ul>
+            </ul>
+        <h3 style="color:red">6) Validating date and time values</h3>
+            <ul>
+                <li><b>ISDATE</b> : Check if a value is a valid date, time or datetime value</li>
+                <li>The ISDATE() function accepts an argument and returns 1 if that argument is a valid DATE, TIME, or DATETIME value; otherwise, it returns 0.</li>
+                <li style="color:red">ISDATE returns 0 if the expression is a datetime2 value.</li>
+                <li style="color:red">Note that the range for datetime data is 1753-01-01 through 9999-12-31, while the range for date data is 0001-01-01 through 9999-12-31.</li>
+                <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    ISDATE(expression)
+                </textarea>
+                <li>ISDATE is deterministic only if you use it with the CONVERT function, if the CONVERT style parameter is specified, and style is not equal to 0, 100, 9, or 109.</li>
+                <li>The return value of ISDATE depends on the settings set by SET DATEFORMAT, SET LANGUAGE and Configure the default language Server Configuration Option.</li>
+                <li>View the current setting, execute the command:</li>
+                <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    DBCC useroptions
+                </textarea>
+            </ul>
+        <h3 style="color:red">7) DATE, TIME, DATETIME FORMAT</h3>
+            <ul>
+                <table align="center" border="1" cellpadding="4" cellspacing="0">
+                    <tr>
+                    <td colspan="4" style="background-color: gray; color: white; font-weight: bold;">
+                    DATE ONLY FORMATS</td>
+                    </tr>
+                    <tr>
+                    <th>Format #</th>
+                    <th>Query</th>
+                    <th>Format</th>
+                    <th>Sample</th>
+                    </tr>
+                    <tr>
+                    <td>1 </td>
+                    <td>select convert(varchar, getdate(), 1) </td>
+                    <td>mm/dd/yy</td>
+                    <td>12/30/06</td>
+                    </tr>
+                    <tr>
+                    <td>2 </td>
+                    <td>select convert(varchar, getdate(), 2) </td>
+                    <td>yy.mm.dd</td>
+                    <td>06.12.30 </td>
+                    </tr>
+                     <tr>
+                    <td>3 </td>
+                    <td>select convert(varchar, getdate(), 3) </td>
+                    <td>dd/mm/yy</td>
+                    <td>30/12/06</td>
+                    </tr>
+                    <tr>
+                    <td>4 </td>
+                    <td>select convert(varchar, getdate(), 4) </td>
+                    <td>dd.mm.yy</td>
+                    <td>30.12.06</td>
+                    </tr>
+                    <tr>
+                    <td>5 </td>
+                    <td>select convert(varchar, getdate(), 5) </td>
+                    <td>dd-mm-yy</td>
+                    <td>30-12-06</td>
+                    </tr>
+                    <tr>
+                    <td>6 </td>
+                    <td>select convert(varchar, getdate(), 6) </td>
+                    <td>dd-Mon-yy</td>
+                    <td>30 Dec 06</td>
+                    </tr>
+                    <tr>
+                    <td>7 </td>
+                    <td>select convert(varchar, getdate(), 7) </td>
+                    <td>Mon dd, yy</td>
+                    <td>Dec 30, 06</td>
+                    </tr>
+                    <tr>
+                    <td>10 </td>
+                    <td>select convert(varchar, getdate(), 10) </td>
+                    <td>mm-dd-yy</td>
+                    <td>12-30-06</td>
+                    </tr>
+                    <tr>
+                    <td>11 </td>
+                    <td>select convert(varchar, getdate(), 11) </td>
+                    <td>yy/mm/dd</td>
+                    <td>06/12/30 </td>
+                    </tr>
+                    <tr>
+                    <td>12 </td>
+                    <td>select convert(varchar, getdate(), 12) </td>
+                    <td>yymmdd</td>
+                    <td>061230 </td>
+                    </tr>
+                    <tr>
+                    <td>23 </td>
+                    <td>select convert(varchar, getdate(), 23) </td>
+                    <td>yyyy-mm-dd</td>
+                    <td>2006-12-30</td>
+                    </tr>
+                    <tr>
+                    <td>101 </td>
+                    <td>select convert(varchar, getdate(), 101) </td>
+                    <td>mm/dd/yyyy</td>
+                    <td>12/30/2006</td>
+                    </tr>
+                    <tr>
+                    <td>102 </td>
+                    <td>select convert(varchar, getdate(), 102) </td>
+                    <td>yyyy.mm.dd</td>
+                    <td>2006.12.30 </td>
+                    </tr>
+                    <tr>
+                    <td>103 </td>
+                    <td>select convert(varchar, getdate(), 103) </td>
+                    <td>dd/mm/yyyy</td>
+                    <td>30/12/2006</td>
+                    </tr>
+                    <tr>
+                    <td>104 </td>
+                    <td>select convert(varchar, getdate(), 104) </td>
+                    <td>dd.mm.yyyy</td>
+                    <td>30.12.2006</td>
+                    </tr>
+                    <tr>
+                    <td>105 </td>
+                    <td>select convert(varchar, getdate(), 105) </td>
+                    <td>dd-mm-yyyy</td>
+                    <td>30-12-2006 </td>
+                    </tr>
+                    <tr>
+                    <td>106 </td>
+                    <td>select convert(varchar, getdate(), 106) </td>
+                    <td>dd Mon yyyy</td>
+                    <td>30 Dec 2006</td>
+                    </tr>
+                    <tr>
+                    <td>107 </td>
+                    <td>select convert(varchar, getdate(), 107) </td>
+                    <td>Mon dd, yyyy</td>
+                    <td>Dec 30, 2006 </td>
+                    </tr>
+                    <tr>
+                    <td>110 </td>
+                    <td>select convert(varchar, getdate(), 110) </td>
+                    <td>mm-dd-yyyy</td>
+                    <td>12-30-2006</td>
+                    </tr>
+                    <tr>
+                    <td>111 </td>
+                    <td>select convert(varchar, getdate(), 111) </td>
+                    <td>yyyy/mm/dd</td>
+                    <td>2006/12/30 </td>
+                    </tr>
+                    <tr>
+                    <td>112 </td>
+                    <td>select convert(varchar, getdate(), 112) </td>
+                    <td>yyyymmdd</td>
+                    <td>20061230</td>
+                    </tr>
+                    <tr>
+                    <td></td>
+                    <td></td>
+                    <td>&nbsp;</td>
+                    <td></td>
+                    </tr>
+                    <tr>
+                    <td colspan="4" style="background-color: gray; color: white; font-weight: bold;">
+                    TIME ONLY FORMATS</td>
+                    </tr>
+                    <tr>
+                    <td>8 </td>
+                    <td>select convert(varchar, getdate(), 8) </td>
+                    <td>hh:mm:ss</td>
+                    <td>00:38:54 </td>
+                    </tr>
+                    <tr>
+                    <td>14</td>
+                    <td>select convert(varchar, getdate(), 14) </td>
+                    <td>hh:mm:ss:nnn</td>
+                    <td>00:38:54:840 </td>
+                    </tr>
+                    <tr>
+                    <td>24</td>
+                    <td>select convert(varchar, getdate(), 24) </td>
+                    <td>hh:mm:ss</td>
+                    <td>00:38:54</td>
+                    </tr>
+                    <tr>
+                    <td>108 </td>
+                    <td>select convert(varchar, getdate(), 108) </td>
+                    <td>hh:mm:ss</td>
+                    <td>00:38:54 </td>
+                    </tr>
+                    <tr>
+                    <td>114</td>
+                    <td>select convert(varchar, getdate(), 114) </td>
+                    <td>hh:mm:ss:nnn</td>
+                    <td>00:38:54:840</td>
+                    </tr>
+                    <tr>
+                    <td></td>
+                    <td></td>
+                    <td>&nbsp;</td>
+                    <td></td>
+                    </tr>
+                    <tr>
+                    <td colspan="4" style="background-color: gray; color: white; font-weight: bold;">
+                    DATE &amp; TIME FORMATS</td>
+                    </tr>
+                    <tr>
+                    <td>0 </td>
+                    <td>select convert(varchar, getdate(), 0) </td>
+                    <td>Mon dd yyyy hh:mm AM/PM</td>
+                    <td>Dec 30 2006 12:38AM </td>
+                    </tr>
+                    <tr>
+                    <td>9</td>
+                    <td>select convert(varchar, getdate(), 9) </td>
+                    <td>Mon dd yyyy hh:mm:ss:nnn AM/PM</td>
+                    <td>Dec 30 2006 12:38:54:840AM </td>
+                    </tr>
+                    <tr>
+                    <td>13 </td>
+                    <td>select convert(varchar, getdate(), 13) </td>
+                    <td>dd Mon yyyy hh:mm:ss:nnn AM/PM</td>
+                    <td>30 Dec 2006 00:38:54:840AM </td>
+                    </tr>
+                    <tr>
+                    <td>20 </td>
+                    <td>select convert(varchar, getdate(), 20) </td>
+                    <td>yyyy-mm-dd hh:mm:ss</td>
+                    <td>2006-12-30 00:38:54</td>
+                    </tr>
+                    <tr>
+                    <td>21 </td>
+                    <td>select convert(varchar, getdate(), 21) </td>
+                    <td>yyyy-mm-dd hh:mm:ss:nnn</td>
+                    <td>2006-12-30 00:38:54.840</td>
+                    </tr>
+                    <tr>
+                    <td>22 </td>
+                    <td>select convert(varchar, getdate(), 22) </td>
+                    <td>mm/dd/yy hh:mm:ss AM/PM</td>
+                    <td>12/30/06 12:38:54 AM</td>
+                    </tr>
+                    <tr>
+                    <td>25</td>
+                    <td>select convert(varchar, getdate(), 25) </td>
+                    <td>yyyy-mm-dd hh:mm:ss:nnn</td>
+                    <td>2006-12-30 00:38:54.840</td>
+                    </tr>
+                    <tr>
+                    <td>100</td>
+                    <td>select convert(varchar, getdate(), 100) </td>
+                    <td>Mon dd yyyy hh:mm AM/PM</td>
+                    <td>Dec 30 2006 12:38AM</td>
+                    </tr>
+                    <tr>
+                    <td>109 </td>
+                    <td>select convert(varchar, getdate(), 109) </td>
+                    <td>Mon dd yyyy hh:mm:ss:nnn AM/PM</td>
+                    <td>Dec 30 2006 12:38:54:840AM </td>
+                    </tr>
+                    <tr>
+                    <td>113</td>
+                    <td>select convert(varchar, getdate(), 113) </td>
+                    <td>dd Mon yyyy hh:mm:ss:nnn</td>
+                    <td>30 Dec 2006 00:38:54:840</td>
+                    </tr>
+                    <tr>
+                    <td>120</td>
+                    <td>select convert(varchar, getdate(), 120) </td>
+                    <td>yyyy-mm-dd hh:mm:ss</td>
+                    <td>2006-12-30 00:38:54</td>
+                    </tr>
+                    <tr>
+                    <td>121</td>
+                    <td>select convert(varchar, getdate(), 121) </td>
+                    <td>yyyy-mm-dd hh:mm:ss:nnn</td>
+                    <td>2006-12-30 00:38:54.840</td>
+                    </tr>
+                    <tr>
+                    <td>126</td>
+                    <td>select convert(varchar, getdate(), 126) </td>
+                    <td>yyyy-mm-dd T hh:mm:ss:nnn</td>
+                    <td>2006-12-30T00:38:54.840</td>
+                    </tr>
+                    <tr>
+                    <td>127</td>
+                    <td>select convert(varchar, getdate(), 127) </td>
+                    <td>yyyy-mm-dd T hh:mm:ss:nnn</td>
+                    <td>2006-12-30T00:38:54.840</td>
+                    </tr>
+                    <tr>
+                    <td></td>
+                    <td></td>
+                    <td>&nbsp;</td>
+                    <td></td>
+                    </tr>
+                    <tr>
+                    <td colspan="4" style="background-color: gray; color: white; font-weight: bold;">
+                    ISLAMIC CALENDAR DATES</td>
+                    </tr>
+                    <tr>
+                    <td>130</td>
+                    <td>select convert(nvarchar, getdate(), 130) </td>
+                    <td>dd mmm yyyy hh:mi:ss:nnn AM/PM</td>
+                    <td><img src="{% static 'IMG\1145_date-output.png'%}" height="18" width="201"></td>
+                    </tr>
+                    <tr>
+                    <td>131</td>
+                    <td>select convert(nvarchar, getdate(), 131) </td>
+                    <td>dd mmm yyyy hh:mi:ss:nnn AM/PM</td>
+                    <td>10/12/1427 12:38:54:840AM</td>
+                    </tr>
+                    </table>
+    </ul>
+</body>
+</html>

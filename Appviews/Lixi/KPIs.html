@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <style>
+        h1 {color: red;}
+        h2 {color: blue;}
+        h3 {color: purple;}
+        h4 {color: green; font-size: 20px}
+    </style>
+    <meta charset="UTF-8">
+    <title>Key Performance Indicators</title>
+</head>
+<body>
+<h1 style="text-align:center">KPIs</h1>
+<ul>
+    <h2>Warehouse</h2>
+    <ul>
+        <table>
+            <tr style="color: green">
+                <th>KPI</th>
+                <th>Weight/ Target</th>
+                <th>PIC</th>
+            </tr>
+            <tr>
+                <td>1. Shipment Inbound Time</td>
+                <td>- Less than 24-48H with standardized SM<br>
+                - Less than 96H with re-work SM</td>
+                <td>-Huy: Receiving<br>-Vàng: Receiving<br>-Lương Hà: HAN staff<br>-Tùng Phạm: HAN staff</td>
+            </tr>
+            <tr>
+                <td>2. Backorder's rate</td>
+                <td>10-15%</td>
+                <td>-Hải: Warehouse Sup<br>-Mai Trần: WH Sup<br>
+                -Đạt: Transportation specialist</td>
+            </tr>
+            <tr>
+                <td>3. Fulfilled time</td>
+                <td>100% same day (before 2:00 PM of the day)</td>
+                <td>-Thắng: Packing<br>-Vàng: Picking<br>-Tú: Packing<br>-Huy: Picking<br>-Long: Picking<br>-Lương Hà<br>-Tùng Phạm</td>
+            </tr>
+            <tr>
+                <td>4. Productivity</td>
+                <td>- 300 orders/ person/ day<br>- All orders of the day (current situation)</td>
+                <td>-Hải: WH Sup<br>-Mai Trần: WH Sup</td>
+            </tr>
+            <tr>
+                <td>5. Order accuracy</td>
+                <td>>=99.8%</td>
+                <td>-Thắng: Packing<br>-Tú: Packing<br>-Lương Hà: HAN staff<br>-Tùng Phạm: HAN staff</td>
+            </tr>
+            <tr>
+                <td>6. Handover Accuracy</td>
+                <td>>= 99%</td>
+                <td>-Vàng: Handover<br>-Trâm: Outbound Leader<br>-Tú: Handover<br>-Lương Hà: HAN staff<br>-Tùng Phạm: HAN staff</td>
+            </tr>
+            <tr>
+                <td>7. On time handover</td>
+                <td>100%</td>
+                <td>-Đạt: Transportation<br>-Trâm: Outbound Leader<br>-Vàng: Handover<br>-Tú: Handover<br>-Thắng: Handover<br>-Lương Hà: HAN staff<br>-Tùng Phạm: HAN staff</td>
+            </tr>
+            <tr>
+                <td>8. Return processing time</td>
+                <td>24-48H</td>
+                <td>-Thảo: Return<br>-Hải: WH Sup<br>-Trâm: Outbound Leader<br>-Mai Trần: WH Sup</td>
+            </tr>
+            <tr>
+                <td>9. Inventory accuracy</td>
+                <td>>=98%</td>
+                <td>All staff</td>
+            </tr>
+        </table>
+    </ul>
+    <h2>Transportation</h2>
+    <ul>
+        <table>
+            <tr style="color:green">
+                <th>KPI</th>
+                <th>Weight/ Target</th>
+                <th>PIC</th>
+            </tr>
+            <tr>
+                <td>1. First time attempt (3PL pick up ord &rarr; 1st delivery)</td>
+                <td>98%</td>
+                <td>-Duyên: Transportation Leader<br>-Đạt: Transportation Specialist</td>
+            </tr>
+            <tr>
+                <td>2. On time delivery percentage (3PL pick up ord &rarr; successful delivery/ returned)</td>
+                <td>98%</td>
+                <td>-Duyên: Transportation Leader<br>-Đạt: Transportation Specialist</td>
+            </tr>
+            <tr>
+                <td>3. Cost per unit</td>
+                <td>Calculating current cost for each order</td>
+                <td>Identify the cost for each order and how many percentages need to be down each year.<br>-Duyên: Transportation Leader</td>
+            </tr>
+        </table>
+    </ul>
+</ul>
+</body>
+</html>

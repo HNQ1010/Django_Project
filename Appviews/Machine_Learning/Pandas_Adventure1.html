@@ -1,0 +1,2654 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h2 style="color:blue">IO tools(text, CSV, HDF5, ...)</h2>
+    <ul>
+        <li>The pandas I/O API is a set of top level <b>reader</b> functions accessed like <b>pandas.read_csv()</b> that <br>
+            generally return a pandas object. The corresponding <b>writer</b> functions are object methods that are accessed<br>
+            like <b>DataFrame.to_csv()</b>.</li>
+        <img src="{% static 'IMG/table_2.png'%}" width="400" height="600">
+        <li>If you use the <b>StringIO class</b>, make sure you import it with python 3:</li>
+        <pre>
+            from io import StringIO
+        </pre>
+    </ul>
+<h2 style="color:blue">CSV and Text file</h2>
+    <ul>
+        <li>The workhorse function for reading text file (a.k.a. flat files) is <b>read_csv()</b>.</li>
+        <h3 style="color:red">Parsing options:</h3>
+        <li><b>read_csv()</b> accepts the following common arguments:</li>
+        <ul>
+            <li style="color:red"><b>Basic</b></li>
+            <li><b>filepath_or_buffer: various</b>. Either a path to a file (a str, pathlib.Path, or py._path.local.LocalPath),<br>
+            URL (including http, ftp, and S3 locations), or any object with a <b>read()</b> method (such as an open file StringIO).</li>
+            <li><b>sep : str, default to ',' for read_csv(), \t for read_table()</b>. Delimiter to use. If sep is None, the C engine<br>
+            cannot automatically detect the separator, but the Python parsing engine can, meaning the latter will be used and and <br>
+            automatically detect the separator by Python's builtin sniffer tool, <b>csv.Sniffer.</b>In addition, separators longer than<br>
+            1 character and different from <b>'\s+'</b> will be interpreted as regular expressions and will also force the use of the <br>
+            Python parsing engine. Note that regex delimiters are prone to ignoring quoted data. Regex example <b>'\\r\\t'</b>.</li>
+            <li><b>delimiter: str, default None</b>. Alternative argument name for sep.</li>
+            <li><b>delim_whitespace: boolean, default False.</b> Specifies whether or not whitespace(' ', '\t') will be used as the delimiter.<br>
+            Equivalent to setting <b>sep='s\t'</b>. If this option is set to True, nothing should be passed in for the delimiter paramreter.</li>
+            <li style="color:red"><b>Column and index locations and names</b></li>
+            <li><b>header: int or list of ints, default 'infer'</b>.Row number(s) to use as the column names, and the start of the data.<br>
+            Default behavior is to infer the column names: if no names are passed the behavior is identical to <b>header=0</b> and columns are<br>
+            inferred from the first line of the file, if column names are passed explicitly then the behavior is identical <b>header=None</b><br>
+            Explicitly pass <b>header=0</b> to be able to replace existing names. The header can be a list of ints that specify row locations<br>
+            for a MultiIndex on the columns. Intervening rows that are not specified will be skipped. Note that this parameter ignores commented<br>
+            lines and empty lines if <b>skip_blank_lines=True</b>, so <b>header=0</b> denotes the first line of data rather than the first line <br>
+            of the file.</li>
+            <li><b>names: array-like, default None.</b> List of column names to use. If file contains no header row, then you should explicitly pass<br>
+            <b>header=None</b>. Duplicates in this list are not allowed.</li>
+            <li><b>index_col: int, str, sequence of int/ str or False, default None.</b>Column(s) to use as the row labels of the DataFrame, either <br>
+            given as string name or column index. If a sequence of int/str is given, a MultiIndex is used. <b>index_col=False</b> can be used to force<br>
+            pandas to not use the first column as the index. When you have malformed file with delimiters at the end of each line. The default value <br>
+            of None instructs pandas to guess. If the number of fields in the column header row is equal to the number of fields in the body of the data<br>
+            fields in the body of the data file, then a default index is used. If it is larger, then the first columns are used as index so that the <br>
+            remaining number of fields in the body are equal to the number of fields in the header.</li>
+            <li><b>usecols: list-like or callable, default None.</b>Return a subset of the columns. If list-like, all elements must either be positional<br>
+            or strings that correspond to column names provided either by the user in <b>names</b> or inferred from the document header row(s). The valid<br>
+            list-like <b>usecols</b> parameter would be [0, 1, 2,..], or ['foo', 'bar', 'baz', ...]. Elements order is ignored, so [0,1] equal to [1,0]<br>
+            To instantiate a DataFrame from data with element or der preserved use pd.read_csv(data, usecols=[0,1][[0,1]]) for [0,1] order and vice versa.<br>
+            If callable, the callable function will be evaluated against the column names, returning names where the callable function evaluates to True:</li>
+            <pre>
+                import pandas as pd
+                from io import StringIO
+                data = 'col1, col2, col3\na,b,1\na,b,2\nc,d,3'
+                pd.read_csv(stringIO(data))
+                Out[]:
+                  col1 col2  col3
+                0    a    b     1
+                1    a    b     2
+                2    c    d     3
+                # Exchanging file's column into upper case then get
+                pd.read_csv(StringIO(data, usecols=lambda x:x.upper() in ['COL1', 'COL3'])
+                Out[]:
+                  col1  col3
+                0    a     1
+                1    a     2
+                2    c     3
+                # USING THIS PARAMETER RESULT IN MUCH FASTER PARSING AND LOWER MEMORY USAGE
+            </pre>
+            <li><b>squeeze: boolean, default False.</b>If the parsed data only contains one column then return Series.</li>
+            <li><b>prefix: Str, default None.</b> Prefix to add column numbers when no header. (prefic='x', header=None then return X0, X1, ...)</li>
+            <li><b>mangle_dupe_cols: boolean, default True.</b>Duplicate columns will be specified as 'X', 'X1', 'X2', ..., rather then 'X', 'X', ...<br>
+            Passing in False will case data to be overwritten if there are duplicate names in the columns.</li>
+            <li style="color:red"><b>General parsing configuration</b></li>
+            <li><b>dtype: type name or dict of column -> type, default None.</b>Data type for data or columns. ({'a': np.float64, 'b': np.int32}).<br>
+            Unsupported if <b>engine='python'.</b>Use <b>str or object</b> together with suitable <b>na_values</b> setting to preserve and not interpret dtype.</li>
+            <li><b>engine: {'c', 'python'}.</b>Parse engine to use. The C engine is faster while the Python engine is currently more feature-complete.</li>
+            <li><b>converters: dict, default None.</b>Dict of functions for converting values in certain columns. Keys can either be ints or column labels.</li>
+            <li><b>true_values: list, default None.</b>Values to consider as False.</li>
+            <li><b>skipinitialspace: boolean, default False.</b>Skip space after delimiter.</li>
+            <li><b>skiprows: list-like or int, default None.</b>Line numbers to skip (0-indexed) or number of lines to skip(int) at the start of the file.<br>
+            If callable, the callable function will be evaluated against the row indices, returning True if the rows should be skipped and False otherwise.</li>
+            <pre>
+                data = 'col1,col2,col3\na,b,1\na,b,2\nc,d,3'
+                pd.read_csv(StringIO(data), skiprows=lambda x: x%2 != 0) # row start at header
+                Out[]:
+                  col1 col2  col3
+                0    a    b     2
+            </pre>
+            <li><b>skipfooter: int, default 0.</b>Number of lines at bottom of file to skip (unsupported with engine='C').</li>
+            <li><b>nrows: int, default None.</b>Number of rows of file to read. Useful for trading pieces of large file.</li>
+            <li><b>low_memory: boolean, default True.</b> Internally process the file in chunks, resulting in lower memory use while parsing, but <br>
+            possibly mixed type inference. To ensure no mixed types either set False, or specify the type with the dtype parameter. Note that the <br>
+            entire file is read into a single DataFrame regardless, use the chunksize or iterator parameter to return the data in chunks. (only valid with C parse).</li>
+            <li><b>memory_map: boolean, default False.</b> If a filepath is provided for <b>filepath_or_buffer</b>, map the file object directly onto <br>
+            memory and access the data directly from there. Using this option can improve performance because there is no longer any I/O overhead.</li>
+            <li style="color:red"><b>NA and missing data handling</b></li>
+            <li><b>na_values: scalar, str, list-like, or dict, default None.</b>Additional strings to recognize as NA/NaN. If dict passed, specific per<br>
+            column NA value.</li>
+            <li><b>keep_default_na: boolean, default True.</b>Whether or not to include the default NaN values when parsing the data.Depending on whether<br>
+            <b>na_values</b> is passed in, the behavior is as follows:</li>
+            <ul>
+                <li>If keep_default_na is True, and na_values are specified, na_values is appended to the default NaN values used for parsing.</li>
+                <li>If keep_default_na is True, and na_values are not specified, only the default NaN values are used for parsing.</li>
+                <li>If keep_default_na is False, and na_values are specified, only the NaN values specified na_values are used for parsing.</li>
+                <li>If keep_default_na is False, and na_values are not specified, no strings will be parsed as NaN.</li>
+                <li>Note that if na_filter is passed in as False, the keep_default_na and na_values parameters will be ignored.</li>
+            </ul>
+            <li><b>na_filter: boolean, default True.</b>Detect missing value markers (empty strings and the value of na_values). In data without <br>
+            any NAs, passing na_filter=False can improve the performance of reading a large file.</li>
+            <li><b>verbose: boolean, default False.</b>Indicate number of NA values placed in non-numeric columns.</li>
+            <li><b>skip_blank_lines: boolean, default True.</b>If True, skip over blank lines rather than interpreting as NaN values.</li>
+            <li style="color:red"><b>Datetime handling</b></li>
+            <li><b>parse_dates: boolean or list of ints or names or list of lists or dict, default False.</b></li>
+            <ul>
+                <li>If True -> try parsing the index.</li>
+                <li>If [1,2,3] ->try parsing columns 1,2,3 each as a separate date column.</li>
+                <li>if [[1,3]] -> combine columns 1 and 3 and parse as a single date column.</li>
+                <li>if {'foo': [1,3]} ->parse columns 1,3 as date and call result 'foo'. A fast-path exists for iso8601-formatted dates.</li>
+            </ul>
+            <li><b>infer_datetime_format: boolean, default False.</b>If True and parse_date is enabled for a column, attempt to infer the datetime<br>
+            format to speed up the processing.</li>
+            <li><b>keep_date_col: boolean, default False.</b>If True and parse_dates specifies combining multiple columns then keep the original columns.</li>
+            <li><b>date_parser: function, default None.</b>Function to use for converting a sequence of string columns to an array of datetime instances.<br>
+            The default uses <b>dateutil.parser.parser</b> to do the conversion.pandas will try to call date_parser in three different ways, advancing to<br>
+            the next if an exception occurs:</li>
+            <ul>
+                <li>Pass one or more arrays (as defined by parse_dates) as arguments</li>
+                <li>Concatenate(row-wise) the string values from the columns defined by parse_dates into a single array and pass that.</li>
+                <li>Call date_parser once for each row using one or more strings (corresponding to the columns defined by parse_dates) as arguments.</li>
+            </ul>
+            <li><b>dayfirst: boolean, default False.</b>DD/MM format dates, international and European format.</li>
+            <li><b>cache_dates: boolean, default True.</b>If True, use a cache of unique, converted dates to apply the datetime conversion. May produce<br>
+            significant speed-up when parsing duplicate date strings, especially ones with timezone offsets.</li>
+            <li style="color:blue"><b>New in version 0.25.0</b></li>
+            <li style="color:red"><b>Iteration</b></li>
+            <li><b>iterator: boolean, default False.</b>Return <b>TextFileReader</b> object for iteration or getting chunks with get_chunk().</li>
+            <li><b>chunksize: int, default None.</b>Return TextFileReader object for iteration.</li>
+            <li style="color:red"><b>Quoting, compression and file format.</b></li>
+            <li><b>compression: {'infer', 'gzip', 'bz2', 'zip', 'xz', None, dict}, default 'infer'.</b>For on-the-fly decompression of on-disk data.<br>
+            If 'infer', then use gzip, bz2, zip or xz if filepath_or_buffer is path-like ending in '.gz', '.bz2', '.zip', or '.xz', respectively, and no<br>
+            decompression otherwise. If using 'zip', the ZIP file must contain only one data file to be read in. Set to None for no decompression. Can <br>
+            be a dict with key 'method' set to one of {'zip', 'gzip', 'bz2'} and other key-value pairs are forwarded to zipfile.ZipFile, gzip.GzipFile, or<br>
+            bz2.BZ2File. The following could be passed for faster compression and to create a reproducible gzip archive: compression={'method':'gzip', <br>
+            'compresslevel':1, 'mtime':1}.</li>
+            <li><b>thousands: str, default None.</b>Thousands separator.</li>
+            <li><b>decimal: str, default '.'.</b>Character to recognize as decimal point. Change to ',' for European data.</li>
+            <li><b>float_precision: string, default None.</b>Specifies which converter the C engine should use for floating-point values. The options are None<br>
+            for the ordinary converter, 'high' for the high-precision converter and 'round_trip' for the round-trip converter.</li>
+            <li><b>lineterminator: str(legngth 1).</b>Character to break file into lines. Only valid with C parser.</li>
+            <li><b>quotechar: str(length 1)</b>. The character used to denote the start and end of a quoted item. Quoted items can include the delimiter and<br>
+            it will be ignored.</li>
+            <li><b>quoting : int or csv.QUOTE_* instance, default 0.</b>Control field quoting behavior per csv.QUOTE_* constants. Use one of QUOTE_MINIMAL(0)<br>
+            , QUOTE_ALL(1), QUOTE_NONNUMERIC(2), or QUOTE_NONE(3).</li>
+            <li><b>doublequote: boolean, default True.</b>When quotechar is specified and quoting is not QUOTE_NONE, indicate whether or not to interpret two<br>
+            consecutive quotechar elements inside a field as a single quotechar element.</li>
+            <li><b>escapechar: str(length 1), default None.</b>One-character string used to escape delimiter when quoting is QUOTE_NONE.</li>
+            <li><b>comment: str, default None.</b>Indicates remainder of line should not be parsed. If found at the beginning of a line, the line will be ignored<br>
+            altogether. This parameter must be a single character. Like empty lines (as long as skip_blank_lines = True), fully commented lines are ignored by<br>
+            the parameter <b>header</b> but not by skiprows. For Eg: comment='#', parsing '#empty\na,b,c\n1,2,3' with header=0 will result in 'a,b,c' being treated<br>
+            as the header.</li>
+            <li><b>encoding: str, default None.</b>Encoding to use for UTF when reading/writing. See python encodings.</li>
+            <li><b>dialect: str or csv.Dialect instance, default None.</b>If provided, this parameter will override values default or not) for the parameters:<br>
+            <b>delimiter, doublequote, escapechar, skipinitialspace,quotechar, and quoting.</b> If it is necessary to override values, a ParserWarning will be <br>
+            issued.</li>
+            <li style="color:red"><b>Error handling</b></li>
+            <li><b>error_bad_lines: boolean, default None.</b>Lines with too many fields (csv file with too many commas) will by default cause an exception<br>
+            to be raised, and no DataFrame will be returned. If False, then these 'bad lines' will be dropped from the DataFrame that is returned.</li>
+            <li><b>warn_bad_lines: boolean, default None.</b> If error_bad_lines is False, and warn_bad_lines is True, a warning for each 'bad line' will be output.</li>
+            <li><b>on_bad_lines: ('error', 'warn', 'skip'), default 'error'.</b>Specifies what to do upon encountering a bad line.</li>
+            <li style="color:blue"><b>From version 1.3.0, replace error_bad_lines and warn_bad_lines with on_bad_lines.</b></li>
+            <ul>
+                <li>'error': raise an ParserError when a bad line is encountered.</li>
+                <li>'warn': print a warning when a bad line is encountered and skip that lines.</li>
+                <li>'skip': skip bad lines without raising or warning when they are encountered.</li>
+            </ul>
+        </ul>
+    </ul>
+<h2 style="color:blue">Specifying column data types</h2>
+    <ul>
+        <li>You can indicate the data type for the whole DataFrame or individual columns.</li>
+        <pre>
+            data = 'a,b,c,d\n1,2,3,4\n5,6,7,8\n9,10,11'
+            df = pd.read_csv(StringIO(data), dtype='object')
+            df['a'][0] # 1
+            df = pd.read_csv(StringIO(data), dtype={'b': 'object', 'c':np.float64, 'd': 'int64'})
+            df.dtypes
+            Out[]:
+            a      int64
+            b     object
+            c    float64
+            d      Int64
+            dtype: object
+        </pre>
+        <li>You can use 'converters' or 'to_numeric' argument of <b>read_csv()</b>:</li>
+        <pre>
+            data = 'col_1\n1\n2\n'A'\n4.22'
+            df = pd.read_csv(StringIO(data), converters={'col_1': str})
+            df2 = pd.read_cs(StringIO(data))
+            df2['col_1'] = pd.to_numeric(df2['col_1'], errors='coerce')
+        </pre>
+        <li>Ultimately, how you deal with reading in columns containing mixed dtypes depends on your specific needs. In the case above, if you wanted to<br>
+        NaN out the data anomalies, then <b>to_numeric</b> is probably your best option. However, if you wanted for all the data to be coerced, no matter<br>
+        the type, then using the converters argument of <b>read_csv()</b> would certainly be worth trying.</li>
+        <li>In some cases, reading in abnormal data with columns containing mixed dtypes will result in an inconsistent dataset. If you rely on pandas to<br>
+        infer the dtypes for different chunks of the data, rather than the whole dataset at one. Consequently, you can end up with column(s) with mixed dtypes.</li>
+        <pre>
+            col_1 = list(range(500000)) + ['a', 'b'] + list(range(500000))
+            df = pd.DataFrame({'col_1': col_1})
+            df.to_csv('foo.csv')
+            mixed_df = pd.read('foo.csv')
+            mixed_df['col_1'].apply(type).value_counts()
+            Out[]:
+            &ltclass 'int'>    737858
+            &ltclass 'str'>    262144
+            Name: col_1, dtype: int64
+            mixed_df['col_1'].dtype
+            Out[]: dtype('O')
+        </pre>
+        <li>mixed_df containing an int dtype for certain chunks of the column, and 'str' for others due to the mixed dtypes from the data that was read in.<br>
+        It is important to note that the overall column will be marked with a dtype of object, which is used for mixed dtypes column.</li>
+    </ul>
+<h2 style="color:blue">Specifying categorical dtype</h2>
+    <ul>
+        <li>categorical coloumns can be parsed directly by specifying <b>dtype='category' or dtype=CategoricalDtype(categories, ordered).</b></li>
+        <pre>
+            data = 'col1,col2,col3\na,b,1\na,b,2\nc,d,3'
+            pd.read_csv(StringIO(data), dtype='category').dtype
+            Out[]:
+            col1    category
+            col2    category
+            col3    category
+            dtype: object
+        </pre>
+        <li>Individual columns can be parsed as a <b>Categorical</b> using a dict specification.</li>
+        <pre>
+            pd.read_csv(StringIO(data), dtype={'col1': 'category'}).dtypes
+            Out[]:
+            col1    category
+            col2      object
+            col3       int64
+            dtype: object
+        </pre>
+        <li>Specifying <b>dtype='category'</b> will result in an unordered Categorical whose categories are the unique values observed in the data.<br>
+        For more control on the categories and order, create a CategoricalDtype ahead of time, and pass that for that column's dtype.</li>
+        <pre>
+            from pandas.api.types import CategoricalDtype
+            dtype = CategoricalDtype(['d', 'c', 'b', 'a'], ordered=True)
+            pd.read_csv(StringIO(data), dtype={'col1':dtype}.dtypes
+            Out[]:
+            col1    category
+            col2      object
+            col3       int64
+            dtype: object
+        </pre>
+        <li>When using dtype=CategoricalDtype, 'unexpected' values outside of dtype.categories are treated as missing values.</li>
+        <pre>
+            dtype = CategoricalDtype(['a', 'b', 'd']) # no 'c'
+            pd.read_csv(StringIO(data), dtype={'col1': dtype}).col1
+            Out[40]:
+            0      a
+            1      a
+            2    NaN
+            Name: col1, dtype: category
+            Categories (3, object): ['a', 'b', 'd']
+        </pre>
+        <li>This matches the behavior of Categorical.set_categories().</li>
+        <li>With dtype='category', theresulting categories will always be parsed as string(object dtype). If the categories are numeric<br>
+        they can be converted using the to_numeric() function, or as appropriate another converter such as to_datetime().</li>
+        <li>When dtype is a CategorialDtype with homogeneous categories (all numeric, all datetime,...), the conversion is done automatically.</li>
+        <pre>
+            df = pd.read_csv(StringIO(data), dtype='category')
+            df.dtypes
+            Out[]:
+            col1    category
+            col2    category
+            col3    category
+            dtype: object
+
+            df['col3']
+            Out[]:
+            0    1
+            1    2
+            2    3
+            Name: col3, dtype: category
+            Categories (3, object): ['1', '2', '3']
+
+            df['col3'].cat.categories = pd.to_numeric(df['col3'].cat.categories)
+            df['col3']
+            Out[]:
+            0    1
+            1    2
+            2    3
+            Name: col3, dtype: category
+            Categories (3, int64): [1, 2, 3]
+        </pre>
+    </ul>
+<h2 style="color:blue">Naming and using columns</h2>
+    <ul>
+        <li style="color:red"><b>Handling and using columns</b></li>
+        <li>A file may or may not have a header row. Pandas assumes the first row should be used as the column names:</li>
+        <li>By specifying the <b>names</b> argument in conjunction with <b>header</b> you can indicate other names to use and whether or not<br>
+        to throw away the header row (if any):</li>
+        <pre>
+            data = 'a,b,c\n1,2,3\n4,5,6\n7,8,9'
+            pd.read_csv(StringIO(data), names=['foo', 'bar', 'baz'], header=0)
+            Out[]:
+               foo  bar  baz
+            0    1    2    3
+            1    4    5    6
+            2    7    8    9
+
+            pd.read_csv(StringIO(data), names=['foo', 'bar', 'baz'], header=None)
+            Out[]:
+             foo bar baz
+            0   a   b   c
+            1   1   2   3
+            2   4   5   6
+            3   7   8   9
+        </pre>
+        <li>If the header is in a row other than the first, pass the row number to header. This will skip the preceding rows:</li>
+        <pre>
+            data = 'skip this skip this\na, b, c\n1,2,3\n4,5,6\n7,8,9'
+            pd.read_csv(StringIO(data), header=1)
+            Out[]:
+               a  b  c
+            0  1  2  3
+            1  4  5  6
+            2  7  8  9
+            pd.read_csv(StringIO(data), names=['foo', 'bar', 'baz'], skiprows=[0,1])
+            Out[]:
+             foo bar baz
+            0   1   2   3
+            1   4   5   6
+            2   7   8   9
+        </pre>
+        <li>Default behavior is to infer the column names: if no names are passed the behavior is identical to header=0, and column names are<br>
+        inferred from the first non-blank line of the file, if column names are passed explicitly then the behavior is identical to header=None.</li>
+    </ul>
+<h2 style="color:blue">Duplicate names parsing</h2>
+    <ul>
+        <li>If the file or header contains duplicate names, pandas will by default distinguish between them so as to prevent overwriting data:</li>
+        <pre>
+            data = 'a,b,a\n0,1,2\n3,4,5'
+            pd.read_csv(StringIO(data))
+            Out[]:
+               a  b  a.1
+            0  0  1    2
+            1  3  4    5
+        </pre>
+        <li>There is no more duplicate data because <b>mangle_dupe_cols=True</b> by default, which modifies a series of duplicate column 'X', 'X', ...<br>
+        to become 'X', 'X1', ...If mange_dupe_cols=False, duplicate data can arise and overwrite data:</li>
+        <pre>
+            data = 'a,b,a\n0,1,2\n3,4,5'
+            pd.read_csv(StringIO(data), mangle_dupe_cols=False)
+            Out[]:
+               a  b  a
+            0  2  1  2
+            1  5  4  5
+        </pre>
+        <li>To prevent users from encountering this problem with duplicate data, a ValueError exception is raised if mangle_dupe_cols!=True.</li>
+        <pre>
+            pd.read_csv(StringIO(data), mangle_dupe_cols=False)
+            ...
+            ValueError: Setting mangle_dupe_cols=False is not supported yet
+        </pre>
+        <h3 style="color:red">Filtering columns(usecols)</h3>
+        <li>The <b>usecols</b> argument allows you to select any subset of the columns in a file, either using the column names, position numbers<br>
+        or callable:</li>
+        <pre>
+            data = 'a,b,c\n1,2,3,foo\n4,5,6,bar\n7,8,9,baz'
+            pd.read_csv(StringIO(data))
+            pd.read_csv(StringIO(data), uecols=['b', 'd'])
+            Out[]:
+               b    d
+            0  2  foo
+            1  5  bar
+            2  8  baz
+            pd.read_csv(StringIO(data), usecols=[0, 2, 3])
+            Out[]:
+               a  c    d
+            0  1  3  foo
+            1  4  6  bar
+            2  7  9  baz
+            pd.read_csv(StringIO(data), usecols=lambda x: x.upper() in ['A', 'C'])
+            Out[]:
+               a  c
+            0  1  3
+            1  4  6
+            2  7  9
+        </pre>
+        <li>The <b>usecols</b> argument can also be used to specify which columns not to use i the final result:</li>
+        <pre>
+            pd.read_csv(StringIO(data), usecol=lambda x: x.lower() not in ['a', 'c'])
+            Out[61]:
+               b    d
+            0  2  foo
+            1  5  bar
+            2  8  baz
+        </pre>
+        <h3 style="color:red">Comments and empty lines</h3>
+        <li><b>Ignoring line comments and empty lines</b></li>
+        <li>If the comment parameter is specified, then completely commented lines will be ignored. By default, completely blank lines<br>
+        will be ignored as well.</li>
+        <pre>
+            data = '\na,b,c\n# commented line\n1,2,3\n4,5,6'
+            print(data)
+            Out[]:
+            a,b,c
+
+            # commented line
+            1,2,3
+
+            4,5,6
+            pd.read_csv(StringIO(data), comment='#')
+            Out[]:
+               a  b  c
+            0  1  2  3
+            1  4  5  6
+        </pre>
+        <li>If skip_blank_line=False, then read_csv will not ignore bank lines and fill with NaN values.</li>
+        <li>The presence of ignored lines might create ambiguities involving line numbers, the parameter header uses row numbers (ignoring<br>
+        commented/ empty lines), while skiprows uses line numbers (including commented/ empty lines):</li>
+        <pre>
+            data = '#commented\na,b,c\nA,B,C\n1,2,3'
+            pd.read_csv(StringIO(data), comment=#, header=1) # not include comment line
+            Out[]:
+               A  B  C
+            0  1  2  3
+            data = 'A,B,C\n#comment\na,b,c\n1,2,3'
+            pd.read_csv(StringIO(data), comment='#', skiprow=2) # include commented line
+            Out[]:
+               a  b  c
+            0  1  2  3
+        </pre>
+        <li>If both header and skiprows are specified, header will relative to the end of skiprows.(ignored rows between skiprows and header)</li>
+        <pre>
+            data = (
+                    "# empty\n"
+                    "# second empty line\n"
+                    "# third emptyline\n"
+                    "X,Y,Z\n"
+                    "1,2,3\n"
+                    "A,B,C\n"
+                    "1,2.,4.\n"
+                    "5.,NaN,10.0\n"
+                )
+            pd.read_csv(StringIO(data), skiprows=4, header=1) # similar to skiprows=5
+            Out[]:
+                 A    B     C
+            0  1.0  2.0   4.0
+            1  5.0  NaN  10.0
+        </pre>
+        <h3 style="color:red">Comments</h3>
+        <li>Sometimes comments or meta data may be included in a file. By default, the parser includes the comments in the output and we can <br>
+        suppress the comments using the comment argument:</li>
+        <pre>
+            pd.read_csv('tmp.csv')
+            Out[]:
+                     ID    level                        category
+            0  Patient1   123000           x # really unpleasant
+            1  Patient2    23000  y # wouldn't take his medicine
+            2  Patient3  1234018                     z # awesome
+
+            pd.read_csv('tmp.csv', comment='#')
+            Out[]:
+                     ID    level category
+            0  Patient1   123000       x
+            1  Patient2    23000       y
+            2  Patient3  1234018       z
+        </pre>
+    </ul>
+<h2 style="color:blue">Dealing with Unicode Data</h2>
+    <ul>
+        <li>The encoding argument should be used for encoded unicode data, which will result in byte strings being decoded to unicode in the result:</li>
+        <pre>
+            from io import BytesIO
+            data = b'word, length\n' b'Tr\xc3\xa4umen\n' b'Gr\xc3\xbc\x9fe,5'
+            data = data.decode('utf8').encode('latin-1')
+
+            pd.read_csv(BytesIO(data), encoding='latin-1')
+            Out[]:
+                  word  length
+            0  Träumen       7
+            1    Grüße       5
+
+            df['word'][1]
+            Out[]: 'Grüße'
+        </pre>
+        <li>Some formats which encode all characters as multiple bytes, like UTF-16, won't parse correctly at all without specifying the encoding.</li>
+    </ul>
+<h2 style="color:blue">Index columns and trailing delimiters</h2>
+    <ul>
+        <li>If a file has one more column of data than the number of column names, the first column will be used as the DataFrame's row names.</li>
+        <pre>
+            data = 'a,b,c\n4,apple,bat,5.7\n8,orange,cow,10'
+            pd.read_csv(StringIO(data), index_col=0)
+                        a    b     c
+            index
+            4       apple  bat   5.7
+            8      orange  cow  10.0
+        </pre>
+        <li>Ordinarily, you can achieve this behavior using the index_col option.</li>
+        <li>There are some exception cases when a file has been prepared with delimiters at the end of each data line, confusing the parser.<br>
+        To explicitly disable the index column inference and discard the last column, pass index_col=False.</li>
+        <pre>
+            data = 'a,b,c\n4,apple,bat,\n8,orange,cow,'
+            pd.read_csv(StringIO(data), index_col=False)
+            Out[]:
+            Out[92]:
+               a       b    c
+            0  4   apple  bat
+            1  8  orange  cow
+        </pre>
+        <li>If a subset of data is being parse using the usecols option, the index_col specification is based on that subset, not the original data.</li>
+        <pre>
+            data = 'a,b,c\n4,apple,bat,\n8,orange,cow,'
+            pd.read_csv(StringIO(data), usecol=['b', 'c'], index_col=0)
+            Out[]:
+                 b   c
+            4  bat NaN
+            8  cow NaN
+        </pre>
+    </ul>
+<h2 style="color:blue">Date handling</h2>
+    <ul>
+        <h3 style="color:red">Specifying date columns</h3>
+        <li>To better facilitate working with datetime data, read_csv() uses the keyword arguments parse_dates and date_parser to allow users <br>
+        to specify a variety of columns and date/ time formats to turn the input text data into datetime object.</li>
+        <li>The simplest case is to just pass in parse_dates=True.</li>
+        <pre>
+            pd.read_csv('foo.csv', index_col=0, parse_dates=True)
+            Out[]:
+                        A  B  C
+            date
+            2009-01-01  a  1  2
+            2009-01-02  b  3  4
+            2009-01-03  c  4  5
+        </pre>
+        <li>It is often the case that we may want to store date and time data separately, or store various date fields separately. The parse_dates<br>
+        keyword can be used to specify a combination of columns to parse the dates and/ or times from.</li>
+        <li>You can specify a list of column lists to parse_dates, the resulting date columns will be prepended to the output (so as to not affect<br>
+        the existing column order) and the new column names will be the concatenation of the component column names.</li>
+        <pre>
+            print(open('tmp.csv').read())
+            Out[]:
+            KORD,19990127, 19:00:00, 18:56:00, 0.8100
+            KORD,19990127, 20:00:00, 19:56:00, 0.0100
+            KORD,19990127, 21:00:00, 20:56:00, -0.5900
+            KORD,19990127, 21:00:00, 21:18:00, -0.9900
+            KORD,19990127, 22:00:00, 21:56:00, -0.5900
+            KORD,19990127, 23:00:00, 22:56:00, -0.5900
+
+
+            pd.read_csv('tmp.csv', header=None, parse_dates=[[1,2], [1,3]])
+            Out[102]:
+                            1_2                 1_3     0     4
+            0 1999-01-27 19:00:00 1999-01-27 18:56:00  KORD  0.81
+            1 1999-01-27 20:00:00 1999-01-27 19:56:00  KORD  0.01
+            2 1999-01-27 21:00:00 1999-01-27 20:56:00  KORD -0.59
+            3 1999-01-27 21:00:00 1999-01-27 21:18:00  KORD -0.99
+            4 1999-01-27 22:00:00 1999-01-27 21:56:00  KORD -0.59
+            5 1999-01-27 23:00:00 1999-01-27 22:56:00  KORD -0.59
+        </pre>
+        <li>By default, the parser removes the component date columns, but you can choose to retain them via the keep_date_col keyword.</li>
+        <pre>
+            pd.read_csv('tmp.csv', header=None, parse_dates=[[1,2], [1,3]], keep_date_cols=True)
+            Out[]:
+                              1_2                 1_3     0         1          2          3     4
+            0 1999-01-27 19:00:00 1999-01-27 18:56:00  KORD  19990127   19:00:00   18:56:00  0.81
+            1 1999-01-27 20:00:00 1999-01-27 19:56:00  KORD  19990127   20:00:00   19:56:00  0.01
+            2 1999-01-27 21:00:00 1999-01-27 20:56:00  KORD  19990127   21:00:00   20:56:00 -0.59
+            3 1999-01-27 21:00:00 1999-01-27 21:18:00  KORD  19990127   21:00:00   21:18:00 -0.99
+            4 1999-01-27 22:00:00 1999-01-27 21:56:00  KORD  19990127   22:00:00   21:56:00 -0.59
+            5 1999-01-27 23:00:00 1999-01-27 22:56:00  KORD  19990127   23:00:00   22:56:00 -0.59
+        </pre>
+        <li>You can also use a dict to specify custom name column:</li>
+        <pre>
+            pd.read_csv('tmp.csv', parse_dates={'nominal': [1,2], 'actual': [1,3]}, header=None)
+            Out[]:
+                          nominal              actual     0     4
+            0 1999-01-27 19:00:00 1999-01-27 18:56:00  KORD  0.81
+            1 1999-01-27 20:00:00 1999-01-27 19:56:00  KORD  0.01
+            2 1999-01-27 21:00:00 1999-01-27 20:56:00  KORD -0.59
+            3 1999-01-27 21:00:00 1999-01-27 21:18:00  KORD -0.99
+            4 1999-01-27 22:00:00 1999-01-27 21:56:00  KORD -0.59
+            5 1999-01-27 23:00:00 1999-01-27 22:56:00  KORD -0.59
+        </pre>
+        <li>It is important to remember that if multiple text columns are to be parsed into a single column, then a new column is prepended<br>
+        to the data. The index_col specification is based on of this new set of columns rather than the original data columns.</li>
+        <pre>
+            pd.read_csv('tmp.csv', header=None, parse_dates={'nominal': [1,2], 'actual': [1,3]}, index_col=0)
+            Out[]:
+                                             actual     0     4
+            nominal
+            1999-01-27 19:00:00 1999-01-27 18:56:00  KORD  0.81
+            1999-01-27 20:00:00 1999-01-27 19:56:00  KORD  0.01
+            1999-01-27 21:00:00 1999-01-27 20:56:00  KORD -0.59
+            1999-01-27 21:00:00 1999-01-27 21:18:00  KORD -0.99
+            1999-01-27 22:00:00 1999-01-27 21:56:00  KORD -0.59
+            1999-01-27 23:00:00 1999-01-27 22:56:00  KORD -0.59
+        </pre>
+        <li>If a column or index contains an un-parsable date, the entire column or index will be returned unaltered as an object data type.<br>
+        For non-standard datetime parsing, use to_datetime() after pd.read_csv().</li>
+        <h3 style="color:red">Date parsing functions</h3>
+        <li>Finally, the parser allows you to specify a custom date_parser function to take full advantage of the flexibility of the date parsing API:</li>
+        <pre>
+            date_spec = {'nominal': [1,2], 'actual': [1,3]}
+            pd.read_csv('tmp.csv', header=None, parse_dates= date_spec, date_parser=pd.to_datetime)
+            Out[]:
+                          nominal              actual     0     4
+            0 1999-01-27 19:00:00 1999-01-27 18:56:00  KORD  0.81
+            1 1999-01-27 20:00:00 1999-01-27 19:56:00  KORD  0.01
+            2 1999-01-27 21:00:00 1999-01-27 20:56:00  KORD -0.59
+            3 1999-01-27 21:00:00 1999-01-27 21:18:00  KORD -0.99
+            4 1999-01-27 22:00:00 1999-01-27 21:56:00  KORD -0.59
+            5 1999-01-27 23:00:00 1999-01-27 22:56:00  KORD -0.59
+        </pre>
+        <li>Pandas will try to call date_parser function in three different ways. If an exception is raised, the next one is tried:</li>
+        <ul>
+            <li>date_parser is first called with one or more arrays as arguments as defined using parse_dates (['2013', '2013'], ['1', '2']).</li>
+            <li>If above failed, date_parser is called with all the columns concatenated row-wise into a single array(['2013 1', '2013 2']).</li>
+        </ul>
+        <li>Note that performance-wise, you should try these methods of parsing dates in order:</li>
+        <ul>
+            <li>Try to infer the format using infer_datetime_format=True</li>
+            <li>If you know the format, use pd.to_datetime(), date_parser=lambda x: x.to_datetime(x, format=...)</li>
+            <li>If you have a really non-standard format, use a custom date_parser function. For optimal performance, this should be vectorized<br>
+            and accept arrays as arguments.</li>
+        </ul>
+        <h3 style="color:red">Parsing a CSV with mixed timezones</h3>
+        <li>Pandas can not natively represent a column or index with mixed timezones. If your CSV file contains columns with a mixture of timezones,<br>
+        the default result will be an object-dtype column with strings, even with parse_dates.</li>
+        <li>To parse the mixed timezone values as a datetime column, pass a partially-applied to_datetime() with utc=True as the <b>date_parser</b>.</li>
+        <pre>
+            content = """\
+                        a
+                        2000-01-01T00:00:00+05:00
+                        2000-01-01T00:00:00+06:00"""
+            pd.read_csv(StringIO(content), parse_dates=['a'])
+            Out[]:
+            0    2000-01-01 00:00:00+05:00
+            1    2000-01-01 00:00:00+06:00
+            Name: a, dtype: object
+
+            pd.read_csv(StringIO(content), parse_dates=['a'], date_parser=lambda x: pd.to_datetime(x, utc=True))
+            Out[]:
+            0   1999-12-31 19:00:00+00:00
+            1   1999-12-31 18:00:00+00:00
+            Name: a, dtype: datetime64[ns, UTC]
+        </pre>
+        <h3 style="color:red">Inferring datetime format</h3>
+        <li>If you have parse_dates enable for some or all of your columns, and your datetime strings are all formatted the same way<br>
+        , you may get a large speed up by setting infer_datetime_format=True. If set, pandas will attempt to guess the format of your<br>
+        datetime strings, and then use a faster means of parsing the string.5-10x parsing speeds have been observed. Pandas will fallback<br>
+        to the usual parsing if either the format cannot be guessed or the format that was guessed cannot properly parse the entire column<br>
+        of strings. So in general, infer_datetime_format should not have any negative consequences if enable.</li>
+        <li>Here are some examples of datetime strings that can be guessed:</li>
+        <ul>
+            <li>'20111230'</li>
+            <li>'2011/12/30'</li>
+            <li>'20111230 00:00:00'</li>
+            <li>'2011/12/30 00:00:00'</li>
+            <li>'30/Dec/2011 00:00:00' </li>
+            <li>'30/December/2011 00:00:00'</li>
+        </ul>
+        <li>Note that infer_datetime_format is sensitive to dayfirst. With dayfist=True and dayfirst=False, you will get different values:</li>
+        <ul>
+            <li>'01/12/2011', dayfirst=True : December 1st</li>
+            <li>'01/12/2011', dayfirst=False (default): January 12th</li>
+        </ul>
+        <pre>
+            s = """
+            date,A,B,C
+            2009-01-01,a,1,2
+            2009-01-02,b,3,4
+            2009-01-03,c,4,5
+            """
+            pd.read_csv(StringIO(s), index_col=0, infer_datetime_format=True)
+            Out[]:
+                        A  B  C
+            date
+            2009-01-01  a  1  2
+            2009-01-02  b  3  4
+            2009-01-03  c  4  5
+        </pre>
+        <h3 style="color:red">International date formats</h3>
+        <li>while Us date format tend to be MM/DD/YYYY, many international formats use DD/MM/YYYY instead. For convenience, a dayfirst is provided.</li>
+        <pre>
+            s = """
+                    date,value,cat
+                    1/6/2000,5,a
+                    2/6/2000,10,b
+                    3/6/2000,15,c
+                    """
+            pd.read_csv(StringIO(s), parse_dates=True, dayfirst=True)
+            Out[]:
+                    date  value cat
+            0 2000-06-01      5   a
+            1 2000-06-02     10   b
+            2 2000-06-03     15   c
+            pd.read_csv(StringIO(s), parse_dates=True) # default dayfirst=False
+            Out[]:
+                    date  value cat
+            0 2000-01-06      5   a
+            1 2000-02-06     10   b
+            2 2000-03-06     15   c
+        </pre>
+        <h3 style="color:red">Writing CSVs to binary file objects</h3>
+        <li>df.to_csv(..., mode='wb') allows writing a CSV to a file object opened binary mode. In most cases, it is not necessary to specify<br>
+        'mode' as pandas will auto-detect whether the file object is opened in text or binary mode.</li>
+        <pre>
+            import io
+            data = pd.DataFrame([0,1,2])
+            buffer = io.ByIO()
+            data.to_csv(buffer, encoding='utf-8', compression='gzip')
+        </pre>
+    </ul>
+<h2 style="color:blue">Specifying method for floating-point conversion</h2>
+    <ul>
+        <li>The parameter float_precision can be specified in order to use a specific floating-point converter during parsing with the C engine.<br>
+        The options are the ordinary converter, the high-precision converter, and the round_trip converter (which is guarantee to round-trip values)<br>
+        after writing to a file).</li>
+        <pre>
+            val = '0.3066101993807095471566981359501369297504425048828125'
+            data = 'a,b,c\n1,2,{0}'.format(val)
+            float(val)
+            Out[]: 0.30661019938070955
+            abs(pd.read_csv(StringIO(data), engine='c', float_precision=None)['c'][0]) -float(val))
+            Out[]: 5.551115123125783e-17
+            abs(pd.read_csv(StringIO(data), engine='c', float_precision='high')['c'][0]) -float(val))
+            Out[]: 5.551115123125783e-17
+            abs(pd.read_csv(StringIO(data), engine='c', float_precision='round_trip')['c'][0]) -float(val))
+            Out[]: 0.0
+        </pre>
+    </ul>
+<h2 style="color:blue">Thousand Separator</h2>
+    <ul>
+        <li>For large numbers that have been written with a thousands separator, you can set the thousands keyword to a string of length 1 so<br>
+        that integers will be parsed correctly.</li>
+        <li>By default, numbers with a thousands separator will be parsed as strings:</li>
+        <li>The thousands keyword allows integers to be parsed correctly:</li>
+        <pre>
+            data = """  ID|level|category
+                        Patient1|123,000|x
+                        Patient2|23,000|y
+                        Patient3|1,234,018|z"""
+            pd.read_csv(StringIO(data), sep='|')
+            Out[]:
+                     ID      level category
+            0  Patient1    123,000        x
+            1  Patient2     23,000        y
+            2  Patient3  1,234,018        z
+            dtype('O')
+
+            pd.read_csv(StringIO(data), sep='|', thousands=',')
+            Out[]:
+                     ID    level category
+            0  Patient1   123000        x
+            1  Patient2    23000        y
+            2  Patient3  1234018        z
+            dtype('int64')
+        </pre>
+    </ul>
+<h2 style="color:blue">NA values</h2>
+    <ul>
+        <li>To control which values are parsed as missing values (which are signified by NaN), specify a string in na_values. If you specify<br>
+        a list of strings, then all values in it are considered to be missing values. If you specify a number(a float, like 5.0 or an integer 5)<br>
+        , the corresponding equivalent values will also imply a missing value (in this case effectively [5.0, 5] are recognized as NaN).</li>
+        <li>To completely override the default values that are recognized as missing, specify keep_default_na = False.</li>
+        <li>The default NaN recognized values are :</li>
+        <ul>
+            <li><b>['-1.#IND', '1.#QNAN', '1.#IND', '-1.#QNAN', '#N/A N/A', '#N/A','N/A', 'n/a', 'NA', '#NA', 'NULL', 'null', 'NaN', '-NaN', 'nan', '-nan', ''].</b></li>
+        </ul>
+        <li>Let consider some example:</li>
+        <pre>
+            pd.read_csv(..., na_values=[5]) # the string will first be interpreted as a numerical then as a NaN
+            pd.read_csv(..., keep_default_na=False, na_values=['']) # ignored default and treat ''(empty) as NaN
+            pd.read_csv(..., keep_default_na=False, na_values=['NA', '0']) # ignored default and treat ['NA', '0'] as NaN
+            pd.read_csv(..., na_value=['nope']) # default value and string value 'nope' is recognized as NaN
+        </pre>
+    </ul>
+<h2 style="color:blue">Infinity</h2>
+    <ul>
+        <li>'inf' like values will be parsed as np.inf (positive infinity), and '-inf' as '-np.inf' (negative infinity). These will ignore the case<br>
+        of the value, meaning 'Inf', will also be parsed as np.inf.</li>
+    </ul>
+<h2 style="color:blue">Returning Series</h2>
+    <ul>
+        <li>Using the <b>squeeze</b> keyword, the parser will return output with a single column as a Series:</li>
+        <pre>
+            s = """ level
+                    Patient1,123000
+                    Patient2,23000
+                    Patient3,1234018"""
+            output = pd.read_csv(StringIO(s), squeeze=True)
+            Out[]:
+            Patient1     123000
+            Patient2      23000
+            Patient3    1234018
+            Name: level, dtype: int64
+
+            type(output)
+            Out[]: pandas.core.series.Series
+        </pre>
+    </ul>
+<h2 style="color:blue">Boolean values</h2>
+    <ul>
+        <li>The common values True, False, TRUE, and FALSE are all recognized as boolean. Occasionally, you might want to recognize other values<br>
+        as being boolean. To do this, use the true_values and false_values options as:</li>
+        <pre>
+            data = 'a,b,c\n1,Yes,2\n3,No,4'
+            pd.read_csv(StringIO(data), true_values=['Yes'], false_values=['No'])
+            Out[]:
+               a      b  c
+            0  1   True  2
+            1  3  False  4
+        </pre>
+    </ul>
+<h2 style="color:blue">Handling bad lines</h2>
+    <ul>
+        <li>Some files may have malformed lines with too few fields or too many. Lines with too few fields will have NA values filled in the trailing<br>
+        fields. Lines with too many fields will raise an error by default.</li>
+        <pre>
+            data = 'a,b,c\n1,2,3\n4,5,6,7\n8,9,10'
+            pd.read_csv(StringIO(data)) # raise error because n4,5,6,7 is 4 fields while other have 3 fields.
+        </pre>
+        <li>You can skip this by : on_bad_lines='warn', or on_bad_lines='skip':</li>
+        <pre>
+            pd.read_csv(StringIO(data), on_bad_lines='warn') # show data with bad lines are skipped and warning message
+            Skipping line 3: expected 3 fields, saw 4
+            Out[]:
+               a  b   c
+            0  1  2   3
+            1  8  9  10
+
+            pd.read_csv(StringIO(data), on_bad_lines='skip') # show data with bad lines are skipped and not message
+            Out[]:
+               a  b   c
+            0  1  2   3
+            1  8  9  10
+        </pre>
+        <li>You can also use usecols to skip bad lines:</li>
+        <pre>
+            pd.read_csv(StringIO(data), usecols=[0,1,2])
+            Out[]:
+            a  b   c
+            0  1  2   3
+            1  4  5   6
+            2  8  9  10
+        </pre>
+    </ul>
+<h2 style="color:blue">Dialect</h2>
+    <ul>
+        <li>The 'dialect' keyword gives a greater flexibility in specifying the file format. By default it uses the Excel 'dialect' but you can<br>
+        specify either the dialect name or a csv.Dialect instance.</li>
+        <li>By default, read_csv uses the Excel dialect and treats the double quote as the quote character which causes it to fail when it finds<br>
+        a newline before it finds the closing double quote.</li>
+        <li>We can get round this using dialect:</li>
+        <pre>
+            import csv
+            dia = csv.excel()
+            dia.quoting = csv.QUOTE_NONE
+            pd.read_csv(StringIO(data), dialect=dia)
+            Out[]:
+                   label1 label2 label3
+            index1     "a      c      e
+            index2      b      d      f
+        </pre>
+        <li>All of the dialect options can be specified separately by keyword arguments:</li>
+        <pre>
+            data = 'a,b,c~1,2,3~4,5,6'
+            pd.read_csv(StringIO(data), lineterminator='~')
+            Out[]:
+               a  b  c
+            0  1  2  3
+            1  4  5  6
+        </pre>
+        <li>Another common dialect option is skipinitialspace, to skip whitespace after a delimiter.</li>
+        <pre>
+            data = 'a, b, c\n1, 2, 3\n4, 5, 6'
+            pd.read_csv(StringIO(data), skipinitialspace=True)
+            Out[]:
+               a  b  c
+            0  1  2  3
+            1  4  5  6
+        </pre>
+        <li>The parses make every attempt to 'do the right thing' and not be fragile. Type inference is a pretty big deal. If a column can be<br>
+        coerced to integer dtype without altering the contents, the parse will do so. Any non-numeric columns will come through as object dtype<br>
+        as with the rest of pandas object.</li>
+    </ul>
+<h2 style="color:blue">Quoting and escape character</h2>
+    <ul>
+        <li>Quotes(and other escape characters) in embedded fields can be handled in any number of ways. One way is to use backlashes, to properly<br>
+        parse this data, you should pass the escapechar option:</li>
+        <pre>
+            data = 'a,b\n"hello, \\"Bob\\", nice to see you", 5'
+            pd.read_csv(StringIO(data), escapechar="\\") # escape "\\" inside String or file
+            Out[]:
+                                           a  b
+            0  hello, "Bob", nice to see you  5
+        </pre>
+    </ul>
+<h2 style="color:blue">File with fixed width columns</h2>
+    <ul>
+        <li>While read_csv() reads delimited data, the read_fwf() function works with data files that have known and fixed columns widths. The function<br>
+        parameters to read_fwf are largely the same as read_csv with two extra parameters, and a different usage of the delimiter parameter:</li>
+        <ul>
+            <li><b>colspecs:</b> A list of pair(tuples) giving the extents of the fixed-width fields of each line as half-open interval([from, to])<br>
+            String value 'infer' can be used to instruct the parser to try detecting the column specifications from the first 100 rows of the data.<br>
+            Default behavior, if not specified, is to infer.</li>
+            <li><b>widths:</b> A list of field widths which can be used instead of 'colspecs' if the intervals are contiguous.</li>
+            <li><b>delimiter:</b>Characters to consider as filler characters in teh fixed-width file. Can be used to specify the filler character of the<br>
+            fields if it is not spaces(eg:~).</li>
+        </ul>
+        <pre>
+            colspec = [(0, 6), (8, 20), (21, 33), (34, 43)]
+            widths = [6, 14, 13, 10]
+            pd.read_csv('bar.csv') # normal csv column width
+            pd.read_fwf('bar.csv', colspecs=colspecs, index_col=False) # specify position width per column
+            pd.read_fwf('bar.csv', widths=widths, index_col=False) # specify width per column
+        </pre>
+        <li>The parser will take care of extra whitespaces around the columns so it's ok to have extra separation between the columns in the file.</li>
+        <li>By default, read_fwf will try to infer the file's colspecs by using the first 100 rows of the file. It can do it only in cases when the<br>
+        columns are aligned and correctly separated by the provided delimiter(default delimiter is whitespace).</li>
+        <li>read_fwf supports the dtype parameter for specifying the types of parsed columns to be different from the inferred type.</li>
+    </ul>
+<h2 style="color:blue">Indexes</h2>
+    <ul>
+        <h3 style="color:red">Files with an 'implicit' index column</h3>
+        <li>Consider a file with one less entry in the header than the number of data columns. In this special case, read_csv assumes that the first column<br>
+        is to be used as  the index of the DataFrame. And if it's a datetime data, it wasn't automatically parsed, you have to do it when parsing.</li>
+        <pre>
+            foo = """A,B,C
+                    20090101,a,1,2
+                    20090102,b,3,4
+                    20090103,c,4,5"""
+            pd.read_csv(StringIO(foo), parse_dates=True)
+            Out[]:
+                        A	B	C
+            2009-01-01	a	1	2
+            2009-01-02	b	3	4
+            2009-01-03	c	4	5
+        </pre>
+        <h3 style="color:red">Reading an index with a MultiIndex</h3>
+        <li>Suppose you have data indexed by two columns. The index_col argument to read_csv can take a list of column numbers to turn miltiple<br>
+        columns into a MultiIndex for the index of the returned object.</li>
+        <pre>
+            df = pd.read('mindex_ex.csv', index_col=[0,1])
+            Out[]:
+                        zit   xit
+            year indiv
+            1977 A      1.20  0.60
+                 B      1.50  0.50
+                 C      1.70  0.80
+            1978 A      0.20  0.06
+                 B      0.70  0.20
+                 C      0.80  0.30
+                 D      0.90  0.50
+                 E      1.40  0.90
+            1979 C      0.20  0.15
+                 D      0.14  0.05
+                 E      0.50  0.15
+                 F      1.20  0.50
+                 G      3.40  1.90
+                 H      5.40  2.70
+                 I      6.40  1.20
+
+            df.loc[1978]
+            Out[]:
+                   zit   xit
+            indiv
+            A      0.2  0.06
+            B      0.7  0.20
+            C      0.8  0.30
+            D      0.9  0.50
+            E      1.4  0.90
+
+        </pre>
+        <h3 style="color:red">Reading columns with a MultiIndex</h3>
+        <li>By specifying list of row locations for the header argument, you an read in a MultiIndex for the columns. Specifying non-consecutive<br>
+        rows will skip the intervening rows.</li>
+        <li>read_csv is also able to interpret a more common format of multi-columns indices:</li>
+        <pre>
+            pd.read_csv('mi2.csv', header=[0, 1], index_col=0)
+            Out[188]:
+                 a         b   c
+                 q  r  s   t   u   v
+            one  1  2  3   4   5   6
+            two  7  8  9  10  11  12
+        </pre>
+        <li>Note that if an index_col is not specified (you don't have an index, or define index_col=False), then any names on the columns index will be lost.</li>
+    </ul>
+<h2 style="color:blue">Automatically 'sniffing' the delimiter</h2>
+    <ul>
+        <li>read_csv is capable of inferring delimited (not necessary comma-separated) files, as pandas uses the csv.Sniffer class of the csv mode.<br>
+        For this case, set sep=None.</li>
+        <pre>
+            pd.read_csv('tmp2.csv', sep=None, engine='python')
+            Out[]:
+                        0	        1	        2	        3
+            0	0.469112	-0.282863	-1.509059	-1.135632
+            1	1.212112	-0.173215	0.119209	-1.044236
+            2	-0.861849	-2.104569	-0.494929	1.071804
+            3	0.721555	-0.706771	-1.039575	0.271860
+            4	-0.424972	0.567020	0.276232	-1.087401
+            5	-0.673690	0.113648	-1.478427	0.524988
+            6	0.404705	0.577046	-1.715002	-1.039268
+            7	-0.370647	-1.157892	-1.344312	0.844885
+            8	1.075770	-0.109050	1.643563	-1.469388
+            9	0.357021	-0.674600	-1.776904	-0.968914
+        </pre>
+    </ul>
+<h2 style="color:blue">Reading multiple files to create a single DataFrame</h2>
+    <ul>
+        <li>It's best to use concat() to combine multiple files.</li>
+    </ul>
+<h2 style="color:blue">Iterating through files chunk by chunk</h2>
+    <ul>
+        <li>Suppose you wish to iterate through a (potentially very large) file lazily rather than reading the entire file into memory. By specifying<br>
+        a chunksize to read_csv, the return value will be an iterable object of type TextFileReader:</li>
+        <pre>
+            with pd.read_csv('tmo.sv', sep='|', chunksize=4) as reader: # chunk into part with 4 rows
+                reader
+                for chunk in reader:
+                    print(chunk)
+
+               Unnamed: 0         0         1         2         3
+            0           0  0.469112 -0.282863 -1.509059 -1.135632
+            1           1  1.212112 -0.173215  0.119209 -1.044236
+            2           2 -0.861849 -2.104569 -0.494929  1.071804
+            3           3  0.721555 -0.706771 -1.039575  0.271860
+               Unnamed: 0         0         1         2         3
+            4           4 -0.424972  0.567020  0.276232 -1.087401
+            5           5 -0.673690  0.113648 -1.478427  0.524988
+            6           6  0.404705  0.577046 -1.715002 -1.039268
+            7           7 -0.370647 -1.157892 -1.344312  0.844885
+               Unnamed: 0         0        1         2         3
+            8           8  1.075770 -0.10905  1.643563 -1.469388
+            9           9  0.357021 -0.67460 -1.776904 -0.968914
+        </pre>
+        <li>Specifying iterator=True will also return the TextFileReader object:</li>
+        <pre>
+            with pd.read_csv('tmp.sv', sep='|', iterator=True) as reader:
+                reader.get_chunk(5) # 5 rows
+        </pre>
+        <li>chunksize for all file, and get_chunk for first chunk.</li>
+    </ul>
+<h2 style="color:blue">Specifying the parse engine</h2>
+    <ul>
+        <li>Under the hood pandas uses a fast and efficient parser implementation in C as well as Python implementation which is currently more<br>
+        feature-complete. Where possible pandas uses the C parser (specify a engine), but may fall back to Python if C-unsupported options are <br>
+        specified. Currently, C-unsupported options include:</li>
+        <ul>
+            <li>sep other than a single character (regex separator).</li>
+            <li>skipfooter</li>
+            <li>sep=None with delim_whitespace=False</li>
+        </ul>
+        <li>Specifying any of the above options will produce a ParserWarning unless the python engine is selected explicitly using engine='python'.</li>
+    </ul>
+<h2 style="color:blue">Reading/ Writing remote files</h2>
+    <ul>
+        <li>You can pass in a URL to read or write remote files to many of pandas IO function.</li>
+        <pre>
+            df = pd.read('https://download.bls.gov.pub/time.series/cu/cu.item', sep='\t')
+        </pre>
+        <li>A custom header can be sent along side HTTP(s) requests by passing a dictionary of header key value mappings to the storage_options<br>
+        keyword arguments as shown below:</li>
+        <pre>
+            header = {'User-Agent': 'pandas'}
+            df = pd.read_csv('https://download.bls.gov/pub/time.series/cu/cu.item', sep='\t', storage_options=header)
+        </pre>
+        <li>All URLs which are not local files or HTTP(s) are handled by 'fsspec', if installed, and its various filesys implementations (including<br>
+        Amazon S3, Google Cloud, SSH, FPT, webHDFS, ...) Some of these implementations will require additional packages to be installed, for example<br>
+        S3 URLs requite s3fs library.</li>
+        <pre>
+            df = pd.read_csv('s://pandas-test/adatafile.json')
+        </pre>
+        <li>When dealing with remote storage sys, you might need extra configuration with environment variables or config files in special locations.<br>
+        For example, to access data in your S3 bucket, you will need to define credentials in one of the several ways listed in S3Fs documentation.<br>
+        The same is true for several of storage backends, and you should follow the links at fsimple1 for implementations built into fsspec and fsimpl2<br>
+        for those not included in the main fsspec distribution.</li>
+        <li>You can also pass parameters directly to the backed driver. For example, if you do not have s3 credentials, you can still access public<br>
+        data by specifying an anonymous connection:</li>
+        <pre>
+            pd.read_csv('"s3://ncei-wcsd-archive/data/processed/SH1305/18kHz/SaKe2013"
+                            "-D20130523-T080854_to_SaKe2013-D20130523-T085643.csv",
+                            storage_options={"anon": True}, )
+        </pre>
+        <li>Where we specify that the 'anon' parameter is meant for the 's3' part of the implementation, not to the caching implementation. Note that this<br>
+        caches to a temporary directory for the duration of the session only, but you can also specify a permanent store.</li>
+    </ul>
+<h2 style="color:blue">Writing out data</h2>
+    <ul>
+        <h3 style="color:red">Writing to CSV format</h3>
+        <li>The Series and DataFrame objects have an instance method to_csv which allows storing the contents of the object as comma-separated-values file<br>
+        The function takes a number of arguments. Only the first is require:</li>
+        <ul>
+            <li><b>path_or_buf:</b>A string path to the file to write or a file object. If a file object it must be opened with <b>newline=''.</b></li>
+            <li><b>sep:</b> Field delimiter for the output file (default ',').</li>
+            <li><b>na_rep:</b>A string representation of a missing value (default ").</li>
+            <li><b>float_format:</b>Format string for floating point numbers.</li>
+            <li><b>columns:</b>Columns to write (default None).</li>
+            <li><b>header:</b> Whether to write out the column names (default True).</li>
+            <li><b>index:</b> Whether to write row (index) names (default True)</li>
+            <li><b>index_label:</b> Column label(s) for index column(s) if desired. If None(default), and header and index are True, then the <br>
+            index name are used.(A sequence should be given if the DataFrame uses MultiIndex).</li>
+            <li><b>mode:</b> Python write mode. Default 'w'.</li>
+            <li><b>encoding:</b> a string representing the encoding to use if the contents are non-ASCII, for Python versions prior to 3.</li>
+            <li><b>line_terminator:</b> Character sequence denoting line end (default os.linesep).</li>
+            <li><b>quoting:</b>Set quoting rule as in csv module (default csv.QUOTE_MINIMAL). Note that if you have set a float_format then floats<br>
+            are converted to strings and csv.QUOTE_NONNUMERIC will treat them as non-numeric.</li>
+            <li><b>quotechar:</b> Character used to quote fields(default ").</li>
+            <li><b>doublequote:</b> Control quoting of quotechar in fields(default True).</li>
+            <li><b>escapechar:</b>Number of rows to wrte at a time.</li>
+            <li><b>date_format:</b> Format string for datetime objects.</li>
+        </ul>
+        <h3 style="color:red">Writing a formatted string</h3>
+        <li>The DataFrame object has an stance to_string which allow control over the string representation of the object. All arguments are optional.</li>
+        <ul>
+            <li><b>buf:</b> default None, for example a StringIO object.</li>
+            <li><b>columns: </b>default None, which column to write.</li>
+            <li><b>col_space: </b>default None, minimum width of each column.</li>
+            <li><b>na_rep:</b> Default NaN, representation of NA value.</li>
+            <li><b>formatters:</b> Default None, a dictionary (by column), of functions each of which takes a single argument and returns a formatted string.</li>
+            <li><b>float_format:</b> Default None, a function which takes a single(float) argument and returns a formatted string, to be applied to floats in the DataFrame.</li>
+            <li><b>sparsify:</b> Default True, set to False for a DataFrame with a hierarchical index to print every MultiIndex key at each row.</li>
+            <li><b>index_names:</b> Default True, will print the names of the indices.</li>
+            <li><b>index:</b> Default True, will print the index(ie, row labels).</li>
+            <li><b>justify: </b>default left, will print column headers left-or right-justify.</li>
+        </ul>
+        <li>The Series object also has a to_string method, but with only the buf, na_rep, float_format arguments. There is also a length argument which, if <br>
+        set to True, will additionally output the length of the Series.</li>
+    </ul>
+<h2 style="color:blue">Indexing and selecting data</h2>
+    <ul>
+        <li>The axis labeling information in pandas objects serves many purposes:</li>
+        <ul>
+            <li>Identifies data (provides metadata), using known indicators, important for analysis, visualization, and interactive console display. </li>
+            <li>Enables automatic and explicit data alignment.</li>
+            <li>Allows intuitive getting and setting of subsets of the data set.</li>
+        </ul>
+        <li>In this section, we will focus on the final point: namely, how to slice, dice and generally get and set subsets of pandas objects.<br>
+        The primary focus will be on Series and DataFrame as they have received more development attention in this area.</li>
+        <li>The Python and Numpy indexing operators [] and attribute operator. provide quick and easy access to pandas data structures across a wide range<br>
+        of use cases. This makes interactive work intuitive, as there's little new to learn if you already know how to deal with Python dictionaries and <br>
+        Numpy arrays. However, since the type of the data to ve accessed isn't known in advance, directly using standard operators has some optimization limits.<br>
+        For production code, we recommended that you take advantage of the optimized pandas data access methods exposed in this chapter.</li>
+    </ul>
+<h2 style="color:blue">Different choices of indexing</h2>
+    <ul>
+        <li>Object selection has had a number of user-requested additions in order to support more explicit location based indexing. Pandas now supports three types<br>
+        of multi-axis indexing.</li>
+        <ul>
+            <li><b>.loc:</b> is primarily label based, but may also be used with a boolean array. <b>.loc</b> will raised keyError when the items are not found.</li>
+            <li>Allowed inputs are:</li>
+            <ul>
+                <li>A single label (5 or 'a', 5 will interpret as label of the index, it not an integer position)</li>
+                <li>A list or array of labels ['a', 'b', 'c'].</li>
+                <li>A slice with labels 'a': 'f' (Both start and stop are included ('a' and 'f' are included))</li>
+                <li>A boolean array (any NA values will be treated as False).</li>
+                <li>A callable function with one argument (the calling Series or DataFrame) and that returns valid output for indexing(one of the above).</li>
+            </ul>
+            <li><b>.iloc :</b> is primarily integer position based (from 0 to length-1 of the axis), but may also be used with a boolean array.<b>.iloc</b><br>
+            will raise IndexError if a requested indexer is out-of-bounds, except slice indexers which allow out-of-bounds indexing.</li>
+            <li>Allowed inputs are:</li>
+            <ul>
+                <li>An integer (5)</li>
+                <li>A list or array of int [4,3,0]</li>
+                <li>A slice object with ints 1:7</li>
+                <li>A boolean array (any NA values will be treated as False)</li>
+                <li>A callable function with one argument (the calling Series or DataFrame) and that returns valid output for indexing(one of above)</li>
+            </ul>
+            <li>.loc, .iloc and also [] indexing can accept a callable as indexer.</li>
+            <li>Getting values from an object with multi-axes selection uses the following notation (using .loc as an example, but the following applies<br>
+            to .iloc as well). Any of the axes accessors may be the null slice :. Axes left out of the specification are assumed to be :, eg p.loc['a']<br>
+            is equivalent to p.loc['a', :, :].</li>
+        </ul>
+        <li><b>Series :</b> s.loc[indexer]</li>
+        <li><b>DataFrame:</b> s.loc[row_indexer, column_indexer]</li>
+    </ul>
+<h2 style="color:blue">Basic</h2>
+    <ul>
+        <li><b>Series</b>: series[label]: return scalar value</li>
+        <li><b>DataFrame</b>: frame[column] return series corresponding to colname</li>
+        <pre>
+            dates = pd.date_range('1/1/2000', periods=8)
+            df = pd.DataFrame(np.random.randn(8, 4), index=dates, columns=list('ABCD'))
+            s = df
+            s['A'] # return column A series
+            s[dates[5]] # return s with index label = dates[5]
+            df[['B', 'A']] = df[['A', 'B']] # assign A's values to B's values and vice versa
+        </pre>
+        <li>pandas aligns all axes when setting Series and DataFrame from .loc and .iloc</li>
+        <li>This WILL NOT modify df because the column alignment is before value assignment.</li>
+        <pre>
+            df.loc[:, ['A', 'B']] = df[['A', 'B']] # df not change
+        </pre>
+        <li>The correct way to swap column values is by using raw values.</li>
+        <pre>
+            df.loc[:, ['B', 'A']] = df['A', 'B'].to_numpy() # assign element-wise
+        </pre>
+    </ul>
+<h2 style="color:blue">Attribute access</h2>
+    <ul>
+        <li>You may access an index on a Series or column on a DataFrame directly as an attribute.</li>
+        <pre>
+            sa = pd.Series([1,2,3], index=list('abc'))
+            dfa = df.copy()
+            sa.b
+            dfa.A
+            sa.a = 5 # assign a's values as 5
+            dfa.A = list(range(len(dfa.index)))
+            dfa['A'] = list(range(len(dfa.index)))
+        </pre>
+        <ul>
+            <li>s.1 is not allowed</li>
+            <li>The attribute will not available if it conflicts with an existing method name. s.min, s.max, .... Use s['min'], s['max'], ...</li>
+            <li>Similarly, these attribute are not allowed: index, major_axis, minor_axis, items.</li>
+            <li>Except above, standard indexing will still work. s['1'], s['min'], s['index'], ...</li>
+        </ul>
+        <li>You can also assign a dict to a row of a DataFrame:</li>
+        <pre>
+            x = pd.DataFrame({'x': [1,2,3], 'y': [4,5,6]})
+            x.iloc[1] = {'x': 5, 'y':9}
+        </pre>
+        <li>Don't use df.A to create new column, it'll raise an UserWarning. Use df['A'].</li>
+    </ul>
+<h2 style="color:blue">Slicing ranges</h2>
+    <ul>
+        <li>With Series, the syntax works exactly as with an ndarray, returning a slice of the values and the corresponding labels:</li>
+        <pre>
+            s[:5] # row 0 to 4
+            s[::2] # all step 2
+            s[::-1] # reverse s
+            s2 = s.copy()
+            s2[:5] = 0 # change value from row 0 to row 4 = 0
+        </pre>
+        <li>With DataFrame, slicing inside [] SLICE THE ROWS. This is provided largely as a convenience since it is such a common operation.</li>
+        <pre>
+            df[:3] # row 0 to 3
+            df[::-1] # reverse df's rows
+        </pre>
+    </ul>
+<h2 style="color:blue">Selection by label</h2>
+    <ul>
+        <li>Whether a copy or a reference is returned for a setting operation, may depend on the context.</li>
+        <li>.loc is strict when you present slicers that are not compatible (or convertible) with the index type.</li>
+        <pre>
+            df1 = pd.DataFrame(np.random.randn(5,4), columns=list('ABCD'), index=pd.date_rane('20130101', periods=5))
+            df1.loc['20130101':'20130103'] # row from 20130101 to 20130103
+            df1.loc[2:3] # raise error
+            df1.loc['20130106'] # raise error because label is not exist.
+        </pre>
+        <li>Pandas will raise a KeyError if indexing with a list contain missing labels.</li>
+        <li>Pandas provides a suite of methods in order to have purely label based indexing. This is a strict inclusion based protocol.<br>
+        Every label asked for must be in the index, or a KeyError will be raised. When slicing, both the start bound and the stop bound<br>
+        are included, if present in the index. Integers are valid labels, but they refer to the label and not the position.</li>
+        <li>The .loc attribute is the primary access method. Valid inputs:</li>
+        <ul>
+            <li>A single label (5 or 'a') (5 is interpreted as an index label, not position).</li>
+            <li>A list of array of label ['a', 'b', 'c']</li>
+            <li>A slice object with label 'a': 'f' (Note that both start and stop are included, contrary to python slices) </li>
+            <li>A boolean array (any NA values will be treated as False).</li>
+            <li>A callable function with one argument (the calling Series or DataFrame) and that returns valid output for indexing.</li>
+        </ul>
+        <li>With Series</li>
+        <pre>
+            s1 = pd.Series(np.random.randn(6), index=list('abcdef'))
+            s1.loc['c'] # retrun row index label 'c'
+            s1.loc['c'] = 0 # assign 0 value of index label 'c'
+            s1.loc['c': ] # return value from index label 'c' to end (d, e, f)
+            s1.loc['c': ] = 0 # assign index values from c to end as 0
+        </pre>
+        <li>With DataFrame</li>
+        <pre>
+            df1 = pd.DataFrame(np.random.randn(6, 4), index=list('abcdef'), columns=list('ABCD'))
+            df1.loc[['a', 'b', 'd'], :] # index rows: a, b, d with all columns
+            df1.loc['d', 'A': 'C'] # index rows: d WITH COLUMNS A TO C (include A and C)
+            df1.loc['a'] # similar to df1.loc['a', :] or df.xs('a') - all columns with index a
+            df1.loc['a']>0 # All columns at index a with boolean values
+            df1.loc[:, df1.loc[a]>0] # all rows with columns have value at index a > 0
+        </pre>
+        <li>NA values in a boolean array propagate as False.</li>
+        <pre>
+            mask = pd.array([True, False, True, False, pd.NA, False], dtype='boolean')
+            df1[mask] # return df1 row label following order of mask at at True values (get row 0, row 2)
+        </pre>
+        <li>For getting a value explicitly, you can also use .at, .iat.</li>
+        <pre>
+            df1.loc['a', 'A'] # return value at index a and column A. Single value
+            df1.at['a', 'A'] # Similar above
+        </pre>
+    </ul>
+<h2 style="color:blue">Slicing with labels</h2>
+    <ul>
+        <li>When using .loc with slices, if both the start and the stop labels are present in the index then elements located between the two<br>
+        (INCLUDING THEM) are returned.</li>
+        <pre>
+            s = pd.Series(list('abcde'), index=[0, 3, 2, 5, 4])
+            s.loc[3:5] # return row labels 3, 5, and inside them
+        </pre>
+        <li>If at least one of the two is absent, but the index is sorted, and can be compared against start and stop labels, then slicing will<br>
+        still work a expected, by selecting labels which rank between the two:</li>
+        <li>However, if at least one of the two is absent and the index is not sorted, an error will be raised.</li>
+        <pre>
+            s.loc[3:5] # return row labels 3, 2, 5
+            s.loc[:6] # raise an error, 6 is absent
+            s.sort_index().loc[:6] # still work and return all (index labels from 0 to 5)
+        </pre>
+        <li>If the index has duplicate labels and either the start or the stop label is duplicated, an error will be raised.</li>
+        <pre>
+            s = pd.Series(list('abcdef'), index=[0,3,2,5,4,2])
+            s.loc[3:5] # return row 3, 2, 5
+            s.loc[2:5] # raise error
+        </pre>
+    </ul>
+<h2 style="color:blue">Selection by position</h2>
+    <ul>
+        <li>Pandas provides a suit of methods in order to get purely integer based indexing. The semantics follow closely Python and Numpy<br>
+        slicing. These are 0-based indexing. When slicing, the start bound is included, while the upper bound is excluded. Trying to use a<br>
+        non-integer, even a valid label will raise an IndexError.</li>
+        <li>The .iloc attribute is the primary access method. These are valid inputs:</li>
+        <pre>
+            <li>An integer (5)</li>
+            <li>An list or array of integers.</li>
+            <li>A slice object with ints 1:7</li>
+            <li>A boolean array</li>
+            <li>A callable (that call Series or DataFrame)</li>
+        </pre>
+        <pre>
+            s1 = pd.Series(np.random.randn(5), index=list(range(0, 10, 2)))
+            s1.iloc[:3] # return rows 1 to 3(rows 1, 2)
+            s1.iloc[:3] = 0 # assign values from rows 1 to 3(1, ) to 0
+        </pre>
+        <li>With DataFrame</li>
+        <pre>
+            df1 = pd.DataFrame(np.random.randn(6, 4), index=list(range(0, 12, 2)), columns=list(range(0, 8, 2)))
+            df1.iloc[:3] # rows 1 to 3 (1, 2)
+            df.iloc[1:5, 2:4] # rows 1 to 5(1 to 4) and column 2 to 4(2,3)
+            df.iloc[1:3, :] # rows 1 to 3(1, 2) and all columns
+            df.iloc[:, 1:3] # all rows and column 1 to 3(1, 2)
+            df.iloc[1, 1] # value at row 1, column 1( you can use iat or df1.xs(1))
+        </pre>
+        <li>Out of range slice indexes are handled gracefully just as in Python/ Numpy.</li>
+        <pre>
+            x = list('abcdef')
+            x[4:10] # all list
+            x[8:10] # empty list
+            s = pd.Series(x)
+            s.iloc[4:10] # rows 4 to 10 (but s just has 5 rows, so it gets row 4, 5)
+            s.iloc[8:10] # Series with empty list
+
+            df1 = pd.DataFrame(np.random.randn(5, ), columns=list('AB'))
+            df1.iloc[: ,2:3] # all rows and column 2 (but df1 has not column 2 ,so the result return Empty DataFrame)
+            df1.iloc[:, 1:3] # all rows and column 1 to 3(1, 2), df1 has no column 2, so it return column 1
+            df1.iloc[4:6] # out of bounds, return empty DataFrame
+        </pre>
+        <li>Contrary to range slice, single indexer out of bounds will raise an error.</li>
+        <pre>
+            df1 = pd.DataFrame(np.random.randn(5,2), columns=list('AB'))
+            df1.iloc[0] # similar to df1.iloc[0,:] retun row 0 and all columns
+            df1.iloc[[0, 3, 6]] # 6 is out of row range, the result will raise an Error
+            df1.iloc[:, 4] # out of column range. the result will raise an error
+        </pre>
+    </ul>
+<h2 style="color:blue">Selection by callable</h2>
+    <ul>
+        <li>.loc, .iloc and also [] indexing can accept a callable as indexer. The callable must be a function with one argument (the calling <br>
+        Series or DataFrame) that returns valid output for indexing.</li>
+        <pre>
+            df1 = pd.DataFrame(np.random.randn(6, 4), index=list('abcdef'), columns=list('ABCD'))
+            df1.loc[lambda x: x['A'] >0, :] # rows having values at column A > 0 and all columns
+            df1.loc[:, lambda x: x['A', 'B']] # all rows and columns A, B
+            df1.iloc[lambda x: x <3, :] # rows having index position <3 and all columns
+            df1[lambda x: x.columns[0]] # df1 with column 0, the result similar to df1.columns[0]
+            df1['A'].loc[lambda x: x>0] # return df1['A'] at A's values > 0, similar to df1['A][df1['A']>0]
+        </pre>
+        <li>df1.index and df1.columns access labels of Series or DataFrame, the parameter using int type.</li>
+        <pre>
+            df1.index[0] # return index(row) label 0
+            df1.index[0:3] # return index(row) labels 0 to 3(0, 1, 2)
+            df1.columns[0] # return column label 0
+            df1.columns[0:3] # return column labels 0 to 3 (0, 1, 2)
+        </pre>
+        <li>Using these methods/ indexers, you can chain data selection operations without using a temporary variable.</li>
+        <pre>
+            bb = pd.read_csv('data/baseball.csv', index_col=0)
+            (bb.groupby(['year', 'team']).sum().loc[lambda x: x['r']> 100])
+            Out[]:
+                       stint    g    ab    r    h  X2b  X3b  hr    rbi    sb   cs   bb     so   ibb   hbp    sh    sf  gidp
+            year team
+            2007 CIN       6  379   745  101  203   35    2  36  125.0  10.0  1.0  105  127.0  14.0   1.0   1.0  15.0  18.0
+                 DET       5  301  1062  162  283   54    4  37  144.0  24.0  7.0   97  176.0   3.0  10.0   4.0   8.0  28.0
+                 HOU       4  311   926  109  218   47    6  14   77.0  10.0  4.0   60  212.0   3.0   9.0  16.0   6.0  17.0
+                 LAN      11  413  1021  153  293   61    3  36  154.0   7.0  5.0  114  141.0   8.0   9.0   3.0   8.0  29.0
+                 NYN      13  622  1854  240  509  101    3  61  243.0  22.0  4.0  174  310.0  24.0  23.0  18.0  15.0  48.0
+                 SFN       5  482  1305  198  337   67    6  40  171.0  26.0  7.0  235  188.0  51.0   8.0  16.0   6.0  41.0
+                 TEX       2  198   729  115  200   40    4  28  115.0  21.0  4.0   73  140.0   4.0   5.0   2.0   8.0  16.0
+                 TOR       4  459  1408  187  378   96    2  58  223.0   4.0  2.0  190  265.0  16.0  12.0   4.0  16.0  38.0
+        </pre>
+    </ul>
+<h2 style="color:blue">Combining positional and label-based indexing</h2>
+    <ul>
+        <li>If you wish to get the 0th and the 2nd elements from the index in 'A' column, you can use df.index and df.columns with int parameter:</li>
+        <pre>
+            df = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]}, index=list('abc'))
+            df.loc[df.index[[0,2]], 'A'] # return index labels 0, 2 and column A
+            df.iloc[[0,2], 0] # Similar above
+            df.iloc[[0,2], df.columns.get_loc('A')] # .columns.get_loc('A') is to get iloc(int) of column A
+            df.iloc[[0,2], df.columns.get_indexer(['A', 'B'])]  # .columns.get_indexer(['A', 'B']) is to get positions of column A, B
+        </pre>
+        <li>To get labels of index, use <b>.index[]</b>, to get labels of column, </b>use .columns[]</b></li>
+        <li>To get explicitly position indexer, use get_loc(label), get multiple positions indexer, use get_indexer([label1, label2,..])</li>
+        <pre>
+            df.index[0] # get row label 0
+            df.index[[0, 2]] # get row labels 0 and 2
+            df.columns[0] # get column label 0
+            df.columns[[0, 2]] # get column labels 0 and 2
+            df.columns.get_loc('A') # get position of column label A
+            df.index.get_loc('a') # get position of row label a
+            df.column.get_indexer(['A', 'B']) # get positions of column label A, B
+            df.index.get_indexer(['a', 'b', 'c']) # get position of row labels a, b, c
+        </pre>
+    </ul>
+<h2 style="color:blue">Indexing with list with missing labels is deprecated</h2>
+    <ul>
+        <li>In prior versions, using .loc[list-of-labels] with at least 1 of the keys was found no longer work. It will raise an error. To apply<br>
+        list-of-labels with missing values, the alternative method is to use <b>.reindex().</b></li>
+        <li>The idiomatic way to achieve selecting potentially not-found elements is via .reindex().</li>
+        <pre>
+            s = pd.Series([1,2,3])
+            s.loc[[1,2]] # values of rows index 1 and 2
+            s.loc[[1,2,3]] # 3 is not found, will raise an error
+            s.reindex([1,2,3]) # get index 1, 2, 3 but the 3 doesn't exist, so 3 receive value NA
+            Out[]:
+            1    2.0
+            2    3.0
+            3    NaN
+            dtype: float64
+        </pre>
+        <li>Alternatively, if you want to select only valid keys, the following is idiomatic and efficient, it is guaranteed to preserve the dtype of the selection.</li>
+        <pre>
+            labels = [1,2,3]
+            s.loc[s.index.intersection(labels)] # return intersection between s index(0,1,2) and labels(1,2,3)
+            Out[]:
+            1    2
+            2    3
+            dtype: int64
+        </pre>
+        <li>Having a duplicated index will raise for a .reindex():</li>
+        <pre>
+            s = pd.Series(np.arange(4), index=['a', 'a', 'b', 'c'])
+            labels = ['c', 'd']
+
+            s.reindex(labels)
+            ValueError: cannot reindex from a duplicate axis
+
+            s.loc[s.index.intersection(labels)].reindex(labels)
+            Out[]:
+            c    3.0
+            d    NaN
+            dtype: float64
+
+            label = ['a', 'd']
+            s.loc[s.index.intersection(labels)].reindex(labels)
+            ValueError: cannot reindex from a duplicate axis
+        </pre>
+    </ul>
+<h2 style="color:blue">Selecting random samples</h2>
+    <ul>
+        <li>A random selection of rows or columns from a Series or DataFrame with the <b>sample()</b> method. The method will sample rows by<br>
+        default and accepts a specific number of rows/ columns to return, or a faction of rows.</li>
+        <pre>
+            s = pd.Series(np.arange(6))
+            s.sample() # get sample of s, default 1
+            s.sample(n=3) # get 3 sample of s
+            s.sample(frac=0.5) # get sample of row, the rate = 50%, similar to n=3 in this case of s
+        </pre>
+        <li>By default, <b>sample</b> will return each row at most once, but one can also sample with replacement using <b>replace</b> option:</li>
+        <pre>
+            s = pd.Series(np.arange(6))
+            s.sample(n=6, replace=False) # default sample, without replace. n must <= length of s
+            s.sample(n=6, replace=True) # with replacement, each row can be return more than 1
+        </pre>
+        <li>By default, each row has an equal probability of being selected, <b>but if you want rows to have different probabilities</b>, you can pass<br>
+        the <b>sample</b> function sampling weights as <b>weights</b>. These weights can be a list, a Numpy array or a Series, but they must be of<br>
+        the same length as the object you are sampling. Missing values will be treated as weight of zero, and inf values are not allowed. If weights<br>
+        do not sum to 1, they will be re-normalized by dividing all weights by the sum of the weights.</li>
+        <pre>
+            s = pd.Series(np.arange(6))
+            example_weights = [0, 0, 0.2, 0.2, 0.2, 0.4]
+            s.sample(n=3, weights=example_weight) # return 3 values with highest weight
+            example_weights2 = [0.5, 0, 0, 0, 0, 0] # re-normalize [0.5/ 0.5, 0/0.5/, 0/0.5, 0/0.5, 0/0.5]
+            s.sample(n=1, weights=example_weights2) # return 1 value with highest weight
+        </pre>
+        <li>When applied to a DataFrame, you can use a column of the DataFrame as sampling weights(provided you are sampling rows and not columns)<br>
+        by simply passing the name of the column as a string.</li>
+        <li><b>sample()</b> also allows users to sample columns instead of rows using the 'axis' arguments</li>
+        <pre>
+            df2 = pd.DataFrame({'col1': [9, 8, 7, 6],
+                                'weight_column': [0.5, 0.4, 0.1, 0]})
+            df2.sample(n=3, weight='weight_column') # return 3 rows with highest values in weight_column
+            df2.sample(n=3, axis=1) # return 3 columns, if number of column < n, use replace=True
+            df2.sample(n=3, axis=0) # return 3 rows
+        </pre>
+        <li>Finally, one can also get a seed for 'sample' random number generator using the 'random_state' argument, which will accept either an integer<br>
+        as a seed or Numpy RandomState object.</li>
+        <pre>
+            df4 = df.DataFrame({'col1': [1,2,3], 'col2':[2,3,4]})
+            df4.sample(n=2, random_state=2) # With random_state =2 , the sample will always draw the same rows
+            Out[]:
+               col1  col2
+            2     3     4
+            1     2     3
+            df4.sample(n=2, random_state=2) # result similar above
+            Out[]:
+               col1  col2
+            2     3     4
+            1     2     3
+        </pre>
+    </ul>
+<h2 style="color:blue">Fast scalar value getting and setting</h2>
+    <ul>
+        <li>Since indexing with [] must handle a lot of cases(single-label access, slicing, boolean indexing, etc), it has a bit of<br>
+        overhead in order to figure out what you're asking for. If you only want to access a scalar value, the fasted way is to use<br>
+        .at and .iat method, which are implemented on all of data structures.</li>
+        <li>Similarly to .loc , .at provides label based scalar lookups, while .iat provides integers based lookups analogously to .iloc.</li>
+        <pre>
+            dates = pd.Series(pd.date_range('20010101', periods=10))
+            s = pd.Series(np.random.randn(10), index=dates)
+            df = pd.DataFrame(np.random.randn(10, 4), index=dates, columns=list('ABCD'))
+            s.iat[5] # return value at row index 5
+            df.at[dates[5], 'A'] # return value at row label as dates[5] and column label 'A'
+            df.iat[0, 3] # return value at row index 0 and column index 3 (row 0 and column D)
+            df.at[dates[5], 'E'] # return value at row label as dates[5] and column label 'E'
+            df.iat[3,0] # return value at row index 3 and column index 0 (row index 3 and column 'A')
+            df.at['date[3] + pd.Timedelta('1 day'), 0] # return value at date[4] and column 'A'
+        </pre>
+    </ul>
+<h2 style="color:blue">Boolean Indexing</h2>
+    <ul>
+        <li>Another common operation is he use of boolean vectors to filter data. The operators are: | for 'or', '&' for 'and' and <br>
+        '~' for 'not'. These must be grouped by using parentheses to avoid ambiguous meaning: df['A'] > 2 & df['B'] <3 maybe meaning<br>
+        df['A'] > (2 & df['B']) < 3 while desired is (df['A']>2) & df['B']<3.</li>
+        <li>Using a boolean vector to index a Series works exactly as in a Numpy ndarray:</li>
+        <pre>
+            s = pd.Series(range(-3, 4))
+            s[s>0] # return s values those > 0
+            s[(s < -1) | (s > 0.5)] # return s values those < -1 or > 0.5
+            s[~(s<0)] # return s values those not < 0 ( or >=0)
+        </pre>
+        <li>You may select rows from a DataFrame using a boolean vector the same length as the DataFrame's index.</li>
+        <pre>
+            df[df['A']>0] # Return df with values at df['A'] > 0
+        </pre>
+        <li>List comprehensions and the map method of Series can also be used to produce more complex criteria:</li>
+        <pre>
+            df2 = pd.DataFrame({'a': ['one', 'one', 'two', 'three', 'two', 'one', 'six'],
+                                'b': ['x', 'y', 'y', 'x', 'y', 'x', 'x'],
+                                'c': np.random.randn(7)})
+            criterion = df2['a'].map(lambda x: x.startswith('t'))
+            df2[criterion]
+            df2[[x.startwith('t') for x in df['a']]] # similar but slower than above
+            df2[criterion and df['b'] =='x']
+        </pre>
+        <li>With the choice methods Selection by Label, Selection by Position, and Advanced Indexing you may select along more than one<br>
+         axis using boolean vectors combined with other indexing expressions.</li>
+        <pre>
+            df2.loc[criterion & (df2['b'] == 'x'), 'b':'c']
+        </pre>
+        <li>You can also use boolean with .loc, and boolean value with .iloc.</li>
+        <pre>
+            df = pd.DataFrame([[1,2], [3,4], [5,6]], index=list('abc'), columns=list('AB'))
+            s = df['A'] > 2 # return df['A'] with boolean values
+            df.loc[s, 'B'] # return values at s True and column B
+            df.iloc[s.values, 1] # similar above
+            df.iloc[[False, True, True], 0] # similar above
+        </pre>
+    </ul>
+<h2 style="color:blue">Indexing with isin</h2>
+    <ul>
+        <li>Consider the <b>isin()</b> method of Series, which returns a boolean vector that is True wherever the Series elements exist in<br>
+        the passed list. This allows you to select rows where one or more columns have values you want.</li>
+        <pre>
+            s = pd.Series(np.arange(5), index=np.arange(5)[::-1], dtype='int64')
+            s.isin([2, 4, 6]) # return boolean vector that true is in [2,4,6] and false is not
+            s[s.isin([2, 4, 6])] # return vector of s's value that is true
+        </pre>
+        <li>The same method is available for Index objects and is useful for the cases when you don't know which of the sought labels are in fact present:</li>
+        <pre>
+            s[s.index.isin([2,4,6])] # return vector of s's index value is in [2,4,6]
+            s.reindex([2, 4, 6]) # return reindex s with index [2, 4, 6]
+        </pre>
+        <li>In addition to that, MultiIndex allows selecting a separate level to use in the membership check:</li>
+        <pre>
+            s_mi = pd.Series(np.arange(6), index=pd.MultiIndex.from_product([[0,1], ['a', 'b', 'c']]))
+            s1 = s_mi.index.isin(['a', 'c'], level=1)
+            s_mi.iloc[s1]
+            Out[]:
+            0  a    0
+               c    2
+            1  a    3
+               c    5
+            dtype: int64
+        </pre>
+        <li>DataFrame also has an <b>isin()</b> method. When calling it, pass a set of values as either an array or dict. If values is an array<br>
+        isin() returns a DataFrame of booleans that is same shape as the original DataFrame, with True wherever the element is in the sequence of values.</li>
+        <pre>
+            df = pd.DataFrame({'vals' : [1,2,3,4], 'ids' : ['a', 'b', 'f', 'n'],
+                                        'ids2': ['a', 'n', 'c', 'n']})
+            values = ['a', 'b', 1 ,3]
+            df.isin(values) # return df with boolean value( True if in values and False if is not)
+        </pre>
+        <li>Oftentimes, you'll want to match certain values with certain columns, just make values a dict where the key is the column, and the value<br>
+        is a list of items you want to check for:</li>
+        <pre>
+            values = {'ids': ['a', 'b'], 'vals': [1, 3]}
+            df.insin(values) # return df boolean values (True if corresponding and False if not)
+        </pre>
+        <li>Combine DataFrame's isin() with the any() and all() methods to quickly select subsets of your data that meet a given criteria.</li>
+        <li>Note that any() and all() use default axis is 0, change if you use to check for columns.</li>
+        <pre>
+            values = {'ids': ['a', 'b'], 'ids2': ['a', 'c'], 'vals': [1, 3]}
+            row_mask = df.isin(values).all(1) # all(1) use column axis, return just boolean value(s) match all
+            df[row_mask]
+        </pre>
+    </ul>
+<h2 style="color:blue">The where() method and masking</h2>
+    <ul>
+        <li>Selecting values from a Series with a boolean vector generally returns a subset of data. To guarantee that selection outputs has the <br>
+        same shape as the original data, you can use the where method in Series and DataFrame.</li>
+        <pre>
+            s[s>0] # return s values > 0
+            s.where(s>0) # if s > 0 return value, else NaN
+        </pre>
+        <li>Selecting values from a DataFrame with a boolean criterion now also preserves input data shape. <b>Where</b> is used under the hood as <br>
+        the implementation.</li>
+        <pre>
+            df[df < 0] # Return df, if value < 0 value, else NaN
+            df.where(df < 0, -df) # return df, if value < 0 value, else -df
+        </pre>
+        <li>The signature of DataFrame.where() is differs from numpy.where(). Roughly df1.where(m, df2) is equivalent to np.where(m, df1, d2).</li>
+        <h3 style="color:red">Alignment</h3>
+        <li>Furthermore, <b>where</b> aligns the input boolean condition (ndarray or DataFrame), such that partial selection with setting is possible<br>
+        This is analogous to partial setting via .loc (but on the contents rather than the axis labels).</li>
+        <pre>
+            df2 = df.copy()
+            df2[df2[1:4] > 0] = 3 # assign 0 to values of df2[1:4] if it > 0
+        </pre>
+        <li><b>where</b> can also accept <b>axis and level</b> parameters to align the input when performing the <b>where</b></li>
+        <pre>
+            df2.where(df2 > 0, df['A'], axis='index') # df2>0 then df2, else df['A'], axis=index
+            df.where(lambda x, y: x.where(x>0, y), y=df['A']) # callable, faster than above
+            df.where(lambda x: x >4, lambda x: x +10) # callable
+        </pre>
+        <h3 style="color:red">Mask</h3>
+        <li><b>mask()</b> is inverse of where:</li>
+        <pre>
+            s.mask(s > 0) # return s's values < 0, NA for s's value > 0
+            df.mask(df > 0) # return df's values < 0, NA for df's values > 0
+        </pre>
+    </ul>
+<h2 style="color:blue">Setting with enlargement conditionally using numpy()</h2>
+    <ul>
+        <li>An alternative to <b>where()</b> is to use numpy.where(). Combined with setting a new column, you can use it to enlarge a DataFrame<br>
+        where the values are determined conditionally.</li>
+        <li>Consider you have two choices to choose from in teh following DataFrame. And you want to set a new column color to 'green' when the<br>
+        second column has 'Z'. </li>
+        <pre>
+            df = pd.DataFrame({'col1': list('ABBC'), 'col2': list('ZZXY')})
+            df['color'] = np.where(df['col2'] == 'Z', 'green', 'red')
+        </pre>
+        <li>If you have multiple conditions, you can use <b>numpy.select()</b> to achieve that. Say corresponding to three conditions there are <br>
+        three choice of colors, with a fourth color as a fallback:</li>
+        <pre>
+            conditions = [(df['col2'] == 'Z') & (df['col1'] == 'A'),
+                            (df['col2'] == 'Z') & (df['col1'] == 'B'),
+                            (df['col1'] == 'B')]
+            choices = ['yellow', 'blue', 'purple']
+            df['color'] = np.select(conditions, choices, default='black')
+        </pre>
+    </ul>
+<h2 style="color:blue">The query() method</h2>
+    <ul>
+        <li>DataFrame objects have a <b>query()</b> method that allows selection using an expression. You can get the value of the frame where <br>
+        column b has values between the values of columns a and c.</li>
+        <pre>
+            n = 10
+            df = pd.DataFrame(np.random.randn(n, 3), column=list('abc')
+            df[(df['a'] < df['b']) & (df['b'] < df['c'])] # select df value at b's values between a's values and c's values
+            df.query('(a < b) and (b < c)')
+        </pre>
+        <li>Index column can be used as the column in query:</li>
+        <pre>
+            df = pd.DataFrame(np.random.randint(n/2, size=(n,2), columns= list('bc')
+            df.index.name = df['a'] # named index column
+            df.query('a < b and b< c') # return df with b's values between a and c. Note that use operators
+            df.query('a < b < c') # same result as above
+            df.query('index < b < c') # if you don't want named the index column, use 'index' instead
+        </pre>
+        <li>If index's name overlaps with a column name, then the column name is given precedence.</li>
+        <pre>
+            df = pd.DataFrame({'a': np.random.randint(5, size=(5)})
+            df.index.name = 'a'
+            df.query('a > 2') # use column df['a'], not index column
+            df.query('index > 2') # use index column
+        </pre>
+        <li>If for some reasons, you havev a column named index, then you can refer to the index as <b>ilevel_0</b> as well, but at this point<br>
+        you should consider renaming your columns to something less ambiguous.</li>
+        <h3 style="color:red">MultiIndex query() Syntax</h3>
+        <li>You can also use the levels of a DataFrame with a MultiIndex as if they were columns in the frame:</li>
+        <li>If the MultiIndex are unnamed, you can use <b>ilevel_</b> parameter (index level):</li>
+        <pre>
+            n = 10
+            colors = np.random.choice(['red', 'green'], size= n) # similar as sample, return n elements with randoms in ['red', 'green']
+            foods = np.random.choice(['eggs', 'ham'], size = n)
+            index = pd.MultiIndex.from_arrays([colors, foods], names= ['color', 'food'])
+            df = pd.DataFrame(np.random.randn(n, 2), index=index)
+            df.query("color == 'red'") # use index columns
+            df.index.name = [None, None]
+            df.query('ilevel_0 = "red"')
+            df.query('ilevel_1 = "eggs")
+        </pre>
+        <h3 style="color:red">query() Use Cases</h3>
+        <li>A use case for <b>query()</b> is when you have a collection of DataFrame objects that have a subset of column names (or index <br>
+        level/ names) in common. You can pass the same query to both frames without having to specify which frame you're interested in querying.</li>
+        <pre>
+            n = 10
+            df = pd.DataFrame(np.random.randn(n, 3), columns=list('abc'))
+            df2 = pd.DataFrame(np.random.randn(n + 2, 3), columns=df.columns)
+            expr = '0.0 <= a <= c <=0.5'
+            map(lambda frame: frame.query(expr), [df, df2])
+
+        </pre>
+        <h3 style="color:red">query() Python versus pandas Syntax Comparison</h3>
+        <pre>
+            n = 10
+            df = pd.DataFrame(np.random.randint(n, size=(n ,3)), columns=list('abc))
+            df.query('(a < b) & (b < c)')
+            df[(df['a'] < df['b']) & (df['b'] < df['c'])]
+            df.query('a < b & b < c')
+            df.query('a < b and b < c')
+            df.query('a < b < c')
+        </pre>
+        <h3 style="color:red">The in and not in operators</h3>
+        <li>query() also supports special use of Python's <b>in and not in</b> comparison operators, providing a succinct syntax for calling<br>
+        the <b>isin()</b> method of a Series or DataFrame.</li>
+        <pre>
+            df = pd.DataFrame({'a': list('aabbccddeeff'), 'b': list('aaaabbbbcccc'),
+                                'c': np.random.randint(5, size=12),
+                                'd': np.random.randint(9, size=12)})
+            df.query('a in b')
+            df[df['a'].isin(df['b'])] # similar above
+            df.query('a not in b')
+            df[~df['a'].isin(df['b'])] # similar above
+            df.query('a in b and c < b')
+            df[(df['a'].isin(df['b'])) & (df['c'] < df['d'])] # similar above
+        </pre>
+        <li>Note that <b>in and 'not in'</b> are evaluated in Python, since <b>numexpr</b> has no equivalent of this operation. However, <b>only<br>
+        the in/ not in expression itself</b> is evaluated in vanilla Python. For example, in the expression:</li>
+        <pre>df.query('a in b + c + d')</pre>
+        <li> (b + c + d) is evaluated by numexpr and then the 'in' operation is evaluated in plain Python. In general, an operations that can be<br>
+        evaluated using numexpr will be.</li>
+        <h3 style="color:red">Special use of the == with list objects</h3>
+        <li>Comparing a list of values toa column using '==' or '!=' to in/ not in.</li>
+        <pre>
+            df.query('b == ['a', 'b', 'c']')
+            df[df['b'].isin(['a', 'b', 'c'])]
+            df.query('c == [1,2]')
+            df[df['c'].isin([1,2])]
+            df.query('c != [1,2]')
+            df.query('[1,2] not in c')
+            df.query('[1,2] in c')
+            df[df['c'].isin([1,2])]
+        </pre>
+        <h3 style="color:red">Boolean opearators</h3>
+        <li>You can negate boolean expressions with the word <b>not or ~</b> operator.</li>
+        <pre>
+            df = pd.DataFrame(np.random.rand(n, 3), columns=list('abc'))
+            df['bools'] = np.random.rand(len(df)) > 0.5
+            df.query('not bools') # df values at df['bools'] is False
+            df.query('~ bools') # similar above
+            df.query('not bools') == df[~df['bools']] # return two frames then compare the two, element-wise
+            shorter = df.query('a < b < c and (not bools) or bools > 2')
+            longer = df[(df['a'] < df['b']) & (df['b'] < df['c']) and (~ df['bools']) | (df['bools'] > 2)]
+            shorter == longer # return two frames then compare the two
+        </pre>
+    </ul>
+<h2 style="color:blue">Duplicate Data</h2>
+    <ul>
+        <li>If you want to identify and remove duplicate rows in a DataFrame, there are two methods that will help:</li>
+        <ul>
+            <li><b>duplicated: </b>returns a boolean vector whose length is the number of rows, and which indicates whether a row is duplicated.</li>
+            <li><b>drop_duplicates: </b>removes duplicate rows.</li>
+        </ul>
+        <li>By default, the first observed row of a duplicate set is considered unique, but each method has a <b>keep</b> parameter to specify targets to be kept:</li>
+        <ul>
+            <li><b>keep = 'first' (default): </b>mark/ drop duplicates except for the first occurrence.</li>
+            <li><b>keep = 'last' :</b> mark/ drop duplicates except for the last occurrence.</li>
+            <li><b>keep = False :</b> mark/ drop all duplicates.</li>
+        </ul>
+        <pre>
+            df2 = pd.DataFrame({'a': ['one', 'one', 'two', 'two', 'two', 'three', 'four'],
+                                'b': ['x', 'y', 'x', 'y', 'x', 'x', 'x'],
+                                'c': np.random.randn(7)})
+            df2.duplicated('a') # mark first as unique(False), following as duplicates(True)
+            df2.duplicated('a', keep='last') # mark first as duplicates(True), last as unique(False)
+            df2.duplicated('a', keep=False) # mark all as duplicates(True)
+            df2.drop_duplicates('a') # drop following duplicated rows, keep first
+            df2.drop_duplicates('a', keep='last') # drop front duplicated rows, keep last
+            df2.drop_duplicates('a', keep=False) # drop all duplicates
+        </pre>
+        <li>Also, you can pass a list of columns to identify duplications.</li>
+        <pre>
+            df.duplicated(['a', 'b'])
+            df.drop_duplicates(['a', 'b'])
+        </pre>
+        <li>To drop duplicates by index values, use Index.duplicated then perform slicing. The same set of options are available for the keep parameter.</li>
+        <pre>
+            df3 = pd.DataFrame({'a': np.arange(6), 'b': np.random.randn(6)}, index=list('aabcba'))
+            df3.index.duplicated()
+            df3[~ df3.index.duplicated()]
+            df3[~ df3.index.duplicated(keep='last')]
+            df3[~ df3.index.duplicated(keep=False)]
+        </pre>
+    </ul>
+<h2 style="color:blue">Dictionary-like get() method</h2>
+    <ul>
+        <li>Each of Series or DataFrame have a <b>get()</b> method which can return a default value.</li>
+        <pre>
+            s = pd.Series([1,2,3], index=list('abc'))
+            s.get('a')
+            s.get('x', default=-1)
+        </pre>
+    </ul>
+<h2 style="color:blue">Looking up values by index/ column labels</h2>
+    <ul>
+        <li>Sometimes, you want to extract a set of values given a sequence of row labels and column labels, this can be achieved by <b>pandas.factorize</b><br>
+        and Numpy indexing:</li>
+        <pre>
+            df = pd.DataFrame({'col': list('AABB'), 'A': [80, 23, np.nan, 22], 'B': [80, 55, 76, 67]})
+            idx, cols = pd.factorize(df['col'])
+            df.reindex(cols, axis=1).to_numpy()[np.range(len(df)), idx]
+            Out[]: array([80., 23., 76., 67.])
+        </pre>
+    </ul>
+<h2 style="color:blue">Index Objects</h2>
+    <ul>
+        <li>The pandas Index class and its subclasses can be viewed as implementing an ordered multiset. Duplicates are allowed. However, if<br>
+        you try to convert an Index object with duplicate entries into a set, an exception will be raised.</li>
+        <li>Index also provides the infrastructure necessary for lookups, data alignment, and reindexing. The easiest way to create an Index<br>
+        directly is to pass a list or other sequence to Index.</li>
+        <li>You can also pass a name to be stored in the index:</li>
+        <pre>
+            index = pd.Index(list('edab')
+            'd' in index
+            Out[]: True
+            index = pd.Index(list('edab'), name='something')
+            index.name
+        </pre>
+        <li>The name, if set, will be shown in the console display:</li>
+        <pre>
+            index = pd.Index(list(range(5)), name='rows')
+            columns = pd.Index(list('ABC'), name='cols')
+            df = pd.DataFrame(np.random.randn(5, 3), index=index, columns=columns)
+            df['A']
+        </pre>
+        <h3 style="color:red">Setting metadata</h3>
+        <li>Indexes are 'mostly immutable', but it is possible to set and change their name attribute. You can use the <b>rename, set_names</b><br>
+        to set these attributes directly, and they default to returning a copy.</li>
+        <pre>
+            ind = pd.Index([1,2,3])
+            ind.rename('apple')
+            ind.set_names('other')
+        </pre>
+        <li><b>set_names, set_levels and set_codes</b> also take an optional <b>level</b> argument:</li>
+        <pre>
+            index = pd.MultiIndex.from_product([range(3), ['one', 'two']], names=['first', 'second'])
+            index.levels[1] # ['one', 'two']
+            index.set_levels(['a', 'b'], level =1) # change ['one', 'two'] into ['a', 'b']
+        </pre>
+        <h3 style="color:red">Set operations on Index objects</h3>
+        <li>The two main operations are <b>union and intersection</b>. Difference is provided via <b>.difference()</b> method.</li>
+        <pre>
+            a = pd.Index(['c', 'a', 'b'])
+            b = pd.Index(['c', 'd', 'e'])
+            a.difference(b) # return different values of a
+        </pre>
+        <li>Also available is the symmetric_difference operation, which returns elements that appear in either idx1 or idx2, but<br>
+        not in both. This is equivalent to the index created by idx1.difference(idx2).union(idx2.difference(idx1)), with duplicates dropped.</li>
+        <pre>
+            idx1 = pd.Index([1,2,3,4])
+            idx2 = pd.Index([2,3,4,5])
+            idx1.symmetric_difference(idx2) # return values appear in idx1 and idx2 but not in both [1, 5]
+        </pre>
+        <li>The resulting index from a set operation will be sorted in ascending order.</li>
+        <li>When performing Index.union() between indexes with different dtypes, the indexes must be cast to a common dtype. Typically, though<br>
+        not always, this is object dtype. The exception is when performing a union between integer and float data. In this case, the integer values<br>
+        are converted to float.</li>
+        <pre>
+            idx1 = pd.Index([0,1,2])
+            idx2 = pd.Index([0.5, 1.5])
+            idx1.union(idx2) # return result combining of idx1 and idx2 by ascending order
+        </pre>
+        <h3 style="color:red">Missing values</h3>
+        <li>Even though Index can hold missing values(NaN), it should be avoided if you do not want any unexpected results.</li>
+        <li>Index.fillna fills missing values with specified scalar value.</li>
+        <pre>
+            idx1 = pd.Index([1, np.nan, 3, 4])
+            idx1.fillna(2) # fill np.nan with 2
+            idx2 = pd.DatetimeIndex([pd.Timestamp('2011-01-01'), pd.NaT, pd.Timestamp('2011-01-03')
+            idx2.fillna(pd.Timestamp('2011-01-2') # fill pd.NaT with Timestamp('2011-01-02')
+        </pre>
+    </ul>
+<h2 style="color:blue">Set/ reset index</h2>
+    <ul>
+        <h3 style="color:red">Set an index</h3>
+        <li>DataFrame ha a <b>set_index()</b> method which takes a column name(for a regular Index) or a list of column names (for a MultiIndex)<br>
+        To create a new, re-indexed DataFrame.</li>
+        <pre>
+            data = pd.DataFrame({'a': ['bar', 'bar', 'foo', 'foo'], 'b': ['one', 'two', 'one', 'two'],
+                                'c': list('zyxw'), 'd': np.arange(1,5).astype('float64')})
+            indexed1 = data.set_index('c') # return data with index 'c'
+            indexed2 = data.set_index(['a', 'b']) # return data with MultiIndex['a', 'b']
+        </pre>
+        <li>The 'append' keyword option allow you to keep the existing index and append the given columns to a MultiIndex.</li>
+        <pre>
+            frame = data.set_index('c', drop=False) # frame(data) with column index c and not drop column c in frame
+            frame = frame.set_index(['a', 'b'], append=True) # frame with columns indexes a, b , keep column index c(3 columns indexes)
+        </pre>
+        <li>Other option in set_index allow you not drop the index columns or add the index in-place (change in current object).</li>
+        <pre>
+            data.set_index('c', drop=False) # use 'c' as index column and keep 'c' in frame
+            data.set_index(['a', 'b'], inplace=True) # change index column into ['a', 'b'], permanently
+        </pre>
+        <h3 style="color:red">Reset the Index</h3>
+        <li>As a convenience, there is a new function on DataFrame called reset_index() which transfers the index values into the DataFrame's <br>
+        columns and sets a singple integer index. his is inverse operation set_index().</li>
+        <pre>
+            data.reset_index(inplace=True) # transfer columns indexes into data's column and set index as int sequence (from 0 to row's length -1)
+        </pre>
+        <li>The output is more similar to a SQL table or record array. The names for the columns derived from the index are the ones stored in the names<br>
+        attribute.</li>
+        <li>you can use the 'level' keyword to remove only a portion of the index.</li>
+        <pre>
+            data.reset_index(level=0) # transfer column 0 of indexes into data frame column
+            data.reset_index(level=1) # transfer column 1 of indexes into data frame column
+            data.reset_index() # transfer all columns of indexes into data frame columns
+            data.reset_index(inplace=True) # transfer all, permanently
+        </pre>
+        <h3 style="color:red">Adding an ad hoc index</h3>
+        <li>If you create an index yourself, you can just assign into index field.</li>
+        <pre>
+            data.index = index
+        </pre>
+    </ul>
+<h2 style="color:blue">Returning a view versus a copy</h2>
+    <ul>
+        <li>When setting values in a pandas object, care must be taken to avoid what is called chained indexing.</li>
+        <pre>
+            dfmi = pd.DataFrame([list('abcd'), list('efgh'), list('ijkl'), list('mnop')],
+                                columns=pd.MultiIndex.from_product(['one', 'two'], ['first', 'second'])
+            dfmi['one']['second']
+            dfmi.loc[:, ('one', 'second')] # similar above
+        </pre>
+        <li>These both yield the same results. It is instructive to understand the order of operations on these and why method 2 (.loc) is much<br>
+        preferred over method 1 (chained []).</li>
+        <li>dfmi['one'] selects the first level of the columns and returns a DataFrame that is single-indexed. Then another Python operation <br>
+        dfmi_with_one['second'] selects the series indexed by 'second'. This is indicated by the variable dfmi_with_one because pandas sees these<br>
+        operations as separate events. e.g. separate calls to __getitem__, so it has to treat them as linear operations, they happen one after another.</li>
+        <li>Contrast this to df.loc[:, ('one', 'second')] which passes a nested tuples of (slice(None), ('one', 'second')) to a single call to <br>
+        __getitem__. This allows pandas to deal with this as a single entity. Furthermore this order of operations can be significantly faster, and <br>
+        allows one to index both axes if so desired.</li>
+    </ul>
+<h2 style="color:blue">Evaluation order matters</h2>
+    <ul>
+        <li>When you use chained indexing, the order and type of the indexing operation partially determine whether teh result is a slice into the original<br>
+        object, or a copy of the slice.</li>
+        <pre>
+            df = pd.DataFrame({'a': ['one', 'one', 'two', 'three', 'two', 'one', 'six'],
+                                'c': np.arange(7)})
+            df['c'][df['a'].str.startswith('o')] = 42
+            Out[]:
+            SettingWithCopyWarning
+            A value is trying to be set on a copy of a slice from a DataFrame
+        </pre>
+        <li>If you would like pandas to be more or less trusting about assignment to a chained indexing expression, you can set the option mode.chain_assignment<br>
+        to one of these values:</li>
+        <ul>
+            <li><b>'warn' :</b>The default, means a SettingWithCopyWarning is printed.</li>
+            <li><b>'raise':</b> means pandas will raise a SettingWithCopyException you have to deal with.</li>
+            <li><b>None:</b> will suppress the warning entirely.</li>
+        </ul>
+        <pre>
+            pd.set_option('mode.chain_assignment', 'warn')
+            SettingWithCopyWarning:
+            A value is trying to be set on a copy of a slice from a DataFrame.
+            Try using .loc[row_index,col_indexer] = value instead
+        </pre>
+        <li>This however is operating on a copy and will not work.</li>
+        <li>A chained assignment can also crop up in setting in a mixed dtype frame.</li>
+        <li>The following is the recommended access method using '.loc' for multiple items (using mask) and a single item using a fixed index:</li>
+        <pre>
+            df = pd.DataFrame({'a': ['one', 'one', 'two', 'three', 'two', 'one', 'six',
+                                'c': np.arange(7)})
+            df1 = df.copy()
+            mask = df['a'].str.startswith('o')
+            df1.loc[mask, 'c'] = 42 # return df1 with values at mask and column 'c' as 42
+        </pre>
+        <li>The chained assignment warnings/ exceptions are aiming to inform the user of a possibly invalid assignment. There may be false postives;<br>
+        situations where a chained assignment is inadvertently reported. Replacing it by .loc or .iloc methods.</li>
+    </ul>
+<h1 style="color:blue">MultiIndex/ Advanced indexing</h1>
+<h2 style="color:blue">Hierarchical indexing (MultiIndex)</h2>
+    <ul>
+        <li>Hierarchical/ Multi-level indexing is very exciting as it opens the door to some quite sophisticated data analysis and manipulations.<br>
+        ,especially for working with higher dimensional data. In essence, it enables you to store and manipulate data with an arbitrary number of dimensions<br>
+        in lower dimensional data structures like Series(1d) and DataFrame(2d).</li>
+    </ul>
+<h2 style="color:blue">Creating a MultiIndex(hierarchical index) object</h2>
+    <ul>
+        <li>The MultiIndex object is the hierarchical analogue of the standard Index object which typically stores the axis labels in pandas object.<br>
+        You can think of MultiIndex as an array of tuples where each tuple is unique. A MultiIndex can be created from a list of arrays (using <br>
+        MultiIndex.from_arrays()), and array of tuples (using MultiIndex.from_tuples()), a crossed set of iterables (using MultiIndex.from_product())<br>
+        or a DataFrame (using MultiIndex.from_frame()). The Index constructor will attempt to return a MultiIndex when it is passed a list of tuples.</li>
+        <pre>
+            arrays =    [
+                            ["bar", "bar", "baz", "baz", "foo", "foo", "qux", "qux"],
+                            ["one", "two", "one", "two", "one", "two", "one", "two"],
+                        ]
+            tuples = list(zip(*array))
+            index = pd.MultiIndex.from_tuples(tuples, name=['first', 'second'])
+            s = pd.Series(np.random.randn(8), index=index)
+        </pre>
+        <li>Or if you want every pairing of elements in two iterables, it can be easier to use the MultiIndex.from_product():</li>
+        <pre>
+            s = pd.Series(np.random.randn(8),
+                        index= pd.MultiIndex.from_product([['bar', 'baz', 'foo', 'qux'], ['one', 'two']], names=['first', 'third']))
+        </pre>
+        <li>You can also contruct a MultiIndex from a DataFrame directly, using the method MultiIndex.from_frame(). This is a complementary<br>
+        method to MultiIndex.to_frame().</li>
+        <pre>
+            df = pd.DataFrame([['bar', 'one'], ['bar', 'two'], ['foo', 'one'], ['foo', 'two']], columns=['first', 'second']
+            pd.MultiIndex.from_frame(df)
+        </pre>
+        <li>As a convenience, you can pass a list of arrays directly into Series or DataFrame to construct a MultiIndex automatically.</li>
+        <pre>
+            arrays =    [
+                            np.array(["bar", "bar", "baz", "baz", "foo", "foo", "qux", "qux"]),
+                            np.array(["one", "two", "one", "two", "one", "two", "one", "two"]),
+                        ]
+            s = pd.Series(np.random.randn(8), index=pd.MultiIndex.from_arrays(arrays, names=['first', 'second'])
+            df = pd.DataFrame(np.random.randn(8, 4), index=pd.MultiIndex.from_arrays(arrays, names=['first', 'last'])
+        </pre>
+        <li>All of the MultiIndex constructors accept a <b>names</b> parameter which stores string names for the levels themselves. If no names<br>
+        are provided, None will be assigned.</li>
+        <li>This index can back any axis of a pandas object, and the number of levels of the index is up to you.</li>
+        <pre>
+            arrays = [
+                        ["bar", "bar", "baz", "baz", "foo", "foo", "qux", "qux"],
+                        ["one", "two", "one", "two", "one", "two", "one", "two"],
+                    ]
+            tuples = list(zip(*arrays))
+            index = pd.MultiIndex(tuples, names=['first', 'second'])
+            df = pd.DataFrame(np.random.randn(3, 8), index=['A', 'B', 'C'], columns=index)
+            pd.DataFrame(np.random.randn(6, 6), index=index[:6], columns=index[:6])
+        </pre>
+        <li>We've 'sparsifield' the higher levels of teh indexes to make the console output a bit easier on the eyes. Note that how the index<br>
+        is displayed can be controlled using the multi_sparse option in pandas.set_options().</li>
+        <pre>
+            with pd.option_context('display.multi_sparse', False):
+                df
+        </pre>
+        <li>It worth keeping in mind that there's nothing prevent you from using tuples as atomic labels on ais:</li>
+        <pre>
+            pd.Series(np.random.randn(8), index=tuples)
+        </pre>
+        <li>The reason that MultiIndex matters is that it can allow you to do grouping, selection, and reshaping operations as well we describe and <br>
+        in subsequent areas of the documentation. You can find out working with hierarchically-indexed data without creating a MultiIndex explicitly.<br>
+        However, when loading data from a file, you may wish to generate your own MultiIndex when preparing the data set.</li>
+    </ul>
+<h2 style="color:blue">Reconstructing the level labels</h2>
+    <ul>
+        <li>The method <b>get_level_values()</b> will return a vector of the labels for each location at a particular level:</li>
+        <pre>
+            index.get_level_values(0)
+            index.get_level_values(1)
+            index.get_level_values('first')
+            index.get_level_values('second')
+        </pre>
+    </ul>
+<h2 style="color:blue">Basic indexing on axis with MultiIndex</h2>
+    <ul>
+        <li>One of the important features of hierarchical indexing is that you can select data by a 'partial' label identifying a subgroup<br>
+        in the data. Partial selection 'drops' levels of the hierarchical index in the result in a completely analogous way to selecting a column<br>
+        in a regular DataFrame.</li>
+        <pre>
+            arrays = [  ["bar", "bar", "baz", "baz", "foo", "foo", "qux", "qux"],
+                        ["one", "two", "one", "two", "one", "two", "one", "two"]]
+            index = pd.MultiIndex.from_arrays(arrays, names = ['fist', 'last'])
+            s = pd.Series(np.random.randn(8), index=index)
+            df = pd.DataFrame(np.random.randn(8, 4), index=pd.MultiIndex.from_arrays(arrays, names=['first', 'last']))
+            df['bar']
+            df['bar', 'one']
+            df['bar']['one']
+            s['qux']
+        </pre>
+    </ul>
+<h2 style="color:blue">Defined levels</h2>
+    <ul>
+        <li>The MultiIndex keeps all the defined levels of an index, even if they are not actually used. When slicing an index, you may notice this.</li>
+        <pre>
+            df.columns.levels # all levels
+            df[['foo', 'qux']].columns.levels # all level of [['foo', 'qux']]
+        </pre>
+        <li>If you want to see only the used levels, use the <b>get_level_values()</b> method:</li>
+        <pre>
+            df[['foo', 'qux']].columns.to_numpy() # get column combinations
+            df[['foo', 'qux']].columns.get_level_values(0) # get value of level 0
+        </pre>
+        <li>To reconstruct the MultiIndex with only the used levels, the remove_unused_levels() method may be used:</li>
+        <pre>
+            new_mi = df[['foo', 'qux']].columns.remove_unused_levels()
+            new_mi.levels # show the level combination after remove_unused_levels
+        </pre>
+    </ul>
+<h2 style="color:blue">Data alignment and using reindex</h2>
+    <ul>
+        <li>Operations between differently-indexed object having MultiIndex on the axes will work as you expect, data alignment will work<br>
+        the same as an Index of tuples.</li>
+        <pre>
+            s + s[:-2] # Na values at -2, -1
+            s + s[::2] # NA values at start(s[1]) then step 2 to the last
+        </pre>
+        <li>The reindex() method of Series/ DataFrames can be called with another MultiIndex, or even a list or array of tuples.</li>
+        <pre>
+            s.reindex(index[:3]) # return s with values of index[:3], index[3:] is not included
+            s.reindex([('foo', 'two'), ('bar', 'one'), ('qux', 'one'), ('baz', 'one')])
+            # s with just these indexes, if there're not exist before then they receive values of NA
+        </pre>
+    </ul>
+<h2 style="color:blue">Advance Indexing with hierarchical Index</h2>
+    <ul>
+        <li>Syntactical integrating MultiIndex in advanced indexing with .loc is a bit challenging, but we've made every effort to od so.<br>
+        In general, MultiIndex keys take from form of tuples.</li>
+        <pre>
+            df = df.T
+            df.loc[('bar', 'two')] # return rows with index label 'bar', 'two
+        </pre>
+        <li>Note that df.loc['bar', 'two'] would also work, but this shorthand notation can lead to ambiguity in general. If you want to index<br>
+        a specific column with .loc, you must use a tuple like above ('bar', 'two').</li>
+        <li>You don't have to specify all levels of the MultiIndex by passing only the first elements of the tuple. You can use 'partial' indexing<br>
+        to get all elements. This is a shortcut for the slightly mre verbose notation df.loc[('bar', ), ]</li>
+        <pre>
+            df.loc['bar'] # all row index with 'bar' ('bar', 'one), ('bar', 'two)
+            df.loc['bar' : 'foo'] # all rows index from 'bar' to 'foo'
+            df.loc[('bar', 'one'): ('qux', 'one')] # all rows index from ('bar', 'one') to ('qux', 'one')
+            df.loc[('bar', 'one'): 'foo'] # all rows index from ('bar', 'one') to 'foo'
+            df.loc[[('bar', 'one'), ('qux', 'two')]]  # rows with ('bar', 'one') and ('qux', 'two') (similar reindex)
+        </pre>
+        <li>It is important to note that tuples and lists are not treated identically in pandas when it comes to indexing. Whereas a tuple is <br>
+        interpreted as one multi-level key, a list is used to specify several keys. Or in other words, tuples go horizontally (traversing levels)<br>
+        lists go vertically (scanning levels).</li>
+        <li>Importantly, a list of tuples indexes several complete MultiIndex keys, whereas a tuple of lists refer to several values within a level.</li>
+        <pre>
+            s = pd.Series([1,2,3,4,5,6], index=pd.MultiIndex.from_products([['A', 'B'], ['c', 'd', 'e']]))
+            s.loc[[('A', 'c'), ('B', 'd')]] # index rows ('A', 'c') and ('B', 'd')
+            s.loc[(['A', 'B'], ['c', 'd'])] # index row included level_0 ['A', 'B'], level_1 ['c', 'd']
+        </pre>
+        <h3 style="color:red">Using Slicers</h3>
+        <li>You can slice a MultiIndex by providing multiple indexers.</li>
+        <li>You can provide any of the selectors as if you are indexing by label, including slices, lists of labels, labels, and boolean indexers.</li>
+        <li>You can use slice(None) to select all the contents of that level. You do not need to specify all the deeper levels, they will be implied as slice(None).</li>
+        <li>As usual, both sides of the slicers are included as this is label indexing.</li>
+        <li>You should specify all axes in the .loc specifier, meaning the indexer for the index and for the columns. There are some ambiguous cases<br>
+        where the passed indexer could be mis-interpreted as indexing both axes, rather than into say the MultiIndex for the rows.</li>
+        <pre>
+            df.loc[(slice('A1', 'A3', ...), :] # should do this
+            df.loc[(slice('A1', 'A3', ...)] # avoid do this
+        </pre>
+        <pre>
+            def mklbl(prefix, n):
+                return ['%s%s' %(prefix, i) for i in range(n)]
+            miindex = pd.MultiIndex.from_product([mklbl('A', 4), mklbl('B', 2), mklbl('C', 4), mklbl('D', 2)])
+            micolumns = pd.MultiIndex.from_tuples([('a', 'foo'), ('a', 'bar'), ('b', 'foo'), ('b', 'bah')], names=['lvl0', 'lvl1'])
+            dfmi = (pd.DataFrame(np.arange(len(miindex) * len(micolumns)).reshape(len(miindex), len(micolumns)),
+                                index=miindex, columns=micolumns)).sort_index().sort_index(axis=1)
+
+        </pre>
+        <li>Basic MultiIndex slicing using slices, lists, and labels.</li>
+        <pre>
+            dfmi.loc[(slice('A1', 'A3')), slice(None), ['C1', 'C3']), :]
+        </pre>
+        <li>You can use pandas.IndexSlice to facilitate a more natural syntax using :, rather than using slice(None).</li>
+        <pre>
+            idx = pd.IndexSlice
+            dfmi.loc[idx[:,:,['C1', 'C3']], idx[:,'foo']]
+        </pre>
+        <li>It is possible to perform quite complicated selections using this method on multiple axes at the same time.</li>
+        <pre>
+            dfmi.loc['A1', (slice(None), 'foo')]
+            dfmi.loc[(['A0', 'A3'], ['B0', 'B1'], ['C1', 'C3']), slice(None)), (slice(None), 'foo')]
+            dfmi.loc[idx[:, :, ['C1', 'C3']], idx[:, 'foo']]
+        </pre>
+        <li>Using a boolean indexer, you can provide selection related to the values. Or you can also specify the axis parameter.</li>
+        <pre>
+            mask = dfmi[('a', 'foo')] > 200
+            dfmi.loc[idx[mask, :, ['C1', 'C3']], idx[:, 'foo']]
+            dfmi.loc(axis=0)[:, :, ['C1', 'C3']]
+        </pre>
+        <li>Furthermore, you can set the values using this methods:</li>
+        <pre>
+            df2 = df.copy()
+            df2.loc(axis=0)[:, :, ['C1', 'C3']] = -10
+            df2.loc[idx[:, :, ['C1', 'C3']], :] = df2 * 100
+        </pre>
+        <h3 style="color:red"></h3>
+        <h3 style="color:red"></h3>
+        <h3 style="color:red"></h3>
+        <h3 style="color:red"></h3>
+        <h3 style="color:red"></h3>
+        <h3 style="color:red"></h3>
+    </ul>
+<h2 style="color:blue">Cross-section</h2>
+    <ul>
+        <li>The xs() method of DataFrame additionally takes a level argument to make selecting data at a particular level of a MultiIndex easier.</li>
+        <li>You can also select on the columns with xs, by providing the axis argument.</li>
+        <pre>
+            df = pd.DataFrame(np.random.randn(8, 3),
+                                index=pd.MultiIndex.from_product([['bar', 'baz', 'foo', 'qux'], ['one', 'two']], names=['first', 'second'],
+                                columns=list('ABC'))
+            df.xs('one', level='second')
+            df = df.T
+            df.xs('one', level='second', axis=1)
+            df.loc[:, (slice(None), 'one')]
+            df.xs(('one', 'bar'), level=('second', 'first'), axis=1)
+            df.loc[:, ('bar', 'one')]
+            df.xs('one', level='second', axis=1, drop_level=False) # keep level, by default drop_level=True
+        </pre>
+    </ul>
+<h2 style="color:blue">Advance reindexing and alignment</h2>
+    <ul>
+        <li>Using the parameter 'level' in the reindex() and align() methods of pandas objects is useful to broadcast values across a level.</li>
+        <pre>
+            midx = pd.MultiIndex(levels=[['zero', 'one'], ['x', 'y']], codes=[[1,1,0,0], [1,0,1,0]])
+            df = pd.DataFrame(np.random.randn(4,2), index=midx)
+            df2 = df.groupby(level=0).mean()
+            df2.reindex(df.index, level=0) # x and y of level 1 received the same result of df.mean()
+            df_aligned, df2_aligned = df.align(df2, level=0) # intersection level_0 index
+        </pre>
+    </ul>
+<h2 style="color:blue">Swapping levels with swaplevel</h2>
+    <ul>
+        <li>The swaplevel() method can witch the order of two levels</li>
+        <pre>
+            df[:5].swaplevel(0, 1, axis=0)
+            Out[]:
+                           0         1
+            y one   1.519970 -0.493662
+            x one   0.600178  0.274230
+            y zero  0.132885 -0.023688
+            x zero  2.410179  1.450520
+        </pre>
+    </ul>
+<h2 style="color:blue">Reordering levels with reorder_levels</h2>
+    <ul>
+        <li>The reorder_levels() method generalizes the swaplevel method, allowing you to permute the hierarchical index levels in one step:</li>
+        <pre>
+            df.reorder_level([1,0], axis=0) # change level 1 index into level 0 index
+            df.reorder_level([1,0], axis=1) # applied for column index
+        </pre>
+    </ul>
+<h2 style="color:blue">Renaming names of an Index or MultiIndex</h2>
+    <ul>
+        <li>The rename() method is used to rename the labels of a MultiIndex, and is typically used to rename the columns of a DataFrame. The <br>
+        'columns' argument of rename allows a dictionary to be specified that includes only the columns you wish to rename.</li>
+        <pre>
+            df.rename(columns={0:'col0', 1:'col1'})
+            df.rename(index={'one':'two', 'y': 'z'})
+        </pre>
+        <li>The rename_axis() method is used to rename the name of a Index or MultiIndex. In particular, the names of the levels of MultiIndex<br>
+        can be specified, which is useful if reset_index() is later used to move the values from the MultiIndex to a column.</li>
+        <pre>
+            df.rename_axis(index=['abc', 'def'])
+        </pre>
+        <li>Note that the columns of a DataFrame are an index, so that using rename_axis with the columns argument will change the name of that index.</li>
+        <pre>
+            df.rename_axis(columns='Col').columns
+        </pre>
+        <li>Both rename() and rename_axis() support specifying a dictionary, Series or a mapping function to map labels/ names to new values:</li>
+        <li>When working with an Index object directly, rather than via a DataFrame, Index.set_name() can be used to change the names.</li>
+        <pre>
+            mi = pd.MultiIndex.from_product([[1,2], ['a', 'b']], names= ['x', 'y'])
+            mi2 = mi.rename('new name', level=0)
+        </pre>
+    </ul>
+<h2 style="color:blue">Sorting a MultiIndex</h2>
+    <ul>
+        <li>For MultiIndex objects to be indexed and sliced effectively, they need to be sorted. As with any index, you can use sort_index().</li>
+        <li>You may also pass a level name to sort_index if the MultiIndex are named.</li>
+        <pre>
+            import random
+            random.shuffle(tuples)
+            s = pd.Series(np.random.randn(8), index=pd.MultiIndex.from_tuples(tuples))
+            s.sort_index()
+            s.sort_index(level=0)
+            s.sort_index(level=1)
+            s.index.set_names(['L1', 'L2'], inplace=True)
+            s.sort_index(level='L1')
+            s.sort_index(level='L2')
+        </pre>
+        <li>On higher dimensional objects, you can sort any of the other axes by level if they have MultiIndex:</li>
+        <pre>
+            df.T.sort_index(level=1, axis=1)
+            Out[]:
+                    one      zero       one      zero
+                      x         x         y         y
+            0  0.600178  2.410179  1.519970  0.132885
+            1  0.274230  1.450520 -0.493662 -0.023688
+        </pre>
+        <li>Indexing will work even if the data are not sorted, but will be rather inefficient (and show a PerformanceWarning). It will also<br>
+        return a copy of the data rather than a view:</li>
+        <pre>
+            dfm = pd.DataFrame({'jim': [0, 0, 1, 1], 'joe': ['x', 'x', 'z', 'y'], 'jolie': np.random.rand(4)})
+            dfm = dfm.set_index(['jim', 'joe'])
+            dfm.loc[(1, 'z'), :]
+        </pre>
+        <li>Furthermore, if you try to index something that is not fully lexsorted, this can raise:</li>
+        <pre>
+            dfm.loc[(0, 'y'):(1, 'z')]
+            UnsortedIndexError: 'Key length (2) was greater than MultiIndex lexsort depth (1)'
+        </pre>
+        <li>The is_monotonic_increasing() method on a MultiIndex shows if the index is sorted.</li>
+        <pre>
+            dfm.index.is_monotonic_increasing()
+            Out[]:
+            False
+
+            dfm.sort_index(inplace=True)
+
+            dfm.is_monotonic_increasing()
+            Out[]:
+            True
+
+            dfm.loc[(0, 'y'):(1, 'z')]
+            Out[]:
+                        jolie
+            jim joe
+            1   y    0.110968
+                z    0.537020
+        </pre>
+    </ul>
+<h2 style="color:blue">Take methods</h2>
+    <ul>
+        <li>Similar to Numpy ndarrays, pandas Index, Series and DataFrame also provides take() method, that retrieves elements along a<br>
+        given axis at the given indices. The given indices must be either a list or an ndarray of integer index positions. 'take' will <br>
+        also accept negative integers as relative positions to the end of teh object.</li>
+        <pre>
+            index = pd.Index(np.random.randint(0, 1000, 10))
+            positions = [0, 9, 3]
+            index[positions]
+            index.take(positions)
+            ser = pd.Series(np.random.randn(10))
+            ser.iloc[positions]
+            ser.take(positions)
+        </pre>
+        <li>For DataFrame, the given indices should be a 1d list or ndarray that specifics row or column positions.</li>
+        <pre>
+            frm = pd.DataFrame(np.random.randn(5,3))
+            frm.take([1,4,3])
+            frm.take([0,2], axis=1)
+        </pre>
+        <li>It is important to note that the 'take' method on pandas objects are not intended to work on boolean indices and may return<br>
+        unexpected results.</li>
+        <pre>
+            arr = np.random.randn(10)
+            arr.take([False, False, True, True])
+            arr[[0,1]]
+            ser = pd.Series(np.random.randn(10))
+            ser.take([False, False, True, True]) # still return 4 values, are ambiguous
+            ser.iloc[[0,1]]
+        </pre>
+        <li>Finally, as a small note on performance because the 'take' method handles a narrower range of inputs,it can offer performance that<br>
+        is a good deal faster than fancy indexing.</li>
+    </ul>
+<h1 style="color:red">Index Types</h1>
+<h2 style="color:blue">CategoricalIndex</h2>
+    <ul>
+        <li>CategoricalIndex is a type of index that is useful for supporting indexing with duplicates. This is a container around a Categorical <br>
+        and allows efficient indexing and storage of an index with a large number of duplicated elements.</li>
+        <pre>
+            from pandas.api.types import CategoricalDtype
+            df = pd.DataFrame({'A': np.arange(6), 'B': list('aabbca')})
+            df['B'] = df['B'].astype(CategoricalDtype(list('cab')))
+            df.B.cat.categories
+        </pre>
+        <li>Setting the index will create a CategoricalIndex</li>
+        <pre>
+            df2 = df.set_index('B')
+            df2.index
+        </pre>
+        <li>Indexing with __getitem__/.iloc/.loc works similarly to an Index with duplicates. Then indexers must be in the category or the operation<br>
+        will raise a KeyError.</li>
+        <pre>
+            df2.loc['a']
+        </pre>
+        <li>The CategoricalIndex is preserved after indexing.</li>
+        <li>Sorting the index will sort by the order of the categories (recall that we created the index with CategoricalDtype(list('cab')), so the <br>
+        sorted order is 'cab'.</li>
+        <li>Groupby operations on teh index will preserve the index nature as well.</li>
+        <li>Reindexing operations will return a resulting index based on the type of the passed indexer. Passing a list will return a plain-old<br>
+        index, indexing with a Categorical will return a CategoricalIndex, indexed according to the categories of the passed Categorical dtype. This<br>
+        allows one to arbitrarily index these even with values not in the categories, similarly to how you can reindex any pandas index.</li>
+        <pre>
+            df3 = pd.DataFrame({'A': np.arange(3), 'B': pd.Series(list('abc')).astype('category')})
+            df3 = df3.set_index('B')
+            df3.reindex(['a', 'e'])
+            df3.reindex(['a', 'e']).index
+            df3.reindex(pd.Categorical(['a', 'e'], categories=list('abe')))
+            df3.reindex(pd.Categorical(['a', 'e'], categories=list('abe'))).index
+        </pre>
+        <li>Reshaping an Comparison operations on a CategoricalIndex can also achieve:</li>
+        <pre>
+            df4 = pd.DataFrame({'A': np.arange(2), 'B': list('ba')})
+            df4['B'] = df4['B'].astype(CategoricalDtype(list('ab')))
+            df4 = df4.set_index('B')
+            df5 = pd.DataFrame({'A': np.arange(2), 'B': list('bc')})
+            df5['B'] = df5['B'].astype(CategoricalDtype(list('bc')))
+            df5 = df5.set_index('B')
+            pd.concat([df4, df5])
+            df7 = pd.DataFrame({'A': np.arange(2), 'B': list('xy')})
+            df7 = df7.set_index('B')
+            pd.concat([df5, df7])
+        </pre>
+    </ul>
+<h2 style="color:blue">Int64Index and RangeIndex</h2>
+    <ul>
+        <li>Int64Index is a fundamental basic index in pandas. This is immutable array implementing an ordered, sliceable set.</li>
+        <li>RangeIndex is a sub-class of Int64Index that provides the default index for all NDFrame objects. RangeIndex is an <br>
+        optimized version of Int64Index that can represent a monotonic ordered set. These are analogous to Python range types.</li>
+    </ul>
+<h2 style="color:blue">Float64Index</h2>
+    <ul>
+        <li>By default a Float64Index will be automatically created when passing floating, or mixed-integer-floating values in index<br>
+        creation. This enables a pure label-based slicing paradigm taht makes [], ix, loc for scalar indexing and slicing work exactly the same.</li>
+        <pre>
+            indexF = pd.Index([1.5, 2, 3, 4.5, 5])
+            sf = pd.Series(range(5), index= indexF)
+        </pre>
+        <li>Scalar selection for [], .loc will always be label based. An integer will match an equal float index(3 is equivalent to 3.0).</li>
+        <li>The only positional indexing via .iloc.</li>
+        <pre>
+            sf[3]
+            sf[3.0]
+            sf.loc[3]
+            sf.loc[3.0]
+            sf.iloc[3]
+        </pre>
+        <li>A scalar index that is not found will raise a KeyError. Slicing is primarily on teh values of the index when using [], ix, loc<br>
+        and always positional when using iloc. The exception is when the slice is boolean, in which case it will always be positional.</li>
+        <pre>
+            sf[2:4] # slice
+            sf.loc[2:4] # slice label
+            sf.iloc[2:4] # slice position
+        </pre>
+        <li>In float indexes, slicing using floats is allowed.</li>
+        <pre>
+            sf[2.1:4.6]
+            sf.loc[2.1:4.6]
+        </pre>
+        <li>In non-float indexes, slicing using floats will raise a TypeError.</li>
+        <li>The typical use-case for using this type of indexing. Imagine that you have a somewhat irregular timedelta-like indexing scheme,<br>
+        but the data is recorded as floats.</li>
+        <pre>
+            dfir = pd.concat([pd.DataFrame(np.random.randn(5, 2), index=np.arange(5)*250.0, columns=list('AB')),
+                                pd.DataFrame(np.random.randn(6,2), index=np.arange(4, 10)* 250.1, columns=list('AB'))])
+            dfir[0:1000.4]
+            dfir.loc[0:1000.4]
+            dfir.loc[1000.4]
+            dfir[0:1000]
+            dfir.iloc[0:5]
+        </pre>
+    </ul>
+<h2 style="color:blue">IntervalIndex</h2>
+    <ul>
+        <li>IntervalIndex together with its own dtype, IntervalDtype as well as the Interval scalar type, allow first-class support in pandas<br>
+        for interval notation.</li>
+        <li>The IntervalIndex allows some unique indexing and is also used as a return type for the categories in cut() and qcut().</li>
+        <h3 style="color:red">Indexing with an IntervalIndex</h3>
+        <li>An IntervalIndex can be used in Series and in DataFrame as the index.</li>
+        <pre>
+            df = pd.DataFrame({'A': [1,2,3,4]}, index=pd.IntervalIndex.from_breaks([0, 1, 2, 3, 4]))
+            Out[]:
+                    A
+            (0, 1]  1
+            (1, 2]  2
+            (2, 3]  3
+            (3, 4]  4
+        </pre>
+        <li>Label based indexing via .loc along the edges of an interval works as you would expect, selecting that particular interval.</li>
+        <pre>
+            df.loc[2, 5]
+        </pre>
+        <li>Selecting using an Interval will only return exact matches. Trying to select an Interval that not exactly contained in the IntervalIndex<br>
+        will raise a KeyError.</li>
+        <pre>
+            df.loc[pd.Interval(1,2)] # return matched value
+            df.loc[pd.Interval(0.5, 2.5)] # return KeyError, (0.5, 2.5) is not exist
+        </pre>
+        <li>Selecting all Intervals that overlap a given Interval can be performed using the overlap() method to create a boolean indexer.</li>
+        <pre>
+            idxr = df.index.overlaps(pd.Interval(0.5, 2.5))
+
+            idxr
+            Out[]: array([ True,  True,  True, False])
+
+            df[idxr]
+            Out[]:
+                    A
+            (0, 1]  1
+            (1, 2]  2
+            (2, 3]  3
+        </pre>
+        <h3 style="color:red">Binning data with cut() and qcut()</h3>
+        <li>cut() and qcut() both return a Categorical object, and the bins they create are stored as an IntervalIndex in its .categories attribute.</li>
+        <pre>
+            c = pd.cut(range(4), bins=2)
+        </pre>
+        <li>cut() also accepts an IntervalIndex for its bins argument, which enables a useful pandas idiom. First, we call cut() with some data and bins<br>
+        set to a fixed number, to generate the bins. Then, we pass teh values of .categories as the bins argument in subsequence calls to cut(), supplying<br>
+        new data which will be binned into the same bins.</li>
+        <pre>
+            pd.cut([1, 3, 5, 1], bin=c.categories)
+        </pre>
+        <li>Any values which falls outside all bins will be assigned a NA values.</li>
+        <h3 style="color:red">Generating ranges of intervals</h3>
+        <li>If we need intervals on a regular frequency, we can use the interval_range() function to create an IntervalIndex using various combinations<br>
+        of start, end, and periods. The default frequency for interval_range is a 1 for numeric intervals, and calendar day for datetime-like intervals:</li>
+        <pre>
+            pd.interval_range(start=0, end=5)
+            Out[]:
+            IntervalIndex([(0, 1], (1, 2], (2, 3], (3, 4], (4, 5]], dtype='interval[int64, right]')
+            pd.interval_range(start=pd.Timestamp('2017-01-01'), periods=4)
+            Out[]:
+            IntervalIndex([(2017-01-01, 2017-01-02], (2017-01-02, 2017-01-03], (2017-01-03, 2017-01-04], (2017-01-04, 2017-01-05]])
+            pd.interval_range(end=pd.Timedelta('3 days'), periods=3)
+            Out[]:
+            IntervalIndex([(0 days 00:00:00, 1 days 00:00:00], (1 days 00:00:00, 2 days 00:00:00], (2 days 00:00:00, 3 days 00:00:00]])
+        </pre>
+        <li>The freq parameter can used to specify non-default frequencies, and can utilize a variety of frequency aliases with datetime-like intervals:</li>
+        <pre>
+            pd.interval_range(start=0, periods=5, freq=1.5)
+            IntervalIndex([(0.0, 1.5], (1.5, 3.0], (3.0, 4.5], (4.5, 6.0], (6.0, 7.5]], dtype='interval[float64, right]')
+
+            pd.interval_range(start=pd.Timestamp('2017-01-01'), periods=4, freq='w')
+            IntervalIndex([(2017-01-01, 2017-01-08], (2017-01-08, 2017-01-15], (2017-01-15, 2017-01-22], (2017-01-22, 2017-01-29]])
+
+            pd.interval_range(start=pd.Timedelta('0 days'), periods=3, freq='9H')
+            IntervalIndex([(0 days 00:00:00, 0 days 09:00:00], (0 days 09:00:00, 0 days 18:00:00], (0 days 18:00:00, 1 days 03:00:00]])
+        </pre>
+        <li>Additionally, the 'closed' parameter can be used to specify which side(s) the intervals are closed on. Intervals are closed on the right side by default.</li>
+        <pre>
+            pd.interval_range(start=0, end=6, closed='both')
+            pd.interval_range(start=0, end=4, closed='neither')
+            pd.interval_range(start=0, end=4, closed='left')
+            pd.interval_range(0, 4)
+            pd.interval_range(4, periods=3)
+        </pre>
+        <li>Specify start, end, periods will generate a range of evenly spaced intervals from start to end inclusively, with periods number of <br>
+        elements in teh resulting IntervalIndex.</li>
+        <pre>
+            pd.interval_range(start=0, end=6, periods=4)
+            pd.interval_range(pd.Timestamp('2018-01-01'), pd.Timestamp('2018-02-28'), periods=3)
+        </pre>
+    </ul>
+<h2 style="color:blue">Integer Indexing</h2>
+    <ul>
+        <li>In pandas, out general viewpoint is that labels matter more than integer locations. Therefore, with an integer axis index only label-based<br>
+        indexing is possible with the standard tools like .loc.</li>
+        <pre>
+            s = pd.Series(range(5))
+            s[-1] # ValueError
+        </pre>
+        <li>This deliberate decision was made to prevent ambiguities and subtle bugs (many users reported finding bugs when the API change was made to <br>
+        stop 'falling back' on position-based indexing.</li>
+    </ul>
+<h2 style="color:blue">Non=monotonic indexes require exact matches</h2>
+    <ul>
+        <li>If the index of a Series or DataFrame is monotonically increasing or decreasing, then the bounds of a label-based slice can outside<br>
+        teh range of the index, much like slice indexing a normal Python list. Monotonicity of an index can be tested with is is_monotonic_increasing() and<br>
+        is_monotonic_decreasing() attributes.</li>
+        <pre>
+            df = pd.DataFrame(index=[2,3,3,4,5], columns=['data'], data=list(range(5)))
+            df.index.is_monotonic_increasing
+            True
+            df.loc[0:4, :]
+            df.loc[13:15, :]
+        </pre>
+        <li>On the other hand, if the index is not monotonic, then both slice bounds must be unique members of the index.</li>
+        <pre>
+            df = pd.DataFrame(index=[2,3,1,4,3,5], columns=['data'], data=list(range(6)))
+            df.index.is_monotonic_increasing
+            False
+            df.loc[2:4] # return values
+            df.loc[2:3, :] # duplicate index bound(3), return KeyError
+        </pre>
+        <li>Index.is_monotonic_increasing and Index.is_monotonic_decreasing only check that an index is weakly monotonic. To check for strict <br>
+        monotonicity, you can combine one of these with the is_unique() attribute.</li>
+        <pre>
+            weakly_monotonic = pd.Index(['a', 'b', 'c', 'c'])
+            weakly_monotonic.is_monotonic
+            True
+            weakly_monotonic.is_monotonic_increasing & weakly_monotonic.is_unique
+            False
+        </pre>
+    </ul>
+<h2 style="color:blue">Endpoints are inclusive</h2>
+    <ul>
+        <li>Compared with standard Python sequence slicing in which the slice endpoint is not inclusive, label-based slicing in pandas is inclusive.<br>
+        The primary reason for this is that it is often not possible to easily determine the successor or next element after a particular label in<br>
+        an index.</li>
+        <pre>
+            s = pd.Series(np.random.randn(6), index=list('abcdef'))
+            s[2:5]
+            s.loc['c': 'e']
+        </pre>
+    </ul>
+<h2 style="color:blue">Indexing potentially changes underlying Series dtype</h2>
+    <ul>
+        <li>The different indexing operation can potentially change the dtype of a Series:</li>
+        <pre>
+            series1 = pd.Series([1,2,3])
+            series1.dtype # 'int64'
+            res = series.reindex([0, 4])
+            res.dtype # 'float64'
+            series2 = pd.Series([True])
+            series2.dtype # bool
+            res = series2.reindex_like(series1)
+            res.dtype # O
+        </pre>
+        <li>This is because the (re)indexing operations silently inserts NaNs and the dtype changes accordingly. This can cause some issues<br>
+        when using numpy ufuncs such as numpy.logical_and.</li>
+    </ul>
+</body>
+</html>

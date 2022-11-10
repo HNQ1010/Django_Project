@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <style>
+        h2 {color: blue;}
+        h3 {color: red}
+        h4 {color: #8F3A84; font-size: 20px}
+    </style>
+    <meta charset="UTF-8">
+    <title>RECEIVING PROCEDURE</title>
+</head>
+<body>
+<fieldset>
+    <legend><h2>QUY TRÌNH NHẬN HÀNG</h2></legend>
+    <h3>I. CÔNG TÁC CHUẨN BỊ VÀ TIẾP NHẬN THÔNG TIN</h3>
+    <ul>
+        <li>Chuẩn bị công cụ dụng cụ cần thiết để sẵn sàng tiếp nhận khi hàng hoá tới kho (xe nâng, pallet, tay kéo, bao tay bảo hộ…).</li>
+        <li>Tiếp nhận thông tin và các yêu cầu từ các bộ phận liên quan (Buyers, other warehouses, stores, ...) về các lô hàng sẽ được chuyển tới kho hàng ngày.</li>
+        <li>Timeline</li>
+        <ul>
+            <li>Hàng trong nước: Trước 2 tiếng</li>
+            <li>Hàng nhập khẩu: Trước 1 ngày làm việc</li>
+        </ul>
+        <li>Phân công, sắp xếp nhân sự, đề xuất giải pháp để giải quyết các vấn đề liên quan tới các lô hàng.</li>
+        <li>Ghi nhận, lưu trữ thông tin Shipment nhập kho.</li>
+    </ul>
+    <h3>II. SẮP XẾP VÀ NHẬN HÀNG</h3>
+    <ul>
+        <li>Khi hàng hóa tới kho:</li>
+        <ul>
+            <li>Tiếp nhận thông tin lô hàng tới kho theo mã Shipment hoặc có thông báo trước từ các bộ phận liên quan.</li>
+            <li>Đối với những đơn hàng nhập kho chưa có thông tin, cần phải chờ xác minh và bổ sung thông tin để tiếp tục nhận hàng.</li>
+        </ul>
+        <li>Khi nhận hàng:</li>
+        <ul>
+            <li>Sắp xếp, phân loại, tránh để lẫn các loại hàng hoá với nhau gây khó kiểm đếm (theo mã hàng, box ...).</li>
+            <li>Sắp xếp hàng hóa lên pallet phải cẩn thận, tránh hư hỏng móp méo hộp hàng.</li>
+            <li>Kích thước, khối lượng hàng trên mỗi pallet phải đảm bảo an toàn, tránh làm hư hỏng hàng hóa và rủi ro lao động (chiều cao tối đa, số tầng tối đa...).</li>
+            <li>Đưa lô hàng vào khu vực chờ kiểm theo thứ tự ưu tiên, không được để lộn xộn hàng hoá tại khu vực chờ kiểm.</li>
+        </ul>
+        <li>Khi kết thúc nhận hàng:</li>
+        <ul>
+            <li>Xác nhận với người bàn giao về số lượng, tình trạng của hàng khi nhận vào kho.</li>
+            <li>Tiến hành nhận hàng trên hệ thống (nếu đã đủ thông tin) và hàng hóa đã đủ tiêu chuẩn nhập kho.</li>
+            <li>Cập nhật thông tin lô hàng tới kho cho các bộ phận liên quan (nếu có yêu cầu).</li>
+            <li>Tiến hành thưc hiện việc chuẩn hóa sản phẩm (dán barcode, tem phụ, bảo hành, gia cố, combo...) đối với hàng hóa có yêu cầu.</li>
+            <ul>
+                <li>Phân công nhân sự dán nhãn phụ, đóng set. Các sản phẩm lẻ, nhóm theo số lượng (5,10,20, ...) để tiện cho việc kiểm đếm.</li>
+                <li>Đối với việc dán tem, nhãn, ... không dán nghiêng ngả hoặc đè lên các thông tin quan trọng : hạn sử dụng, nhãn phụ, ...</li>
+                <li>Trường hợp đóng combo, phải có hướng dẫn chi tiết để đảm bảo đúng yêu cầu hàng hóa lưu kho và phải kiểm tra lại nếu chênh lệch số lượng.</li>
+                <li><b>Trường hợp Barcode hộp giống Barcode sản phẩm, tiến hành dán tem cảnh báo trước khi nhập kho lô hàng đó.</b></li>
+                <li>Đối với các đơn hàng tiến hành nhập kho, phải ghi chú lại thông tin, để vào khu vực riêng kèm theo ghi chú để dễ dàng kiểm tra, nhận biết.</li>
+                <li>Các vấn đề phát sinh khác báo lại cho Leader để tiến hành giải quyết.</li>
+            </ul>
+        </ul>
+    </ul>
+    <h3>III. WEB PROCEDURE: QUY TRÌNH XỬ LÝ HÀNG TRÊN HỆ THỐNG</h3>
+    <ul>
+        <h4>Bước 1: Vào admin.lixibox.com &rarr; Buyer &rarr; Purchasing &rarr;Buyer Shipment&rarr; Tìm thông tin SM cần nhận và bấm vào SM đó &rarr; Check Inventory.</h4>
+        <img src="{% static 'IMG/Lx_receive_1.png'%}">
+        <h4>Bước 2: Tại giao diện hiện ra, hệ thống sẽ hiển thị từng barcode sản phẩm để nhận hàng, lưu ý các thông tin sau:</h4>
+        <img src="{% static 'IMG/Lx_receive_2.png'%}">
+        <ul>
+            <li><b>Mã Barcode:</b> Mã sản phẩm cần nhận vào kho.</li>
+            <li><b>Số Lượng:</b> Hệ thống sẽ hiển thị vị trí lưu kho hiện tại của sản phẩm. Dựa vào cách sắp xếp, nhập vào số lượng tại vị trí cần lưu.</li>
+            <li><b>Lý do:</b> Hệ thống sẽ tự so sánh chênh lệch số lượng sản phẩm với thực tế, trường hợp hàng thực tế thiếu so với hệ thống, cần xác nhận đầy đủ các thông tin sau:</li>
+            <ul>
+                <li>Nếu thiếu hàng và không có xác nhận gửi thiếu từ các bộ phận liên quan &rarr; <b>Chọn lý do thiếu</b>.</li>
+                <li>Nếu thiếu hàng và có xác nhận gửi thiếu từ các bộ phận liên quan &rarr; Tick vào ô <b>Chuyển lần tới</b>.</li>
+                <li>Nếu thừa hàng &rarr; nhập đủ số lượng và báo để bộ phận liên quan tạo shipment bổ sung cho sản phẩm <b>(Hệ thống sẽ không ghi nhận dư cho các trường hợp này).</b></li>
+            </ul>
+            <li><b>Cập nhật:</b>Bấm để hoàn thành nhận sản phẩm.</li>
+            <li><b>Move:</b>Bấm để di tiếp tục nhận các sản phẩm khác.</li>
+        </ul>
+    </ul>
+</fieldset>
+</body>
+</html>

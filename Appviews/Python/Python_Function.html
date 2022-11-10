@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Functions</title>
+</head>
+<body>
+<h2 style="color: blue;">VII) FUNCTION</h2>
+<h3> 1) Defining a Function</h3>
+    <textarea style="color: #DC7633" rows="4" cols="100">
+        def greet_user():
+            print("Hello!")
+        greet_user()
+    </textarea>
+<ul><h4 style="color: blue">Passing Information to a Function</h4></ul>
+    <textarea style="color: #DC7633" rows="4" cols="100">
+        def greet_user(username):
+            print("Hello, " + username.title() + "!")
+        greet_user('jesse')
+    </textarea>
+<ul><h4 style="color: blue">Arguments and Parameters</h4></ul>
+    <textarea style="color: #DC7633" rows="4" cols="100">
+        def greet_user(username): # username: parameter
+            print("Hello, " + username.title() + "!")
+        greet_user('jesse') # jesse: argument
+    </textarea>
+<h3> 2) Passing Argument</h3>
+<ul style="color:blue">Positional Arguments</ul>
+    <textarea style="color: #DC7633" rows="5" cols="100">
+        def describe_pet(animal_type, pet_name):
+            print("\nI have a " + animal_type + ".")
+            print("My " + animal_type + "'s name is " + pet_name.title() + ".")
+        describe_pet('hamster', 'harry'
+    </textarea>
+<ul style="color:blue">Order Matters in Positional Arguments</ul>
+<p style="color: red">* You can get unexpected results if you mix up the order of the arguments in<br>
+a function call when using positional arguments:</p>
+    <textarea style="color: #DC7633" rows="7" cols="100">
+        def describe_pet(animal_type, pet_name):
+            print("\nI have a " + animal_type + ".")
+            print("My " + animal_type + "'s name is " + pet_name.title() + ".")
+        describe_pet('harry', 'hamster')
+        I have a harry
+        My harry's name is hamster
+    </textarea>
+<ul style="color:blue">Keyword Arguments</ul>
+<p style="color: red">* A keyword argument is a name-value pair that you pass to a function. You directly associate the<br>
+name and the value within the argument, so when you pass the argument to the function, there’s no confusion (you won’t<br>
+end up with a harry named Hamster). Keyword arguments free you from having to worry about correctly ordering your arguments<br>
+in the function call, and they clarify the role of each value in the function call.</p>
+    <textarea style="color: #DC7633" rows="5" cols="100">
+        def describe_pet(animal_type, pet_name):
+            print("\nI have a " + animal_type + ".")
+            print("My " + animal_type + "'s name is " + pet_name.title() + ".")
+            describe_pet(animal_type='hamster', pet_name='harry')
+    </textarea>
+<ul style="color:blue">Default Values</ul>
+<p style="color: red">* Python uses the argument value. If not, it uses the parameter’s default value. So when you define<br>
+a default value for a parameter, you can exclude the corresponding argument you’d usually write in the function call. Using<br>
+default values can simplify your function calls and clarify the ways in which your functions are typically used</p>
+    <textarea style="color: #DC7633" rows="7" cols="100">
+        def describe_pet(pet_name, animal_type='dog'):
+            print("\nI have a " + animal_type + ".")
+            print("My " + animal_type + "'s name is " + pet_name.title() + ".")
+        describe_pet(pet_name='willie')
+        #To describe an animal other than a dog, you could use a function call like this:
+        describe_pet(pet_name='harry', animal_type='hamster')
+    </textarea>
+<p><b>Note: When you use default values, any parameter with a default value needs to be listed after all the parameters that<br>
+    don’t have default values. This allows Python to continue interpreting positional arguments correctly</b></p>
+<ul style="color:blue">Equivalent function calls</ul>
+    <textarea style="color: #DC7633" rows="8" cols="100">
+        def describe_pet(pet_name, animal_type='dog'):
+
+        describe_pet('willie')
+        describe_pet(pet_name='willie')
+        describe_pet('harry', 'hamster')
+        describe_pet(pet_name='harry', animal_type='hamster')
+        describe_pet(animal_type='hamster', pet_name='harry')
+    </textarea>
+<h3> 3) Return Values</h3>
+<p>A function doesn’t always have to display its output directly. Instead, it can process some data and then return a<br>
+value or set of values. The value the function returns is called a return value</p>
+    <textarea style="color: #DC7633" rows="6" cols="100">
+        def get_formatted_name(first_name, last_name):
+            full_name = first_name + ' ' + last_name
+            return full_name.title()
+        musician = get_formatted_name('jimi', 'hendrix')
+            print(musician)
+    </textarea>
+<ul style="color:blue">Making an Argument Optional</ul>
+    <textarea style="color: #DC7633" rows="7" cols="100">
+        def get_formatted_name(first_name, middle_name, last_name):
+            full_name = first_name + ' ' + middle_name + ' ' + last_name
+            return full_name.title()
+
+        musician = get_formatted_name('john', 'lee', 'hooker')
+        print(musician)
+    </textarea>
+<p>But middle names aren’t always needed, and this function as written would not work if you tried to call it with only<br>
+a first name and a last name. To make the middle name optional, we can give the middle_name argument an empty default value<br>
+and ignore the argument unless the user provides a value.</p>
+    <textarea style="color: #DC7633" rows="12" cols="100">
+        def get_formatted_name(first_name, last_name, middle_name=''):
+            if middle_name:
+                full_name = first_name + ' ' + middle_name + ' ' + last_name
+            else:
+                full_name = first_name + ' ' + last_name
+            return full_name.title()
+
+        musician = get_formatted_name('jimi', 'hendrix')
+        print(musician)
+        musician = get_formatted_name('john', 'hooker', 'lee')
+        print(musician)
+    </textarea>
+<ul style="color:blue">Returning a Dictionary</ul>
+    <textarea style="color: #DC7633" rows="7" cols="100">
+        def build_person(first_name, last_name):
+            person = {'first': first_name, 'last': last_name}
+            return person
+        musician = build_person('jimi', 'hendrix')
+        print(musician)
+        {'first': 'jimi', 'last': 'hendrix'}
+    </textarea>
+<p>You can easily extend this function to accept optional values like a middle name, an age, an occupation, or any other<br>
+information you want to store about a person. For example, the following change allows you to store a person’s age as well:
+</p>
+    <textarea style="color: #DC7633" rows="8" cols="100">
+        def build_person(first_name, last_name, age=''):
+            person = {'first': first_name, 'last': last_name}
+            if age:
+                person['age'] = age
+            return person
+        musician = build_person('jimi', 'hendrix', age=27)
+        print(musician)
+    </textarea>
+<ul style="color:blue">Using a Function with a while Loop</ul>
+    <textarea style="color: #DC7633" rows="18" cols="100">
+        def get_formatted_name(first_name, last_name):
+            full_name = first_name + ' ' + last_name
+            return full_name.title()
+            while True:
+                print("\nPlease tell me your name:")
+                print("(enter 'q' at any time to quit)")
+
+                f_name = input("First name: ")
+                if f_name == 'q':
+                    break
+
+                l_name = input("Last name: ")
+                if l_name == 'q':
+                    break
+
+        formatted_name = get_formatted_name(f_name, l_name)
+        print("\nHello, " + formatted_name + "!")
+    </textarea>
+<h3> 3) Passing a List</h3>
+<p>You’ll often find it useful to pass a list to a function, whether it’s a list of names, numbers, or more complex <br>
+objects, such as dictionaries. When you pass a list to a function, the function gets direct access to the contents of <br>
+the list. Let’s use functions to make working with lists more efficient.</p>
+    <textarea style="color: #DC7633" rows="7" cols="100">
+        def greet_users(names):
+            for name in names:
+                msg = "Hello, " + name.title() + "!"
+                print(msg)
+        usernames = ['hannah', 'ty', 'margot']
+        greet_users(usernames)
+    </textarea>
+<ul style="color:blue">Modifying a List in a Function</ul>
+    <textarea style="color: #DC7633" rows="14" cols="100">
+        def print_models(unprinted_designs, completed_models):
+            while unprinted_designs:
+                current_design = unprinted_designs.pop()
+                completed_models.append(current_design)
+
+        def show_completed_models(completed_models):
+            for completed_model in completed_models:
+                print(completed_model)
+
+        unprinted_designs = ['iphone case', 'robot pendant', 'dodecahedron']
+        completed_models = []
+        print_models(unprinted_designs, completed_models)
+        show_completed_models(completed_models)
+    </textarea>
+<ul style="color:blue">Preventing a Function from Modifying a List</ul>
+<p>You can send a copy of a list to a function like this:<br>
+    <span  style="color:red">function_name(list_name[:])</span></p>
+<h3> 4) Passing an Arbitrary Number of Arguments</h3>
+<p>Sometimes you won’t know ahead of time how many arguments a function needs to accept. Fortunately, Python allows a<br>
+    function to collect an arbitrary number of arguments from the calling statement.</p>
+    <textarea style="color: #DC7633" rows="8" cols="100">
+        def make_pizza(*toppings):
+            print(toppings)
+            # for topping in toppings:
+                # print("- " + topping)
+
+        make_pizza('pepperoni')
+        make_pizza('mushrooms', 'green peppers', 'extra cheese')
+    </textarea>
+<p style="color: red">* The asterisk in the parameter name *toppings tells Python to make an empty tuple called toppings<br>
+    and pack whatever values it receives into this tuple.</p>
+<ul style="color:blue">Mixing Positional and Arbitrary Arguments</ul>
+    <textarea style="color: #DC7633" rows="7" cols="100">
+        def make_pizza(size, *toppings):
+            for topping in toppings:
+                print("- " + topping)
+
+        make_pizza(16, 'pepperoni')
+        make_pizza(12, 'mushrooms', 'green peppers', 'extra cheese')
+    </textarea>
+<ul style="color:blue">Using Arbitrary Keyword Arguments</ul>
+<p>Sometimes you’ll want to accept an arbitrary number of arguments, but you won’t know ahead of time what kind of <br>
+information will be passed to the function. In this case, you can write functions that accept as many key-value pairs<br>
+as the calling statement provides.</p>
+    <textarea style="color: #DC7633" rows="7" cols="100">
+        def build_profile(first, last, **user_info):
+            profile = {}
+            profile['first_name'] = first
+            profile['last_name'] = last
+            for key, value in user_info.items():
+                profile[key] = value
+            return profile
+        user_profile = build_profile('albert', 'einstein', location='princeton',
+                                                           field='physics')
+        print(user_profile)
+    </textarea>
+<p>The definition of build_profile() expects a first and last name, and then it allows the user to pass in as many <br>
+name-value pairs as they want. The double asterisks before the parameter <span style="color:red">**user_info cause Python to create an empty <br>
+dictionary called user_info and pack whatever name-value pairs it receives into this dictionary</span>. Within the function, <br>
+you can access the name-value pairs in user_info just as you would for any dictionary.</p>
+
+<h3> 5) Storing Your Functions in Modules</h3>
+<p> By using descriptive names for your functions, your main program will be much
+easier to follow. You can go a step further<br> by storing your functions in a separate
+file called a module and then importing that module into your main program. An import<br>
+statement tells Python to make the code in a module available in the currently running
+program file. Storing your functions <br>in a separate file allows you to hide the details of
+your program’s code and focus on its higher-level logic. It also allows you to<br>
+reuse functions in many different programs. When you store your functions
+in separate files, you can share those files<br> with other programmers without
+having to share your entire program. Knowing how to import functions also allows<br>
+you to use libraries of functions that other programmers have written</p>
+
+<ul style="color:blue">Importing an Entire Module</ul>
+    <textarea style="color: #DC7633" rows="5" cols="50">
+    pizza.py
+        def make_pizza(size, *toppings):
+            for topping in toppings:
+                print("- " + topping)
+    </textarea>
+    <textarea style="color: #DC7633" rows="5" cols="50">
+    making_pizzas.py
+        import pizza
+        pizza.make_pizza(16, 'pepperoni')
+        pizza.make_pizza(12, 'mushrooms', 'green peppers', 'extra cheese')
+    </textarea>
+<ul style="color:blue">Importing Specific Functions</ul>
+    <textarea style="color: #DC7633" rows="4" cols="50">
+        from module_name import function_name
+        from module_name import function_0, function_1, function_2
+        from pizza import make_pizza
+    </textarea>
+<ul style="color:blue">Using as to Give a Function an Alias</ul>
+<p><span style="color:red">If the name of a function you’re importing might conflict with an existing name in your program or if the function <br>
+name is long</span>, you can use a short, unique alias—an alternate name similar to a nickname for the function. You’ll give <br>
+the function this special nickname when you import the function.</p>
+    <textarea style="color: #DC7633" rows="2" cols="50">
+        from pizza import make_pizza as mp
+    </textarea>
+<ul style="color:blue">Using as to Give a Module an Alias</ul>
+<p><b>Giving a module a short
+alias, like p for pizza, allows you to call the module’s functions more quickly.</b></p>
+    <textarea style="color: #DC7633" rows="2" cols="50">
+        import pizza as p
+    </textarea>
+<ul style="color:blue">Import All Functions in a Module</ul>
+    <textarea style="color: #DC7633" rows="2" cols="50">
+        from pizza import *
+    </textarea>
+
+<h3> 6) Styling Functions</h3>
+<p style="color: red">READABLE, STYLING, EASY TO READ AND UNDERSTAND</p>
+</body>
+</html>

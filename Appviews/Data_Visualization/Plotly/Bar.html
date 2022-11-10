@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+
+    <meta charset="UTF-8">
+    <title>BAR CHART</title>
+</head>
+<body>
+<h1 style="color:blue; text-align:center">BAR</h1>
+    <ul>
+        <li>In a bar plot, each row of data_frame is represented as a rectangular mark.</li>
+        <h2 style = "color: blue">BAR with Plotly Express Figure</h2>
+        <p style="color:blue">Attributes list:</p>
+        <ul>
+            <li><b>data_frame(DataFrame or array-like or dict)</b> :This argument needs to be passed for column names (and not keyword names)<br>
+                to be used. Array-like and dict are transform internally to a pd.DataFrame . If missing, a DataFrame gets constructed under <br>
+                the hood using the other arguments.</li>
+            <li><b>x (str, int, Series, array-like)</b> : Values from this column or array-like are used to position marks along the x-axis in<br>
+                Cartesian coordinates.</li>
+            <li><b>y (str, int, Series or array-like)</b> :Value from this column or array-like are used to position marks along the y-axis in <br>
+                Cartesian coordinates.</li>
+            <li><b>color(str, int, Series or array-like)</b> :Values from this column or array-like are used to assign color to marks.</li>
+            <li><b>pattern_shape(str, int, Series or array-like)</b> :Value from this column or array-like are used to assign pattern shapes to marks.</li>
+            <li><b>facet_row(str, int, Series or array-like)</b> :Values from this column or array-like are used to assign marks to faceted subplots<br>
+                in the vertical direction.</li>
+            <li><b>facet_col(str, int, Series or array-like)</b> :Value from this column or array-like are used to assign marks to faceted subplots in <br>
+                the horizontal direction.</li>
+            <li><b>facet_col_wrap(int)</b> :Specify number of facet columns per row. Ignored if 0, and forced to 0 if facet_row or marginal is set.</li>
+            <li><b>facet_row_spacing(float between 0 and 1)</b> :Spacing between facet rows, in paper units. Default 0.03 or 0.0.7 when facet_col_wrap is used.</li>
+            <li><b>facet_col_spacing(float between 0 and 1)</b> :Spacing between facet col, in paper units. Default 0.02</li>
+            <li><b>hover_name(str, int, Series or array-like)</b> :Values from this col or array-like appear in bold in the hover tooltip.</li>
+            <li><b>hover_data(list of str, int, Series, array-like or dict)</b> :With dict, column names as keys, value is True(appear) of False(disappear).<br>
+                Values from these appear as extra daa in the hover tooltip.</li>
+            <li><b>custom_data(list of str, int, Series or array-like)</b> :Values from these columns are extra data, to be used in widgets or Dash callback.<br>
+                This data is not user-visible but is included in events emitted by the figure.</li>
+            <li><b>text(str, int, Series or array-like)</b> :Values from this appear in teh figure as text labels.</li>
+            <li><b>base(str, int, Series or array-like)</b> :Values from this is used to position the base of the bar.</li>
+            <li><b>error_x(str, int, Series or array-like)</b> :Values from this is used to size x-axis error bar. If error_x_minus is None, error bar<br>
+                will be symmetrical, otherwise error_x is used for the positive direction only.</li>
+            <li><b>error_x_minus(str, int, Series or array-like)</b> :Values from this is used to size e-axis error bars in teh negative direction.<br>
+                Ignored if error_x is None.</li>
+            <li><b>error_y(str, int, Series or array-like)</b> :Values from this is used to size y-axis error bars. If error_y_minus is None, error bar <br>
+                will be symmetrical, otherwise error_y is used for positive direction only.</li>
+            <li><b>error_y_minus(str, int, Series or array-like)</b> :Values from this is used to size y-axis error bar in the negative direction.<br>
+                Ignored if error_y is None.</li>
+            <li><b>animation_frame(str, int, Series or array-like)</b> :Values from this is used to assign marks to animation frames.</li>
+            <li><b>animation_group(str, int, Series or array-like)</b> :Values from this is used to provide object-constancy across animation frames: rows with <br>
+                matching animation_group will be treated as if they describe the same object in each frame.</li>
+            <li><b>category_order(dict with str keys and list of str value)</b> :Default {}. This parameter is used to force a specific ordering of values <br>
+                per column. The keys of this dict should correspond to column names, and the values should be lists of strings corresponding to the <br>
+                specific display order desired.</li>
+            <li><b>labels(dict with str key and str value)</b> :Default {}. By default, column names are used in the figure for axis titles, legend<br>
+                entries and hovers. This parameter allows this to be overridden. The keys of this dict should correspond to column names, and the values <br>
+                should correspond to the desired label to be displayed.</li>
+            <li><b>color_discrete_sequence(list of str)</b> :String should define valid CSS-colors. When color is set and the values in the corresponding column are <br>
+                not numeric, values in that column are assigned colors by cycling through color_discrete_sequence in teh order described in category_orders,<br>
+                unless the value of color is a key in color_discrete_map. Various useful color sequences are available in the plotly.express.colors(plotly.express.colors.qualitative).</li>
+            <li><b>color_discrete_map(dict with str keys and str values)</b> :Default {}. String values should define valid CSS-colors.Used to override color_discrete_sequence<br>
+                to assign a specific colors to marks corresponding with specific values. Keys in color_discrete_map should be values in the column denoted by color.<br>
+                Alternatively, if the values of color are valid colors, the string 'identity' may be passed to cause them to be used directly.</li>
+            <li><b>color_continuous_scale(list of str)</b> :Strings should define valid CSS-colors. This list is used to build a continuous color scale when <br>
+                the column denoted by color contains numeric data. Various useful color scales are available in the plotly.express.colors (plotly.express.colors.sequentials,<br>
+                plotly.express.colors.diverging and plotly.express.colors.cyclical).</li>
+            <li><b>pattern_shape_sequence(list of str)</b> :String should define valid plotly.js patterns-shapes. When pattern_shape is set, values in this are assigned patterns-shapes <br>
+                by cycling through pattern_shape_sequence in the order described in category_orders, unless the value of pattern_shape is a key in pattern_shape_map.</li>
+            <li><b>pattern_shape_map(dict with str keys and str values)</b> :Default {}. Strings values define plotly.js patterns-shapes. Used to override <br>
+                pattern_shape_sequence to assign a specific patterns-shapes to lines corresponding with specific values. Keys in pattern_shape_map should be values <br>
+                in the column denoted by pattern_shape. Alternatively, if the values of pattern_shape are valid patterns-shapes names, the string 'identity' may be passed <br>
+                to cause them to be used directly.</li>
+            <li><b>range_color(list of 2 numbers)</b> :If provided, override color_continuous_Scale.</li>
+            <li><b>opacity(float)</b> :Value between 0 and 1. Sets the opacity for markers.</li>
+            <li><b>orientation('v' or 'h')</b> :Default 'v' if x and y are provided, continuous or category. Otherwise, 'v'('h') if x(y) is categorical and y(x) is continuous.<br>
+                'v'('h') if x(y) is provided.</li>
+            <li><b>barmode('group', 'overlay', 'relative')</b> :Default 'relative', bars are stacked above zero for positive values and below zero for negative values.<br>
+                In 'overlay', bars are drawn on top of one another, and 'group' mode, bars are placed beside each other.</li>
+            <li><b>log_x(boolean)</b> :Default False. If True, the x-axis is log-scaled in cartesian coordinates.</li>
+            <li><b>log_y(boolean)</b> :Default False. If True, the y-axis is log-scaled in cartesian coordinates.</li>
+            <li><b>range_x(list of 2 numbers)</b> :If provided, override auto-scaling on the x-axis in cartesian coordinates.</li>
+            <li><b>range_y(list of 2 numbers)</b> :If provided, override auto-scaling on the y-axis in cartesian coordinates.</li>
+            <li><b>title(str)</b> :The figure title.</li>
+            <li><b>template(str or dict or go.layout.Template instance)</b> :The figure template name(must be a key in plotly.io.templates) or definition.</li>
+            <li><b>width(int)</b> :Default None. The figure width in pixels.</li>
+            <li><b>height(int)</b> :Default None. The figure height in pixels.</li>
+        </ul>
+        <h2 style = "color: blue">BAR Charts with Plotly Express</h2>
+        <li>Plotly express is easy-to-use, high level interface to Plotly.</li>
+        <li>With px.bar, each row of the DataFrame is represented as a rectangular mark.</li>
+        <pre>
+            import plotly.express as px
+            data_canada = px.data.gapminder().query("country == 'Canada'")
+            fig = px.bar(data_canada, x = 'year', y = 'pop')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_1.png'%}">
+        <h2 style = "color: blue">BAR Charts with Long Format Data</h2>
+        <li>Long-form data has one row per observation, and one column per variable. This is suitable for storing and displaying multivariate data<br>
+            with dimension greater than 2. This format is sometimes called 'tidy'.</li>
+        <pre>
+            df = px.data.medals_long()
+            fig = px.bar(df, x = 'nation', y = 'count', color = 'medal', title = 'Long-Form Input')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_2.png'%}">
+        <h2 style = "color: blue">BAR Charts with Wide Format Data</h2>
+        <li>Wide-format data has one row per value of one of the first variable, and one column per value of second variable. This is suitable<br>
+            for storing and displaying 2-dimensional data.</li>
+        <pre>
+            df = px.data.medals_wide()
+            fig = px.bar(df, x = 'nation', y = ['gold', 'silver', 'bronze'], title = 'Wide-form Input')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_3.png'%}">
+        <h2 style = "color: blue">BAR Charts in Dash</h2>
+        <pre>
+            import dash
+            from dash import dcc
+            from dash import html
+            from dash import Input, Output
+            df = px.data.tips()
+            days = df.day.unique()
+            app = dash.Dash()
+            app.layout = html.Div([dcc.Dropdown(id = 'dropdown', options = [{'label': x, 'value':x} for x in days],
+                                    value = days[0], clearable = False]), dcc.Graph(id = 'bar-chart')])
+            @app.callback(Output['bar-chart', 'figure'], [Input('dropdown', 'value')])
+            def update_bar_chart(day):
+                mask = (df['day'] == day)
+                fig = px.bar(df[mask], x = 'sex', y = 'total_bill', color = 'smoker', barmode = 'group')
+                return fig
+            app.run_server(debug = True)
+        </pre>
+        <img src="{% static 'IMG/bar_4.png'%}">
+        <h2 style = "color: blue">Customize Bar Charts with Plotly Express</h2>
+        <li>The bar plot can be customized using keyword argument (color, color_line, ...)</li>
+        <pre>
+            df = px.data.gapminder().query("country == 'Canada'")
+            fig = px.bar(df, x = 'year', y = 'pop', hover_data = ['lifeExp', 'gdpPercap'], color = 'lifeExp',
+                        labels = {'pop' : 'Population of Canada'})
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_5.png'%}">
+        <li>When several rows share the same value of x (Male and Female), the rectangles are stacked on top of of another.</li>
+        <pre>
+            df = px.data.tips()
+            fig = px.bar(df, x = 'sex', y = 'total_bill', color = 'time')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_6.png'%}">
+        <li>The default stacked bar chart behavior can be changed to grouped (also known as clustered) using the barmode argument.</li>
+        <pre>
+            fig = px.bar(df, x = 'sex', y ='total_bill', color = 'time', barmode = 'group')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_7.png'%}">
+        <li>Bar chart also support using pattern.(pattern_shape, pattern_shape_sequence, pattern_shape_map, ...)</li>
+        <pre>
+            df = px.data.medals_long()
+            fig = px.bar(df, x = 'medal', y = 'count', color = 'nation', pattern_shape = 'nation',
+                            pattern_shape_sequence = ['+', 'x', '.'])
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_8.png'%}">
+        <h2 style = "color: blue">Faceted Subplot</h2>
+        <li>Use the keyword argument facet_row( or facet_col) to create faceted subplots, where different rows(columns) correspond to <br>
+            different values of the DataFrame column specified in facet_row. </li>
+        <pre>
+            df = px.data.tips()
+            fig = px.bar(df, x = 'sex', y = 'total_bill', color = 'smoker', barmode = 'group',
+                            facet_row = 'time', facet_col = 'day', category_order = {'day' : 'Thur', 'Fri', 'Sat', 'Sun',
+                                                                                    'time' : 'Lunch', 'Dinner'})
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_9.png'%}">
+        <h2 style = "color: blue">Basic Chart with Plotly graph_objects</h2>
+        <pre>
+            import plotly.graph_objects as go
+            animal = ['giraffes', 'orangutans', 'monkeys']
+            fig = go.Figure([go.Bar(x = animal, y = [20, 14, 3])
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_10.png'%}">
+        <li></li>
+        <h2 style = "color: blue">Grouped Bar Chart</h2>
+        <li>Customize the figure using fig.update.</li>
+        <pre>
+            animals = ['giraffes', 'orangutans', 'monkeys']
+            fig = go.Figure(data = [go.Bar(name = 'SF Zoo', x = animals, y = [20, 14, 23]),
+                                    go.Bar(name = 'LA Zoo', x = animals, y = [12, 18, 29])])
+            fig.update_layout(barmode = 'group')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_11.png'%}">
+        <h2 style = "color: blue">Stacked Bar Chart</h2>
+        <pre>
+            fig = go.Figure([go.Bar(name = 'SF Zoo', x = animals , y = [20, 14, 23]),
+                            go.Bar(name = 'LA Zoo', x = animals , y = [12, 18, 29])]
+            fig.update_layout(barmode = 'stack') # or 'relative'
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_12.png'%}">
+        <h2 style = "color: blue">Bar Chart with Hover Text</h2>
+        <pre>
+            x = ['Product A', 'Product B', 'Product C']
+            y = [20, 14, 23]
+
+            fig = go.Figure(go.Bar(x =x, y = y, hovertext = ['{}% market share'.format(i) for i in y]))
+            fig.update_traces(marker_color = 'rgb(158, 202, 225)', marker_line_color = 'rgb(8, 48, 107)'),
+                                marker_line_width = 1.5, opacity = 0.6)
+            fig.update_layout(title_text = 'January 2013 Sales Report')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_13.png'%}">
+        <h2 style = "color: blue">Bar Chart with direct Labels</h2>
+        <pre>
+            fig = go.Figure(go.Bar(x = x, y = y, text = y, textposition = 'auto'))
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_14.png'%}">
+        <h2 style = "color: blue">Controlling Text Fontsize with uniformtext</h2>
+        <li>If you want all the text labels to have the same size, you can use the uniformtext layout parameter. The minsize attribute sets<br>
+            the font size, and the mode attribute sets what happens for labels which cannot fit with the desired fontsize: either hide them or <br>
+            show them with overflow.</li>
+        <li><b>texttemplate</b> : Template string use for rendering the information text that appear on points. It will override 'textinfor'.<br>
+            Variables are value using for : label, color, value, percent and text. Variables are inserted using %{variable}.</li>
+        <pre>
+            d3.format(".0%")(0.123);  // rounded percentage, "12%"
+            d3.format("($.2f")(-3.5); // localized fixed-point currency, "(£3.50)"
+            d3.format("+20")(42);     // space-filled and signed, "                 +42"
+            d3.format(".^20")(42);    // dot-filled and centered, ".........42........."
+            d3.format(".2s")(42e6);   // SI-prefix with two significant digits, "42M"
+            d3.format("#x")(48879);   // prefixed lowercase hexadecimal, "0xbeef"
+            d3.format(",.2r")(4223);  // grouped thousands with two significant digits, "4,200"
+        </pre>
+        <pre>
+            df = px.data.gapminder().query("continen == 'Europe' and year == 2007 and pop > 2.e6")
+            fig = px.bar(df, y = 'pop', x = 'country', text = 'pop')
+            fig.update_traces(texttemplate = '%{text:.2s}', textposition = 'outside')
+            fig.update_layout(uniformtext_minsize = 8, uniformtext_mode = 'hide')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_15.png'%}">
+        <h2 style = "color: blue">Rotated Bar Chart Labels</h2>
+        <li>You can modify the tickangle of the axis by xaxis_tickangle and yaxis_tickangle parameters.</li>
+        <pre>
+            fig.update_layout(x_axis_tickangle = 90, y_axis_tickangle = 45)
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_16.png'%}">
+        <h2 style = "color: blue">Customizing Individual Bar Colors</h2>
+        <li><b>marker_color</b>can be a single color or an iterable color.</li>
+        <pre>
+            colors = ['lightslategray',]* 5
+            colors[1] = 1
+            fig = go.Figure(go.Bar(x =['A', 'B', 'C'], y = [20, 14, 23], marker_color = colors))
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_17.png'%}">
+        <h2 style = "color: blue">Customizing Individual Bar Widths</h2>
+        <pre>
+            fig = go.Figure(data=[go.Bar(x=[1, 2, 3, 5.5, 10], y=[10, 8, 6, 4, 2],
+                width=[0.8, 0.8, 0.8, 3.5, 4])]) # customize width here
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_18.png'%}">
+        <li>Bar chart with custom widths can be used to make mekko charts. see more in Plotly: Bar</li>
+        <li>In bar chart, When using width parameter, each trace will display at a small offset of 0 coordinate.</li>
+        <pre>
+            fig = go.Figure([go.Bar(x = [20, 25], y = [20, 30], width = (2, 4)),
+                            go.Bar(x = [20, 25], y = [15, 20], width = (2, 4))])
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_19.png'%}">
+        <li>Getting them at the same 0 coordinate, used 'offset' parameter.</li>
+        <pre>
+            fig = go.Figure([go.Bar(x = [20, 25], y = [20, 30], width = (2, 4)),
+                            go.Bar(x = [20, 25], y = [15, 20], width = (2, 4))])
+            fig.update_traces(offset = 0)
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_20.png'%}">
+        <pre>
+            labels = ['apples', 'oranges', 'pears', 'bananas']
+            widths = np.array([10, 20, 20, 50])
+            data = {'south' :[50, 80, 60, 70],
+                    'North' : [50, 20, 40, 30]}
+            fig = go.Figure()
+            for key in data:
+                fig = add_trace(go.Bar(
+                        name = key,
+                        y = data[key],
+                        x = np.cumsum(widths) - widths,
+                        width = widths,
+                        offset = 0,
+                        customdata = np.transpose([labels, widths*data[key]]),
+                        texttemplate = '%{y} x %{width} = &ltbr&gt%{customdata[1]}',
+                        textposition = 'inside',
+                        textangle = 0,
+                        textfont_color = 'White',
+                        hovertemplate = &ltbr&gt.join([ 'label : %{customdata[0]}',
+                                                        'width : %{width}',
+                                                        'height : %{y}',
+                                                        'area : %{customdata[1]}'])
+                        ))
+            fig.update_xaxes(tickvals = np.cumsum(widths) - widths/2,
+                            ticktext = ['%s&ltbr&gt%d' % (l, w) for l, w in zip(labels, widths)])
+            fig.update_xaxes(range = [0, 100])
+            fig.update_yaxes(range = [0, 100])
+            fig.update_layout(title_text = 'Marimekko Chart', barmode = 'stack',
+                                uniformtext = {'mode' : 'hide', 'minzise' = 10})
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_21.png'%}">
+        <h2 style = "color: blue">Customizing Individual Bar Base</h2>
+        <li>Set where the base of the bar is drawn.</li>
+        <pre>
+            years = ['2016', '2017', '2018']
+            fig = go.Figure()
+            fig.add_trace(go.Bar(x = years, y = [500, 600, 700], base = [-500, -600, -700],
+                                marker_color = 'crimson', name = 'expense'))
+            fig.add_trace(go.Bar(x = years, y= [300, 400, 700], base = 0,
+                                marker_color = 'lightslategrey', name = 'revenue'))
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_22.png'%}">
+        <h2 style = "color: blue">Colored and Styled Bar Chart</h2>
+        <pre>
+            year = np.arange(1995, 2013)
+            fig = go.Figure()
+            fig.add_trace(go.Bar(x = years,
+                                y = [219, 146, 112, 127, 124, 180, 236, 207, 236, 263, 350, 430, 474, 526, 488, 537, 500, 439],
+                                name = 'Rest of World', marker_color = 'rgb(55, 83, 109)'))
+            fig.add_trace(go.Bar(x = years,
+                                y = [16, 13, 10, 11, 28, 37, 43, 55, 56, 88, 105, 156, 270, 299, 340, 403, 549, 499],
+                                name = 'China', marker_color  = 'rgb(26, 118, 255)'))
+            fig.update_layout(title = 'US Export of Plastic Scrap', xaxis_tickfont_size = 14,
+                                yaxis = {   'title' : 'USD(millions)',
+                                            'titlefont_size' : 16,
+                                            'tickfont_size' : 14},
+                                legend = {  'x' : 0,
+                                            'y' : 1.0,
+                                            'bgcolor' : 'rgba(255, 255, 255, 0)',
+                                            'bordercolor' : 'rgba(255, 255, 255, 0)'}),
+                                barmode = 'group',
+                                bargap = 0.5,   # gap between bar of adjacent location coordinates
+                                bargroupgap = 0.1) #gap between bars of the same location coordinate
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_23.png'%}">
+        <h2 style = "color: blue">Bar Chart with Relative Barmode</h2>
+        <li>With 'relative' (stack) barmode, the bars are stacked on top of one another, with negative values below, positive above the axis.</li>
+        <pre>
+            x = [1, 2, 3, 4]
+            fig = go.Figure()
+            fig.add_trace(go.Bar(x = x, y = [1, 4, 9, 16])
+            fig.add_trace(go.Bar(x = x, y = [6, -8, -4.5, 8])
+            fig.add_trace(go.Bar(x = x, y = [-15, -3, 4.5, -8])
+            fig.add_trace(go.Bar(x = x, y = [-1, 3, -3, -4])
+            fig.update_layout(barmode = 'relative', title_text = 'Relative Bar Mode')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_24.png'%}">
+        <h2 style = "color: blue">Bar Chart with Sorted or Ordered Categories</h2>
+        <li>Set category_order to category ascending or descending for the alphabetical order of the category name or 'total ascending' <br>
+            ,'total descending' for category value.</li>
+        <li>category ascending</li>
+        <pre>
+            x = ['b', 'a', 'c', 'd']
+            y = np.array([  [2, 5, 1, 9],
+                            [1, 4, 9, 16],
+                            [6, 8, 4.5, 8]]
+            fig = go.Figure()
+            for i, j zip(y, names):
+                fig = add_trace(go.Bar(x = x, y = i, name = j))
+            fig.update_layout(barmode = 'relative', xaxis = {'categoryorder': 'category ascending'})
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_25.png'%}">
+        <li>category array</li>
+        <pre>
+            fig.update_layout(barmode = 'relative', xaxis = {'categoryoder': 'array', 'categoryarray': ['d', 'c', 'a', 'b']})
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_26.png'%}">
+        <li>categoryorder : total descending (by values sum)</li>
+        <pre>
+            fig.update_layout(xaxis = {'categoryorder': 'total descending'})
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_27.png'%}">
+        <h2 style = "color: blue">Bar Charts With Multi-category Axis Type</h2>
+        <li>If your traces have arrays for x or y, then the axis type is automatically inferred to be multi-category.</li>
+        <pre>
+            x = [   ["BB+", "BB+", "BB+", "BB", "BB", "BB"],
+                    [16, 17, 18, 16, 17, 18,]]
+            fig = go.Figure()
+            fig.add_bar(x = x, y = [1, 2, 3, 4, 5, 6])
+            fig.add_bar(x = x, y = [6, 5, 4, 3, 2, 1])
+            fig.update_layout(barmode = 'relative')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/bar_28.png'%}">
+        <h2 style = "color: blue">Dash</h2>
+        <li>Dash is open source framework for building analytical applications, with no jsscrip, and it is tightly intergrated with the Plotly graphing library.</li>
+        <pre>
+            import dash
+            from dash import dcc
+            from dash import html
+            from dash improt Input, Output
+            fig = go.Figure()
+            ....
+            app = dash.Dash()
+            app.layout = html.Div([dcc.Graph(figure = fig)])
+            app.run_server(debug = True, use_reloader  = False) # turn off reloader if inside Jupyter.
+        </pre>
+    </ul>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <style>
+        h1 {color: red;}
+        h2 {color: blue;}
+        h3 {color: purple;}
+        h4 {color: green; font-size: 20px}
+    </style>
+    <meta charset="UTF-8">
+    <title>Warehouse Re-Allocation Project</title>
+</head>
+<body>
+    <h1 style="text-align:center">WAREHOUSE RE-ALLOCATION PROJECT</a></h1>
+    <ul>
+        <h3>&#9733; Issues</h3>
+            <ul>
+                <li>WH-Allocation was organized in the simple form including:</li><br>
+                <b style="text-align: center; font-size: 20px">Line - Bay - Position</b>
+                <ul>
+                    <li>Line: It's named with letter (A, B, C, ...)</li>
+                    <li>Bay: Based on shelves format (6).</li>
+                    <li>Position: Order start from 1 and gradually increase to the end. (1 to 24, 28, 32, ..)</li>
+                </ul>
+                <li>For example: A01.06</li>
+                <ul>
+                    <li>Line: A</li>
+                    <li>Bay 01: 01</li>
+                    <li>Position: 06</li>
+                </ul>
+                <p>&#9733; The problems are:</p>
+                <ul>
+                    <li>New staff can't be familiar with warehouse allocation immediately &rarr; make difficulty when serving warehouse operations: put away, picking, packing, ...</li>
+                    <li>There's no format for allocation arrangement when expanding warehouse area.</li>
+                </ul>
+            </ul>
+        <h3>&#9733; Next steps</h3>
+            <ul>
+                <li>Re-arrange warehouse allocation following the format:</li><br>
+                <b style="text-align: center; font-size: 20px">WH Name - Area - Line - Bay - Level - Position</b><br>
+                <p>with line's format are named:</p>
+                <ul>
+                    <li><b>F</b> : Fixed area</li>
+                    <li><b>M</b> : Moving (free) area</li>
+                </ul>
+                <li>For example: SG-F0101-11</li>
+                <ul>
+                    <li>WH Name: Saigon Packing</li>
+                    <li>Area: Fixed area</li>
+                    <li>Line: 01</li>
+                    <li>Bay: 01</li>
+                    <li>Level: 1</li>
+                    <li>Position: 1</li>
+                </ul>
+                <p>&#9733;The advantages of the new warehouse allocation format are:</p>
+                <ul>
+                    <li>Easy for understanding, guiding, introducing or even expanding in larger warehouse.</li>
+                    <li>Each letter contains its meaning, it makes significant in warehouse allocation.</li>
+                    <li>New staff or viewers can easily contain, understand allocation's format and get the real positions inside warehouse.</li>
+                </ul>
+                <li><b>Allocation Replacement document </b></li>
+                <a href="https://drive.google.com/file/d/1LZ7YBmiWeDnSSYIk5962Fw9fZmI1RtcE/view?usp=sharing">https://drive.google.com/file/d/1LZ7YBmiWeDnSSYIk5962Fw9fZmI1RtcE/view?usp=sharing</a>
+            </ul>
+        <h3>&#9733; Expected Timeline: Week38 &rarr; W39</h3>
+        <ul>
+            <li>W38:</li>
+            <ul>
+                <li>Training new format to employees.</li>
+                <li>Preparing articles, separating areas and re-arranging warehouse before sticking the label on the shelves.</li>
+            </ul>
+            <li>W39:</li>
+            <ul>
+                <li>After finish sticking label on the shelves, provide information to tech team to change warehouse allocation on the system.</li>
+                <li>Keep controlling and managing warehouse operation to keep track problems (if any).</li>
+            </ul>
+    </ul>
+    </ul>
+</body>
+</html>

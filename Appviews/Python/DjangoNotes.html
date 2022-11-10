@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Django NOTES</title>
+</head>
+<body>
+<h2 style="color:blue">Window Command (CMD)</h2>
+<ul>
+    <p><b>cd directory</b> : Place the working directory (e.g: cd C://)</p>
+    <p><b>cls :</b> clear all</p>
+    <p><b>pwd :</b> print working directory</p>
+    <p><b>mkdir folder_name :</b> Making new folder</p>
+</ul>
+
+<h2 style="color:blue">Create Virtual Environment</h2>
+<ul>
+    <p><b>pip install virtualenvwrapper-win</b> : Making virtualenv for one place</p>
+    <p><b>pip instal django :</b> Making Django venv</p>
+    <p><b>Mkvirtualenv name_of_venv :</b> Create venv</p>
+    <p><b>workon name_of_venv :</b> Working on venv (or active venv)</p>
+    <p><b>deactive :</b> Disable venv</p>
+</ul>
+<h2 style="color:blue">Create Super User</h2>
+<ul>
+    <p><b>python manage.py makemigrations app_name :</b></p>
+    <p><b>python manage.py migrate :</b></p>
+    <p><b>python manage.py createsuperuser :</b> Create super user for Django admin site</p>
+</ul>
+
+<h2 style="color:blue">Add Test Data into Models</h2>
+<h3 style="color:red">Using Shell</h3>
+<ul>
+    <p><b>python manage.py shell :</b> Open shell venv</p>
+</ul>
+<h3 style="color:red">Add, Save and Check Test Data</h3>
+<ul>
+    <p><b>from app_name import class_name</b></p>
+    <p><b>var = class_name(parameter) :</b>(E.g : Class_name is Car and it have two label(or columns) are name_of_car and miles : t= Car('BMW', 100))</p>
+    <p><b>var.save()</b></p>
+    <p><b>print(Car.objects.all())</b></p>
+    <p style="color:red"><b>print(Car.objects.filter(label=var, ...)) :</b> filter inside database following given variable</p>
+
+</ul>
+
+<h2 style="color:blue">Using Variable Format inside HTML File</h2>
+<ul>
+    {% verbatim %}
+    <p><b>{{ }} :</b> For simple text injection (like dictionary, or some variable with text)</p>
+    <p><b>{% %} :</b> For more complex injection and logic (if statement, for statement, ...)</p>
+    {% endverbatim %}
+</ul>
+ <textarea style="color: red" rows="16" cols="100">
+        LOGIN FORM: used into django application
+        User.objects.all() : get all users information
+        User.objects.filter(name=var, ....) : filter exist information
+
+        user = auth.authenticate(name = var, ...) : Authenticating information
+
+        authenticating statement:
+        If user is not None:
+            auth.login(request, user)
+            do sth
+
+        HTML authentication statement
+        {% verbatim %}
+        {% if user.is_authenticated %}
+        {% endverbatim %}
+    </textarea>
+
+<h2 style="color:blue">False in Python</h2>
+<ul>
+    <p><b>None :</b></p>
+    <p><b>False :</b></p>
+    <p><b>Zero of any numeric type :</b> For example 0, 0.0, 0j ....</p>
+    <p><b>Empty sequence :</b> For example (), []</p>
+    <p><b>Empty mapping :</b> For example {}</p>
+    <p><b>Objects of Classes which has __bool__() or __len()__ method which return 0 or False :</b></p>
+</ul>
+
+</body>
+</html>

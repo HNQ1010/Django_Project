@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <title>Fill Area</title>
+</head>
+<body>
+<h1 style="color:blue; text-align:center">FILL AREA</h1>
+    <ul>
+
+        <h2 style = "color: blue">Filled Area Plot With Plotly Express </h2>
+        <p style="color:blue">Attributes list:</p>
+        <ul>
+            <li><b>data_frame(DataFrame or array-like or dict)</b> :This argument needs to be passed for column names (and not keyword names) to be used.<br>
+                Array-like and dict are transformed internally to a pd.DataFrame. If missing, a DataFrame gets constructed under the hood using the other arguments.</li>
+            <li><b>x(str, int, Series or array-like)</b> :Values from this is used to position marks along the x-axis in cartesian coordinates.</li>
+            <li><b>y(str, int, Series or array-like)</b> :Values from this is used to position marks along the y-axis in cartesian coordinates.</li>
+            <li><b>line_group(str, int, Series or array-like)</b> :Values from this is used to group rows of data_frame into lines.</li>
+            <li><b>color(str, int, Series or array-like)</b> :Values from this is used to assign color to marks.</li>
+            <li><b>symbol(str, int, Series or array-like)</b> :Value from this is used to assign symbol to marks.</li>
+            <li><b>hover_name(str, int, Series or array-like)</b> :Value from this is appeared in bold in hover information.</li>
+            <li><b>hover_data(list of str, int, Series or array-like)</b> :Values from these appear as extra data in hover tooltip.</li>
+            <li><b>custom_data(list of str, int, Series or array-like)</b> :Values from these are extra data, to be used in widgets or dash callbacks.<br>
+                This data is not user-visible but is included in events emitted by the figure.</li>
+            <li><b>text(str, int, Series or array-like)</b> :Value from this is used  as text labels.</li>
+            <li><b>facet_row(str, int, Series or array-like)</b> :Value from this is used to assign marks to faceted subplots in the horizontal direction.</li>
+            <li><b>facet_col(str, int, Series or array-like)</b> :Value from this is used to assign marks to faceted subplots in the vertical direction.</li>
+            <li><b>facet_col_wrap(int)</b> :maximum number of columns of facet column. Ignored if 0, and force to 0 if facet_row or marginal is set.</li>
+            <li><b>facet_row_spacing(float between 0 to 1)</b> :Default 0.03, or 0.07 when facet_col_wrap is used. Spacing between facet rows, in paper units.</li>
+            <li><b>facet_col_spacing(float between 0 to 1)</b> :Default 0.02. Spacing between facet columns, in paper units.</li>
+            <li><b>animation_frame(str, int, Series or array-like)</b> :Used to assign marks to animation frame.</li>
+            <li><b>animation_group(str, int, Series or array-like)</b> :Used to provide object-constancy across animation frames: rows with matching<br>
+                animation_group will be treated as if they describe the same object in each frame.</li>
+            <li><b>category_order(dict with str keys and str values)</b> :Default {}. Used to force a specific ordering of values per column. The keys<br>
+                of this dict should correspond to the name of columns, and the values should be a list of strings corresponding to order desired.</li>
+            <li><b>labels(dict with str keys and str values)</b> :By default, column names are used in the figure for the axis title, legend entries<br>
+                and hovers. This parameter allows this to be overridden. The keys of dict should be the column names and the values should correspond to desired label.</li>
+            <li><b>color_discrete_sequence(list of str)</b> :Strings should define CSS-colors. When color is set and the values in the corresponding column are not numeric<br>
+                , values in that column are assigned colors by cycling through color_discrete_sequence in teh order described in category_orders, unless the value of colors<br>
+                is a key in color_discrete_map. Various useful color sequences are availabel in teh plotly.express.colors, specifically plotly.express.colors.qualitative.<br>
+                See visualize colors at px.color.sequential.swatches() and px.colors.quanlitative.swatches().</li>
+            <li><b>color_discrete_map(dict with str keys and str values)</b> :Default {}. String values should define plotly.js symbols. Used to override symbol_sequence<br>
+                to assign a specific colors to marks corresponding with specific values. Keys in color_discrete_map should be values in the column denoted by color. Alternatively,<br>
+                if the values of color are valid colors, the string 'identity' may be passed to cause them to be used directly.</li>
+            <li><b>symbol_sequence(list of str)</b> :Strings should define valid plotly.js symbols. When symbol is set, values in that column are assigned symbols by cycling through<br>
+                symbol_sequence in the order described in category_orders, unless the value of symbol is a key in symbol_map.</li>
+            <li><b>symbol_map(dict with str keys and str values)</b> :String values should define valid plotly.js symbols. Used to override symbol+sequence to assign a specific symbols<br>
+                to marks corresponding with specific values. Keys in symbol_map should be values in teh column denoted by symbol. Alternatively, if the values of symbol are valid symbol<br>
+                names, the string 'identity' may be passed to cause them to be used directly.</li>
+            <li><b>markers(boolean)</b> :Default False, if True, makers are shown on lines.</li>
+            <li><b>orientation('v', 'h')</b> :Default 'v' if x and y are provided and both continuous or both categorical, otherwise 'v'('h') if x(y) is categorical and y(x) is continuous<br>
+                and 'v'('h') if only x(y) is provided.</li>
+            <li><b>groupnorm('fraction' or 'percent')</b> :Default None.If 'faction', the value of each point is divided by the sum of all values at that location coordinate.'percent' is<br>
+                the same but multiplied by 100 to show percentages. None will stack up all values at ech location coordinate.</li>
+            <li><b>log_x(boolean)</b> :Default False.If True, the x-axis is log-scaled in cartesian coordinates.</li>
+            <li><b>log_y(boolean)</b> :Default False. If True, the y-axis is log-scaled in cartesian coordinates.</li>
+            <li><b>range_x(list of two numbers)</b> :If provided, overrides auto-scaling on the x-axis in cartesian coordinates.</li>
+            <li><b>range_y(list of 2 numbers)</b> :If provided, overrides auto-scaling on the y-axis in cartesian coordinates.</li>
+            <li><b>line_shape(str)</b> :Default 'linear'. One of 'linear' or 'spline'.</li>
+            <li><b>title(str)</b> :The figure title.</li>
+            <li><b>template(str or dict or plotly.go.layout.Template instance)</b> :The figure template name(must be a key in plotly.io.templates) or definition.</li>
+            <li><b>with(int)</b> :The figure width in pixels.</li>
+            <li><b>height(int)</b> :The figure height in pixels.</li>
+        </ul>
+        <h2 style = "color: blue">Filled Area Plot With Plotly Express</h2>
+        <li>px.area creates a stacked area plot. Each filled area corresponds to one value of the column given by the line_group parameter.</li>
+        <pre>
+            df = px.data.gapminder()
+            fig = px.area(df, x = 'year', y = 'pop', color = 'continent', line_group = 'country')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/fill_1.png'%}">
+        <h2 style = "color: blue">Fill Area Plot in Dash</h2>
+        <pre>
+            import dash
+            from dash import dcc
+            from dash import html
+            from dash import Input, Output
+            df = px.data.gapminder()
+            countries = df.country.drop_duplicated().sample(n=10, random_state=42)
+            df = df[df.country.isin(countries)]
+            app = dash.Dash(__name__)
+            app.layout = html.Div([html.P('Select y-axis'), dcc.Dropdown(id = 'select_list', value = 'pop',
+                                                            options = [{'label':'x', 'value':x} for x in ['lifeExp', 'pop', 'gdpPercap']]
+                                    dcc.Graph(id = 'area-chart')
+            @app.callback(Output('area-chart', 'figure'), [Input('select_list', 'value'])
+            def create_area_chart(y):
+                fig = px.area(df, x = 'year', y = y, line_group = 'country', color = 'continent')
+                return fig
+            app.run_server(debug = True)
+        </pre>
+        <img src="{% static 'IMG/fill_2.png'%}">
+        <h2 style = "color: blue">Basic Overlaid Area Chart</h2>
+        <pre>
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(x= [1, 2, 3, 4], y = [0, 2, 3, 5], fill = 'tozeroy') # fill down to x-axis
+            fig.add_trace(go.Scatter(x = [1, 2, 3, 4], y = [3, 5, 1, 7], fill = 'tonexty') # fill to trace0 y
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/fill_3.png'%}">
+        <h2 style = "color: blue">Overlaid Area Chart Without Boundary Lines</h2>
+        <pre>
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(x = [1, 2, 3, 4], y = [0, 2, 3, 5], fill = 'tozery', mode = 'none'))
+            fig.add_trace(go.Scatter(x = [1, 2, 3, 4], y = [3, 5, 1, 7], fill = 'tonexty', mode = 'none'))
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/fill_3.png'%}">
+        <h2 style = "color: blue">Interior Filling For Area Chart</h2>
+        <pre>
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(x = [1, 2, 3, 4], y = [3, 4, 8, 3], fill = None, mode = 'lines', line_color = 'indigo'))
+            fig.add_trace(go.Scatter(x = [1, 2, 3, 4], y = [1, 6, 2, 6], fill = 'tonexty', mode = 'lines', line_color = 'indigo'))
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/fill_4.png'%}">
+        <h2 style = "color: blue">Stacked Area Chart</h2>
+        <li>The stackgroup parameter is used to add the y values of the different traces in the same group. Traces in the same group fill up <br>
+            to the next trace of the group.</li>
+        <pre>
+            x = ['Winter', 'Spring', 'Summer', 'Fall']
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(x = x, y = [40, 60, 40, 10], hoverinfo = 'x + y', mode = 'lines',
+                                    line = {'width': 0.5, 'color':'rgb(131, 90, 241)'},
+                                    stackgroup = 'one'))
+            fig.add_trace(go.Scatter(x = x, y = [20, 10, 10, 60], hoverinfo = 'x + y', mode = 'lines',
+                                    line = {'width': 0.5, 'color':'rgb(111, 231, 219)'},
+                                    stackgroup = 'one'))
+            fig.add_trace(go.Scatter(x = x, y = [40, 30, 50, 30], hoverinfo = 'x + y', mode = 'lines',
+                                    line = {'width':0.5, 'color':'rgb(184, 247, 212)'},
+                                    stackgroup = 'one'))
+            fig.update_layout(yaxis_range = [0, 100])
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/fill_5.png'%}">
+        <h2 style = "color: blue">Stacked Area Chart With Normalized Values</h2>
+        <pre>
+            x = ['Winter', 'Spring', 'Summer', 'Fall']
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(x = x, y = [40, 20, 30, 40], mode = 'lines', line = {'width':0.5, 'color':'rgb(184, 247, 212)'},
+                                        stackgroup = 'one', groupnorm = 'percent'))
+            fig.add_trace(go.Scatter(x = x, y = [50, 70, 40, 60], mode = 'lines', line = {'width': 0.5, 'color': 'rgb(111, 231, 219)'},
+                                        stackgroup = 'one', groupnorm = 'percent'))
+            fig.add_trace(go.Scatter(x = x, y = [70, 80, 60, 70], mode = 'lines', line = {'width':0.5, 'color': 'rgb(127, 166, 238)'},
+                                        stackgroup = 'one', groupnorm = 'percent'))
+            fig.add_trace(go.Scatter(x =x, y = [100, 100, 100, 100], mode= 'lines', line = {'width':0.5, 'color': 'rgb(131, 90, 241)'},
+                                        stackgroup = 'one', groupnorm = 'percent'))
+            fig.update_layout(showlegend = True, xaxis_type = 'category', yaxis = {'type': 'linear', 'range':[0, 100], 'ticksuffix': '%'})
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/fill_6.png'%}">
+        <h2 style = "color: blue">Select Hover Points</h2>
+        <pre>
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(x = [0, 0.5, 1, 1.5, 2], y = [0, 1, 2, 1, 0], fill = 'toself', fillcolor = 'darkviolet',
+                         hoveron = 'points + fills', line_color = 'darkviolet', text = 'Points + Fills', hoverinfo = 'text + x + y'))
+            fig.add_trace(go.Scatter(x = [3, 3.5, 4, 4.5, 5], y = [0, 1, 2, 1, 0], fill = 'toself', fillcolor = 'darkviolet',
+                         hoveron = 'points', line_color = 'darkviolet', text = 'Points only', hoverinfo = 'text + x + y'))
+            fig.update_layout(title ='hover on &lti>points&lt/i> and &lti>fills&lt/i>', xaxis_range = [0, 5.2], yaxis_range = [0, 3])
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/fill_7.png'%}">
+        <h2 style = "color: blue">Dash</h2>
+        <pre>
+            import dash
+            from dash import dcc
+            from dash import html
+            fig = go.Figure()
+            app.layout = html.Div([dcc.Graph(figure = fig])
+            app.run_server(debug = True, use_reloadr = False)
+        </pre>
+    </ul>
+</body>
+</html>

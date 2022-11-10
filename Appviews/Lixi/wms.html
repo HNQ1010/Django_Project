@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <style>
+        h1 {color: red;}
+        h2 {color: blue;}
+        h3 {color: purple;}
+        h4 {color: green; font-size: 20px}
+    </style>
+    <meta charset="UTF-8">
+    <title>Warehouse Operation Work Flow</title>
+</head>
+<body>
+    <h1 style="text-align:center"><a href="wms"></a>WMS IMPROVEMENT</h1>
+        <ul>
+            <h3>&#9733; Issues</h3>
+            <ul>
+                <li>At this time, as the business growing, we need 2 systems serving our operation:</li>
+                <ul>
+                    <p>&#9755; OPS (Operating system): Serve the operation between departments.</p>
+                    <p>&#9755; WMS (Warehouse management system): Control warehouse inventory and streamline warehouse activities.</p>
+                </ul>
+                <li>In other word, WMS is proportion of OPS, but it is related to main part (company's product) and can raise many issues involving in all departments.</li>
+                <li>Based on that, WMS improvement is the urgent task that need to be interested in at this time.</li>
+                <ul>
+                    <li>Firstly, As the current warehouse operation flow, the warehouse activities was missing 2 functions of the flow on the system. They are:</li>
+                    <ul>
+                        <p>&#9755; Put away (store) process</p>
+                        <p>&#9755; Handover process</p>
+                    </ul>
+                    <li>The second: WMS functions were hidden in different functions and process directly on that functions.(Receiving is in Buyer function and processes directly in it).</li>
+                    <li>The third: A <b>big important </b>thing is Barcode system is not showing on the system in warehouse operation activities. It lead to:</li>
+                        <ul>
+                            <p>&#9755; Missing confirmation between operation processes &rarr; loosen process.</p>
+                            <p>&#9755; Many manual processes that lead to make mistake easily in operation (Picking, packing without confirming information on each item, just identify by seeing)</p>
+                            <p>&#9755; Staff have to double check for each finished processes.(Re-check picking list by product's name :(( ) &rarr; Cause of workload.</p>
+                        </ul>
+                </ul>
+            </ul>
+            <h3>&#9733; Next steps</h3>
+            <ul>
+                <li>As discussion with team and your suggestion to pick some most important features that need to improve. I'd like to show you steps as belows:</li>
+                <ul>
+                    <li style="color:red">Step 1: Assign PIC to contact when we are starting project. We need a person that deeply understand and keep following our needs to make corresponding between system and warehouse operation.</li>
+                    <li style="color:red">Step 2: Gathering warehouse management system as one function and separating each function as warehouse operation flow.</li>
+                    <img src="{% static 'IMG/Lx_operation_flow4.png' %}" style="width: 100%">
+                    <li>Step 3: Apply/ show product's barcode on the system.</li>
+                    <li>Step 4: After finishing above steps, and as the priorities in built-in these functions/ features. I'd like to focus on improving the Outbound operation. The features are:</li>
+                    <ul>
+                        <h4> &#9755; Picking:</h4>
+                        <table>
+                            <tr>
+                                <th>Current Process</th>
+                                <th>Expected Process</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="https://drive.google.com/file/d/1aZjOJR29vIJs6NYLYhCYCBxZkhHavxV-/view?usp=sharing">https://drive.google.com/file/d/1aZjOJR29vIJs6NYLYhCYCBxZkhHavxV-/view?usp=sharing</a><br>
+                                    <p><b>Disadvantages:</b></p>
+                                    <ul>
+                                        <li>Picking process was combining with packing and handover processes.</li>
+                                        <li>Staff are picking items by seeing the item's name &rarr; easily get wrong or mistaken items.</li>
+                                        <li>There're item's information (scan to see right or wrong items &rarr; It's just a reference document and it's not forced to process) &rarr; We just contain the issues when we do the process relate to that item.</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <p><b>Advantages:</b></p>
+                                    <p>The expected picking process will:</p>
+                                    <ul>
+                                        <li>Make confirmation in each item's barcode when staff do picking process. Make sure the items are picked correctly at right position.</li>
+                                        <li>Combine re-check process at ech item that was picked.</li>
+                                        <li>Make picking process more auto, quickly, and minimize actions that based on human observation that easily lead to mistakes or wrongs.</li>
+                                    </ul>
+                                    &#9873; <b>Inside picking function</b>: There're 3 columns (or tabs) that showing these information:<br>
+                                <ul>
+                                    <p>&#9872; Pending: these orders with "Out of stock" Status or facing issues.</p>
+                                    <p>&#9872; Ready to pick: 2 options:</p>
+                                    <ul>
+                                        <li><b>B2C orders:</b>Limit the amount of items in each picking list (150 - 200 items)</li>
+                                        <li><b>B2B orders:</b>Manually choose which order need to pick in each picking list.</li>
+                                    </ul>
+                                    <p>&#9872; Picked/ Returning</p>
+                                    <p>&#9733; Packed column should belong to Packing function and Requested column should belong to Handover function.</p>
+                                </ul>
+                                    <p>&#9873; The creating picking list process will be as regular but the visualization in picking list will be displayed these information:</p>
+                                        <ul>
+                                            <p>&#9872; Input place to scan item's barcode for confirming right item's barcode.</p>
+                                            <p>&#9872; Item's position (where staff can pick item).</p>
+                                            <p>&#9872; Input place for entering item's quantity for confirming after staff have picked items.</p>
+                                            <li><b>These step in Picking list is replacing for Re-check step, so we can ignore Re-check step and update inventory after staff confirm item's quantity.</b></li>
+                                        </ul>
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                        <h4> &#9755; Packing:</h4>
+                        <table>
+                            <tr>
+                                <th>Current Process</th>
+                                <th>Expected Process</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="https://drive.google.com/file/d/1KdmtorUqYmEIZ0nkzhrMS1v7IMopcC5a/view?usp=sharing">https://drive.google.com/file/d/1KdmtorUqYmEIZ0nkzhrMS1v7IMopcC5a/view?usp=sharing</a><br>
+                                    <p><b>Disadvantages</b></p>
+                                    <ul>
+                                        <li><b>B2C process</b>: It's not divided volume into particular packing lists. It sum all of orders waiting for packing. The problems are:</li>
+                                            <ul>
+                                                <p>&#9755; Cannot control the packaging time in case the volume is increasing.</p>
+                                                <p>&#9755; Cannot do picking process while packaging orders.</p>
+                                                <p>&#9755; When there're more than 1 staff do packaging process, the visualization in packing page will be illogical and we can't<br> contain the overview of the packing situation.</p>
+                                                <p>&#9755; Beside, the updates of data of picking, packing while staff are doing one of these process can raise system errors or<br> bugs in operation system.</p>
+                                            </ul>
+                                        <li><b>B2B process</b></li>
+                                            <ul>
+                                                <p>&#9755; Manually do case by case for each step inside process.(status, picking, packing, handover, ...) &rarr; manually process.</p>
+                                                <p>&#9755; Separate from packing process. (Process in another function (Distribution function) and directly process in it).</p>
+                                                <p>&#9755; Cannot control the order's details exactly (there're not confirming of picking, packing, handover process on the system).</p>
+                                            </ul>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <p><b>Advantages:</b></p>
+                                    <p>The expected packing process will:</p>
+                                    <ul>
+                                        <li>Make confirmation when staff do packaging process on each item's barcode and item's quantity.</li>
+                                        <li>Separate each packing list for each staff at the same time to get the overview of packing situation.</li>
+                                        <li>Make process more automatic, quickly, minimize actions that based on human observation that easily lead to mistakes or wrongs.</li>
+                                    </ul>
+                                    &#9873;<b>Inside Packing function: There're 3 options:</b>
+                                    <ul>
+                                        <h4>B2C</h4>
+                                        <p>&#9755; <b>Waiting for packing</b> list: It's corresponding with B2C picking list that was picked and visualizing these information:</p>
+                                        <ul>
+                                            <li>Order code</li>
+                                            <li>From order code showing direct to item's barcode (with product's picture and product's name) and quantity requested.</li>
+                                            <p>&#9755; when staff press "Packing" button, the system will present one by one order with:</p>
+                                            <ul>
+                                                <li>Input places for item's barcode confirming</li>
+                                                <li>Input places for item's quantity confirming</li>
+                                                <li>Print button to print out order label</li>
+                                            </ul>
+                                        </ul>
+                                        <h4>B2B</h4>
+                                        <p>&#9755;<b>Waiting for packing</b> list: Corresponding with B2B picking list that was picked and visualizing these information:</p>
+                                        <ul>
+                                            <li>Order code</li>
+                                            <li>From order code showing direct to item's barcode (with product's picture and product's name) and quantity requested.</li>
+                                            <p>&#9755; when staff press "Packing" button, the system will present the first BOX with:</p>
+                                            <ul>
+                                                <li>Input places for item's barcode confirming</li>
+                                                <li>Input places for item's quantity</li>
+                                                <p>&#9755; system will auto minus the item's quantity on each BOX until the last BOX.</p>
+                                                <p>At the last BOX, there will be "Print label" button to print out all of BOX label (Eg: 1/10, 2/10, ...) of the order.</p>
+                                            </ul>
+                                        </ul>
+                                    </ul>
+                                    <h4>Packed order</h4>
+                                    <ul>
+                                        <li>Similar with Requested page inside Packing function at this time. It includes orders that was packed and waiting for handover process.</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </table>
+                        <h4>&#9755;Handover</h4>
+                        <table>
+                            <tr>
+                                <th>Current Process</th>
+                                <th>Expected process</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="https://drive.google.com/file/d/1NU56I7vnPQDVUv-Ks6XLk3MozoGdqCsz/view?usp=sharing">https://drive.google.com/file/d/1NU56I7vnPQDVUv-Ks6XLk3MozoGdqCsz/view?usp=sharing</a>
+                                    <p><b>Disadvantages:</b></p>
+                                    <ul>
+                                        <li>It's mixed with other functions (picking, packing).</li>
+                                        <li>Missing "waiting for handover" process (waiting list before handing over to 3PL).</li>
+                                        <li>Manually update status for each order. Especially B2B order (change status by hand).</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <p><b>Advantages:</b></p>
+                                    <li>The expected Handover process will:</li>
+                                    <ul>
+                                        <li>List down packed order in a list and confirm order's status after finished handing over handover list to 3PL.</li>
+                                        <li>Managing handover order situation and handover order's quantity before handing over to 3PL</li>
+                                        <li>Make confirmation step on the system before handing over to 3PL. </li>
+                                    </ul>
+                                    &#9873;<b>Inside Handover function: There're 2 options:</b>
+                                    <ul>
+                                        <p>&#9755; <b>Waiting for handover</b></p>
+                                        <ul>
+                                            <li>Order inside <b>Waiting for handover</b> list is corresponding with order in <b>Requested</b> column in <b>Packing</b> function at this moment.</li>
+                                            <li>When order was packed and waiting for handover to 3PL, it will be scan into a list (or scan into a list when handing over to 3PL based on requests). By the way, we need a record list when handover to 3PL.</li>
+                                            <li>After handing over to 3PL, there's <b>Confirm</b> button changing order's status to <b>Handed over</b>'s status.</li>
+                                        </ul>
+                                        <p>&#9755; <b>Handed over</b></p>
+                                        <ul>
+                                            <li>It's recorded list after handed over to 3PL to keep track information of warehouse daily operations.</li>
+                                        </ul>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </table>
+                    </ul>
+                </ul>
+            </ul>
+        </ul>
+    </ul>
+
+</body>
+</html>

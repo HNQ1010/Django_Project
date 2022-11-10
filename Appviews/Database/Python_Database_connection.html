@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <meta charset="UTF-8">
+    <title>Database Connection</title>
+</head>
+<body>
+<h1 style="text-align:center">Python Database Connection</h1>
+<h2 style="color:blue">Using pyodbc for SQL Server, MYSQL, psycopg2 for postgreSQL and default python for sqlite3</h2>
+    <ul>
+        <li>Try 'pip install pyodbc' first. If fail, check and install manually in pip package.</li>
+        <h3 style="color:red">Connect to a Database</h3>
+        <li>Pass an ODBC connection string to the pyodbc connect() function which will return a Connection. Once you have a connection <br>
+            you can ask it for a Cursor.</li>
+        <pre>
+            import pyodbc
+            # Specifying the ODBC driver , server name, database, etc directly
+            cnxn = pyodbc.connect('Driver={ODBC Driver 17 for SQL Server}; SERVER=localhost; DATABASE=testdb, UID=me, PWD=pass')
+            # Using a DSN, but providing  a password as well
+            cnxn = pyodbc.connect('DSN=test; PWD=password')
+            # Create a cursor from the connection
+            cursor = cnxn.cursor()
+        </pre>
+        <li>There are a lot of options when connecting, see more the connect() function.</li>
+        <li>And make sure you set the encoding or decoding settings needed for your database and the version of Python you are using.</li>
+        <pre>
+            cnxn.setdecoding(pyodbc.SQL_CHAR, encoding='utf_8')
+            cnxn.setdecoding(pyodbc.SQL_WCHAR, encoding='utf_8')
+            cnxn.setencoding(encoding='utf_8')
+        </pre>
+        <li>All SQL statements are executed using the Cursor execute() function. If the statement returns rows, such as a select statement, <br>
+            you can retrieve them using the Cursor fetch functions: fetchone(), fetchall(), fetchmany(). They return None if statement return empty list.</li>
+        <li>If you'are selecting a single value, you can use the <b>fetchval</b> convenience method. If the statement generates a row, it returns<br>
+            the value of the first column of the first row.</li>
+        <li><b>fetchval()</b> is a better choice if the statement can return an empty set.</li>
+        <h3 style="color:red">Connect() function</h3>
+        <pre>
+            connect(*constring, autocommit=False, timeout=0, readonly=False, attrs_before=None, encoding='utf-16le', ansi=False, **kwargs)
+        </pre>
+        <li>Creates and returns a new connection to the database.</li>
+        <pre>
+            cnxn = pyodbc.connect('DSN=SQLServer1; Database=test; UID=me;PWD=mypwd; autocommit=True)
+        </pre>
+        <li>To create a connection to a database, pyodbc passes an 'ODBC connection string' to the local driver manager which then calls the relevant database<br>
+            driver which in turn calls the database to request a connection. Hence, this ODBC connection string must include all the necessary connection information.<br>
+            This information is formatted as key/value pairs separated by semi-colons (the values can be enclosed with curly braces if necessary).</li>
+        <pre>
+            driver = {PostgreSQL Unicode}; serve=localhost; database=test; uid=me; pwd=mypwd)
+        </pre>
+        <li>The connect() function constructs this ODBC connection string by concatenating the connstring parameter with key/value pairs from the kwargs.<br>
+            Both connstring and the kwargs are optional, but one of them must be provided. Note, connect() dos not attempt to parse any key/value pairs in the<br>
+            connstring parameter. It uses that string exactly as given.</r></li>
+        <pre>
+            connect('DSN=MySQLDB; SCHEMA=DW', UID='me', PWD='mypwd')
+            will cause connect() to generate an ODBC connection string of
+            DSN=MYSQLDB; SCHEMA=DW; UID=me;PWD=mypwd
+        </pre>
+        <li>This string is then used to create the connection.</li>
+        <li>Other parameter:</li>
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Notes</th>
+                <th>Default</th>
+            </tr>
+            <tr>
+                <td>ansi</td>
+                <td>If True, indicates the driver does not support Unicode</td>
+                <td>False</td>
+            </tr>
+            <tr>
+                <td>attrs_before</td>
+                <td>A dictionary of connection attributes to set before conecting.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>autocommit</td>
+                <td>If True, causes a commit to be performed after each SQL statement.</td>
+                <td>False</td>
+            </tr>
+            <tr>
+                <td>encoding</td>
+                <td>The encoding for the connection string</td>
+                <td>False</td>
+            </tr>
+            <tr>
+                <td>readonly</td>
+                <td>If True, the connection is set to read-only</td>
+                <td>False</td>
+            </tr>
+            <tr>
+                <td>timeout</td>
+                <td>Time timeout for the connection attempt, in seconds.</td>
+                <td></td>
+            </tr>
+        </table>
+        <h3 style="color:red">Connecting to SQL Server from Windows</h3>
+        <li>You can find out what drivers are installed on your PC by navigating to 'Control Pannel ->Administrative Tools ->Data Source<br>
+            and clicking on the 'Drivers' tab.</li>
+        <li>Or you can use the command:</li>
+        <pre>
+            print(pyodbc.drivers())
+        </pre>
+        <li>It's generally best to use the latest drivers on your PC, regardless of the version of SQL Server you are connecting to, because <br>
+            the drivers are largely backwards-compatible. However you may prefer to use the specific driver for your SQL Server instance.</li>
+        <pre>
+            conn = connect('DRIVER={ODBC Driver 17 for SQL Server'; SERVER=test; DATABASE=test; UID=user; PWD=password')
+        </pre>
+        <li>If you use Windows Authentication to connect to the Server, your string will be:</li>
+        <pre>
+            conn = pyodbc.connect('DRIVER={SQL Server}; SERVER=server_name; Database=database_name; TRUSTED_CONNECTION=yes')
+        </pre>
+        <li style="color:red">Note that there're no spaces between <b>=</b>. (Driver={SQL Server}: no spaces before and after =)</li>
+        <li><b>Using DSN</b></li>
+            <ul>
+                <li>The DSN( or Data Source Name) allows you to define the ODBC driver, server, database, login credentials (possibly), and <br>
+                    other connection attributes all in one place, so you don't have to provide hem in your connection string. You can set up DSNs on<br>
+                    your PC by using your ODBC Data Source Administrator window.</li>
+                <li>To get your ODBC Data Source Administrator window, navigate to 'Control Pannel -> Administrative Tools->Data Sources'.<br>
+                    Under the tabs 'User DSN' or System DSN chick on the 'Add...' button and follow the wizard instructions. 'User DSN' if for just you.<br>
+                    'System DSN' is for all users. Choose a driver that is suitable for the version of SQL Server you are connecting to, and add any other<br>
+                    connection information that is relevant. Once you have created your new DSN, use it in the pyodbc.connect() function as:</li>
+                <pre>
+                    conn = pyodbc.connect('DSN=mynewdsn; UID=user; PWD=password')
+                </pre>
+                <li>Attributes in the connection string will override any attributes in the DSN.</li>
+                <li>You can connect to your SQL Server instance using a trsted connection, using your Window account rather than a login name and password<br>
+                    by using the Trusted_Connection attribute:</li>
+                <pre>
+                    conn = pyodbc.connect('DSN = mynewdsn; Trusted_Connection = yes;')
+                </pre>
+                <li>Adding the APP keyword allows you to provide a descriptive label for your database connection (of up to 128 characters).<br>
+                    This is useful for database administrators.</li>
+                <pre>
+                    conn = pyodbc.connect('DSN=mynewdsn; APP = Daily Incremental Backup;')
+                </pre>
+            </ul>
+        <h3 style="color:red">Connecting to MYSQL</h3>
+        <pre>
+            connection_string = ('DRIVER=MYSQL ODBC 8.0 ANSI Driver;'
+                                'SERVER=localhost;'
+                                'DATABASE=mydb;'
+                                'UID=root;'
+                                'PWD=mypassword;'
+                                'charset=utf8mb4;')
+        </pre>
+        <li>MySQL uses a single encoding for all text data which you will need to configure after connecting. </li>
+        <pre>
+            cnxn.setdecoding(pyodbc.SQL_WCHAR, encoding = 'utf-8')
+            cnxn.setencoding(encoding = 'utf-8')
+        </pre>
+        <h3 style="color:red">Connecting to PostgreSQL</h3>
+        <li>PostgreSQL uses a single encoding for all text data which you will need to configure after connecting.</li>
+        <pre>
+            cnxn.setdecoding(pyodbc.SQL_WCHAR, enconding='utf-8')
+            cnxn.setencoding(encoding='utf-8')
+        </pre>
+        <li>The driver defaults to a 255-byte maximum varchar/wvarchar size fo writes which causes very slow writes. There are 2 easy fixes:
+            <ul>
+                <li>Set the MaxVarcharSize parameter in your connection string or DSN.</li>
+                <li>Set the cnnection's maxwrite.</li>
+                <pre>
+                    In both cases, using:
+                    cnxn.maxwrite = 1024 * 1024 * 1024
+                </pre>
+            </ul></li>
+        <li>PostgreSQL has an option for returning boolean values as strings '0' and '1' or as booleans True and False. Use <b>BoolsAsCahar</b> to configure it:</li>
+        <pre>
+            [PostgreSQL]
+            Driver = your_PostgreSQL_driver
+            Database = your_database_name
+            BoolsAsChar = 0
+        </pre>
+        <li style="color:red">You can also use psycopg2 package to connect to PostgreSQL. Psycopg is the most popular PostgreSQL database adapter for the Python programming language.</li>
+        <pre>
+            db_host = 'db_host'
+            db_name = 'db_name'
+            db_user = 'user_name'
+            db_pass = 'db_pass'
+            import psycopg2
+            conn = psycopg2.connect(dbname=db_name, user=db_user, password=db_pass, host=db_host)
+        </pre>
+        <h3 style="color:red">Connecting to SQLite</h3>
+        <li>Python has built-in support for SQlite3, so you may not need to use ODBC at all.</li>
+        <pre>
+            import sqlite3
+            conn = sqlite3.connect('Databse = database_name')
+            cur = conn.cursor()
+            ...
+        </pre>
+        <h3 style="color:red">Connecting to ODPS</h3>
+        <pre>
+            from odps import ODPS
+            o = ODPS('**your-access-id**', '**your-secret-access-key**', '**your-default-project**',
+            endpoint='**your-end-point**')
+        </pre>
+
+        <h3 style="color:red">Python and pandas Cursor</h3>
+        cursor = conn.cursor()
+        df = pd.read_sql(sql, conn)
+    </ul>
+</body>
+</html>

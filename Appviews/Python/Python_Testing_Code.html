@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Testing Code</title>
+</head>
+<ul>
+<h1 style="color: blue;">X) Testing Code</h1>
+<h2> 1) Testing a Function</h2>
+    <textarea style="color: #DC7633" rows="13" cols="50">
+function.py
+        def get_formatted_name(first, last):
+            full_name = first + ' ' + last
+            return full_name.title()
+    </textarea>
+    <textarea style="color: #DC7633" rows="13" cols="100">
+names.py
+        from name_function import get_formatted_name
+        print("Enter 'q' at any time to quit.")
+        while True:
+            first = input("\nPlease give me a first name: ")
+            if first == 'q':
+                break
+            last = input("Please give me a last name: ")
+            if last == 'q':
+                break
+            formatted_name = get_formatted_name(first, last)
+            print("\tNeatly formatted name: " + formatted_name + '.')
+    </textarea>
+
+<h2 style="color:red"><b> 2) Unit Tests and Test Cases</b></h2>
+<p>The module unittest from the Python standard library provides tools for
+    testing your code.<br> <span style="color:red"><b>A unit test</b></span> verifies that one specific aspect of a function’s
+behavior is correct. <br><span style="color:red"><b>A test case</b></span> is a collection of unit tests that together prove
+that a function behaves as it’s supposed to, within the full range of <br>situations you expect it to handle.
+A good test case considers all the possible kinds of input a function could <br>receive and includes tests to represent each
+of these situations. <span style="color:red"><b>A test case with full coverage includes a full range of unit<br>
+tests covering all the possible ways you can use a function.</b></span></p>
+<ul style="color:blue"><b>A Passing Test</b></ul>
+    <textarea style="color: #DC7633" rows="9" cols="100">
+        import unittest
+        from name_function import get_formatted_name
+
+        1)class NamesTestCase(unittest.TestCase):
+            def test_first_last_name(self):
+        2)        formatted_name = get_formatted_name('janis', 'joplin')
+        3)        self.assertEqual(formatted_name, 'Janis Joplin')
+        unittest.main()
+    </textarea>
+<p> 1) we create a class called NamesTestCase, which will contain a series
+of unit tests for get_formatted_name().</p>
+<p> 2) we call get_formatted_name() with the arguments 'janis' and
+'joplin', and store the result in formatted_name</p>
+<p style="color:red"> 3) * we use one of unittest’s most useful features: an assert method.<br>
+Assert methods verify that a result you received matches the result you
+expected to receive.<br> In this case, because we know get_formatted_name() is
+supposed to return a capitalized, properly spaced full name, we expect
+the value in formatted_name to be Janis Joplin.</p>
+
+    <textarea style="color: #DC7633" rows="5" cols="100">
+        .
+        --------------------------------------------------
+        Ran 1 test in 0.000s
+        OK
+    </textarea>
+<p>The line unittest.main() tells Python to run the tests in this file. When
+we run test_name_function.py, we get the outputs:</p>
+<ul>
+    <p>The dot(.) : Mean that a single test passed</p>
+    <p>---------- : Python ran one test</p>
+    <p>0.000s     : It took less than 0.001 seconds to run</p>
+    <p>OK         : Unit tests in the test case passed. </p>
+</ul>
+<ul style="color:blue"><b>A Failing Test</b></ul>
+<p>Modifying a get_formatted_name with the third parameter "middle" and run the test. We'll get the following outputs:</p>
+    <textarea style="color: #DC7633" rows="12" cols="100">
+            1)E
+            ======================================================================
+            2)ERROR: test_first_last_name (__main__.NamesTestCase)
+            ----------------------------------------------------------------------
+            3)Traceback (most recent call last):
+            File "test_name_function.py", line 8, in test_first_last_name
+            formatted_name = get_formatted_name('janis', 'joplin')
+            TypeError: get_formatted_name() missing 1 required positional argument: 'last'
+            ----------------------------------------------------------------------
+            4)Ran 1 test in 0.000s
+            5)FAILED (errors=1)
+    </textarea>
+<ul>
+    <p>1) : tells us one unit test in the test case resulted in an error.</p>
+    <p>2) : we see that test_first_last_name() in NamesTestCase caused an error</p>
+    <p>3) : we see a standard traceback, which reports that the function call
+get_formatted_name('janis', 'joplin')<br> no longer works because it’s missing a
+required positional argument.</p>
+    <p>4) : We also see that one unit test was run. </p>
+    <p>5) : we see an additional message that the overall test case failed and that one error occurred when
+running the test case . </p>
+</ul>
+
+<ul style="color:blue"><b>Responding to a Failed Test</b></ul>
+<p>Check and fix bugs based on the output results</p>
+<ul style="color:blue"><b>Adding New Tests</b></ul>
+    <textarea style="color: #DC7633" rows="10" cols="100">
+            import unittest
+            from name_function import get_formatted_name
+
+            class NamesTestCase(unittest.TestCase):
+                def test_first_last_name(self):
+                        --snip--
+                def test_first_last_middle_name(self):
+                        --snip--
+            unittest.main()
+    </textarea>
+    <textarea style="color: #DC7633" rows="10" cols="50">
+            ..
+            -------------------------------------
+            Ran 2 tests in 0.000s
+            OK
+    </textarea>
+
+<h2> 3) Testing a Class</h2>
+<ul style="color:blue"><b>A Variety of Assert Methods</b></ul>
+    <textarea style="color: red" rows="7" cols="100">
+        assertEqual(a, b) : Verify that a == b
+        assertNotEqual(a, b) : Verify that a != b
+        assertTrue(x) : Verify that x is True
+        assertFalse(x) : Verify that x is False
+        assertIn(item, list) : Verify that item is in list
+        assertNotIn(item, list) : Verify that item is not in list
+    </textarea>
+<ul style="color:blue"><b>A Class to Test</b></ul>
+    <textarea style="color: red" rows="14" cols="100">
+        class AnonymousSurvey:
+            def __init__(self, question):
+                self.question = question
+                self.responses = []
+
+            def show_question(self):
+                print(question)
+            def store_response(self, new_response):
+                self.responses.append(new_response)
+            def show_results(self):
+                print("Survey results:")
+                for response in responses:
+                    print('- ' + response)
+    </textarea>
+<ul style="color:blue"><b>Testing the AnonymousSurvey Class</b></ul>
+    <textarea style="color: red" rows="9" cols="100">
+        import unittest
+        survey.py from survey import AnonymousSurvey
+        1)class TestAnonmyousSurvey(unittest.TestCase):
+        2)    def test_store_single_response(self):
+        3)      my_survey = AnonymousSurvey(question)
+                my_survey.store_response('English')
+        4)      self.assertIn('English', my_survey.responses)
+        unittest.main()
+    </textarea>
+<ul>
+    <p>1) : We call our test case TestAnonymousSurvey, which again inherits from unittest.TestCase.</p>
+    <p>2) : A good descriptive name for this method is test_store_single_response()</p>
+    <p>3) : we create an instance called my_survey.</p>
+    <p>4) : Then we verify that the response was
+stored correctly by asserting that English is in the list my_survey.responses . </p>
+</ul>
+<p>This is good, but a survey is useful only if it generates more than one
+response. Let’s verify that three responses can be stored correctly.</p>
+    <textarea style="color: red" rows="14" cols="100">
+        import unittest
+        survey.py from survey import AnonymousSurvey
+        class TestAnonmyousSurvey(unittest.TestCase):
+                def test_store_single_response(self):
+                    --snip--
+                def test_store_three_responses(self):
+                    question = 'What language did you first learn to speak?'
+        1)          my_survey = AnonymousSurvey(question)
+                    responses = ['English', 'Spanish', 'Mandarin']
+        2)          for response in responses:
+                        my_survey.store_response(response)
+                        self.assertIn(response, my_survey.responses)
+        unittest.main()
+    </textarea>
+    <textarea style="color: red" rows="14" cols="50">
+                ..
+            ----------------------------------
+            Ran 2 tests in 0.000s
+            OK
+    </textarea>
+
+<ul>
+    <p>1) : We define a list containing three different responses. </p>
+    <p>2) : we write another loop and assert that each response is now in my_survey.responses</p>
+</ul>
+
+<ul style="color:blue"><b>The setUp() Method</b></ul>
+<p style="color:red">*The unittest.TestCase
+class has a setUp() method that allows you to create these objects once and
+then use them in each of your test methods.<br> When you include a setUp()
+method in a TestCase class, Python runs the setUp() method before running
+each method starting with test_. <br>Any objects created in the setUp() method
+are then available in each test method you write</p>
+    <textarea style="color: red" rows="18" cols="100">
+        import unittest
+        from survey import AnonymousSurvey
+            class TestAnonymousSurvey(unittest.TestCase):
+                def setUp(self):
+                    question = "What language did you first learn to speak?"
+                    self.my_survey = AnonymousSurvey(question)
+                    self.responses = ['English', 'Spanish', 'Mandarin']
+
+                def test_store_single_response(self):
+                    self.my_survey.store_response(self.responses[0])
+                    self.assertIn(self.responses[0], self.my_survey.responses)
+                def test_store_three_responses(self):
+                    for response in self.responses:
+                        self.my_survey.store_response(response)
+                    for response in self.responses:
+                        self.assertIn(response, self.my_survey.responses)
+        unittest.main()
+    </textarea>
+<p style="color:red"><b>When a test case is running, Python prints one character for each unit test as it is
+    completed.</b>
+    <ul><p>A passing test prints a dot (.)</p>
+        <p>A test that results in an error prints an E</p>
+        <p>A test that results in a failed assertion prints an F</p>
+    </ul></p>
+<p> This is why you’ll see a different
+number of dots and characters on the first line of output when you run your test cases.<br>
+If a test case takes a long time to run because it contains many unit tests, you can
+watch these results to get a sense of how many tests are passing.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

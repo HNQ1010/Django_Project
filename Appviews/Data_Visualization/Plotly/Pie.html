@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <title>Pie Chart</title>
+</head>
+<body>
+<h1 style="color:blue; text-align:center">PIE CHART</h1>
+    <ul>
+        <h2 style = "color: blue">PIE with Plotly Express Figure</h2>
+        <p style="color:blue">Attributes list:</p>
+        <ul>
+            <li><b>data_frame(DataFrame or array-like or dict)</b> :This argument need to be passed for column name(and not keyword names)<br>
+                to be used. Array-like and dict are transformed internally to a pandas DataFrame. If missing, a DataFrame get constructed <br>
+                under the hood using the other arguments.</li>
+            <li><b>names(str, int, Series or array-like)</b> :Values from this is used as labels for sector.</li>
+            <li><b>values(str, int, Series or array-like)</b> :Value from this is used to set values associated to sectors.</li>
+            <li><b>color(str, int, Series or array-like)</b> :Value from this is used to assign color to marks.</li>
+            <li><b>color_discrete_sequence(list of str)</b> :String should valid CSS-colors. When color is set and the values in the corresponding<br>
+                column are not numeric, values in that column are assigned colors by cycling through color_discrete_sequence in the order describe<br>
+                in category_orders, unless the value of color is a key in color_discrete_map. Various useful color sequences are available in the <br>
+                plotly.express.colors (plotly.express.colors.quanlitative).</li>
+            <li><b>color_discrete_map(dict of str keys and str values)</b> : Default {}. String value should valid CSS-colors. Used to override <br>
+                color_discrete_sequence to assign a specific colors to marks corresponding with specific values. Keys in color_discrete_map should be <br>
+                values in the column denoted by color. Alternatively, if the values of color are valid colors, the string 'identity' will be passed <br>
+                to cause them to be used directly.</li>
+            <li><b>hover_name(str, int, Series or array-like)</b> :Values from this appear in bold in hover information.</li>
+            <li><b>hover_data(list of str)</b> :Values from these appear as extra data in the hover tooltip.</li>
+            <li><b>custom_data(list of str, int, Series or array-like)</b> :Values from these are extra data, to be used in widgets or Dash. This data <br>
+                is not user-visible bit is included in events emitted by the figure.</li>
+            <li><b>labels(dict with str keys and str values)</b> :Default {}. By default, column names are used in the figure for axis title, legend entries<br>
+                and hover. This parameter allows this to be overridden. The keys of dict should correspond to the column names and the values should <br>
+                correspond to the desired label to be displayed.</li>
+            <li><b>title(str)</b> :Figure title.</li>
+            <li><b>template(str or dict or plotly.graph_objects.layout.Template instance)</b> :The figure template name(must be a key in plotly.io.templates) or definition.</li>
+            <li><b>width(int)</b> :Default None. Figure width in pixels.</li>
+            <li><b>height(int)</b> :Default None. Figure height in pixels.</li>
+            <li><b>opacity(float)</b> :Between 0 and 1. Sets the opacity of plots.</li>
+            <li><b>hole(float)</b> :Sets the fraction of the radius to cut out of the pie. Use this to make a donut chart.</li>
+        </ul>
+        <h2 style = "color: blue">Pie Chart With Plotly Express</h2>
+        <li>A pie chart is a circular statistical chart, which is divided into sectors to illustrate numerical proportion.</li>
+        <li>In px.pie, data visualized by the sectors of the pie is set in values. The sector labels are set in names.</li>
+        <pre>
+            df = px.data.gapminder().query("year == 2007 and continent == 'Europe'")
+            df.loc[df['pop'] < 2.e6, 'country'] = 'Other countries'
+            fig = px.pie(df, values = 'pop', names = 'country', title = 'Europe Population')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/pie_1.png'%}">
+        <h2 style = "color: blue">Pie Chart With Repeated Labels</h2>
+        <li>Lines of the dataframe with the same value for names are grouped together in the same sector.</li>
+        <pre>
+            df = px.data.tips()
+            fig = px.pie(df, name = 'day', values = 'tips')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/pie_2.png'%}">
+        <h2 style = "color: blue">Pie Chart in Dash</h2>
+        <pre>
+            import dash
+            from dash import dcc
+            from dash import html
+            from dash import Input, Output
+            df = px.data.tips()
+            app = dash.Dash(__name__)
+            app.layout =    html.Div([html.P('Names:'),
+                            dcc.Dropdown(id = 'names', value = 'day',
+                                        options = [{'label':x, 'value':x} for x in ['smoker', 'day', 'time', 'sex']],
+                                        clearable = False),
+                            html.P('Values'),
+                            dcc.Dropdown(id = 'values', value = 'total_bill',
+                                        options = [{'label':x, 'value':x} for x in ['total_bill', 'tip', 'size']],
+                                        clearable = False),
+                            dcc.Graph(id = 'pie-chart')])
+            @app.callback(Output('pie-chart', 'figure'), [  Input('names', 'value'),
+                                                            Input('values', 'value')])
+            def generate_pie_chart(names, values):
+                fig = px.pie(df, names = names, values = values)
+                return fig
+            app.run_server(debug = True)
+        </pre>
+        <img src="{% static 'IMG/pie_3.png'%}">
+        <h2 style = "color: blue">Setting The Color Of Pie Sector With px.pie</h2>
+        <pre>
+            df = px.data.tips()
+            fig = px.pie(df, values = 'tip', names = 'day', color_discrete_sequence = px.colors.sequential.RdBu)
+            #or use colors.qualitative(px.colors.qualitative.Magenta)
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/pie_4.png'%}">
+        <h2 style = "color: blue">Using An Explicit Mapping For Discrete Colors</h2>
+        <pre>
+            df = px.data.tips()
+            fig = px.pie(df, values = 'tip', names = 'day', color = 'day',
+                                color_discrete_mapping = {  'Thur': 'lightcyan',
+                                                            'Fri': 'cyan',
+                                                            'Sat': 'royalblue',
+                                                            'Sun': 'darkblue'})
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/pie_5.png'%}">
+        <h2 style = "color: blue">Customizing A Pie Chart Created With px.pie</h2>
+        <pre>
+            df = px.data.gapminder().query("year == 2007 and continent  == 'Americas'")
+            fig = px.pie(df, names = 'country', values = 'pop', title = 'Americas Population',
+                        hover_data = ['lifeExp'], labels = {'lifeExp':'Life Expectancy'})
+            fig.update_layout(textposition = 'inside', textinfo ='percent + label')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/pie_6.png'%}">
+        <h2 style = "color: blue">Basic Pie Chart With go.pie</h2>
+        <li>In go.Pie, data visualized by the sector of the pie is set in values. The sector labels are set in labels and the sector colors<br>
+            are set in marker.colors.</li>
+        <pre>
+            labels = ['Oxygen', 'Hydrogen', 'Carbon_Dioxide', 'Nitrogen']
+            values = [4500, 2500, 1053, 500]
+            fig = go.Figure(go.Pie(labels = labels, values = values))
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/pie_7.png'%}">
+        <h2 style = "color: blue">Styled Pie Chart</h2>
+        <li>Colors can be given as RGB triples or hexadecimal strings, or CSS color names.</li>
+        <pre>
+            colors = ['gold', 'mediumturquoise', 'darkorange', 'lightgreen']
+            fig = go.Figure(data=[go.Pie(labels=['Oxygen','Hydrogen','Carbon_Dioxide','Nitrogen'],
+                                         values=[4500,2500,1053,500])])
+            fig.update_traces(textinfo = 'label + percent', hoverinfo='value', textfont_size=15,
+                              marker=dict(colors=colors, line=dict(color='rgb(231, 63, 116)', width=2)))
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/pie_8.png'%}">
+        <h2 style = "color: blue">Controlling Text Font size With Uniform Text</h2>
+        <li>If you want all the text labels to have the same size, you can use the uniformtext layout parameter.</li>
+        <li>The minsize attribute sets the font size, and the mode attribute sets what happens for labels which can not <br>
+            fit with the desired fontsize: either hide them or show them with overflow.</li>
+        <pre>
+            df = px.data.gapminder().query("continent == 'Asia'")
+            fig = px.pie(names = 'country', values = 'pop')
+            fig.update_traces(textposition = 'inside')
+            fig.update_layout(uniformtext{'minsize' = 10, 'mode' : 'hide'})
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/pie_9.png'%}">
+        <h2 style = "color: blue">Controlling Text Orientation Inside Pie Sectors.</h2>
+        <li>The 'insidetextorientation' attribute controls the 'orientation' of text inside sectors. With 'auto', the text may <br>
+            automatically be rotated to fit with the maximum size inside the slice. In case force text by a specific side, use these:<br>
+            <b>'horizontal', 'radial', or 'tangential'.</b></li>
+        <pre>
+            fig.update_traces(insidetextorientation = 'tangential')
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/pie_10.png'%}">
+        <h2 style = "color: blue">Donut Chart</h2>
+        <li>Using 'hole' attribute to make a donut chart.</li>
+        <pre>
+            fig.update_traces(hole = .3)
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/pie_11.png'%}">
+        <h2 style = "color: blue">Pulling Sectors Out From The Center</h2>
+        <li>For a pulled-out or exploded layout of the pie chart, use the <b style="color:red">pull</b> argument. It can be a scalar for pulling all sectors or an <br>
+            array to pull only some of the sectors.</li>
+        <pre>
+            labels = ['Oxygen', 'Hydrogen', 'Carbon_Dioxide', 'Nitrogen']
+            values = [4500, 2500, 1053, 500]
+            fig = go.Figure(go.Pie(labels = labels, values = values, pull = [0, 0, 0.2, 0]))
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/pie_12.png'%}">
+        <h2 style = "color: blue">Pie Chart In Subplots</h2>
+        <pre>
+            from plotly.subplots import make_subplots
+            labels = ["US", "China", "European Union", "Russian Federation", "Brazil", "India", "Rest of World"]
+            # Create subplots: Use 'domain' type for Pie subplot
+            fig = make_subplots(rows = 1, cols =2, specs = [[{'type': 'domain'}, {'type': 'domain'}]])
+            fig.add_trace(go.Pie(labels = labels, values = [16, 15, 12, 6, 5, 4, 42], name = 'GHG Emissions')
+            fig.add_trace(go.Pie(labels = labels, values = [27, 11, 25, 8, 1, 3, 25], name = 'CO2 Emissions')
+            fig.update_traces(hole = .4, hoverinfo = 'label + percent + name')
+            fig.update_layout(title = 'Global Emissions 1990-2011',
+            #add annotation in the center of the donut pie
+                                annotaions = [  {'text':'GHG', 'x':0.19, 'y':0.5, 'font_size':20, 'showarrow':Fasle},
+                                                {'text':'CO2', 'x':0.81, 'y':0.5, 'font_size':20, 'showarrow':False}])
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/pie_13.png'%}">
+        <pre>
+            labels = ['1st', '2nd', '3rd', '4th', '5th']
+            # Define color sets of paintings
+            night_colors = ['rgb(56, 75, 126)', 'rgb(18, 36, 37)', 'rgb(34, 53, 101)', 'rgb(36, 55, 57)', 'rgb(6, 4, 4)']
+            sunflowers_colors = ['rgb(177, 127, 38)', 'rgb(205, 152, 36)', 'rgb(99, 79, 37)', 'rgb(129, 180, 179)', 'rgb(124, 103, 37)']
+            irises_colors = ['rgb(33, 75, 99)', 'rgb(79, 129, 102)', 'rgb(151, 179, 100)', 'rgb(175, 49, 35)', 'rgb(36, 73, 147)']
+            cafe_colors =  ['rgb(146, 123, 21)', 'rgb(177, 180, 34)', 'rgb(206, 206, 40)', 'rgb(175, 51, 21)', 'rgb(35, 36, 21)']
+            #Create subplots using domain type
+            specs = [[{'type':'domain'}, {'type':'domain'}], [{'type':'domain'}, {'type':'domain'}]]
+            fig = make_subplots(rows = 2, cols =2, specs = specs)
+            # Define pie charts
+            fig.add_trace(go.Pie(labels=labels, values=[38, 27, 18, 10, 7], name='Starry Night',
+                                 marker_colors=night_colors), 1, 1)
+            fig.add_trace(go.Pie(labels=labels, values=[28, 26, 21, 15, 10], name='Sunflowers',
+                                 marker_colors=sunflowers_colors), 1, 2)
+            fig.add_trace(go.Pie(labels=labels, values=[38, 19, 16, 14, 13], name='Irises',
+                                 marker_colors=irises_colors), 2, 1)
+            fig.add_trace(go.Pie(labels=labels, values=[31, 24, 19, 18, 8], name='The Night Café',
+                                 marker_colors=cafe_colors), 2, 2)
+            fig.update_traces(hoverinfo = 'label + percent + name, textinfo = 'none')
+            fig.update_layout(title = 'Van Gogh : 5 Most Prominent Color Shown Proportionally',
+                            showlegend = False, width = 800, height = 500)
+            fig = go.Figure(fig)
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/pie_14.png'%}">
+        <h2 style = "color: blue">Plot Chart With Area Proportional to Total Count</h2>
+        <li>Plots in the same scalegroup are represented with an area proportional to their total size.</li>
+        <pre>
+            labels = ['Asia', 'Europe', 'Africa', 'Americas', 'Oceania']
+            fig = make_subplots(rows = 1, cols = 2, specs = [[{'type': 'domain'}, {'type': 'domain'}]],
+                                subplot_titles = ['1980', '2007'])
+            fig.add_trace(go.Pie(labels = labels, values = [4, 7, 1, 7, .5], name = 'World GDP 1980', scalegroup = 'one'), 1, 1)
+            fig.add_trace(go.Pie(labels = labels, values = [21, 15, 3, 19, 1], name = 'World GDP 2007', scalegroup = 'one'), 1, 2)
+            fig.update_layout(title = 'World GDP')
+            fig = go.Figure(fig)
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/pie_15.png'%}">
+        <h2 style = "color: blue">Sunburst Charts</h2>
+        <li>For multi-level pie charts representing hierarchical data, you can use the Sunburst chart.</li>
+        <pre>
+            fig = go.Figure(go.Sunburst(    labels=["Eve", "Cain", "Seth", "Enos", "Noam", "Abel", "Awan", "Enoch", "Azura"],
+                                            parents=["", "Eve", "Eve", "Seth", "Seth", "Eve", "Eve", "Awan", "Eve" ],
+                                            values=[10, 14, 12, 10, 2, 6, 6, 4, 4]))
+            fig.update_layout(margin = {'t':0, 'l':0, 'r':0, 'b':0}
+            fig.show()
+        </pre>
+        <img src="{% static 'IMG/pie_16.png'%}">
+        <h2 style = "color: blue">Dash</h2>
+        <li>Dash is an open-source framework for building analytical applications, with no jsscript required, and it is tightly integrated<br>
+            with the plotly graphing library.</li>
+        <pre>
+            import dash
+            from dash import dcc
+            from dash import html
+            fig = go.Figure(go.Pie(...))
+            app = dash.Dash()
+            app.layout = html.Div([dcc.Graph(figure = fig)])
+            app.run_server(debug = True, use_reloader = False) # turn off re-loader when inside Jupyter
+        </pre>
+    </ul>
+</body>
+</html>

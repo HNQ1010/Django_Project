@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>COOK BOOK</title>
+</head>
+<body>
+<h1 style="text-align:center">COOKBOOK</h1>
+<h1 style="color:blue">Idioms</h1>
+<ul>
+    <h2 style="color:red">If-then</h2>
+    <ul>
+        <pre>
+            df = pd.DataFrame({'AAA': [4,5,6,7], 'BBB': [10,20,30,40], 'CCC': [100, 50, -30, -50]})
+            df.loc[df['AAA'] >= 5, 'BBB'] = 1
+            df.loc[df['AAA'] >= 5, ['BBB', 'CCC']] = 555
+            df.loc[df.AAA < 5, ['BBB', 'CCC']] = 2000
+            df_mask = pd.DataFrame({'AAA': [True] * 4, 'BBB': [False]*4, 'CCC': [True, False] * 2})
+            df.where(df_mask, -1000)
+        </pre>
+        <pre>
+            df = pd.DataFrame({'AA': [4,5,6,7], 'BBB':[10, 20, 30, 40], 'CCC': [100, 50, -30, -50]})
+            df['logic'] = np.where(df.AAA > 5, 'high', 'low')
+        </pre>
+    </ul>
+    <h2 style="color:red">Splitting</h2>
+    <ul>
+        <pre>
+            df = pd.DataFrame({'AAA': [4,5,6,7], 'BBB': [10,20,30,40], 'CCC': [100, 50, -30, -50]})
+            df[df.AAA <=5]
+            df[df.AAA > 5]
+        </pre>
+    </ul>
+    <h2 style="color:red">Building criteria</h2>
+    <ul>
+        <pre>
+            df = pd.DataFrame({'AAA': [4,5,6,7], 'BBB': [10, 20, 30, 40], 'CCC': [100, 50, -30, -50]})
+            df.loc[(df.BBB < 25) & (df.CCC >= -40), 'AAA']
+            df.loc[(df.BBB > 25 | df.CCC >=40), 'AAA']
+            df.loc[(df.BBB > 25) | (df.CCC >= 75), 'AAA'] = 0.1
+            aValue = 43.0
+            (df.CCC - aValue).abs().argsort() # return integer indices that sorted index
+            Out[]:
+            0    1
+            1    0
+            2    2
+            3    3
+            df.loc[(df.CCC - aValue).abs().argsort()] # df.loc[[1,0,2,3]]
+            Crit1 = df.AAA <= 5.5
+            Crit2 = df.BBB == 10.0
+            Crit3 = df.CCC > -40.0
+            AllCrit = Crit1 & Crit2 & Crit3
+            Out[]:
+            0     True
+            1    False
+            2    False
+            3    False
+            dtype: bool
+
+            import functools
+            CritList = [Crit1, Crit2, Crit3]
+            AllCrit = functools.reduce(lambda x, y: x&y, CritList)
+            df[AllCrit]
+        </pre>
+    </ul>
+</ul>
+<h1 style="color:blue">Selection</h1>
+<ul>
+    <h2 style="color:red">DataFrames</h2>
+    <ul>
+        <li>There are 2 explicit slicing methods, with a third general case.</li>
+        <ul>
+            <li>1. Positional-oriented (Python slicing style: exclusive of end).</li>
+            <li>2. Label-oriented (Non-Python slicing style: inclusive od end).</li>
+            <li>3. General (Either slicing style: depends on if the slice contains labels or positions).</li>
+        </ul>
+        <li>Ambiguity arises when an index consists of integers with a non-zero start or non-unit increment.</li>
+        <pre>
+            df = pd.DataFrame({'AAA': [4,5,6,7], 'BBB': [10,20,30,40], 'CCC': [100, 50, -30, -50]})
+            df[(df.AAA <=6) * (df.index.isin([0,2,4])]
+            df.index = 'foo bar boo kar'.split()
+            df.loc['bar': 'kar']
+            data = {'AAA': [4,5,6,7], 'BBB': [10,20,30,40], 'CCC': [100, 50, -30, -50]}
+            df2 = pd.DataFrame(data, index=[1,2,3,4])
+            df2.iloc[1:3] # position 1 to 3
+            df2.loc[1:3] # label 1 to 3 (include the end)
+            df[~((df.AAA <= 6) & (df.index.isin([0,2,4])))]
+        </pre>
+    </ul>
+    <h2 style="color:red">New columns</h2>
+    <ul>
+        <pre>
+            df = pd.DataFrame({'AAA': [1,2,1,3], 'BBB': [1,1,2,2], 'CCC': [2,1,3,1]})
+            source_cols = df.columns
+            new_cols = [str(x) + '_cat' for x in sour_cols]
+            categories = {1: 'Alpha', 2: 'Beta', 3: 'Charlie'}
+            df[new_cols] = df[source_cols].applymap(categories.get)
+            Out[]:
+               AAA  BBB  CCC  AAA_cat BBB_cat  CCC_cat
+            0    1    1    2    Alpha   Alpha     Beta
+            1    2    1    1     Beta   Alpha    Alpha
+            2    1    2    3    Alpha    Beta  Charlie
+            3    3    2    1  Charlie    Beta    Alpha
+
+            df = pd.DataFrame({'AAA': [1,1,1,2,2,2,3,3], 'BBB': [2,1,3,4,5,1,2,3]})
+            df.loc[df.groupby('AAA')['BBB'].idxmin()]
+            df.sort_values('BBB').groupby('AAA', as_index=False).first()
+        </pre>
+    </ul>
+</ul>
+<h1 style="color:blue">MultiIndexing</h1>
+<ul>
+    <pre>
+        df = pd.DataFrame({'One_X': [1.1, 1.1, 1.1], 'One_Y': [1.2, 1.2, 1.2],
+                            'Two_X': [1.11, 1.11, 1.11], 'Two_Y': [1.22, 1.22, 1.22, 1.22]})
+        df.index.name = 'row'
+        df.columns = pd.MultiIndex.from_tuples([tuple(c.split('_')) for c in df.columns])
+        df = df.stack(0).reset_index(1)
+        df.columns = ['Sample', 'All_X', 'All_Y']
+    </pre>
+    <h2 style="color:red">Arithmetic</h2>
+    <ul>
+        <pre>
+            cols = pd.MultiIndex.from_tuples([(x, y) for x in ['A', 'B', 'C'] for y in ['O', 'I']])
+            df = pd.DataFrame(np.random.randn(2, 6), index=['n', 'm'], columns=cols)
+            df = df.div(df['C'], level=1)
+        </pre>
+    </ul>
+    <h2 style="color:red">Slicing</h2>
+    <ul>
+        <pre>
+            coords = [('AA', 'one'), ('AA', 'six'), ('BB', 'one'), ('BB', 'two'), ('BB', 'six')]
+            index = pd.MultiIndex.from_tuples(coords)
+            df = pd.DataFrame([11, 22, 33 ,44, 55], index=index)
+            df.xs('BB', level=0, axis=0)
+            df.xs('six', level=1, axis=0)
+        </pre>
+        <pre>
+            import itertools
+            index = list(itertools.product(['Ada', 'Quinn', 'Violet'], ['Comp', 'Math', 'Sci']))
+            headr = list(itertools.product(['Exams', 'Labs'], ['I', 'IT']))
+            indx = pd.MultiIndex.from_tuples(index, names=['Student', 'Course'])
+            cols = pd.MultiIndex.from_tuple(headr)
+            data = [[70 + x + y + (x*y) % 3 for x in range(4)] for y in range(9)]
+            df = pd.DataFrame(data, indx, cols)
+            All = slice(None)
+            df.loc['Violet']
+            df.loc[(All, 'Math'), All]
+            df.loc[(slice('Ada', 'Quinn'), 'Math'), All]
+            df.loc[(All, 'math'), ('Exam')]
+            df.loc[(All, 'Math'), (All, 'IT')]
+        </pre>
+    </ul>
+    <h2 style="color:red">Sorting</h2>
+    <ul>
+        <pre>
+            df.sort_values(by = ['Labs', 'IT'], ascending=False)
+        </pre>
+    </ul>
+    <h2 style="color:red">Level</h2>
+    <ul>
+        <li>Prepending a level to a multiIndex.</li>
+        <pre>
+            df2 = pd.DataFrame({'A' : ['a1', 'a1', 'a2', 'a3'],
+                   'B' : ['b1', 'b2', 'b3', 'b4'],
+                   'Vals' : np.random.randn(4)}
+                 ).groupby(['A', 'B']).sum()
+            pd.concat({'Foo': df2})
+            pd.concat({'Foo': df2}, names=['Firstlevel'])
+        </pre>
+        <li>Flatten hierarchical columns.</li>
+        <pre>
+            import itertools
+            index = list(itertools.product(['Ada', 'Quinn', 'Violet'], ['Comp', 'Math', 'Sci']))
+            headr = list(itertools.product(['Exams', 'Labs'], ['I', 'IT']))
+            indx = pd.MultiIndex.from_tuples(index, names=['Student', 'Course'])
+            cols = pd.MultiIndex.from_tuple(headr)
+            data = [[70 + x + y + (x*y) % 3 for x in range(4)] for y in range(9)]
+            df = pd.DataFrame(data, indx, cols)
+            df.columns = df.columns.get_level_values(0)
+            df.columns = [' '.join(col).strip() for col in df.columns.values]
+            df.columns = [' '.join(col).strip() for col in df.columns]
+        </pre>
+    </ul>
+</ul>
+<h1 style="color:blue">Missing data</h1>
+<ul>
+    <pre>
+        df = pd.DataFrame(np.random.randn(6,1), index=pd.date_range('2013-08-01', periods=6, freq='B'), columns=list('A'))
+        df.loc[df.index[3], 'A'] = np.nan
+        df.reindex(df.index[::-1]).ffill()
+    </pre>
+</ul>
+<h1 style="color:blue">Grouping</h1>
+<ul>
+    <pre>
+        df = pd.DataFrame({'animal': 'cat dog cat fish dog cat cat'.split(),
+                            'size': list('SSMMMLL'),
+                            'weight': [8, 10, 11, 1, 20, 12, 12],
+                            'adult': [False] * 5 + [True] * 2})
+        df.groupby('animal').apply(lambda subf: subf['size'][subf['weight'].idxmax()])
+        gb = df.groupby(['animal'])
+        gb.get_group('cat')
+
+        def GrowUp(x):
+            avg_weight = sum(x[x['size'] == 'S'].weight * 1.5)
+            avg_weight += sum(x[x['size'] == 'M'].weight * 1.25)
+            avg_weight += sum(x[x['size'] == 'L'].weight)
+            avg_weight /= len(x)
+            return pd.Series(['L', avg_weight, True], index=['size', 'weight', 'adult'])
+        expected_df = gb.apply(GrowUp)
+    </pre>
+    <pre>
+        S = pd.Series([i / 100.0 for i in range(1, 110])
+        def cum_ret(x, y):
+            return x*(1 + y)
+        def red(x):
+            return functools.reduce(cum_ret, x, 1.0)
+        S.expanding().apply(red, raw=True)
+        df = pd.DataFrame({'A': [1,1,2,2], 'B': [1, -1, 1, 2]})
+        gb = df.groupby('A')
+        def replace(g):
+            mask = g < 0
+            return g.where(mask, g[~mask].mean())
+        gb.transform(replace)
+    </pre>
+    <pre>
+        df = pd.DataFrame({'code' : ['foo', 'bar', 'baz'] * 2, 'data': [0.16, -0.21, 0.33, 0.45, -0.59, 0.62],
+                            'flag': [False, True] * 3})
+        code_groups = df.groupby('code')
+        agg_n_sort_order = code_groups[['data']].transform(sum).sort_values(by='data')
+        sorted_df = df.loc[agg_n_sort_order.index]
+    </pre>
+    <pre>
+        rng - pd.date_range(start='2014-10-07', 'periods=10, freq='2min')
+        ts = pd.Series(data=list(range(10)), index=rng)
+        def MyCust(x):
+            if len(x) > 2:
+                return x[1] * 1.234
+            return pd.NaT
+        mhc = {'Mean': np.mean, 'Max': np.max, 'Custom': MyCust}
+        ts.resample('5min').apply(mhc)
+    </pre>
+    <pre>
+        df = pd.DataFrame({'Color': 'Red Red Red Blue'.split(), 'Value': [100, 150, 50, 50]})
+        df['Counts'] = df.groupby(['Color']).transform(len)
+    </pre>
+    <pre>
+        df = pd.DataFrame({'line_race': [10, 10, 8, 10, 10, 8], 'beyer': [99, 102, 103, 103, 88, 100]},
+                            index=['Last Gunfighter', 'Last Gunfighter', 'Last Gunfighter', 'Paynter', 'Paynter', 'Paynter'])
+        df['beyer_shifted'] = df.groupby(level=0)['beyer'].shift(1)
+    </pre>
+    <pre>
+        df = pd.DataFrame({"host": ["other", "other", "that", "this", "this"],
+                            "service": ["mail", "web", "mail", "mail", "web"],
+                            "no": [1, 2, 1, 2, 1]}).set_index(["host", "service"])
+        mask = df.groupby(level=0).agg('idxmax')
+        df_count = df.loc[mask['no']].reset_index()
+    </pre>
+    <pre>
+        df = pd.DataFrame([0,1,0,1,1,1,0,1,1], columns=['A'])
+        df['A'].groupby(df['A'] != df['A'].shift()).cumsum()).groups
+        df['A'].groupby((df['A'] != df['A'].shift()).cumsum()).cumsum()
+    </pre>
+    <h2 style="color:red">Expanding data</h2>
+    <ul>
+        <li>Alignment and to_date.</li>
+        <pre>
+            df = pd.DataFrame({'Basket': [88, 88, 88, 123, 477, 477, 566],
+            #                   'Sale' : pd.Series([15, 30, 15, 90, 88, 57, 90], dtype='string'),
+                                'Sale' : [15, 30, 15, 90, 88, 57, 90],
+                                'Date': pd.to_datetime(['3/01/2012', '11/02/2012', '16/08/2012', '18/06/2012', '19/08/2012', '11/12/2012', '06/07/2012'])})
+            # df.Sale[:] = '$' + df.Sale[:]
+            # df
+
+            def handler(grouped):
+                se = grouped.set_index('Date')['Sale'].sort_index()
+                return pd.concat({ 'MeanToDate': se.expanding().mean(),
+                                'MaxToDate': se.cummax(),
+                                'SaleCount': se.expanding().count(),
+                                'PrevSale': se.shift()}, axis=1)
+            new_df = df.groupby('Basket').apply(handler).reset_index()
+            new_df
+        </pre>
+        <li>Rolling computation window based on values instead of counts.</li>
+        <li>Rolling mean by Time intervals.</li>
+    <h2 style="color:red">Splitting</h2>
+    <ul>
+        <pre>
+            df= pd.DataFrame({'Case': list('AAABAABAA'), 'Data': np.random.randn(9)})
+            dfs = list(zip(*df.groupby((1*(df['Case'] == 'B')).cumsum().rolling(window=3, min_periods=1).median())))[-1]
+            dfs[0]
+            dfs[1]
+            dfs[2]
+        </pre>
+    </ul>
+    <h2 style="color:red">Pivot</h2>
+    <ul>
+        <pre>
+            df = pd.DataFrame({'Province': ['ON', 'QC', 'BC', 'AL', 'AL', 'MN', 'ON'],
+                                'City': ['Toronto', 'Montreal', 'Vancouver', 'Calgary', 'Edmonton', 'Winnipeg', 'Windsor'],
+                                'Sale': [13, 6, 16, 8, 4, 3, 1]})
+            table = df.pivot_table(values='Sale', index='Province', columns='City', aggfunc='sum', margins=True)
+            table.stack('City')
+        </pre>
+        <pre>
+            df = pd.DataFrame({'value': np.random.randn(36)}, index=pd.date_range('2011-01-01', freq='M', periods=36)
+            df.pivot_table(index=df.index.month, columns=df.index.year, values='value', aggfunc='sum')
+            df.pivot_table(index=df.index, columns=df.index.year, values='value', aggfunc='sum').resample('3M').sum()
+        </pre>
+    </ul>
+    <h2 style="color:red">Apply</h2>
+    <ul>
+        <pre>
+            df = pd.DataFrame({'A': [[2,4,8,15], [100,200], [10,20,30]],
+                                'B': [list('abc'), 'jj kk'.split(), ['ccc']]}, index='I II III'.split())
+            def SeriesFromSibList(aList):
+                return pd.Series(aList)
+            df_orgz = pd.concat({ind: row.apply(SeriesFromSubList) for ind, row in df.iterrows()})
+            df_orgz
+        </pre>
+        <pre>
+            df = pd.DataFrame(np.random.randn(2000,2)/ 10000, index=pd.date_range('2001-01-01', periods=2000), columns=list('AB'))
+            def gm(df, const):
+                v = ((((df['A'] + df['B']) + 1).cumprod()) - 1) * const
+                return v.iloc[-1]
+            s = pd.Series({df.index[i]: gm(df.iloc[i: min(i + 51, len(df) -1)], 5) for i in range(len(df) - 50)})
+            s
+        </pre>
+        <pre>
+            rng = pd.date_range(start='2014-01-01', periods=100)
+            df = pd.DataFrame({'Open': np.random.randn(len(rng)),
+                                'Close': np.random.randn(len(rng)),
+                                'Volume': np.random.randint(100, 2000, len(rng))}, index=rng)
+            def vmap(bars):
+                return (bars.Close * bars.Volume).sum() / bars.Volume.sum()
+            window = 5
+            s = pd.concat([(pd.Series(vmap(df.iloc[i: i + window]), index=[df.index[i + window]])) for i in range(len(df) - window)])
+            s.round(2)
+        </pre>
+    </ul>
+    </ul>
+</ul>
+</body>
+</html>

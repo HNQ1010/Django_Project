@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css\style.css'%}">
+    <meta charset="UTF-8">
+    <title>NUMPY</title>
+</head>
+<body>
+<h1 style="color:blue; text-align:center">NUMPY QUICKSTART</h1>
+    <h2>Learning Object</h2>
+        <ul>
+        <li>Understand the difference between 1-, 2- and n-dimensional (n>2) arrays in Python.</li>
+        <li>Understand how to apply some linear algebra operations to n-dimensional arrays without using for-loops.</li>
+        <li>Understand axis and shape properties for n-dimensional arrays.</li>
+        </ul>
+    <h2>The Basics</h2>
+        <ul>
+            <li>Numpy's main object is the homogeneous multi-dimensional array.</li>
+            <li>It is a table of elements(usually numbers), all of the same type, indexed by a tuple of non-negative integers.</li>
+            <li>In NUMPY dimensions are called axes.</li>
+            <li>For example:</li>
+    <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+    [1, 2, 1]
+    </textarea>
+    <ul>
+        <li>This is the coordinates of a point in 3D space.</li>
+        <li>It has one axis.</li>
+        <li>That axis has 3 elements in it, so we say it has a length of 3.</li>
+    </ul>
+    <textarea rows= "5" cols="50" style="color:#1F0221; font-family:Times New Roman">
+    [
+    [1., 0., 0.],
+    [0., 1., 0.]
+    ]
+    </textarea>
+        <ul>
+        <li>3D space.</li>
+        <li>2 axes.</li>
+        <li>The first axis has length of 2, the second axis has length of 3.</li>
+        </ul>
+        <li>Numpy's array class is called ndarray. It is also known by the alias array.</li>
+        <li style="color:blue"><b>numpy.array</b> is not the same as the Standard Python library class <b>array.array</b><br>
+        , which only handles one-dimensional arrays and offers less functionality.</li>
+        <li>The more important attributes of an <b>ndarray</b> object are:</li>
+        <ul>
+        <li><b>.ndim</b> : the number of axes (dimensions) of the array.</li>
+        <li><b>.shape</b> : this is a tuple of integers indicating the size of the array in each dimension, or is called <br>
+        the dimensions of the array. For the matrix with n rows and m columns, teh shape will be (n,m). The length of the shape tuple <br>
+        is therefore the number of axes, ndim.</li>
+        <li><b>.size</b> : the total number of elements of the array. This is equal to the product of the elements of shape.</li>
+        <li><b>dtype</b> : an object describing the type of the elements in the array. One can create or specify dtype's using <br>
+        standard Python types. Additionally Numpy provides types of its own : <b>int32, int16, and float64</b> are some examples.</li>
+        <li><b>.itemsize</b> : the size in bytes of each element of the array. For examples: float64 is 8 byte(64/8), complex32 is 4 bytes(32/8).<br>
+        <b style="color:blue">It's equivalent to .dtype.itemsize.</b></li>
+        <li><b>.data</b> : the buffer containing the actual elements of the array. Normally, we won't need to use this attribute because we'll <br>
+        access the elements in an array using indexing facilities.</li>
+        <h3 style="color:red">1) Array Creation</h3>
+        <ul>
+        <li>There are several ways to create an array:</li>
+        <ul>
+        <li>You can create an array from a regular Python list or tuple using the array function. The type of the resulting array is deduced<br>
+        from the type of the elements in the sequences.</li>
+        <textarea rows= "8" cols="50" style="color:#1F0221; font-family:Times New Roman">
+        >>>import numpy as np
+        >>>a = np.array([2, 3, 4])
+        >>>a
+        array([2, 3, 4])
+        >>>a.dtype
+        dtype('int64')
+        >>>
+        </textarea>
+        <li>A frequent error consists in calling array with multiple arguments, rather than providing a single sequence as an argument.</li>
+        <textarea rows= "8" cols="50" style="color:#1F0221; font-family:Times New Roman">
+        >>>a = np.array(2, 3, 4)    # WRONG
+        >>>a = np.array([2, 3, 4])  # RIGHT
+        </textarea>
+        <li><b>array</b> transforms sequences of sequences into two-dimensional arrays, sequences of sequences of sequences into three-dimensional arrays, and so on.</li>
+        <textarea rows= "13" cols="100" style="color:#1F0221; font-family:Times New Roman">
+        >>>a = np.array([(1.5, 2, 3), (4, 5, 6)])       # 2-dimensional
+        >>>b = np.array([[1, 2], [3, 4]], dtype='complex')  # 2-dimensional
+        >>>print(a)
+        >>>print(b)
+        array([
+            [1.5, 2., 3.],
+            [4., 5., 6.]
+                ])
+        array([
+            [1. + 0.j, 2. + 0.j],
+            [3. + 0.j, 4. + 0.j]
+                ])
+        </textarea>
+        <li>The type of the array can also be explicit as the example above.</li>
+        <li>Often, the elements of an array are originally unknown, but its size is known.<b style="color:blue">Hence,<br>
+        Numpy offers several functions to create arrays with initial placeholder content.</b> These minimize the necessity of <br>
+        growing arrays, an expensive operation.</li>
+        <ul>
+        <li><b>zeros</b> : creates an array full of zeros.</li>
+        <li><b>ones</b> : creates an array full of ones.</li>
+        <li><b>empty</b> : creates an array whose initial content is random and depends on the state of the memory.</li>
+        <li>By default, the type of these arrays is float64, but it can be specify via the keyword <b>dtype</b>.</li>
+        </ul>
+        <textarea rows= "9" cols="50" style="color:#1F0221; font-family:Times New Roman">
+        >>>a = np.zeros(2,3)
+        >>>b = np.ones(2,2)
+        >>>print(a)
+        >>>print(b)
+        array([ [0, 0, 0],
+            [0, 0, 0]])
+        array([ [1, 1],
+            [1, 1]])
+        </textarea>
+        <li>To create a sequence of numbers, Numpy provides the <b>arange</b> function which is analogous to the Python built-in <b>range</b>, but returns an array.</li>
+        <textarea rows= "5" cols="50" style="color:#1F0221; font-family:Times New Roman">
+        >>>np.arange(10,30,5)
+        array([10, 15, 20, 25])
+        >>>np.arange(0, 2, 0.3)
+        array([0, 0.3, 0.6, 0.9, 1.2, 1.5, 1.8])
+        </textarea>
+        <li>When <b>arange</b> is used with floating arguments, it is generally not possible to predict the number of elements obtained, <br>
+        due to the finite floating point precision.<b>For this reason, it's better to use the function <span style="color:red">linspace</span> that receives as an <br>
+        argument the number of elements that we want, instead of step:</b></li>
+        <textarea rows= "8" cols="50" style="color:#1F0221; font-family:Times New Roman">
+        >>>from numpy import pi
+        >>>np.linspace(0,2,9)
+        # 9 numbers from 0 to 2
+        array([0., 0.25, 0.5, 0.75, 1., 1,25, 1.5, 1.75])
+        x = np.linspace(0, 2*pi, 100)
+        # useful to evaluate function at lot of points
+        f = np.sin(x)
+        </textarea>
+        <li style="color:red"><b>See also: zeros_like, ones_like, empty_like, numpy.random.Generator.rand, numpy.random.Generator.randn, fromfunction, fromfile.</b></li>
+        </ul>
+        </ul>
+        <h3 style="color:red">2) Printing Arrays</h3>
+        <ul>
+        <li>When printing an array, Numpy displays it in a similar way to nested list, but with the layout:</li>
+        <ul>
+        <li>The last axis is printed from left to right.</li>
+        <li>The second to last is printed from top to bottom.</li>
+        <li>The rest are also printed from top to bottom, with each slice separated from the next by an empty line.</li>
+        </ul>
+        <li>Using <b>reshape</b> function to print out the array as the shape you want.</li>
+        <textarea rows= "16" cols="50" style="color:#1F0221; font-family:Times New Roman">
+        >>>a = np.arange(6)
+        >>>b = np.arange(12).reshape(3,4)
+        >>>c = np.arange(24).reshape(2,3,4)
+        array([0, 1, 2, 3, 4, 5])   # a: 1-d
+
+        array([ [0, 1, 2, 3],
+            [4, 5, 6, 7],       # b: 2-d
+            [8, 9, 10, 11]])
+
+        array([[[0, 1, 2, 3],
+            [4, 5, 6, 7],
+            [8, 9, 10, 11]],    # c: 3-d
+           [[12, 13, 14, 15],
+            [16, 17, 18, 19],
+            [20, 21, 22, 23]]])
+        </textarea>
+        <li>If an array too large to be printed, Numpy automatically skips the center part of the array and only prints the corners:</li>
+        <pre>
+        >>> print(np.arange(10000))
+        [   0    1    2 ... 9997 9998 9999]
+        >>>
+        >>> print(np.arange(10000).reshape(100, 100))
+        [[   0    1    2 ...   97   98   99]
+        [ 100  101  102 ...  197  198  199]
+        [ 200  201  202 ...  297  298  299]
+        ...
+        [9700 9701 9702 ... 9797 9798 9799]
+        [9800 9801 9802 ... 9897 9898 9899]
+        [9900 9901 9902 ... 9997 9998 9999]]
+        </pre>
+        <li>To disable and force Numpy to print entire array, you can change the printing options using <b>set_printoptions.</b></li>
+        <pre>
+        import sys
+        >>>.set_printoptions(threshold = sys.maxsize)
+        </pre>
+        </ul>
+        <h3 style="color:red">3) Basic Operations</h3>
+        <ul>
+        <li>Arithmetic operators on arrays apply <b>elementwise</b></li>
+        <textarea rows= "11" cols="50" style="color:#1F0221; font-family:Times New Roman">
+        >>>a = np.array([20, 30, 40, 50])
+        >>>b = np.array([4])
+        >>>print(a + b)
+        >>>print(a -b)
+        >>>print(a * b)
+        >>>print(a/b>
+        array([24, 34, 44, 54]) # a + b
+        array([16, 26, 36, 46]) # a - b
+        array([80, 120, 160, 200]) a * b
+        array([5., 7.5, 10., 12.5])
+        </textarea>
+        <li>Unlike in many matrix languages, the product operator * operates elementwise in Numpy array.<br>
+        <b style="color:blue">And the other way to perform it is using the @ operator ỏ the dot(.) function.</b></li>
+        <textarea rows= "10" cols="50" style="color:#1F0221; font-family:Times New Roman">
+        >>>a = np.ones((2, 3))
+        >>>b = np.empty((2, 3))
+        >>>a *= 3
+        >>>a
+        array([ [3, 3, 3],
+            [3, 3, 3]])
+        >>>b += a
+        array([ [fl, fl, fl],
+            [fl, fl, fl]])
+        </textarea>
+        <li>Some operators, such as += or *=, act in place to modify an existing array and create a new one.</li>
+        <li>When operating with arrays of different types, the type of the resulting array corresponds to the more general or precise one (a behavior known as upcasting).</li>
+        <textarea rows= "9" cols="50" style="color:#1F0221; font-family:Times New Roman">
+        >>>a = np.ones([3, dtyte = 'int32'])
+        #dtype: int
+        >>>b = np.linspace(0, pi, 3)
+        #dtype: float64
+        >>>c = a + b # dtype:
+        #float64
+        >>>d = np.exp(c * 1j)
+        #dtype: complex128
+        </textarea>
+        <li>Many unary operations(sum, min, max,mean, ...), are implemented as methods of the <b>ndarray</b> class.</li>
+        <textarea rows= "3" cols="50" style="color:#1F0221; font-family:Times New Roman">
+        >>>a = np.empty((2,3))
+        >>>a.sum(), a.min(), a.max()
+        </textarea>
+        <li style="color:blue">By default, these operations apply to the arrays as though it were a list of numbers, regardless of its shape.<br>
+        However, by specifying the <b>axis</b> parameter you can apply an operation along the specified axis of an array:</li>
+        <textarea rows= "5" cols="50" style="color:#1F0221; font-family:Times New Roman">
+        >>>a = np.empty((2,3))
+        >>>a.sum(axis=0) #sum of each row
+        >>>a.min(axis=1) # min of each column
+        >>>a.cumsum(axis = 0) #cumulative sum of each row
+        </textarea>
+        </ul>
+        <h3 style="color:red">4) Universal Functions</h3>
+        <ul>
+            <li>Numpy provides familiar mathematical functions(sin, cos, exp). In Numpy, these are called <b>Universal function(ufunc)</b>.</li>
+            <li>In Numpy, these functions operate element-wise on an array, producing an array as output.</li>
+            <textarea rows= "7" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                >>>b = np.arange(3)
+                >>>np.sqrt(b)
+                >>>np.exp(b)
+                array([0, 1, 2]) # b
+                array([0., 1., 1.4142156]) #sqrt(b)
+                array([1., 2.71828183, 7.3890561]) #exp(b)
+            </textarea>
+            <li style="color:red">See also: all, any, apply_along_axis, argmax, argmin, argsort, average, bincount, ceil, conj, corrcoef, cov, cross<br>
+            cumprod, cumsum, diff, dot, floor, inner, invert, lexsort, max, maximum, mean, median, min, minimum, nonzero, outer, prod, re, round, sort,<br>
+            std, sum, trace, transpose, var, vdot, vectorize, where.</li>
+        </ul>
+        <h3 style="color:red">5) Indexing, Slicing and Iterating</h3>
+            <ul>
+                <li>1-dimensional arrays can be indexed, sliced and iterated ove, much like lists and other Python sequences.</li>
+            <textarea rows= "13" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                >>>a = np.arange(10) **3
+                array([0, 1, 8 , 27, 64, 125, 216, 343, 512, 729])
+                >>>a[2] # one element
+                8
+                >>>a[2:5] # from ... to ...
+                array([8, 27, 64])
+                >>>a[::] # from start to end = a or = a[::1] (start to end step 1)
+                array([0, 1, 8, 27, 64, 125, 216, 343, 512, 729])
+                >>>a[:6:2] # from start to 6 step 2
+                array([0, 8, 64])
+                >>a[::-1] # reverse array
+                array([729, 512, 343, 216, 125, 64, 27, 8, 1, 0])
+            </textarea>
+                <li>Multi-dimensional arrays can have one index per axis. These indices are given in a tuple separated by commas:</li>
+            <textarea rows= "14" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                >>>b = np.arange(20).reshape(5,4)
+                array([ [0, 1, 2, 3],
+                        [4, 5, 6, 7],
+                        [8, 9, 10, 11],
+                        [12, 13, 14, 15],
+                        [16, 17, 18, 19]    ])
+                >>>b[2,3] # element in row 2 , column 3
+                11
+                >>>b[0:5, 1] # elements from row 0 to row 4, column 1
+                array([1, 5, 9, 13])
+                >>>b[:,1] # elements from all rows and column 1
+                array([1, 5, 9, 13, 17])
+                >>>b[1:3, :] # elements in row 0 to row 2 and all columns
+            </textarea>
+                <li>When fewer indices are provided than the number of axes, the missing indices are considered complete slices:</li>
+            <textarea rows= "9" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                >>>a = np.arange(20).reshape(5,4)
+                array([ [0, 1, 2, 3],
+                        [4, 5, 6, 7],
+                        [8, 9, 10, 11],
+                        [12, 13, 14, 15],
+                        [16, 17, 18, 19]    ])
+                >>>b[-1] # last row and all columns, it similar to b[-1, :]
+                array([16, 17, 18, 19])
+            </textarea>
+                <li>The expression within brackets in b[i] is treated as an i followed by as many instances of : as needed to represent<br>
+                the remaining axes. Numpy also allows you to write this using dots as <b>b[i, ...]</b>.</li>
+                <li style="color:blue">The dots(...) represent as many colons as needed to produce a complete indexing tuple. For example, if x is an arrays with 5 axes, then:</li>
+                <ul>
+                    <li>x[1, 2, ...] is equivalent to x[1, 2, :, :, :]</li>
+                    <li>x[..., 3] is equivalent to x[:, :, :, 3]</li>
+                    <li>x[4, ..., 5, :] is equivalent to x[4, :, :, 5, :]</li>
+                </ul>
+            <textarea rows= "11" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                >>>a = np.array([ [ [0, 1, 2],
+                                    [3, 4, 5] ],
+                                  [ [6, 7, 8],
+                                    [9, 10, 11] ] ])
+                >>>a[1, ...] # a[1]
+                array([ [6, 7, 8],
+                        [9, 10, 11]])
+                >>>a[..., 1] # similar to a[:, :, 1]
+                array([ [1, 4],
+                        [7, 10] ])
+            </textarea>
+                <li><b>Iterating </b>over multi-dimensional arrays is done with respect to the first axis.</li>
+                <li>If one wants to perform an operation on each element in the array, one can use the <b>flat</b> attribute<br>
+                    which is iterator over all the elements of the array:</li>
+            <textarea rows= "18" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                >>>a = np.array([ [ [0, 1, 2],
+                                    [3, 4, 5] ],
+                                  [ [6, 7, 8],
+                                    [9, 10, 11] ] ])
+                >>>for row in a:
+                >>>     print(row)
+                array([ [ [0, 1, 2],
+                        [3, 4, 5] ],
+                      [ [6, 7, 8],
+                        [9, 10, 11] ] ])
+                >>> for i in a.flat:
+                >>>     print(i)
+                0
+                1
+                ...
+                10
+                11
+            </textarea>
+                <li style="color:red">See also: newaxis, ndenumerate, indices</li>
+            </ul>
+        <h3 style="color:red">5) Indexing, Slicing and Iterating</h3>
+            <ul>
+            <h4 style="color:blue">Changing the shape of an array</h4>
+                <ul>
+                    <li>The shape of an array can be changed with various commands. These following commands all return the modify array, but do not change the original array.</li>
+            <textarea rows= "14" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                >>>a = np.arange(12, dtype = int) # 1-d array
+                array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+                >>>a.reshape(3, 4) # turn 1-d array to 3-d array
+                array([ [0, 1, 2, 3],
+                        [4, 5, 6, 7],
+                        [8, 9 ,10, 11] ])
+                >>>a.ravel() # returns the arrays, flattened
+                array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+                >>>a.T # transposed the array
+                array([ [0, 4, 8],
+                        [1, 5, 9],
+                        [2, 6, 10],
+                        [3, 7 ,11]])
+            </textarea>
+                    <li>The order of the elements in the array resulting from <b>ravel</b> is normally "C-style", that is, the rightmost<br>
+                        index 'changes the fastest', so the element after a[0, 0] is a[0, 1].</li>
+                    <li>If the array is reshaped to some other shape, again the array is treated as 'C-style'. Numpy normally creates<br>
+                        arrays stored in this order, so <b>ravel</b> will usually not need to copy its argument. </li>
+                    <li>But if the array was made by taking slices of another array or created with unusual options, it may be need to be copied.</li>
+                    <li>The function <b>reshape</b> and <b>ravel</b> can also be instructed, using an optional argument, to use <b>FORTRAN-style arrays</b><br>
+                        in which the leftmost index changes the fastest.</li>
+                    <li style="color:red">The reshape returns its argument with a modified shape(temporary), whereas the <b>resize</b> modifies the array itself (permanent).</li>
+                    <li>If a dimension is given as -1 in a reshaping operation, the other dimensions are automatically calculated:</li>
+            <textarea rows= "8" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                >>>a = np.arange(12, dtype = int).reshape(3,4)
+                array([ [0, 1, 2],
+                        [3, 4, 5] ])
+                >>>a.reshape(3, -1)
+                array([ [0, 1],
+                        [2, 3],
+                        [4, 5] ])
+            </textarea>
+                </ul>
+            <h4 style="color:blue">Stacking together different arrays</h4>
+                <ul>
+                    <li>Several arrays can be stacked together along different axes, but the concatenation axis must match exactly.</li>
+            <textarea rows= "17" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                >>>a = np.array([   [1, 9, 7],
+                                    [2, 5, 2]  ])
+                >>>b = np.array([   [1, 9],
+                                    [2, 8]  ])
+                >>>c = np.array([   [1, 2],
+                                    [3, 4],
+                                    [5, 6]  ])
+                >>>np.vstack((b,c)) # (a,c) and (a,b) cannot use vstack (vertical stack)
+                array([ [1, 9],
+                        [2, 8],
+                        [1, 2],
+                        [3, 4],
+                        [5, 6]  ])
+                >>>np.hstack((a,b)) # (a,c) cannot use hstack (horizontal stack)
+                array([ [9, 7, 1, 9],
+                        [5, 2, 2, 8]])
+            </textarea>
+                    <li>The function <b>column_stack</b> treats 1-d array as columns into other arrays. It's equivalent to <b>hstack</b>.</li>
+                    <li>The function <b>row_stack</b> is equivalent to <b>vstack</b>.</li>
+                    <li>1-D array after transfer also follows the rules of the <b>hstack</b> and <b>vstack</b></li>
+            <textarea rows= "15" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                >>>a = np.array([   [1, 9, 7]   ])
+                >>>b = np.array([   [2, 4, 7],
+                                    [3, 4, 8]   ])
+                >>>c = np.array([   [1, 2],
+                                    [3, 4],
+                                    [5, 6]  ])
+                >>>np.column_stack((a,c))
+                array([ [1, 1, 2],
+                        [9, 3, 4],
+                        [7, 5, 6]  ])
+                >>>np.row_stack((a,b))
+                array([ [1, 9, 7],
+                        [2, 4, 7],
+                        [3, 4, 8]   ])
+            </textarea>
+                    <li>In general, for arrays with more than two dimensions, hstack stacks along their second axes, vstack stacks along <br>
+                        their first axes, and concatenation allows for an optional arguments giving the number of the axis along which the <br>
+                        concatenation should happen.</li>
+                    <li style="color:red">In complex case, <b>r_</b>(row) and <b>c_</b>(column) are useful for creating arrays by stacking numbers along one axis.<br>
+                        They allow the use of range literal:</li>
+            <textarea rows= "11" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                >>>np.r_[1:4, 2, 4, 5]
+                array([1, 2, 3, 2, 4, 5])
+                >>>np.c_[1:4]
+                array([ [1],
+                        [2],
+                        [3]     ])
+                >>>np.c_[1:4, [10, 11, 12]]
+                array([ [1, 10],
+                        [2, 11],
+                        [3, 12]  ])
+            </textarea>
+                    <li>See also : concatenate</li>
+                </ul>
+            <h4 style="color:blue">Splitting one array into several smaller ones.</h4>
+                <ul>
+                    <li>Using <b>hsplit</b>, you can split an array along ts horizontal axis, either by specifying the number of equally shaped arrays <br>
+                    to return, or by specifying the columns after which the division should occur:</li>
+                    <li><b>vsplit</b> splits along the vertical axis, and <b>array_split</b> allows one to specify along which axis to split.</li>
+                    <li style="color:red">hsplit and vplit require the returned array having the same size, but array_split does not.</li>
+            <textarea rows= "28" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                >>>a = np.arange(12, dtype = 'int')
+                array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+                >>>a.resize(3,4)
+                array([ [0, 1, 2, 3],
+                        [4, 5, 6, 7],
+                        [8, 9 , 10, 11] ])
+                >>>np.hsplit(a, 2) # split array into smaller array by horizontal size
+                [array([[0, 1],
+                        [4, 5],
+                        [8, 9]],
+                array([ [2, 3],
+                        [6, 7],
+                        [10, 11]])]
+                >>>np.vsplit(a, 3) # split array into smaller array by vertical size
+                [array([[0, 1, 2, 3]    ]),
+                array([ [4, 5, 6, 7]    ]),
+                array([ [8, 9, 10, 11]  ])]
+                >>>np.array_split(a,3, axis =1)
+                [array([[0, 1],
+                        [4, 5],
+                        [8, 9]]),
+                array([ [2],
+                        [6],
+                        [10]]),
+                array([ [3],
+                        [7],
+                        [11]])   ]
+            </textarea>
+                </ul>
+            <h4 style="color:blue">Copy and Views</h4>
+                <ul>
+                    <li>When operating and manipulating arrays, their data is sometimes copied into a new array and sometimes not. There're three cases:</li>
+                    <h5>No Copy at All</h5>
+            <textarea rows= "10" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                >>>a = np.arange(12).reshape(3,4)
+                >>>b = a # no new object is created.
+                >>>b is a # a and b is different name of the same array
+                True
+                >>>def f(x):
+                >>>     print(id(x))
+                >>>f(a)
+                >>>id(a) # id is a unique identifier of an object.
+            </textarea>
+                    <li>Python passes mutable objects as reference, so function calls make no copy.</li>
+                    <h5>View or Shallow Copy</h5>
+                    <li>Different array objects can share the same data. The <b>view</b> method creates a new array object that looks at the same data.</li>
+                    <li>Slicing an array return a view of it.</li>
+            <textarea rows= "10" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                >>>c = a.view()
+                >>>c is a
+                False
+                >>c.base is a
+                True    # c is a view of the data owned by a
+                >>>c = c.reshape()  # a's shape doesn't change.
+                >>>c[0,3] = 1000    # a's data is changed.
+                >>>s = a[:, 1:3]    # s is a view of a
+                >>>s[:] = 10        # a's data is change, note different between s= 10 and s[:] = 10
+            </textarea>
+                    <h5>Deep Copy</h5>
+                    <li>The <b>copy</b> method makes a complete copy of the array and its data.</li>
+            <textarea rows= "7" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                >>>d = a.copy()     # new array with new data is created.
+                >>>d is a
+                False
+                >>>d.base is a
+                False   # d is completely new objects. It don't share anything with a
+                >>>d[0,0] = 99  # d's data is changed, but a's data is not changed.
+            </textarea> <br>
+            <textarea rows= "4" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                >>>a = np.arane(1000).reshape(200,5)
+                >>>b = a[:100].copy()
+                >>>del a
+            </textarea>
+                    <li>when 'del a' is executed, the memory of a will be released. In case b is used instead, a is referenced by b <br>
+                    and will persist in memory.</li>
+                </ul>
+            </ul>
+        <h3 style="color:red">6) Functions and Methods Overview</h3>
+            <ul>
+                <li><b>Array creation</b> : arange, array, copy, empty, empty_like, eye, fromfile, fromfunction, identity, linsapce,<br>
+                logspace, mgrid, ogrid, ones, one_like, r_, c_, zeros, zeros_like.</li>
+                <li><b>Conversions</b> :ndarary.astype, atleast_1d, atleast_2d, atleast_3d, mat.</li>
+                <li><b>Manipulations</b> : array_split, column_stack, concatenate, diagonal, dsplit, dstack, hsplit, hstack, ndarray.item,<br>
+                 newaxis, ravel, repeat, reshape, resize, squeeze, swapaxes, take, transpose, vsplit, vstack.</li>
+                <li><b>Questions</b> :all, any, nonzero, where.</li>
+                <li><b>Ordering</b> :argmax, argmin, argsort, max, min, ptp, search, searchsorted, sort.</li>
+                <li><b>Operations</b> : choose, compress, cumprod, cumsum, inner, ndarray.fill, imag, prod, put, putmask, real, sum.</li>
+                <li><b>Basic Statistic</b> : cov, mean, std, var.</li>
+                <li><b>Basic Linear Algebra</b> : cross, dot, outer, linalg.svd, vdot.</li>
+            </ul>
+        </ul>
+        </ul>
+    <h2>Less Basics</h2>
+        <ul>
+        <h3 style="color:red">1) Broadcasting rules</h3>
+            <ul>
+                <li>Broadcasting allows universal functions to deal in a meaningful way with inputs that do not have exactly the same shape.</li>
+                <li>The first rule of broadcasting is that if all input arrays do not have the same number of dimensions, a '1' will be repeatedly<br>
+                prepended to the shapes of the smaller arrays until all the arrays have the same number of dimensions.</li>
+                <li>The second rule of broadcasting ensures that arrays with a size of 1 along a particular dimension act as if they had the size of <br>
+                the array with the largest shape along that dimension. The value of the array element is assumed to be the same along that dimension <br>
+                for the 'broadcast' array.</li>
+                <li>After application of the broadcasting rules, the sizes of all arrays must match.</li>
+            </ul>
+        <h3 style="color:red">2) Advanced indexing and index tricks</h3>
+            <ul>
+                <li>Numpy offer more indexing facilities than regular Python sequences. In addition to indexing by integers and slices, as we saw before,<br>
+                arrays can be indexed by arrays of integers and arrays of booleans.</li>
+            <h4 style="color:blue">Indexing with Arrays of indices</h4>
+            <textarea rows= "9" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                >>>a = np.arange(12) ** 2           # array of the first 12 square number
+                >>>i = np.array([1, 1, 3, 8, 5])    # an array of 1-d
+                >>>a[i] # the elements of a at position i
+                array([1, 1, 9, 64, 25], dtype = int32)
+                >>>j = np.array([[3, 4], [7, 9]])
+                >>>a[j]     # the same shape as j and elements same as j's elements
+                array([ [9, 16],
+                        [49, 81]], dtype = int32)
+            </textarea>
+                <li>When the indexed array 'a' is multi-dimensional, a single array of indices refers to the first dimension of 'a'.</li>
+                <li>The behavior converting an image of labels into a color image using palette.</li>
+            <textarea rows= "17" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                >>>palette = np.array([ [0, 0, 0],
+                                        [255, 0, 0],
+                                        [0, 255, 0],
+                                        [0, 0, 255],
+                                        [255, 255, 255]])
+                >>>image = np.array([   [0, 1, 2, 0],
+                                        [0, 3, 4, 0]])
+                >>>palette[image]
+                array([[[0, 0, 0],
+                        [255, 0, 0],
+                        [0, 255, 0],
+                        [0, 0, 0]],
+                    [   [0, 0, 0],
+                        [0, 0, 255],
+                        [255, 255, 255],
+                        [0, 0, 0]]])
+            </textarea>
+                <li>We can also give indexes for more than one dimension. The arrays of indices for each dimension must have the same shape.</li>
+            <textarea rows= "22" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                >>>a = np.arange(12).reshape(3, 4)
+                array([[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11]])
+                >>>i = np.array([[0, 1], [1, 2]])   # indices for first dimension of a
+                >>>j = np.array([[2, 1], [3, 3]])   # indices for second dimension of a
+                >>>a[i]
+                array([ [[0, 1, 2, 3],
+                         [4, 5, 6, 7]],
+                        [[4, 5, 6, 7],
+                         [8, 9, 10, 11]]  ])
+                >>>a[i, j]  # i and j must have the same shape
+                array([ [2, 5],
+                        [7, 11]])
+                >>>a[i, 2]
+                array([[2, 6], [6, 10]])
+                >>>a[:, i]
+                array([ [0, 1],
+                        [1, 2]],
+                      [ [4, 5],
+                        [5, 6]],
+                      [ [8, 9],
+                        [9, 10]])
+            </textarea>
+                <li>In Python <b>arr[i, j]</b> is exactly same as <b>arr[(i, j)]</b>, so we can put i and j in a tuple and then do the indexing with that.</li>
+            <textarea rows= "4" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                >>>l = (i, j)
+                >>>a[l]
+                array([[2, 5], [7, 11]])
+            </textarea>
+                <li>However, we cannot do this by putting i and j into an array, because this array will be interpreted as indexing the first dimension of a.<br>
+                In case, we use it, use tuple instead:</li>
+            <textarea rows= "7" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                >>>s = np.array([i, j])
+                >>>a[s]     # s will be interpreted as first dimension of a
+                # To get exactly indices as i and j we use tuple(s)
+                >>>a[tuple(s)]
+                array([ [2, 5],
+                        [7, 11]])
+            </textarea>
+                <li>Another common use of indexing with arrays is the search of the maximum value of time-dependent series:</li>
+            <textarea rows= "20" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                >>>time = np.linsapce(20, 145, 5) # time scale
+                >>>data = np.sin(np.arange(20)).reshape(5,4) # 4 time-dependent series
+                >>>ind = data.argmax(axis = 0)  # index of maximum value for each series
+                >>>ind
+                array([2, 0, 3, 1])
+                # column 0- row 2
+                # column 1- row 0
+                # column 2- row 3
+                # column 3- row 1
+                >>>time_max = time[ind]
+                >>>time_max
+                array([82.5, 20., 113.75, 51.25])
+                >>>range(data.shape[1]) #.shape[1] : second axis
+                range(4)
+                >>>data_max = data[ind, range(data.shape[1])] # based on ind explanation, use this indexed axes.
+                >>>data_max
+                array([0.98935825, 0.84147098, 0.99060736, 0.6569866])
+                >>>np.all(data_max == data.max(axis = 0))
+                True
+            </textarea>
+                <li>You can also use indexing with arrays as a target to assign. However, when the list of indices contains repetitions<br>
+                , the assignment is done several times, leaving behind the last value.</li>
+            <textarea rows= "8" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                >>>a = np.arange(5)
+                >>>a[[1, 3, 4]] = 0
+                >>>a
+                array([0, 0, 2, 0, 0])
+                >>>a[[0, 0, 2]] = [0, 1, 2]
+                >>>a # a received the last value at position 0, 1 instead of 0
+                array([1, 0, 1, 0, 0])
+            </textarea>
+                <li>But notice that, if you use the <b>+=</b> construct, Python will treat a += 1 is equivalent to a = a +1.</li>
+            <textarea rows= "5" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                >>>a = np.arange(5)
+                >>>a[[0, 0, 2]] += 1
+                >>>a # a simply plus 1 at these position
+                array([1, 1, 3, 3, 4])
+            </textarea>
+            <h4 style="color:blue">Indexing with Boolean Arrays</h4>
+            <li>When we index arrays with arrays of (integer) indices, we are providing the list of indices to pick. With boolean indices<br>
+             the approach is different. We explicitly choose which items in the arrays we want and which ones we don't.</li>
+            <li>The most natural way one can think of for boolean indexing is to use boolean arrays that have the same shape as the original array:</li>
+            <textarea rows= "14" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                >>>a = np.arange(12).reshape(3,4)
+                >>>b = a>4
+                >>>b
+                array([ [False, False, False, False],
+                        [False, True, True, True],
+                        [True, True, True, True]])
+                >>>a[b]     # 1-d array from a with the selected of b
+                array([5, 6, 7, 8, 9, 10, 11])
+                >>>a[b] = 0
+                >>>a
+                array([ [0, 1, 2, 3],
+                        [4, 0, 0, 0],
+                        [0, 0, 0, 0]])
+            </textarea>
+            <li>An example about how to use boolean indexing to generate an image of the Mandelbrot set:</li>
+            <textarea rows= "20" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                >>>import numpy as np
+                >>>import matplotlib.pyplot as plt
+                >>>def mandelbrot(h, w, maxit = 20, r =2):
+                >>>     """Return an image of the Mandelbrot fractal of size (h, w)."""
+                >>>     x = np.linspace(-2.5, 1.5, 4*h + 1)
+                >>>     y = np.linspace(-1.5, 1.5, 3*w + 1)
+                >>>     A, B = meshgrid(x, y) # return coordinator of A and B
+                >>>     C = A + B*1j
+                >>>     z = np.zeros_like(C)
+                >>>     divtime = maxit + np.zeros(z.shape, dtype = int)
+                >>>
+                >>>     for i in range(maxit):
+                >>>         z = z**2 + C
+                >>>         diverge = abs(z) > r        # who is dilivering
+                >>>         div_now = diverge & (divtime == maxit) #Who is dilivering now
+                >>>         divtime[dive_now] = i   # note when
+                >>>         z[diverge] = r      # avoid diverging too much
+                >>>     return divtime
+                >>>plt.imshow(mandelbrot(400, 400)
+            </textarea>
+            <li>The second way of indexing with booleans is more similar to integer indexing. For each dimension of the array we give<br>
+             a 1-d boolean array selecting the slices we want:</li>
+            <textarea rows= "16" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                >>>a = np.arange(12).reshape(3,4)
+                >>>b1 = np.array([False, True, True])   # first dim selection
+                >>>b2 = np.array([True, False, True, False])    # second dim selection
+                >>>a[b1]    # get rows at True
+                array([ [4, 5, 6, 7],
+                        [8, 9, 10, 11]])
+                >>>a[b1, :] # same as a[b1]
+                array([ [4, 5, 6, 7],
+                        [8, 9, 10, 11]])
+                >>>a[:, b2]     # get columns at True
+                array([ [0, 2],
+                        [4, 6],
+                        [8, 10] ])
+                >>>a[b1, b2] # it similar to a[(1,2), (0,2)]
+                >>>array([[4, 10]])
+            </textarea>
+            <li>Note that the length of 1-d array must coincide with the length of the dimension (or axis) you want to slice.</li>
+            <h4 style="color:blue">The ix_() function</h4>
+            <li>The <b>ix_</b> function can be used to combine different vectors so as to obtain the result for each n-uplet.</li>
+            <textarea rows= "18" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                >>>a = np.array([2, 3, 4, 5]) # shape(4,)
+                >>>b = np.array([8, 5, 4])  #shape(3,)
+                >>>c = np.array([5, 4, 6, 8, 3]) #shape(5)
+                >>>ax, bx, cx = np.ix_(a, b, c)
+                >>>ax
+                array([ [[2]],
+                        [[3]],
+                        [[4]],
+                        [[5]]   ])
+                >>>bx
+                array([[[8],
+                        [5],
+                        [4]]])
+                >>>cx
+                array([[[5, 4, 6, 8, 3]]])
+                >>>ax.shape, bx.shape, cx.shape
+                (4, 1, 1), (1, 3, 1), (1, 1, 5)
+            </textarea>
+            <li>You could also implement the reduce as follows:</li>
+            <textarea rows= "8" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                >>>def ufunc_reduce(ufuct, *vectors):
+                >>>     vs = np.ix_(*vector) # combines vectors
+                >>>     r = ufuct.identity   # set original value
+                >>>     for v in vs:        # get each vector
+                >>>         r = ufunct(r, v) #calculate result by ufunct(add, multiply, ...)
+                >>>ufunc(np.add, a, b, c)
+            </textarea>
+            <li>The advantage of this verion of reduce compared to the normal ufunc. reduce is that it makes use of the broadcasting rules <br>
+            in order to avoid creating an argument array the size of the output times the number of vectors.</li>
+            </ul>
+        </ul>
+    <h2 style="color:red">Tips and Tricks</h2>
+        <ul>
+        <h3 style="color:red">1) Automatic Reshaping : use -1 for the axis that you want</h3>
+            <textarea rows= "5" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                >>>a = np.arange(30)
+                >>>b = a.reshape(-1)
+                >>>c = a.reshape(3, -1)
+                >>>d = a.reshape(3, 2, -1)
+            </textarea>
+        <h3 style="color:red">2) Vector Stacking</h3>
+            <li>Construct 2-d array from a list of equally-size row vectors: in MATLAB, we use m = [x; y], in Numpy, we use stacks methods.</li>
+        <h3 style="color:red">3) Histogram</h3>
+            <li>The Numpy <b>histogram</b> function applied to an array returns a pair of vectors: the histogram of the array and a vector of the bin edges.</li>
+            <li><b>matplotlib</b> also has a function to build histograms (call hist), as in Matlab) that differs from the one in Numpy.</li>
+            <li>The main difference is that <b>pylab.hist</b> plots the histogram automatically, while <b>numpy.histogram</b> only generates the data.</li>
+            <textarea rows= "10" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                >>>rg = np.random.default_rng(1)
+                >>>mu, sigma = 2, 0.5
+                # Build a vector of 10000 normal deviates with variance 0.5 ^2 and mean 2
+                >>>v = rg.normal(mu, sigma, 10000)
+                # Drawing histogram
+                >>>plt.hist(v, bins =50, density = True)
+                # Calculating hist with Numpy and then plot it
+                >>>(n, bins) = np.histogram(v, bins =50, density =True)
+                >>>plt.plot(.5 * (bins[1:] + bins[:-1]), n)
+            </textarea>
+        </ul>
+
+
+
+
+
+</body>
+</html>

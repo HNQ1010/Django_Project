@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <style>
+        h1 {color: red;}
+        h2 {color: blue;}
+        h3 {color: purple;}
+        h4 {color: green; font-size: 20px}
+    </style>
+    <meta charset="UTF-8">
+    <title>Warehouse Re-Location Project</title>
+</head>
+<body>
+    <h1 style="text-align:center">WAREHOUSE RE-LOCATION PROJECT</a></h1>
+    <ul>
+        <h3>&#9733; Issues</h3>
+            <ul>
+                <li>Address: Taiyo Nissin Building, 100, Nguyễn Thị Tư, Q9, HCM.</li>
+                <li>SG Packing warehouse is placed at inconvenience place:</li>
+                <ul>
+                    <li>The place is in a sea port area &rarr; container truck get in and out regularly &rarr; high risks for traffic.</li>
+                    <li>The place is affected by flood, sea level.</li>
+                    <li>The distance is far away from center &rarr; 3PL vendors (express) face issues when coming to the warehouse &rarr; we can't utilise vendor's services.</li>
+                    <li>Store usages are divided in different floors &rarr; goods are not concentrated in a area &rarr; make additional movement when processing goods.</li>
+                    <li>Building policies is limited in: </li>
+                    <ul>
+                        <li>Number of people that can enter into building &rarr; force us use their labor with high cost.(13.63% higher than other Vendors).</li>
+                        <li>They don't work on weekend &rarr; In case we have to operate our activities, it's a bottle neck.</li>
+                    </ul>
+                    <li>The price is quite high (140k/ m2) compare with some other places.(Tan Binh, Tan Tao, Vinh Loc industrial areas, ... &rarr;110-120k/ m2).</li>
+                    <li>The warehouse storage is not many available for receiving goods or extending for function areas (picking, packing, handover, ...) in peak days.</li>
+                    <p>&#9733; <b>Current warehouse CBM:</b></p>
+                    <table>
+                        <tr>
+                            <th>Area</th>
+                            <th>Length</th>
+                            <th>Width</th>
+                            <th>Height</th>
+                            <th>CBM</th>
+                        </tr>
+                        <tr>
+                            <td>Cool Warehouse</td>
+                            <td>25</td>
+                            <td>14</td>
+                            <td>1.2</td>
+                            <td>420</td>
+                        </tr>
+                        <tr>
+                            <td>Normal Warehouse</td>
+                            <td>24</td>
+                            <td>7</td>
+                            <td>1.2</td>
+                            <td>201.6</td>
+                        </tr>
+                        <tr>
+                            <td>Preserve Warehouse</td>
+                            <td>19</td>
+                            <td>7</td>
+                            <td>1.2</td>
+                            <td>159.6</td>
+                        </tr>
+                        <tr>
+                            <td><b>Total</b></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td>781.2</td>
+                        </tr>
+                    </table>
+                    <p>&#9733;<b>Current functions usage:</b></p>
+                    <table>
+                        <tr>
+                            <th>Area</th>
+                            <th>Length</th>
+                            <th>Width</th>
+                            <th>Height</th>
+                            <th>CBM</th>
+                        </tr>
+                        <tr>
+                            <td>Receiving</td>
+                            <td>2</td>
+                            <td>1</td>
+                            <td>1.2</td>
+                            <td>2.4</td>
+                        </tr>
+                        <tr>
+                            <td>Re-work</td>
+                            <td>4</td>
+                            <td>2</td>
+                            <td>1.2</td>
+                            <td>9.6</td>
+                        </tr>
+                        <tr>
+                            <td>Waiting for QC</td>
+                            <td>6</td>
+                            <td>2</td>
+                            <td>1.2</td>
+                            <td>14.4</td>
+                        </tr>
+                        <tr>
+                            <td>Packaging</td>
+                            <td>6</td>
+                            <td>3</td>
+                            <td>1.2</td>
+                            <td>21.6</td>
+                        </tr>
+                        <tr>
+                            <td>Handover</td>
+                            <td>4</td>
+                            <td>2</td>
+                            <td>1.2</td>
+                            <td>9.6</td>
+                        </tr>
+                        <tr>
+                            <td>Material & Stationery</td>
+                            <td>6</td>
+                            <td>3</td>
+                            <td>1.2</td>
+                            <td>21.6</td>
+                        </tr>
+                        <tr>
+                            <td>WC</td>
+                            <td>4</td>
+                            <td>3</td>
+                            <td>1.2</td>
+                            <td>14.4</td>
+                        </tr>
+                        <tr>
+                            <td>Working table</td>
+                            <td>3</td>
+                            <td>2</td>
+                            <td>1.2</td>
+                            <td>7.2</td>
+                        </tr>
+                        <tr>
+                            <td>Path</td>
+                            <td>12</td>
+                            <td>10</td>
+                            <td>1.2</td>
+                            <td>144</td>
+                        </tr>
+                            <td>Path</td>
+                            <td>8</td>
+                            <td>2</td>
+                            <td>1.2</td>
+                            <td>19.2</td>
+                        </tr>
+                        <tr>
+                            <td><b>Total</b></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td>271.2</td>
+                        </tr>
+                    </table>
+                    <p>&#9733; Warehouse storage usages: 440.44 CBM</p>
+                    <p><a href="https://docs.google.com/spreadsheets/d/1mNvYcRmBsQE1k9L-vgxBFIhkoF-jqgwG/edit?usp=sharing&ouid=116641571980125233246&rtpof=true&sd=true">Document</a></p>
+                    <p>&#9733; <b>CBM Available:</b> = 781.2 - (271.2 + 440.44) = 45.56 CBM</p>
+                </ul>
+            </ul>
+        <h3>&#9733; Next steps</h3>
+            <ul>
+                <li>With disadvantages as above, moving warehouse to another location is bring us more benefits and conveniences.<br>
+                <li>The warehouse area is estimated about 2000 meter square to serve our purposes:</li>
+                <ul>
+                    <li>More space for storing good</li>
+                    <li>More space for processing goods (re-work, waiting for processing, waiting for handover area, ...)</li>
+                    <li>In parallel with improving WMS system, the warehouse operation can extend (more headcount, more volume, ..) in case we optimize costs and operation processes.</li>
+                </ul>
+            </ul>
+        <h3>&#9733; Expected Timeline</h3>
+        <ul>
+            <li>After got approval, we will find and send back the draft layout for the new warehouse location.</li>
+            <li>Expected timeline: Within next 1 month.</li>
+        </ul>
+        <h3>&#9733; Potential Locations & Indexes</h3>
+            <ul>
+                <table>
+                    <tr>
+                        <th>Indexes</th>
+                        <th>Location</th>
+                    </tr>
+                    <tr>
+                        <td><b style="font-size:20px; color:red">Descriptions</b></td>
+                    </tr>
+                    <tr>
+                        <td>Address</td>
+                        <td>100, Trần Đại Nghĩa, P.Tân Tạo A, Bình Tân, HCM</td>
+                    </tr>
+                    <tr>
+                        <td>Area</td>
+                        <td>3000 m<sup>2</sup><br>
+                        <ul>
+                            <li>1700 m<sup>2</sup> warehouse</li>
+                            <li>300 * 3 = 900 m <sup>2</sup> office</li>
+                            <li>400 m<sup>2</sup> paths, function areas</li>
+                        </ul></td>
+                    </tr>
+                    <tr>
+                        <td>Rental fee</td>
+                        <td>
+                            <ul>
+                            <li>250 mil/ month &rarr; 83.333/ m<sup>2</sup>/ month</li>
+                            <li>If pay the whole (5 years): 220 mil/ month &rarr; 73.333/ m<sup>2</sup>/ month</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>% per year (increasing fee)</td>
+                        <td>10% each 2 years</td>
+                    </tr>
+                    <tr>
+                        <td>Deposit</td>
+                        <td>2 months</td>
+                    </tr>
+                    <tr>
+                        <td>Floor</td>
+                        <td><ul>
+                            <li>Warehouse: 1 floor</li>
+                            <li>Office: 3 floors</li>
+                        </ul></td>
+                    </tr>
+                    <tr>
+                        <td>Height</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><b style="font-size:20px; color:red">Conditions</b></td>
+                    </tr>
+                    <tr>
+                        <td>Traffic</td>
+                        <td>Normal traffic in rush hours</td>
+                    </tr>
+                    <tr>
+                        <td>Vehicle's active time (Cont, Truck, Van, ...)</td>
+                        <td>24/24</td>
+                    </tr>
+                    <tr>
+                        <td>3PL Vendors</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Weather conditions</td>
+                        <td>Not involve in sea level</td>
+                    </tr>
+                    <tr>
+                        <td>To Center</td>
+                        <td>Near districts: 5,6,8,1,2,Tân Bình,Thủ Đức</td>
+                    </tr>
+                    <tr>
+                        <td><b style="font-size:20px; color:red">Conclusions</b></td>
+                    </tr>
+                    <tr>
+                        <td>Advantages</td>
+                        <td><ul>
+                            <li>Rental fee: Cheap compare with market price (because landlord just want to rent out for a person/ organization,<br>
+                                they don't want to split out to many spaces).</li>
+                            <li>Conditions: <ul>
+                                <li>Warehouse: Like new, wide, high, ventilating,... </li>
+                                <li>Office: Full of functions: Working space, meeting room, functions area</li>
+                            </ul></li>
+                        </ul></td>
+                    </tr>
+                    <tr>
+                        <td>Disadvantages</td>
+                        <td><ul>
+                            <li>Less use of office part, but can be used in the future.</li>
+                            <li>Don't have particular estimated timeline for new system (WMS) and products(SKUs number) in the near future.</li>
+                            <li>Office is fixing and will be completed at the end of Dec.2022</li>
+                        </ul>
+                        </td>
+                    </tr>
+                </table><br>
+                    <video width="600" height="350" controls>
+                    <source src="{% static 'IMG/IMG_1247.MOV'%}" type="video/webm">
+                    </video>
+                    <video width="600" height="350" controls>
+                    <source src="{% static 'IMG/IMG_1248.webm'%}" type="video/webm">
+                    </video>
+            </ul>
+        <h3>&#9733; Cost Per Unit</h3>
+        <ul>
+            <p>The <a href="https://docs.google.com/spreadsheets/d/1cRWoaCPyiFgX5WzNZkMsmgX9Cbwn2kc-/edit#gid=963955855">link</a> here.</a></p>
+            <img src="{% static 'IMG/cost4.png'%}">
+            <img src="{% static 'IMG/cost5.png'%}">
+            <h4>&rarr; Conclusions:</h4>
+            <ul>
+                <p>&#9755; 1. Receiving workload (fixed processes) is quite complex in unloading, unpacking, QC, standardizing products &rarr; <b>cost time</b><br>
+                    Beside, Receiving cost is charged too high by building's labor.(10-15 times higher than 3PL's receiving cost per item) &rarr; <b>high cost.</b></p>
+                <p>&#9755; 2. <a href="wms">WMS don't support much for current processes or larger volume </a>  &rarr; <b>less workload but more headcount.</b></p>
+                <ul>
+                    <li>Compare productivity FFM and current in-house (orders/ person/ month).</li>
+                    <table>
+                        <tr style="color: Green; text-align:center"><b>
+                            <th>FFM</th>
+                            <th>In-House</th></b>
+                        </tr>
+                        <tr style="text-align: center">
+                            <td>5000 - 8000</td>
+                            <td>1815 - 2960</td>
+                        </tr>
+                    </table>
+                    <li>Fixed processing cycle (instead of flexible picking, packing in case orders place) for picking, packing in daily routine.</li>
+                    <li>Picking, packing are still manual processes: paper list for picking, B2B list doesn't have product's locations (keep in mind for product's locations).</li>
+                </ul>
+                <p>&#9755; 3. Material cost is too high (special boxes for MKT strategies) &rarr; <b>less frequently but too high cost</b></p>
+                <p>&#9755; 4. Employee cost: not in accordance with proper productivity this time &rarr; related to WMS and at this moment, we just can optimize their productivity in some of manual workload.</p>
+                <ul>
+                    <li>Standardizing shipment products:<a href="https://docs.google.com/spreadsheets/d/1IPyUW-zBVOhc_KYF8mFDwRmAR6kpagd8bS0lCurcpnA/edit?usp=sharing">SM Report</a></li>
+                    <li>Moving stock:<a href="https://admin.lixibox.com/other/jarvis/queries/2851-ops-transaction-rate-of-the-warehouse?warehouse_name=1&start_time=2022-09-12T17%3A00%3A00%2B00%3A00&end_time=2022-10-12T16%3A59%3A59%2B00%3A00">Transaction in-out</a> </li>
+                    <li><a href="flow & procedure">Separating stock areas:</a></li>
+                    <ul>
+                        <li>Fast-moving</li>
+                        <li>Slow-moving</li>
+                    </ul>
+                </ul>
+            </ul>
+            <h4>&rarr; Insight:</h4>
+                <ul>
+                    <p>Building in-house operation for managing and controlling security, activities, workflow, smoothies, ... between departments, we need:</p>
+                    <ul>
+                        <li>New WMS version interacting with OPS</li>
+                        <li>API with E-commerce platforms: Shoppee, Laz, Tiki, ...</li>
+                    </ul>
+                    <p>&rarr; when these things are finished, it's time our operation is scaled up.</p>
+                    <p>&rarr; We can remove 3PL's expenses.</p>
+                    <p>&rarr; Expanding our business with no confusions.</p>
+                </ul>
+            </ul>
+        </ul>
+    </ul>
+</body>
+</html>

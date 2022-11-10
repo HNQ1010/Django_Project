@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static%}
+    <link rel="stylesheet" href="{% static 'css\style.css'%}">
+    <meta charset="UTF-8">
+    <title>SQL Server Window Functions</title>
+</head>
+<body>
+<h1 style="color:red; text-align:center"><b>SQL Server Window Functions</b></h1>
+    <ul>
+        <h2 style="color:red"> SELECT - OVER Clause</h2>
+            <ul>
+                <li>Determines the partitioning and ordering of a rowset before the associated window function is applied.</li>
+                <li>The OVER clause defines a window or user-specified set of rows within a query result set.</li>
+                <li>A window function then computes a value for each row in the window. You can use OVER clause with functions that <br>
+                compute aggregated values such as moving averages, cumulative aggregates, running total, or a top N per group results.</li>
+                <li>Similar to function, window function also calculate the value as function called but it return many rows for the result.</li>
+                    <ul>
+                        <li><b>Ranking function</b></li>
+                        <li><b>Aggregate functions</b> : (See Part 8)</li>
+                        <li><b>Analytic functions</b></li>
+                        <li><b>NEXT VALUE FOR function</b></li>
+                    </ul>
+                <textarea rows= "4" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                    OVER(   [PARTITION BY clause]
+                            [ORDER BY clause]
+                            [ROW or RANGE clause])
+                </textarea>
+                    <ul>
+                        <li style="color:blue"><b>PARTITION BY</b></li>
+                            <ul>
+                                <li>Divides the query result set into partitions. The window function is applied to each partition separately and computation restarts for each partition.</li>
+                                <textarea rows= "2" cols="50" style="color:#1F0221; font-family:Times New Roman">
+                                    PARTITION BY value_expression
+                                </textarea>
+                                <li>value_expression: can only refer to columns made available by the FROM clause, and cannot refer to expression or aliases in the SELECT list.</li>
+                                <li>value_expression can be a column expression, scalar subquery, scalar function or user-defined variable.</li>
+                                    <textarea rows= "6" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                        SELECT  object_id,
+                                                type,
+                                                min = MIN(object_id) OVER( PARTITION BY type),
+                                                MAX(object_id) OVER(PARTITION BY type) as max
+                                        FROM sys.objects;
+                                    </textarea>
+                                    <pre>
+                                    object_id   type        min         max
+                                    ...         ...     ...         ...
+                                    1147151132	IT	    1019150676	1563152614
+                                    1291151645	IT	    1019150676	1563152614
+                                    1307151702	IT	    1019150676	1563152614
+                                    1323151759	IT	    1019150676	1563152614
+                                    1339151816	IT	    1019150676	1563152614
+                                    1355151873	IT	    1019150676	1563152614
+                                    1371151930	IT	    1019150676	1563152614
+                                    1387151987	IT	    1019150676	1563152614
+                                    ...         ...     ...         ...
+                                    </pre>
+                            </ul>
+                        <li style="color:blue"><b>ORDER BY</b></li>
+                            <ul>
+                                <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    ORDER BY order_expression [COLLATE collation_name] [ASC|DESC]
+                                </textarea>
+                                <li>Defines the logical order of the rows within each partition of the result set.</li>
+                                <li>If it's not specified, the default order is ASC and applied for all rows in the partition. </li>
+                                <li>If it's specifies, and ROW/RANGE is not specified, the default of ROW/RANGE is RANGE UNBOUNDED PRECEDING AND CURRENT ROW</li>
+                                <li>order_expression: specifies a column or expression on which to sort, can only refer to columns made available by the FROM clause.</li>
+                                <li>An integer cannot be specified order_expression to represent a column name or alias.</li>
+                                <li>collation_name : specifies that ORDER BY operation should be performed according to SC, and can be Windows collation or SQL collation.<br>
+                                    COLLATE is applicable only for columns of type char, varchar, nchar, nvarchar.</li>
+                                <li>ASC|DESC : ascending|descending</li>
+                                <textarea rows= "6" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    SELECT  object_id,
+                                            type,
+                                            min = MIN(object_id) OVER( PARTITION BY type ORDER BY object_id),
+                                            MAX(object_id) OVER(PARTITION BY type ORDER BY object_id) as max
+                                    FROM sys.objects;
+                                </textarea>
+                                    <pre>
+                                    object_id   type        min         max
+                                    ...         ...     ...         ...
+                                    1083150904	IT	    1019150676	1563152614
+                                    1547152557	IT	    1019150676	1547152557
+                                    1563152614	IT	    1019150676	1563152614
+                                    2123154609	P 	    2123154609	2123154609
+                                    2139154666	P 	    2123154609	2139154666
+                                    295672101	PK	    295672101	295672101
+                                    3	        S 	    3	        3
+                                    5	        S 	    3	        5
+                                    6	        S 	    3	        6
+                                    ...         ...     ...         ...
+                                    </pre>
+                            </ul>
+                        <li style="color:blue"><b>ROW | RANGE</b></li>
+                            <ul>
+                                <textarea rows= "20" cols="150" style="color:#1F0221; font-family:Times New Roman">
+                                    ROW|RANGE [window_frame_preceding | window_frame_extend]
+                                        * window_frame_extent exist of :
+                                            + window_frame_preceding
+                                            + BETWEEN window_frame_bound AND window_frame_bound
+                                        * window_frame_bound exist of:
+                                            + window_frame_preceding
+                                            + window_frame_following
+                                        * window_frame_preceding
+                                            + UNBOUND PRECEDING
+                                            + unsigned_value_specification PRECEDING
+                                            + CURRENT ROW
+                                        * window_frame_following
+                                            + UNBOUND FOLLOWING
+                                            + unsigned_value_specification FOLLOWING
+                                            + CURRENT ROW
+                                        If window_frame_preceding is used for window_frame_extent(short syntax),
+                                        then this specification is used for window_frame_bound starting point and
+                                        end point is CURRENT ROW:
+                                    Eg: 5 preceding means BETWEEN 5 PRECEDING AND CURRENT ROW
+                                </textarea>
+                                    <ul>
+                                        <li>UNBOUNDED PRECEDING : start at the first row of the window frame.</li>
+                                        <li>unsigned_value_specification PRECEDING (not allowed for RANGE) : indicates the number of rows or values to precede the current row.</li>
+                                        <li>CURRENT ROW : starts or ends at the current row.</li>
+                                        <li>UNBOUND FOLLOWING : ends at the last row of the partition.</li>
+                                        <li>unsigned_value_specification FOLLOWING : indicates the number of rows or values to follow the current row.(not allowed for RANGE)</li>
+                                        <li>BETWEEN ... AND : specify the lower(starting) and upper(ending) boundary points of the window (within 5 options above). The lower boundary always less than the upper boundary. </li>
+                                    </ul>
+                                <li>Further limits the rows within the partition by specifying start and end points within the partition.</li>
+                                <li>It specifies a range of rows with respect to the current row either by (RANGE)logical association or (ROWS)physical association.</li>
+                                <li>The ROWS clause limit the rows within a partition by specifying a fixed number of rows preceding or following the current row.</li>
+                                <li>Alternatively, the RANGE clause logically limits the rows within a partition by specifying a range of values with respect to the value in the current row.</li>
+                                <li style="color:red"><b>RANGE ...CURRENT ROW includes all rows that have the same values in the ORDER BY expression as the current row.</b></li>
+                                <li> Option for ROW/RANGE</li>
+                                    <ul>
+                                        <li>when you use window_frame_preceding for window_frame_extend, that's also meant the begin point is PRECEDING point and end point is CURRENT ROW. <br>
+                                            For example : ROWS/ RANGE 2 PRECEDING = ROWS/RANGE BETWEEN 2 PRECEDING AND CURRENT ROW</li>
+                                        <li>when ROWS/RANGE is not specified, the function get the default is RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</li>
+                                        <li>This applies only to functions that have can accept optional ROWS/RANGE specification.(RANKING function cannot accept it).</li>
+                                        <li>RANGE cannot be used with unsigned_value_specification PRECEDING and FOLLOWING (as mention in ROW| RANGE).</li>
+                                        <h4 style="color:blue"><b>* ROWS options:</b></h4>
+                                            <ul>
+                                                <li>ROWS UNBOUNDED PRECEDING (or ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)</li>
+                                                <li>ROWS 2 PRECEDING (or ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)</li>
+                                                <li>ROWS CURRENT ROW (OR ROWS BETWEEN CURRENT ROW AND CURRENT ROW)</li>
+
+                                                <li>ROWS BETWEEN UNBOUNDED PRECEDING AND 2 PRECEDING</li>
+                                                <li>ROWS BETWEEN UNBOUNDED PRECEDING AND 2 FOLLOWING</li>
+                                                <li>ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUND FOLLOWING</li>
+
+                                                <li>ROWS BETWEEN 2 PRECEDING AND 4 PRECEDING</li>
+                                                <li>ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING</li>
+                                                <li>ROWS BETWEEN 2 PRECEDING AND UNBOUNDED FOLLOWING</li>
+
+                                                <li>ROWS BETWEEN CURRENT ROW AND 2 FOLLOWING</li>
+                                                <li>ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING</li>
+
+                                                <li>ROWS BETWEEN 2 FOLLOWING AND 4 FOLLOWING</li>
+                                                <li>ROWS BETWEEN 2 FOLLOWING AND UNBOUNDED FOLLOWING</li>
+                                            </ul>
+                                        <h4 style="color:blue"><b>* RANGE options</b></h4>
+                                            <ul>
+                                                <li>Default : RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</li>
+                                                <li>RANGE CURRENT ROW (OR RANGE BETWEEN CURRENT ROW AND CURRENT ROW)</li>
+                                                <li>RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUND FOLLOWING</li>
+                                                <li>RANGE BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING</li>
+                                            </ul>
+                                    </ul>
+                            </ul>
+                        <li style="color:red"><b>REMARKS</b></li>
+                            <ul>
+                                <li>The OVER clause cannot be used with CHECKSUM aggregate function.</li>
+                                <li>RANGE get the interval value in specified range plus the rows have the same values.</li>
+                                <li>In some case, OVER clause may not be supported.</li>
+                            </ul>
+                    </ul>
+                <h3 style="color:red">1) RANKING FUNCTIONS</h3>
+                    <ul>
+                        <li>Ranking function returns a ranking value for each row in partition. Depending on the function that is used, some rows may receive the same value as other rows.</li>
+                        <li>Raking function is non-deterministic.</li>
+                        <li>ORDER BY clause is required, and the first row in the result set based on the set of ORDER BY clause.</li>
+                            <ul>
+                                <li><b>RANK</b></li>
+                                <li><b>DENSE_RANK</b></li>
+                                <li><b>NTILE</b></li>
+                                <li><b>ROW_NUMBER</b></li>
+                            </ul>
+                        <h4 style="color:blue"><b>* RANK()</b></h4>
+                            <ul>
+                                <li>Returns the rank of each row within the partition of a result set. The rank of a row is one plus the number of ranks that come before the row in question.</li>
+                                <li>RANK() skips the number of row if they have the same value (1,2,2,4,5...)</li>
+                                <li>RANK() is a temporary value calculated when the query is run. To persist number in table, see sequence or identity property.</li>
+                                <textarea rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    RANK() OVER (   [partition_by_clause] order_by_clause)
+                                </textarea>
+                                    <ul>
+                                        <li><b>partition_by_clause</b> : divides the result set produced by the FROM clause into partitions to which the function is applied.<br>
+                                            If it's not specified, the function treats all row in the result set as single group.</li>
+                                        <li><b>order_by_clause</b> : determines the order of the data before the function is applied. <span style="color:red"> The order_by_clause is required.<br>
+                                            The ROWS/RANGE is not applied for RANK function.</span></li>
+                                        <li>Return type: bigint</li>
+                                        <li>If two or more rows tie for a rank, each tied row receives the the same rank.</li>
+                                    </ul>
+                                <textarea rows= "9" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    use AdventureWork2014
+                                    SELECT Top(10) BusinessEntityID, Rate,
+                                            RANK() OVER( ORDER BY Rate DESC) RankBySalary
+                                    FROM HumanResources.EmployeePayHistory eph1
+                                    WHERE RateChangeDate = (SELECT   MAX(RateChangeDate)
+                                                            FROM HumanResources.EmployeePayHistory eph2
+                                                            WHERE eph1.BusinessEntityID = eph2.BusinessEntityID)
+                                    ORDER BY BusinessEntityID;
+                                </textarea>
+                                <pre>
+                                    BusinessEntityID Rate                  RankBySalary
+                                    ---------------- --------------------- --------------------
+                                    1	            125.50	                    1
+                                    25	            84.1346	                    2
+                                    273	            72.1154	                    3
+                                    2	            63.4615	                    4
+                                    234	            60.0962	                    5
+                                    263	            50.4808	                    6
+                                    7	            50.4808	                    6
+                                    234	            48.5577	                    8
+                                    285	            48.101	                    9
+                                    274	            48.101	                    9
+                                </pre>
+                                <textarea rows= "12" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    use AdventureWork2014
+                                    GO
+                                    SELECT i.ProductID, p.Name, i.LocationID, i.Quantity,
+                                            RANK() OVER( PARTITION BY i.LocationID
+                                                            ORDER BY i.Quantity DESC) rank
+                                    FROM Production.ProductInventory i
+                                    INNER JOIN Production.Product p
+                                        ON i.ProductID = p.ProductID
+                                    WHERE i.LocationID BETWEEN 3 AND 4
+                                    ORDER BY i.LocationID;
+                                    GO
+                                </textarea>
+                                <pre>
+                                    ProductID   Name                   LocationID   Quantity Rank
+                                    ----------- ---------------------- ------------ -------- ----
+                                    494         Paint - Silver         3            49       1
+                                    495         Paint - Blue           3            49       1
+                                    493         Paint - Red            3            41       3
+                                    496         Paint - Yellow         3            30       4
+                                    492         Paint - Black          3            17       5
+                                    495         Paint - Blue           4            35       1
+                                    496         Paint - Yellow         4            25       2
+                                    493         Paint - Red            4            24       3
+                                    492         Paint - Black          4            14       4
+                                    494         Paint - Silver         4            12       5
+                                     (10 row(s) affected)
+                                </pre>
+                            </ul>
+                        <h4 style="color:blue"><b>* DENSE_RANK()</b></h4>
+                            <ul>
+                                <li>The DENSE_RANK() assigns a rank to each row within a partition of a result set. The same values will have the same ranks.</li>
+                                <li>Unlike the RANK(), it returns consecutive rank values or don't skip the number for similar values(1,2,2,3,3,4)</li>
+                                <textarea rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    DENSE_RANK() OVER ([PARTITION BY partition_expression, ...]
+                                                            ORDER BY sort_expression [ASC|DESC])
+                                </textarea>
+                                <li>DENSE_RANK() resets the rank when the partition boundary is crossed.</li>
+                                <li>PARTITION BY is optional, ORDER BY is required.</li>
+                                <textarea rows= "11" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    SELECT  * FROM (
+                                            SELECT  product_id,
+                                                    product_name,
+                                                    category_id,
+                                                    list_price,
+                                                    DENSE_RANK() OVER( PARTITION BY category_id
+                                                                            ORDER BY list_price DESC) price_rank
+                                            FROM production.products
+                                            ) t
+                                    WHERE t.price_rank <3;
+                                </textarea><br>
+                                <img src="{% static 'IMG\SQL-Server-DENSE_RANK-Function-Over-Partition-Example.png'%}"><br>
+                                <textarea rows= "8" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    SELECT  product_id,
+                                            product_name,
+                                            category_id,
+                                            list_price,
+                                            DENSE_RANK() OVER( PARTITION BY category_id
+                                                        ORDER BY list_price DESC) price_rank
+                                    FROM production.products;
+                                </textarea><br>
+                                <img src="{% static 'IMG\SQL-Server-DENSE_RANK-Function-Over-Result-Set-Example.png'%}"><br>
+                            </ul>
+                        <h4 style="color:blue"><b>* ROW_NUMBER()</b></h4>
+                            <ul>
+                                <li>Numbers the output of the result set. More specifically, returns the sequential number of a row within a partition of a result set, starting at 1.</li>
+                                <textarea rows= "2" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    ROW_NUMBER() OVER(  [PARTITION BY value_expression, ...[n]] order_by_clause)
+                                </textarea>
+                                    <ul>
+                                        <li><b>value_expression</b> : specifies the column by which result set is partitioned.</li>
+                                        <li><b>order_by_clause</b> : determines the sequence in which the rows are assigned their unique ROW_NUMBER within a specified partition.</li>
+                                    </ul>
+                                <textarea rows= "12" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    use AdventureWork2014
+                                    GO
+                                    WITH orderedOrder AS (
+                                                SELECT  SalesOrderID, OrderDate,
+                                                        ROW_NUMBER() OVER(ORDER BY OrderDate) rowNumber
+                                                FROM Sales.SalesOrderHeader)
+                                        SELECT * FROM orderedOrder
+                                        WHERE rowNumber BETWEEN 50 and 60;
+                                    GO
+                                </textarea>
+                                <pre><code>
+                                    SalesOrderID    OrderDate                   rowNumber
+                                    43708	    2011-06-02 00:00:00.000	    50
+                                    43709	    2011-06-02 00:00:00.000	    51
+                                    43710	    2011-06-02 00:00:00.000	    52
+                                    43711	    2011-06-03 00:00:00.000	    53
+                                    43712	    2011-06-03 00:00:00.000	    54
+                                    43713	    2011-06-04 00:00:00.000	    55
+                                    43714	    2011-06-04 00:00:00.000	    56
+                                    43715	    2011-06-04 00:00:00.000	    57
+                                    43716	    2011-06-04 00:00:00.000	    58
+                                    43717	    2011-06-04 00:00:00.000	    59
+                                    43718	    2011-06-05 00:00:00.000	    60
+                                </code></pre>
+                                <textarea rows= "12" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    use AdventureWork2014
+                                    GO
+                                    SELECT  FirstName, LastName, TerritoryName, ROUND(SalesYTD, 2, 1) SalesYTD,
+                                            ROW_NUMBER() OVER(PARTITION BY TerritoryName ORDER BY SalesYTD DESC) row
+                                    FROM    Sales.SalesPerson
+                                    WHERE Territory IS NOT NULL AND SalesYTD <>0
+                                    ORDER BY TerritoryName;
+                                </textarea>
+                                <pre>
+                                FirstName   LastName            TerritoryName   SalesYTD       row
+                                Lynn	Tsoflias	        Australia	1421810.92	    1
+                                José	Saraiva	                Canada	        2604540.71	    1
+                                Garrett	Vargas	                Canada	        1453719.46	    2
+                                Jillian	Carson	                Central	        3189418.36	    1
+                                Ranjit	Varkey Chudukatil	France	        3121616.32	    1
+                                Rachel	Valdez	                Germany	        1827066.71	    1
+                                Michael	Blythe	                Northeast	3763178.17	    1
+                                Tete	Mensa-Annan	        Northwest	1576562.19	    1
+                                David	Campbell	        Northwest	1573012.93	    2
+                                Pamela	Ansman-Wolfe	        Northwest	1352577.13	    3
+                                Tsvi	Reiter	                Southeast	2315185.61	    1
+                                Linda	Mitchell	        Southwest	4251368.54	    1
+                                Shu	    Ito	                Southwest	2458535.61	    2
+                                Jae	    Pak	                United Kingdom	4116871.22	    1
+                                </pre>
+                            </ul>
+                        <h4 style="color:blue"><b>* NTILE()</b></h4>
+                            <ul>
+                                <li>Distributes the rows in an ordered partition into a specified number of groups.</li>
+                                <li>The groups are numbered, starting at one, and for each row, NTILE returns the number of the group to which row belongs.</li>
+                                <textarea rows= "9" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    NTILE(integer_expression) OVER ([partition_by_clause] order_by_clause)
+                                </textarea>
+                                    <ul>
+                                        <li><b>integer_expression</b> : is a positive integer expression that specifies the number of groups into which partition must be divided.(int, bigint)</li>
+                                        <li><b>partition_by_clause</b> : divides the result set produced by the FROM clause into partitions to which the function is applied.</li>
+                                        <li><b>order_by_clause</b> : determines the order in which the NTILE values are assigned to the rows in a partition.</li>
+                                    </ul>
+                                <li>If the number of rows can not divisible by integer_expression, this will cause groups of two sizes that differ by one member.<br>
+                                    (Eg: result set include 7 rows when divide into 2 groups: 1 group with 4 members and 1 group with 3 members). The larger groups come before smaller groups follow ORDER BY clause.</li>
+                                <textarea rows= "12" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    use AdventureWork2014
+                                    GO
+                                    SELECT p.FirstName, p.LastName,
+                                            a.PostalCode,
+                                            CONVERT(nvarchar(20), s.SalesYTD, 1) SalesYTD,
+                                            NTILE(4) OVER (ORDER BY SalesYTD DESC) Quartile
+                                    FROM Sales.SalesPerson s
+                                    INNER JOIN Person.Person p ON s.BusinessEntityID = p.BusinessEntityID
+                                    INNER JOIN Person.Address a ON a.AddressID = p.BusinessEntityID
+                                    WHERE TerritoryID IS NOT NULL and SalesYTD <>0;
+                                    GO
+                                </textarea>
+                                <pre><code>
+                                    FirstName   LastName            PostalCode  SalesYTD            Quartile
+                                    ---------   ------------------  -------    --------------       -------
+                                    Linda	    Mitchell	        98027	   4,251,368.55	        1
+                                    Jae	            Pak	                98055	   4,116,871.23	        1
+                                    Michael	    Blythe	        98027	   3,763,178.18	        1
+                                    Jillian	    Carson	        98027	   3,189,418.37	        1
+                                    Ranjit	    Varkey Chudukatil	98055	   3,121,616.32	        2
+                                    José	    Saraiva	        98055	   2,604,540.72	        2
+                                    Shu	            Ito	                98055	   2,458,535.62	        2
+                                    Tsvi	    Reiter	        98027	   2,315,185.61	        2
+                                    Rachel	    Valdez	        98055	   1,827,066.71	        3
+                                    Tete	    Mensa-Annan	        98055	   1,576,562.20	        3
+                                    David	    Campbell	        98055	   1,573,012.94	        3
+                                    Garrett	    Vargas	        98027	   1,453,719.47	        4
+                                    Lynn	    Tsoflias	        98055	   1,421,810.92	        4
+                                    Pamela	    Ansman-Wolfe	98027	   1,352,577.13	        4
+                                </code></pre>
+                                <textarea rows= "12" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    use AdventureWork2014
+                                    GO
+                                    SELECT  p.FirstName, p.LastName, p.PostalCode,
+                                            CONVERT(NVARCHAR(20), SalesYTD, 1) SalesYTD,
+                                            NTILE(4) OVER(  PARTITION BY PostalCode
+                                                            ORDER BY SalesYTD DESC) Quartile
+                                    FROM Sales.Sales s
+                                    INNER JOIN Person.Person p ON s.BusinessEntityID = p.BusinessEntityID
+                                    INNER JOIN Person.Address a ON a.AddressID = p.BusinessEntityID
+                                    WHERE Territory IS NOT NULL AND SaleYTD !=0;
+                                    GO
+                                </textarea>
+                                <pre>
+                                FirstName   LastName            PostalCode  SalesYTD       Quartile
+                                ---------   ------------------  -------    --------------  -------
+                                Linda	    Mitchell	        98027	    4,251,368.55	1
+                                Michael	    Blythe	        98027	    3,763,178.18	1
+                                Jillian	    Carson	        98027	    3,189,418.37	2
+                                Tsvi	    Reiter	        98027	    2,315,185.61	2
+                                Garrett	    Vargas	        98027	    1,453,719.47	3
+                                Pamela	    Ansman-Wolfe        98027	    1,352,577.13	4
+                                Jae	        Pak	        98055	    4,116,871.23	1
+                                Ranjit	    Varkey Chudukatil	98055	    3,121,616.32	1
+                                José	    Saraiva	        98055	    2,604,540.72	2
+                                Shu	        Ito	        98055	    2,458,535.62	2
+                                Rachel	    Valdez	        98055	    1,827,066.71	3
+                                Tete	    Mensa-Annan	        98055	    1,576,562.20	3
+                                David	    Campbell	        98055	    1,573,012.94	4
+                                Lynn	    Tsoflias	        98055	    1,421,810.92	4
+                                </pre>
+                            </ul>
+                    </ul>
+                <h3 style="color:red">2) AGGREGATE FUNCTION</h3>
+                    <ul>
+                        <li>An aggregate function performs a calculation on a set of values and returns a single value. Except for COUNT(*), aggregate function ignore NULL.</li>
+                        <li>Aggregate functions are often used with GROUP BY clause of the SELECT statement.</li>
+                        <li>All aggregate functions are deterministic, that means they return same result each time we call them with a specified set of input values.</li>
+                        <li>Use aggregate functions as expression only:</li>
+                            <ul>
+                                <li>The SELECT list of a SELECT statement (either a subquery or an outer query)</li>
+                                <li>A HAVING clause.</li>
+                            </ul>
+                        <li>Aggregate functions can use with OVER() clause except STRING_AGG, GROUPING and GROUPING_ID.</li>
+                        <li>See details in Aggregate function part.</li>
+                    </ul>
+                <h3 style="color:red">3) ANALYTIC FUNCTIONS</h3>
+                    <ul>
+                        <li><b>CUME_DIST</b></li>
+                        <li><b>FIRST_VALUE</b></li>
+                        <li><b>LAG</b></li>
+                        <li><b>LAST_VALUE</b></li>
+                        <li><b>LEAD</b></li>
+                        <li><b>PERCENT_RANK</b></li>
+                        <li><b>PERCENTILE_CONT</b></li>
+                        <li><b>PERCENTILE_DISC</b></li>
+                        <h4 style="color:blue">* CUME_DIST (cumulative distribution: frequency, not value)</h4>
+                            <ul>
+                                <li>Sometime, you want to make a report that contains the top or bottom x% values from a data set. One way to achieve that is use CUME_DIST().</li>
+                                <li>The CUME_DIST calculates the cumulative distribution of a value within a group of values, or simply, it calculates the relative position of a value in a group of value.</li>
+                                <li style="color:red">In other side, CUM_DIST get the number of of rows to current row divides to total rows</li>
+                                <textarea rows= "4" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    CUME_DIST() OVER ([PARTITION BY partition_expression, ...],
+                                                        ORDER BY sort_expression [ASC|DESC], ...)
+                                    --Formula : number of row/ total row
+                                </textarea>
+                                <li><b>PARTITION BY clause</b>
+                                    <ul>
+                                        <li>The PARTITION BY clause distributes rows into multiple partitions to which the CUME_DIST() function is applied</li>
+                                        <li>It is optional, so the CUME_DIST() will treat the whole result set as a single partition if you omit it.</li>
+                                    </ul>
+                                <li><b>ORDER BY clause</b></li>
+                                    <ul>
+                                        <li>The ORDER BY clause specifies the logical order of rows in each partition to which the CUME_DIST() function is applied.</li>
+                                        <li>The ORDER BY clause considers NULL as a lowest possible value.</li>
+                                    </ul>
+                                <li>Return value: the result set of CUME_DIST is greater than 0 and lower than 1.</li>
+                                <li>The function returns the same cumulative distribution values for the same tie values.</li>
+                                <textarea rows= "9" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    SELECT  CONCAT_WS(',', first_name, last_name) full_name,
+                                            net_sales,
+                                            year,
+                                            CUME_DIST() OVER ([PARTITION BY year]
+                                                                ORDER BY net_sales DESC) cume_dist
+                                    FROM sales.vw_staff_sales t
+                                    INNER JOIN sales.staffs m ON m.staff_id = t.staff_id
+                                    WHERE year in (2016, 2017);
+                                </textarea><br>
+                                <img src="{% static 'IMG\SQL-Server-CUME_DIST-Function-over-partition-example.png'%}"><br>
+                                <textarea rows= "7" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    SELECT  CONCAT_WS(',', first_name, last_name) full_name,
+                                            net_sales,
+                                            CUME_DIST() OVER ()
+                                    FROM sales.vw_staff_sales t
+                                    INNER JOIN sales.staffs m ON m.staff_id = t.staff_id
+                                    WHERE year = 2017;
+                                </textarea><br>
+                                <img src="{% static 'IMG\SQL-Server-CUME_DIST-Function-over-result-set-example.png'%}"><br>
+                            </ul>
+                        <h4 style="color:blue">* FIRST_VALUE</h4>
+                            <ul>
+                                <li>Returns the first value in an ordered partition of a result set.</li>
+                                <textarea rows= "5" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    FIRST_VALUE(scalar_expression) [IGNORE NULLS| RESPECT NULLS]
+                                        OVER( [partition_by_clause] order_by_clause [row_ranges_clause])
+                                </textarea>
+                                    <ul>
+                                        <li><b>scalar_expression</b> : is the value to be returned, can be a column, subquery, or other arbitrary expression that results in a single value.<br>
+                                            Other analytic function is not permitted.</li>
+                                        <li><b>IGNORE NULLS | RESPECT NULLS</b> : ignore or respect NULL values in the data set when computing first value over a partition.<br>
+                                            If IGNORE NULLS value, the query will replace missing values with the next observed value.</li>
+                                        <li><b>order_by_clause</b> : determines the logical order in which the operation is performed. It's required.</li>
+                                        <li><b>[partition_by_clause]</b> : optional, divides the result set into partitions.</li>
+                                        <li><b>[row_range_clause]</b> : specifies the interval rows inside the partition (with options: preceding, current, following)which the function is applied.</li>
+                                        <li>return_type: the same type of scalar_expression.</li>
+                                    </ul>
+                                <textarea rows= "9" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    USE AdventureWork2014
+                                    GO
+                                    SELECT  JobTitle, LastName, VacationHours,
+                                            FIRST_VALUE(LastName) OVER(PARTITION BY JobTitle
+                                                                    ORDER BY VacationHours) fewestVacationHours
+                                    FROM HumanResources.Employee e
+                                    INNER JOIN Person.Person p ON e.BusinessEntityID = p.BusinessEntityID
+                                    ORDER BY JobTitle;
+                                </textarea>
+                                <pre>
+                                JobTitle                            LastName                  VacationHours FewestVacationHours
+                                ----------------------------------- ------------------------- ------------- -------------------
+                                Accountant                          Moreland                  58            Moreland
+                                Accountant                          Seamans                   59            Moreland
+                                Accounts Manager                    Liu                       57            Liu
+                                Accounts Payable Specialist         Tomic                     63            Tomic
+                                Accounts Payable Specialist         Sheperdigian              64            Tomic
+                                Accounts Receivable Specialist      Poe                       60            Poe
+                                Accounts Receivable Specialist      Spoon                     61            Poe
+                                Accounts Receivable Specialist      Walton                    62            Poe
+                                </pre>
+
+                            </ul>
+                        <h4 style="color:blue">* LAG</h4>
+                            <ul>
+                                <li>Access data from a previous row in the same result set without use of a self-join.</li>
+                                <li>LAG provides access to a row at a given physical offset that comes before the current row.</li>
+                                <li>Use this analytic function in a select statement to compare values in the current rows with values in a previous row.</li>
+                                <textarea rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    LAG(scalar_expression [, offset], [, default])
+                                        OVER ([partition_by_clause] order_by_clause)
+                                </textarea>
+                                    <ul>
+                                        <li><b>scalar_expression</b> : this value to be returned based on the specified offset. It is an expression of any type that returns a single(scalar) value.</li>
+                                        <li><b>offset</b> : The number of row back from the current row from which to obtain a value. If not specified, the default is 1.<br>
+                                            OFFSET can be a column, subquery or other expression that evaluates to a positive integer or can be implicitly converted to bigint. It cannot be a negative or analytic function.</li>
+                                        <li><b>default</b> : The value to return when offset is beyond the scope of the partition. If a default value is not specified, NULL is returned.<br>
+                                            Default can be a column, subquery or other expression, but it cannot be an analytic function. Default must be type-compatible with scalar_expression.</li>
+                                        <li><b>partition_by_clause</b> : divides the result set produced by the FROM clause into partitions to which the function is applied. If not specified, the function treats all the query as single group.</li>
+                                        <li><b>order_by_clause</b>: determines the order of the data before the function is applied. If partition_by_clause is defined, it specifies the order in the partition.</li>
+                                        <li>The order_by_clause is required.</li>
+                                        <li>Return_type: the data type of the scalar_expression, if scalar_expression is nullable or default is NULL, it will return NULL.</li>
+                                    </ul>
+                                <textarea rows= "9" cols="120" style="color:#1F0221; font-family:Times New Roman">
+                                    USE AdventureWork2014
+                                    GO
+                                    SELECT  CalendarYear, CalendarQuarter, SalesAmountQuota SalesQuota,
+                                            LAG(SalesAmountQuota, 1, 0) OVER (ORDER BY CalendarYear, CalendarQuarter) prevQuota,
+                                            SalesAmountQuota - LAG(SalesAmountQuota, 1, 0) OVER (ORDER BY CalendarYear, CalendarQuarter) Diff
+                                    FROM dbo.FactSalesQuota
+                                    WHERE EmployeeKey = 272 and CalendarYear IN (2001, 2002)
+                                    ORDER BY CalendarYear, CalendarQuarter;
+                                </textarea>
+                                <pre>
+                                Year Quarter  SalesQuota  PrevQuota  Diff
+                                ---- -------  ----------  ---------  -------------
+                                2001 3        28000.0000      0.0000   28000.0000
+                                2001 4         7000.0000  28000.0000  -21000.0000
+                                2001 1        91000.0000   7000.0000   84000.0000
+                                2002 2       140000.0000  91000.0000   49000.0000
+                                2002 3         7000.0000 140000.0000  -70000.0000
+                                2002 4       154000.0000   7000.0000  147000.0000
+                                </pre>
+                                <textarea rows= "7" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    CREATE TABLE T (a int, b int, c int)
+                                    INSERT INTO T VALUES(1,1,-3), (2,2,4), (3,1,NULL), (4,3,1),(5,2,NULL), (6,1,5)
+                                    SELECT  b,c,
+                                            LAG(2*c, b*(SELECT min(b) FROM T), -c/2) OVER( ORDER BY a) i
+                                    FROM T;
+                                    --LAG use column c for the scalar_expression and multiply the result to 2
+                                </textarea>
+                                <pre>
+                                b           c           i
+                                ----------- ----------- -----------
+                                1           -3          1
+                                2           4           -2
+                                1           NULL        8
+                                3           1           -6
+                                2           NULL        NULL
+                                1           5           NULL
+                                </pre>
+                            </ul>
+                        <h4 style="color:blue">* LAST_VALUE</h4>
+                            <ul>
+                                <li>Returns the last value in an ordered set of value.</li>
+                                <textarea rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    LAST_VALUE( [scalar_expression] ) [IGNORE NULLS | RESPECT NULLS]
+                                    OVER ([partition_by_clause] order_by_clause rows_range_clause)
+                                </textarea>
+                                <li>scalar_expression : is the value, to be returned, can be a column, subquery or other expression that result in a single value.</li>
+                                <li>IGNORE NULLS | RESPECT NULLS : ignore or respect NULL values in the dataset when computing the last column.</li>
+                                <li>partition_by_clause : divides result set into partitions by FROM clause. If not specified, the function will treat result set as a single value.</li>
+                                <li>order_by_clause: determines the logical order of the date before the function is applied. The order_by_clause is required.</li>
+                                <li>rows_range_clause : further limit the rows within the partition by specifying start points and end points.</li>
+                                <li style="color:red">In calculating, the row_range_clause can be need to specify to find the proper value to calculate.</li>
+                                <li>Return type: same as scalar_expression</li>
+                                <textarea rows= "16" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    use AdventureWorks2014
+                                    SELECT  BusinessEntityID, DATEPART(QUARTER, QuotaDate) Quarter,
+                                            YEAR(year, QuotaDate) salesYear,
+                                            SalesQuota QuotaThisYear,
+                                            SalesQuota - FIRST_VALUE(SalesQuota) OVER (
+                                                    PARTITION BY BusinessEntityID, YEAR(year, QuotaDate)
+                                                ORDER BY DATEPART(QUARTER, QuotaDate)) as diff_first
+                                            SalesQuota - LAST_VALUE(SalesQuota) OVER (
+                                                    PARTITION BY BusinessEntityID, YER(year, QuotaDate)
+                                                ORDER BY DATEPART(QUATER, QuotaDate)
+                                                RANGE BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING) as diff_last
+                                    FROM Sales.SalesPersonQuotaHistory
+                                    WHERE YEAR(QuotaDate) > 2005
+                                    AND BusinessEntityID between 274 and 275
+                                    ORDER BY BusinessEntityID, salesYear, Quarter;
+                                </textarea>
+                                <pre>
+                                    BE      Quarter SalesYear   QuotaThisQuarter      Diff_first    Diff_last
+                                    274	    4	    2011  	    91000.00   	        63000.00	0.00
+                                    274	    3	    2011  	    7000.00	        -21000.00	-84000.00
+                                    274	    2	    2011  	    28000.00   	        0.00	        -63000.00
+                                    274	    4	    2012  	    107000.00           -33000.00	0.00
+                                    274	    3	    2012  	    154000.00           14000.00	47000.00
+                                    274	    2	    2012  	    70000.00   	        -70000.00	-37000.00
+                                    274	    1	    2012  	    140000.00           0.00	        33000.00
+                                    274	    4	    2013  	    84000.00   	        26000.00	0.00
+                                    274	    3	    2013  	    116000.00           58000.00	32000.00
+                                    274	    2	    2013  	    263000.00           205000.00	179000.00
+                                    274	    1	    2013  	    58000.00   	        0.00	        -26000.00
+                                    ..............................................................................
+                                </pre>
+                            </ul>
+                        <h4 style="color:blue">* LEAD</h4>
+                            <ul>
+                                <li>Accesses data from a subsequent row in the same result set without the use of a self-join.</li>
+                                <li>LEAD provides access to a row at given physical offset that follows the current row.</li>
+                                <textarea rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    LEAD(scalar_expression [, offset], [default])
+                                        OVER ([partition_by_clause] order_by_clause)
+                                </textarea>
+                                    <ul>
+                                        <li>scalar_expression : the value to be returned based on the specified offset. It is an expression of any type that returns a single (scalar value)</li>
+                                        <li>offset : the number of rows forward from the current row from which to obtain a value. If not specified, the default is 1. It can be a column, subquery, or expression<br>
+                                            that evaluate to a positive integer or can be implicitly convert to bigint and can not be a negative value or an analytic function.</li>
+                                        <li>default : the value is returned when OFFSET beyond the scope of the partition. Its default is NULL. default can be a column, subquery or expression.</li>
+                                        <li>partition_by_clause: divides the result set produced by the FROM clause into partitions.</li>
+                                        <li>order_by_clause : determines the logical ordered of the data before the function is applied. It reset for each partition.</li>
+                                        <li>Return type: the data of specified scalar_expression. NULL will be returned if scalar_expression is nullable or default is set to NULL</li>
+                                    </ul>
+                                <textarea rows= "9" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    Use AdventureWork2014
+                                    GO
+                                    SELECT  TerritoryName, BusinessEntityID, SalesYTD,
+                                            LEAD(SalesYTD) OVER (PARTITION BY TerritoryName,
+                                                            ORDER BY SalesYTD DESC) nextSales
+                                    FROM Sales.vSalePerson
+                                    WHERE TerritoryName IN (N'Northwest', N'Canada')
+                                    ORDER BY TerritoryName;
+                                </textarea>
+                                <pre>
+                                    TerritoryName   BusinessEntityID    SalesYTD        nextSales
+                                    Canada          282	                2604540.7172	1453719.4653
+                                    Canada          278	                1453719.4653	NULL
+                                    Northwest	    284	                1576562.1966	1573012.9383
+                                    Northwest	    283	                1573012.9383	1352577.1325
+                                    Northwest	    280	                1352577.1325	NULL
+                                </pre>
+                                <textarea rows= "11" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    IF EXISTS (SELECT * FROM sys.tables WHERE name = 'test')
+                                    DROP TABLE test;
+                                    GO
+                                    CREATE TABLE test (a int, b int, c int);
+                                    INSERT INTO test values (1,1,-3), (2,2,4), (3,1,NULL),
+                                                            (4,3,1),(5,2,NULL), (6,1,5);
+                                    SELECT  b,c
+                                            LEAD(2*c, b*(SELECT min(b) FORM test), -c/2)
+                                                    OVER (ORDER BY a) i
+                                    FROM test;
+                                </textarea>
+                                <pre>
+                                    b           c           i
+                                    ----------- ----------- -----------
+                                    1           -3          8
+                                    2           4           2
+                                    1           NULL        2
+                                    3           1           0
+                                    2           NULL        NULL
+                                    1           5           -2
+                                </pre>
+                            </ul>
+                        <h4 style="color:blue">* PERCENT_RANK</h4>
+                            <ul>
+                                <li>Calculates the relative rank of a row within a group of rows in SLQ Server.</li>
+                                <li>Use PERCENT_RANK to evaluate the relative standing of a value within a query set or partition.</li>
+                                <textarea rows= "3" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    PERCENT_RANK() OVER([partition_by_clause] order_by_clause)
+                                    --Formula : (rank-1)/ (total row -1)
+                                </textarea>
+                                <li>partition_by_clause: divides the result set produced by FROM clause into partitions.</li>
+                                <li>order_by_clause: determines the logical order of dataset before function is applied.</li>
+                                <li>Return type: float(53)</li>
+                                <li>The range of PERCENT_RANK is greater than 0 and less than 1. The first row in any set has the value is 0.<br>
+                                    NULL values are included and are treated as lowest possible values.</li>
+                                <textarea rows= "11" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    Use AdventureWorks2014
+                                    GO
+                                    SELECT  Department, LastName, Rate,
+                                            CUME_DIST() OVER(PARTITION BY Department ORDER BY Rate) as CumeDist,
+                                            PERCENT_RANK () OVER (PARTITION BY Department ORDER BY RAte) as PctRank
+                                    FROM HumanResources.vEmployeeDepartmentHistory edh
+                                        INNER JOIN HumanResources.EmployeePayHistory e
+                                            ON e.BusinessEntityID = edh.BusinessEntityID
+                                    WHERE Department IN (N'Information Services', N'Document Control')
+                                    ORDER BY Department, Rate DESC;
+                                </textarea>
+                                <pre>
+                                Department             LastName               Rate                  CumeDist               PctRank
+                                ---------------------- ---------------------- --------------------- ---------------------- ----------------------
+                                Document Control       Arifin                 17.7885               1                      1
+                                Document Control       Norred                 16.8269               0.8                    0.5
+                                Document Control       Kharatishvili          16.8269               0.8                    0.5
+                                Document Control       Chai                   10.25                 0.4                    0
+                                Document Control       Berge                  10.25                 0.4                    0
+                                Information Services   Trenary                50.4808               1                      1
+                                Information Services   Conroy                 39.6635               0.9                    0.888888888888889
+                                Information Services   Ajenstat               38.4615               0.8                    0.666666666666667
+                                Information Services   Wilson                 38.4615               0.8                    0.666666666666667
+                                Information Services   Sharma                 32.4519               0.6                    0.444444444444444
+                                Information Services   Connelly               32.4519               0.6                    0.444444444444444
+                                Information Services   Berg                   27.4038               0.4                    0
+                                Information Services   Meyyappan              27.4038               0.4                    0
+                                Information Services   Bacon                  27.4038               0.4                    0
+                                Information Services   Bueno                  27.4038               0.4                    0
+                                (15 row(s) affected)
+                                </pre>
+                            </ul>
+                        <h4 style="color:blue">* PERCENTILE_CONT</h4>
+                            <ul>
+                                <li>Calculates a percentile based on a continuous distribution of the column value in SQL server.</li>
+                                <li>The result is interpolated and might not be equal to any of the specific values in the column.</li>
+                                <textarea rows= "4" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    PERCENTILE_CONT (numeric_literal)
+                                        WITHIN GROUP (ORDER BY order_by_expression [ASC|DESC])
+                                            OVER ([partition_by_clause])
+                                </textarea>
+                                    <ul>
+                                        <li>numeric_literal: the percentile to compute. The value have to between 0.0 and 1.0</li>
+                                        <li style="color:red"><b>WITHIN GROUP (ORDER BY order_by_expression [ASC|DESC])</b></li>
+                                            <ul>
+                                                <li>Specifies a list of numeric values to sort and compute the percentile over.</li>
+                                                <li>Only one order_by_expression is allowed.</li>
+                                                <li>The expression must evaluate to an exact or approximate numeric type, with no other data types allowed.</li>
+                                                <li>Exact numeric types are int, bigint smallint, tinyint, numeric, bit, decimal, smallmoney and money.</li>
+                                                <li>Approximate numeric types are float and real, the default sort order is ascending.</li>
+                                            </ul>
+                                        <li>OVER (partition_by_clause): divides dataset produced by FROM clause into partitions. ORDER BY and ROWS|RANGE of the OVER clause is not allowed.</li>
+                                    </ul>
+                                <li>Any NULLS in the data set is ignored.</li>
+                                <textarea rows= "12" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    Use AdventureWorks2014
+                                    GO
+                                    SELECT  DISTINCT Name DepartmentName,
+                                            PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY ph.Rate)
+                                                            OVER(PARTITION BY Name) MedianCont
+                                    FROM    HumanResources.Department d
+                                        INNER JOIN HumanResources.EmployeeDepartmentHistory dh
+                                            ON d.DepartmentID = dh.DepartmentID
+                                        INNER JOIN HumanResources.EmployeePayHistory ph
+                                            ON ph.BusinessEntityID = dh.BusinessEntityID
+                                    WHERE dh.EndDate is NULL;
+                                </textarea>
+                                <pre>
+                                    DepartmentName        MedianCont
+                                    --------------------   ----------
+                                    Document Control       16.8269
+                                    Engineering            34.375
+                                    Executive              54.32695
+                                    Human Resources        17.427850
+                                </pre>
+                            </ul>
+                        <h4 style="color:blue">* PERCENTILE_DISC</h4>
+                            <ul>
+                                <li>Computes a specific percentile for sorted values in an entire rowset or within a rowset's distinct partition.</li>
+                                <li>With a given percentile value P (cume_dist value), PERCENTILE_DISC sorts the expression values in ORDER BY clause<br>
+                                    and then returns the value with the smallest CUME_DIST value given (with respect for the same sort specification) that <br>
+                                    is greater than or equal to P.</li>
+                                <li>For example, PERCENTILE_DISC(0.5) will compute the the middle percentile of the expression.</li>
+                                <li>PERCENTILE_DISC calculates the percentile based on a discrete distribution of the column values. The result is equal to a specific column value.</li>
+                                <textarea rows= "4" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    PERCENTILE_DISC(numeric_literal) WITHIN GROUP(ORDER BY order_by_expression ASC|DESC)
+                                                        OVER ([partition_by_expression])
+                                </textarea>
+                                    <ul>
+                                        <li>numeric_literal: the percentile to compute. The value must between 0.0 and 1.0</li>
+                                        <li>WITHIN GROUP: specifies a list of value to sort and compute the percentile over. Only one order_by_clause is allowed.<br>
+                                            The default sort is ascending, the list of values can be of any of the data types that are valid for the sort operation.</li>
+                                        <li>OVER([partition_by_clause]) : divides the data set produced by FROM clause into partitions. order_by and row|range of the OVER clause is not allowed.</li>
+                                        <li>NULL is ignore in the data set.</li>
+                                        <li>Under compatibility level 110 and higher, WITHIN GROUP is a reserved keyword. </li>
+                                    </ul>
+                                <textarea rows= "14" cols="100" style="color:#1F0221; font-family:Times New Roman">
+                                    Use AdventureWorks2014
+                                    GO
+                                    SELECT  DISTINCT Name DepartmentName,
+                                            PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY ph.rate)
+                                                            OVER(PARTITION BY Name) MedianCont,
+                                            PERCENTILE_DISC(0.5) WITHIN GROUP(ORDER BY ph.Rate)
+                                                            OVER(PARTITION BY Name) MedianDisc
+                                    FROM    HumanResources.Department d
+                                        INNER JOIN HumanResources.EmployeeDepartmentHistory dh
+                                            ON d.DepartmentID = dh.DepartmentID
+                                        INNER JOIN HumanResources.EmployeePayHistory ph
+                                            ON ph.BusinessEntityID = dh.BusinessEntityID
+                                    WHERE dh.EndDate is NULL;
+                                </textarea>
+                                <pre>
+                                    DepartmentName        MedianCont    MedianDisc
+                                    --------------------   ----------   ----------
+                                    Document Control       16.8269      16.8269
+                                    Engineering            34.375       32.6923
+                                    Executive              54.32695     48.5577
+                                    Human Resources        17.427850    16.5865
+                                </pre>
+                            </ul>
+                    </ul>
+            </ul>
+    </ul>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <title>GIT Tutorial</title>
+</head>
+<body>
+<h1 style="text-align:center">GIT Tutorial</h1>
+    <ul>
+        <h2 style="color:blue">Workflow</h2>
+        <img src="{% static 'IMG/git_1.png'%}">
+        <li>For window, use git bash.</li>
+        <h2 style="color:blue">Check Commands</h2>
+        <pre>
+            git --version
+            git --help
+        </pre>
+        <h2 style="color:blue">Git Config</h2>
+        <pre>
+            git config --global user.name 'your_name'
+            git config --global user.email 'your_email'
+            git config --global color.ui auto
+            git config -l
+            # see more options in git config
+        </pre>
+        <pre>
+            git config --l :list all
+            ls :list
+            ls -a : list all
+            ls -g : list global
+            ctrl + c :copy
+            ctrl + l: clear
+        </pre>
+        <h2 style="color:blue">Git Repositories</h2>
+        <li>Repositories in Git contains a collection of files of various different versions of a project.</li>
+        <pre>
+            Original Initializing repository. (Using when create a new branch)
+            git init .
+            rm -rf folder_name
+            Ex: Remove .git initializing folder above
+            rm -rf .git
+            git add 'name'
+            git add . : add all
+        </pre>
+        <h2 style="color:blue">Git Create Files</h2>
+        <pre>
+            # Create 3 files: index.html, index.js, main.css
+            touch index.html
+            touch index.js
+            touch main.css
+        </pre>
+        <pre>
+            # Check current status
+            git status
+        </pre>
+        <h2 style="color:blue">Git Add Commands</h2>
+        <pre>
+            git add 'file_name' : and specified file
+            git add . : add all
+            git rm --cached file_name : remove added specified file.
+            git rm -r --cached . : remove all
+        </pre>
+        <h2 style="color:blue">Git Commit</h2>
+        <pre>
+            cd .. : back to initializing file
+            git commit -m 'message_content' : commit with message
+            git log : see all commit transactions, each commit come with unique hash
+            git log --oneline (see transactions in one line)
+            git show commit_hash : see details in one commit
+            vi file_name : access and change inside file
+            i : insert
+            esc key and ':' : commit the message
+            wq: quit write (exit file)
+            cat file_name : read object from stdin, one per line
+            git diff : get the original line endings in file
+            git restore file_name : if you have changed in file, git restore file as before changing
+            get commit --amend -m 'message_content' : take the most recent commit and add new staged changes to it
+        </pre>
+        <h2 style="color:blue">Git Push</h2>
+        <pre>
+            git remote add origin ssh_key : push files from local to git
+            git branch -M main : change repository to main branch (it's similar to master)
+            git push -u origin main : push the main branch in the local to the remote
+            # Or you can force origin branch :master or main
+            git push --force origin master
+        </pre>
+        <h3>Setup Profile Settings</h3>
+        <li>go to profile -> Settings -> SSH and GPG keys -> generating SSH keys -> Generating a new SSH key and adding it to the ssh-agent.</li>
+        <li>Then choose the operating sys (window, mac, linux) and do following guides:</li>
+            <ul>
+                <li>1. Open git bash</li>
+                <li>2. Paste the text and substituting gitHub email</li>
+                <pre>
+                    ssh-keygen -t ed25519 -C 'your_email@example.com'
+                </pre>
+                <li>This create a new SSH key, using the provided email as a label</li>
+                <li>3. Adding your SSH key to the ssh-agent</li>
+                <pre>
+                    # start the ssh-agent in the background
+                    $ eval "$(ssh-agent -s)"
+                    > Agent pid 59566
+                    # Add your SSH private key to the ssh-agent.
+                    $ ssh-add ~/.ssh/id_ed25519 # replace id_ed25519 if using differ key in step 2
+                </pre>
+                <li>4. Adding a new SSH key to your GitHub account</li>
+                <pre>
+                    # Copies the contents of the id_ed25519.pub file to your clipboard
+                    $ clip < ~/.ssh/id_ed25519.pub
+                    # go settings -> SSH and GPG keys ->New SSH key -> add title and paste key -> Add SSH key
+                </pre>
+                <li>After setup was done. repeat command:</li>
+                <pre>
+                    git push -u origin main
+                </pre>
+                <li>And then you can do every thing: </li>
+                <pre>
+                    # create new file
+                    vi main.go
+                    git add .
+                    git commit -m 'message_content'
+                    git push
+                </pre>
+            </ul>
+        <h2 style="color:blue">Git Pull</h2>
+        <pre>
+            git pull :pull the change in git remote
+            git add . :add again
+            git commit -m 'message-content'
+            git push
+        </pre>
+        <h2 style="color:blue">Git Branch</h2>
+        <li>When you execute git add ., git commit, git push, git pull... it usually happen in main brain, to avoid mistakes, or <br>
+            need to be review before push it. We use other branch to store them.</li>
+        <li><b>A branch</b> represents an independence line of development.</li>
+        <img src="{% static 'IMG/git_2.png'%}">
+        <pre>
+            # check branch
+            git branch
+            # See branch in remote server
+            git branch -r
+            # Or check all branch
+            git branch -a
+            # Create a new branch
+            git branch branch_name (Eg: git branch part-1)
+            # or switch to new branch
+            git checkout -b branch_name
+            # Switch branch for new development
+            git checkout branch_name
+            # Switch to main branch
+            git checkout main (or git checkout -)
+            # git checkout -  : will switch between 2 latest branch
+
+            # At working branch, do git push to push branch into remote git
+            git push
+            # After return message (git push --set-upstream origin branch_name)
+            # Notice that, there'are one branch_name in remote server and one in local machine
+            git push -u origin branch_name
+            # Delete branch
+            git branch -d branch_name
+            # or git branch -D branch_name
+        </pre>
+        <h2 style="color:blue">Git Merge branch</h2>
+        <li>You do merge action when push from child branch to main(master branch)</li>
+        <li>Need to review and do more action before merge branch : check, assign, ...</li>
+        <pre>
+            git merge branch_name
+        </pre>
+        <li>In case you don't see merge in git bash when you manually merge in remote server, do pull command to pull commits from remote server.</li>
+        <pre>
+            git pull
+        </pre>
+        <li>It show same result.</li>
+        <h2 style="color:blue">Git Resolve Conflicts</h2>
+        <li>If you make a change in remote server while changing in local, you have to pull from remote to local and choose the commit that you want to push.</li>
+        <pre>
+            # pull from remote to local
+            git pull
+            # manually change in vs code (pycharm), or used git command to change
+            vi file_name
+            # if you change in vs code, at git environment use p! to save file as the change in vs code
+            q!
+        </pre>
+        <h2 style="color:blue">Git Rebase</h2>
+        <li>If main branch has one commit and child command has another commit, and you want add latest changes on top, do rebase command:</li>
+        <pre>
+            git pull -r origin main
+            # Manually modify git pull, add and rebase the first time
+            git add .
+            git rebase --continue
+
+            # Manually modify git pull, add and rebase the second time
+            git add .
+            git rebase --continue
+            # After received successful rebase message, do git push force
+            git push -f
+
+        </pre>
+        <h2 style="color:blue">Git Public Website</h2>
+        <li>Change repository to Public (int setting repository).</li>
+        <li>Setting -> Github Pages -> Source ->master/docs</li>
+        <li style="color:red">Website get source from index.html</li>
+    </ul>
+</body>
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <style>
+        h2 {color: blue;}
+        h3 {color: red}
+        h4 {color: #8F3A84}
+    </style>
+    <meta charset="UTF-8">
+    <title>WH PROCEDURE</title>
+</head>
+<body>
+<h1 style="text-align: center">QUY TRÌNH KHO</h1>
+<fieldset>
+    <legend><h2>QUY TRÌNH NHẬN HÀNG</h2></legend>
+    <h3>I. CÔNG TÁC CHUẨN BỊ VÀ TIẾP NHẬN THÔNG TIN</h3>
+    <ul>
+        <li>Chuẩn bị công cụ dụng cụ cần thiết để sẵn sàng tiếp nhận khi hàng hoá tới kho (xe nâng, pallet, tay kéo, bao tay bảo hộ…).</li>
+        <li>Tiếp nhận thông tin và các yêu cầu từ các bộ phận liên quan (nếu có) về các lô hàng sẽ được chuyển tới kho hàng ngày.</li>
+        <li>Họp định kỳ phân công, sắp xếp nhân sự, đề xuất giải pháp để giải quyết các vấn đề liên quan tới các lô hàng.</li>
+        <li>Ghi nhận, lưu trữ thông tin Shipment nhập kho.</li>
+    </ul>
+    <h3>II. SẮP XẾP VÀ NHẬN HÀNG</h3>
+    <ul>
+        <li>Khi hàng hóa tới kho:</li>
+        <ul>
+            <li>Tiếp nhận thông tin lô hàng tới kho theo mã Shipment hoặc có thông báo trước từ cấp trên, tuyệt đối không nhận hàng không có thông tin.</li>
+            <li>Nhận bàn giao từ đơn vị vận chuyển tại cổng nhận hàng, không tự ý bốc dỡ hàng hóa và đi ra khỏi khu vực nhận hàng.</li>
+        </ul>
+        <li>Khi nhận hàng:</li>
+        <ul>
+            <li>Sắp xếp, phân loại, tránh để lẫn các loại hàng hoá với nhau gây khó kiểm đếm (theo mã hàng, box, hạn sử dụng, ...).</li>
+            <li>Sắp xếp hàng hóa lên pallet phải cẩn thận, tránh hư hỏng móp méo hộp hàng.</li>
+            <li>Kích thước, khối lượng mỗi pallet phải tuân thủ hướng dẫn số lượng thùng tối đa trên một pallet (chiều cao tối đa, số tầng tối đa...).</li>
+            <li>Đưa lô hàng vào khu vực chờ kiểm theo thứ tự ưu tiên, không được để lộn xộn hàng hoá tại khu vực chờ kiểm.</li>
+        </ul>
+        <li>Khi kết thúc nhận hàng:</li>
+        <ul>
+            <li>Ký xác nhận với tài xế về số lượng, tình trạng của hàng khi nhận vào kho.</li>
+            <li>Cập nhật trạng thái lô hàng đã nhận vào kho kèm theo phiếu giao hàng, biên bản, hình ảnh cần thiết khi nhận hàng xong.</li>
+            <li>Cập nhật thông tin lô hàng tới kho cho các bộ phận liên quan (nếu có yêu cầu).</li>
+            <li>Tiến hành thưc hiện dịch vụ đi kèm (in dán barcode, tem phụ, ...) đối với hàng hóa có yêu cầu.</li>
+        </ul>
+    </ul>
+    <h3>III. KIỂM HÀNG</h3>
+    <ul>
+        <li>Kiểm hàng theo BOX hoặc theo sản phẩm tùy vào tình trạng hàng hóa tới kho.</li>
+        <li>Khi nhập hàng cập nhật đầy đủ, chính xác các thông tin gồm:</li>
+        <ul>
+            <li>Kích thước</li>
+            <li>Khối lượng</li>
+            <li>Số lượng</li>
+            <li>Ngày sản xuất</li>
+            <li>Hạn sử dụng</li>
+            <li>Dịch vụ đi kèm (in, dán nhãn, barcode, tem phụ, ...).</li>
+        </ul>
+        <li>Đối với hàng hư hỏng: nhập hư hỏng, tiến hành kiểm tra, phân loại theo tiêu chuẩn nhập kho (A, D1, D2, D3) đã ban hành.</li>
+        <li>Bàn giao lên tồn trong vòng 48h kể từ khi hàng hoá được nhận vào kho. Lưu ý: không áp dụng với hàng hoá chưa đủ điều kiện nhập kho(thiếu tem, nhãn, barcode, ...).</li>
+        <li>Tổng hợp thông tin, gom hàng, ghi chú lại, để vào khu vực quy định và báo lại các bộ phận liên quan về các lô hàng:</li>
+        <ul>
+            <li>Có số lượng, chủng loại hàng thực tế khác với thông tin trên hệ thống.</li>
+            <li>Hàng hóa bên trong bị hư hỏng khi bàn giao tại kho.</li>
+            <li>Các vấn đề phát sinh khác.</li>
+        </ul>
+        <li><b style="color:red">Lưu ý:</b> Sau 2 ngày làm việc, nếu không có phản hồi từ các bộ phận liên quan, kho sẽ không chịu trách nhiệm đối với bất kỳ vấn đề nào xảy ra với lô hàng đó.</li>
+    </ul>
+    <h3>IV. XỬ LÝ ĐỐI VỚI CÁC TRƯỜNG HỢP HÀNG HÓA CHƯA ĐẠT TIÊU CHUẨN NHẬP KHO FFM:</h3>
+    <ul>
+        <h4>Kiểm hàng nhập kho theo tiêu chuẩn phân loại hàng hóa đã ban hành theo QUY CHUẨN NHẬP KHO(A, D1, D2, D3).</h4>
+        <h4>Dán nhãn phụ,dán tem cảnh báo, ...</h4>
+        <h4>Đóng set (combo)</h4>
+        <h4>Gia cố</h4>
+        <h4>Đồng kiểm</h4>
+        <h4>Các yêu cầu khác</h4>
+    </ul>
+    <ul>
+        <li>Tiếp nhận thông tin từ các bộ phận khác đối với các khách hàng có yêu cầu.</li>
+        <li>Phân công nhân sự dán nhãn phụ, đóng set. Các sản phẩm lẻ, nhóm theo số lượng (5,10,20, ...) để tiện cho việc kiểm đếm.</li>
+        <li>Thực hiện đúng yêu cầu của khách hàng, không dán nghiêng ngả hoặc đè lên các thông tin quan trọng : hạn sử dụng, nhãn phụ, ...</li>
+        <li>Xác nhận khi hoàn thành công việc để đảm bảo chính xác số lượng sản phẩm, số nhãn phụ, tem, nhãn cần dán.</li>
+        <li>Trường hợp đóng combo, phải có hướng dẫn chi tiết để đảm bảo đúng yêu cầu, quy định nhập kho và phải kiểm tra lại nếu chênh lệch.</li>
+        <li><b>Trường hợp Barcode thùng giống Barcode sản phẩm bên trong, tiến hành dán tem cảnh báo trước khi bàn giao nhập kho lô hàng đó.</b></li>
+        <li>Đối với các sản phẩm chưa thể tiến hành nhập kho, phải ghi chú lại thông tin, để vào khu vực quy định kèm theo ghi chú để dễ dàng kiểm tra, nhận biết.</li>
+        <li>Các vấn đề phát sinh khác báo lại cho Leader để tiến hành giải quyết.</li>
+    </ul>
+</fieldset>
+<fieldset>
+    <legend><h2>QUY TRÌNH KIỂM TRA SẢN PHẨM</h2></legend>
+    <h3>I. TIẾP NHẬN THÔNG TIN VÀ XỬ LÝ LÔ HÀNG</h3>
+    <ul>
+        <li>Nắm bắt thông tin về số lượng hàng hóa tới kho (nhận, hoàn), số lượng đơn hàng(packing) cần xử lý trong ngày.</li>
+        <li>Nhận hàng bàn giao từ các bộ phận liên quan để tiến hành QC.</li>
+        <li>Điều phối số lượng hàng hóa cần đóng gói, thúc đẩy và xử lý nhanh gọn, dứt điểm số lượng hàng hóa chưa được xử lý xong.</li>
+        <li>Theo dõi, ghi nhận vào sổ bàn giao các thông tin cần thiết để giải quyết với các bộ phận liên quan.</li>
+        <li>Báo cáo, bàn giao thông tin về tình trạng hàng hóa thiếu, thừa, kém chất lượng, trễ hạn lại cho quản lý để có những phương án điều chỉnh phù hợp. </li>
+    </ul>
+    <h3>II. BÀN GIAO CHO BỘ PHẬN WH CONTROLLER</h3>
+    <ul>
+        <li>Nhận bàn giao từ bộ phận Receiving và Return để tiến hành QC</li>
+        <li>Kiểm tra, kiểm đếm về tình trạng, sô lượng sản phẩm để bàn giao cho bộ phận WH Controller để tiến hành lên tồn cho hàng hóa tới kho.</li>
+        <li>Theo dõi, ghi nhận vào <b>sổ bàn giao lên tồn</b> các thông tin:</li>
+        <ul>
+            <li>Ngày tháng</li>
+            <li>Mã Shipment/ bảng kê</li>
+            <li>Số lượng mã Barcode sản phẩm</li>
+            <li>Số lượng sản phẩm</li>
+            <li>Tình trạng SM/ PA</li>
+            <li>Ký xác nhận</li>
+        </ul>
+        <li>Dán mã Shipment/ PA, số lượng sản phẩm đã kiểm đếm và thông báo cho bộ phận WH Controller.</li>
+    </ul>
+    <h3>III. BÀN GIAO CHO BỘ PHẬN ĐÓNG GÓI</h3>
+    <ul>
+        <li>Nhận bàn giao từ bộ phận lấy hàng tại khu vực chờ bàn giao để tiến hành QC hàng hóa.</li>
+        <li>Kiểm tra, kiểm đếm về tình trạng, số lượng sản phẩm để bàn giao cho bộ phận đóng gói hoàn thiện đơn hàng.</li>
+        <li>Điều phối, thúc đẩy bộ phận đóng gói xử lý nhanh, dứt điểm lượng hàng hóa chưa xử lý xong.</li>
+        <li>Theo dõi, xác nhận vào <b>sổ theo dõi lấy hàng</b> các thông tin:</li>
+        <ul>
+            <li>Ngày tháng</li>
+            <li>Số hiệu bảng kê</li>
+            <li>Mã đơn hàng (đối với các sản phẩm bị thiếu, mất hàng)</li>
+            <li>Mã sản phẩm (đối với các sản phẩm bị thiếu, mất hàng)</li>
+            <li>Số lượng sản phẩm</li>
+            <li>Ký xác nhận</li>
+        </ul>
+        <li>Dán mã bảng kê, số lượng sản phẩm đã lấy lên xe lấy hàng và <b>thông báo bàn giao cho bộ phận đóng gói theo thứ tự FIFO.</b></li>
+        <li>Không đẩy xe hàng vào khu vực đóng gói.</li>
+        <h3>Xử lý đối với những trường hợp phát sinh trong quá trình bàn giao:</h3>
+        <ul>
+            <li><b>Thiếu hàng:</b></li>
+            <ul>
+                <li>Xác nhận thiếu hàng trên hệ thống theo PK</li>
+                <li>Bàn giao cho bộ phận đóng gói</li>
+                <li>Sau khi kết thúc đóng gói, nhận bàn giao đơn hàng có sản phẩm thiếu từ bộ phận đóng gói</li>
+                <li>Bàn giao lại cho bộ phận WH Controller để tiến hành các bước tiếp theo</li>
+                <ul>
+                    <li>Nếu tìm thấy sản phẩm, WH Contrller thông báo cho nhân viên lấy hàng, lấy và bàn giao lại cho Checker</li>
+                    <li>Nếu không tìm thấy hàng, WH Controller xác nhân mất và tiến hành trả sản phẩm của đơn hàng trên hệ thống</li>
+                </ul>
+            </ul>
+            <li><b>Thừa hàng:</b></li>
+            <ul>
+                <li>Ghi nhận mã PK và bàn giao cho bộ phận đóng gói</li>
+                <li>Sau khi kết thúc đóng gói, nhận bàn giao đơn hàng có sản phẩm dư từ bộ phận đóng gói</li>
+                <li>Bàn giao lại cho bộ phận WH Controller để tiến hành kiểm tồn sản phẩm</li>
+                <ul>
+                    <li>Nếu đủ hàng thì đặt hàng lên kệ để khớp tồn hệ thống</li>
+                    <li>Nếu dư hàng, tạo SM nhập kho cho sản phẩm dư đó</li>
+                </ul>
+            </ul>
+        </ul>
+    </ul>
+</fieldset>
+<fieldset>
+    <legend><h2>QUY TRÌNH KIỂM SOÁT KHO</h2></legend>
+    <h3>I. CÔNG TÁC CHUẨN BỊ VÀ TIẾP NHẬN THÔNG TIN</h3>
+    <ul>
+        <li>Chuẩn bị công cụ dụng cụ cần thiết phục vụ cho công việc hàng ngày (xe nâng, pallet, tay kéo, bao tay bảo hộ…).</li>
+        <li>Tiếp nhận thông tin và các yêu cầu từ các bộ phận liên quan (nếu có) về công việc hàng ngày.</li>
+        <li>Họp định kỳ để phân công, sắp xếp nhân sự, đề xuất giải pháp để giải quyết các vấn đề liên quan tới công việc hàng ngày.</li>
+        <li>Ghi nhận, phản ánh thông tin liên quan tới hoạt động kho cho người quản lý trong các cuộc họp định kỳ.</li>
+    </ul>
+    <h3>II. PUT AWAY - LÊN TỒN HÀNG HÓA TỚI KHO VÀ HÀNG HOÀN TRẢ VỀ KHO</h3>
+    <ul>
+        <li>Tiếp nhận từ Checker về hàng hóa cần lên tồn và ký xác nhận vào sổ bàn giao các thông tin:</li>
+        <ul>
+            <li>Ngày tháng</li>
+            <li>Mã Shipment/ bảng kê</li>
+            <li>Số lượng mã Barcode sản phẩm</li>
+            <li>Số lượng sản phẩm</li>
+            <li>Tình trạng SM/ PA</li>
+            <li>Ký xác nhận</li>
+        </ul>
+        <li>Lên tồn hàng hóa đã được xử lý, giải quyết ngay lập tức khi phát sinh chênh lệch về số lượng, chất lượng hàng hóa khi bàn giao và lập biên bản khi không giải quyết được.</li>
+        <li>Đưa ra yêu cầu cần thiết và làm việc với các bộ phận liên quan về hàng hóa khi bàn giao.</li>
+        <li>Lên tồn theo vị trí ưu tiên, sắp xếp thuận tiện cho việc lấy hàng.</li>
+        <li>Sử dụng thành thạo các tính năng hệ thống để hỗ trợ cho công việc hàng ngày: gom hàng, vị trí ưu tiên, ...</li>
+    </ul>
+    <h3>III. SẮP XẾP VÀ GIÁM SÁT TÌNH TRẠNG LƯU KHO CỦA CÁC SẢN PHẨM</h3>
+    <ul>
+        <li>Thanh tra, kiểm tra tình trạng lưu kho của các sản phẩm về tình trạng lưu kho, tối ưu vị trí, ...</li>
+        <li>Lên kế hoạch và giải quyết các vấn đề liên quan tới các sản phẩm lưu kho khi có vấn đề.</li>
+        <li>Đưa ra ý kiến và làm việc với các bộ phận liên quan khi có các hoạt động ảnh hưởng tới tịnh trạng lưu kho của các sản phẩm.</li>
+        <li>Sử dụng thành thạo các tính năng hệ thống để hỗ trợ cho công tác sắp xếp trong kho: Gom vị trí, đổi vị trí, ...</li>
+        <li>Tổng hợp thông tin và báo cáo lại trong các cuộc họp định kỳ.</li>
+    </ul>
+    <h3>IV. CÔNG TÁC KIỂM TỒN</h3>
+    <ul>
+        <li>Tiếp nhận thông tin từ các bộ phận khác đối với các khách hàng có yêu cầu.</li>
+        <li>Làm việc với quản lý về thông tin, kế hoạch để đáp ứng các yêu cầu về thời gian, nhân lực và các yêu cầu khác.</li>
+        <li>Triển khai công việc theo kế hoạc đã vạch ra và đưa ra phản hồi đúng tiến độ.</li>
+        <li>Tổng hợp lại thông tin sau các đợt kiểm tồn để lên kế hoạch cải thiện và tối ưu cho những lần tiếp theo.</li>
+    </ul>
+</fieldset>
+<fieldset>
+    <legend><h2>QUY TRÌNH LẤY HÀNG</h2></legend>
+    <h3>I. TIẾP NHẬN THÔNG TIN VÀ XỬ LÝ ĐƠN HÀNG</h3>
+    <ul>
+        <li>Nắm bắt thông tin về số lượng đơn hàng, thứ tự ưu tiên trên hệ thống và lên kế hoạch đầu mỗi ca làm việc.</li>
+        <li>Nhân viên lấy hàng sử dụng PDA tạo bảng kê theo thứ tự ưu tiên mặc định của hệ thống ...</li>
+        <li>Đặc biệt lưu ý và xử lý trước đối với các trường hợp khẩn cấp (FFnow, ...).</li>
+        <li>Nhân viên lấy hàng phải lấy đúng vị trí hệ thống gợi ý, tuyệt đối không được lấy hàng ở vị trí không được hệ thống hướng dẫn.</li>
+        <li>Lấy hàng, phân loại các mã hàng, sắp xếp gọn gàng khi đặt vào xe lấy hàng để bộ phận đóng gói tiếp nhận và xử lý dễ dàng, thuận tiện.</li>
+        <li>Tuyệt đối không được để hàng hóa lộn xộn trên xe lấy hàng.</li>
+        <li>Trường hợp không tìm thấy hàng hoá ở vị trí được hệ thống hướng dẫn, nhân viên lấy hàng cập nhật tình trạng thiếu hàng cho sản phẩm trong bảng kê và tiếp tục lấy các sản phẩm khác để hoàn thành bàng kê.</li>
+        <li>Trường hợp thừa hàng hoặc có sản phẩm khác tại vị trí chỉ định, nhân viên lấy hàng ghi nhận, báo cáo thông tin cho Leader để giải quyết triệt để.</li>
+    </ul>
+    <h3>II. BÀN GIAO HÀNG HÓA CHO CHECKER</h3>
+    <ul>
+        <li>Bộ phận lấy hàng đưa xe hàng tới khu vực chờ bàn giao và bàn giao cho Checker.</li>
+        <li>Ký xác nhận vào <b>sổ theo dõi lấy hàng</b> các thông tin:</li>
+        <ul>
+            <li>Ngày tháng</li>
+            <li>Số hiệu bảng kê</li>
+            <li>Mã đơn hàng (đối với các sản phẩm bị thiếu, mất hàng)</li>
+            <li>Mã sản phẩm (đối với các sản phẩm bị thiếu, mất hàng)</li>
+            <li>Số lượng sản phẩm</li>
+            <li>Ký xác nhận</li>
+        </ul>
+        <li>Bàn giao đơn hàng tìm thấy sản phẩm cho Checker, và ký xác nhận vào sổ theo dõi lấy hàng.</li>
+        <li>Tuyệt đối không đẩy xe hàng vào khu vực đóng gói.</li>
+    </ul>
+</fieldset>
+<fieldset>
+    <legend><h2>QUY TRÌNH ĐÓNG GÓI HÀNG HOÁ</h2></legend>
+    <h3>I. Tiêu chuẩn đóng gói FFM</h3>
+    <ul>
+        <li>Đơn hàng từ kho FFM giao tới tay người tiêu dùng sử dụng hộp carton tiêu chuẩn 3 lớp sóng E hoặc túi nilon chuyên dụng có logo FFM.</li>
+        <li>Các sản phẩm trước khi được xếp vào hộp sẽ được kiểm tra kỹ các dấu hiệu bất thường….</li>
+        <li>Hàng hóa là giày dép hoặc hàng thời trang, hàng không dễ vỡ/móp méo, sử dụng hộp hoặc túi nilong để đóng gói, và không cần chêm chèn vật liệu chống va đập.</li>
+        <li>Sản phẩm là chai, lọ, dạng kem, lỏng, phải quấn PE từng sản phẩm trước khi đưa vào hộp đóng gói và xếp thẳng đứng theo chiều của sản phẩm, chèn giấy chèn xung quanh nếu có khoảng trống trong hộp.</li>
+        <li>Sản phẩm là các đồ khô, đồ ăn, đồ hộp không thuộc dạng dễ vỡ, thì trong quá trình đóng gói, nhân viên đóng gói sẽ xếp ngăn nắp và chèn giấy nếu có khoảng trống trong hộp đóng gói.</li>
+        <li>Sản phẩm phụ đi cùng với sản phẩm chính phải đi chung, hoặc niêm phong bọc để đảm bảo các sản phẩm không bị tách rời khỏi sản phẩm chính..</li>
+        <li>Sản phẩm là hàng tặng cũng yêu cầu được đóng gói theo tiêu chuẩn.</li>
+        <li>Sản phẩm không đủ điều kiện xuất kho như: quần áo nhàu nát, hư hỏng bao bì...yêu cầu đổi sản phẩm khác hoặc thay thế túi bọc trước khi đóng gói.</li>
+        <li>Với các sản phẩm không đạt tiêu chuẩn nhập kho (chai dạng vòi chưa được quấn, barcode không rõ ràng, ...) thì phải tiến hành gia cố hoặc yêu cầu in lại trước khi đưa ra đóng gói.</li>
+        <li>Sản phẩm là đồ thủy tinh, đồ dễ vỡ đi cùng với nhau thì từng sản sẽ được bọc bóng nổ trước khi đóng vào hộp.</li>
+        <li>Các sản phẩm dễ vỡ, linh kiện điện tử phải quấn bóng khí, dán tem cảnh báo hoặc sử dụng băng keo cảnh báo hàng dễ vỡ.</li>
+        <li>Các quy cách đóng gói khác theo tiêu chuẩn của FFM.</li>
+    </ul>
+    <h3>II. Đóng gói và phân loại hàng hoá</h3>
+    <ul>
+        <li>Bộ phận đóng gói nhận bàn giao từ bộ phận Checker, ký nhận số lượng, tình trạng và đưa xe hàng về khu vực đóng hàng.</li>
+        <li style="color:red">Tất cả hàng hóa khi sau khi nhận bàn giao sẽ thuộc trách nhiệm của bộ phận đóng gói.</li>
+        <li>Bộ phận đóng gói phải đóng gói đơn hàng dưới Camera để ghi nhận lại hiện trạng nếu phát sinh khiếu nại. Tất cả trường hợp không đúng quy định, lỗi khiếu nại phát sinh sẽ thuộc về nhân viên đóng gói.</li>
+        <li>Đối với đơn hàng khẩn cấp (FFnow, ...) ,sau khi đóng xong phải thông báo và bàn giao cho bộ phận giao hàng.</li>
+        <li>Tuyệt đối không dùng barcode của sản phẩm này để scan cho sản phẩm khác.</li>
+        <li>Quan sát màn hình để lưu ý các thông báo về yêu cầu đóng gói.</li>
+        <li>Tuân thủ quy trình đóng gói theo tiêu chuẩn đóng gói FFM.</li>
+    </ul>
+    <h3>III. Các trường hợp cần lưu ý:</h3>
+    <ul>
+        <h4>1. Hàng hóa là chất lỏng/ mỹ phẩm</h4>
+        <ul>
+            <li>Đối với sản phẩm là chai/ lọ phải được dựng đứng theo chiều đứng của hộp đóng gói.</li>
+            <li>Bọc kín sản phẩm bằng 2 lớp bóng nổ trước khi cho vào hộp.</li>
+            <li>Hàng chất lỏng có vòi, nắp nhấn phải được cố định vòi, nấp nhấn trước khi sản phẩm được đóng gói và quấn thêm 1 lớp PE trước khi đưa vào hộp.</li>
+            <li>Sắp xếp các sản phẩm vào thùng carton sau đó chèn giấy để các sản phẩm không bị xô lệch khi va đập hoặc vận chuyển.</li>
+        </ul>
+        <h4>2. Hàng dễ vỡ</h4>
+        <ul>
+            <li>Hàng dễ vỡ là các sản phẩm bằng chất liệu: nhựa mỏng, thủy tinh, pha lê, sành, sứ, gốm, đất nung, thạch cao hoặc các sản phẩm bằng nhựa cứng giòn dễ nút gãy..</li>
+            <li>Từng sản phẩm yêu cầu phải được gia cố riêng, bọc trong vật liệu chống sốc và được đặt theo chiều của sản phẩm.</li>
+            <li>Chèn đầy các khoảng trống trong hộp bằng cách sử dụng giấy chèn, bóng nổ để tránh va chạm các hộp với nhau có thể gây vỡ.</li>
+            <li>Sử dụng băng keo chuyên dụng hoặc dán tem "Hàng dễ vỡ" bên ngoài hộp bên cạnh bill gửi.</li>
+        </ul>
+        <h4>3. Hàng hóa là thiết bị điện tử</h4>
+        <ul>
+            <li>Bao gồm: điện thoại, laptop, máy tính bảng, đồng hồ, máy ảnh, … các loại hàng hóa này thường được đóng gói theo tiêu chuẩn của Nhà sản xuất.</li>
+            <li>Các sản phẩm này yêu cầu sản phẩm bắt buộc có seal khi giao hàng, FFM sẽ kiểm tra chi tiết tính nguyên vẹn theo tiêu chuẩn của nhà sản xuất khi nhập hàng.</li>
+            <li>Những sản phẩm này được đóng thùng carton của FFM và quấn thêm 02 vòng màng PE để đảm bảo trong quá trình giao hàng hạn chế bị ảnh hưởng vào bên trong.</li>
+            <li>Bên trong sản phẩm phải có các vật dụng chống va đập, chống xốc như xốp, giấy cứng.</li>
+        </ul>
+        <h4>Các yêu cầu đóng gói đặc biệt khác sẽ được thực hiện theo yêu cầu của từng NBH hàng và FFM sẽ áp dụng phí đóng gói và nguyên vật liệu riêng theo yêu cầu.</h4>
+    </ul>
+</fieldset>
+<fieldset>
+    <legend><h2>QUY TRÌNH BÀN GIAO CHO HÃNG VẬN CHUYỂN</h2></legend>
+    <h3>I. Chuẩn bị bàn giao</h3>
+    <ul>
+        <h4>Bước 1: Tiếp nhận hàng hóa từ bộ phận đóng gói</h4>
+        <ul>
+            <li>Nhân viên bàn giao nhận hàng từ bộ phận đóng gói tại khu vực đã được chỉ định.</li>
+            <li>Tập kết và phân loại hàng hóa tại các khu vực tương ứng với các hãng vận chuyển.</li>
+            <li>Bàn giao theo thứ tự thời gian tới và Ưu tiên các đơn hàng theo thứ tự ưu tiên của hệ thống: Fulfill Now, quá hạn, Tiki, ...</li>
+            <li>Kiểm soát số lượng hàng hóa, tình trạng hàng hoá thực tế và bảng kê đã tạo.</li>
+            <li>Kéo vào khu vực đã chỉ định và chờ bàn giao.</li>
+        </ul>
+        <h4>Bước 2: Xử lý hàng hóa không đủ điều kiện xuất kho</h4>
+        <ul>
+            <li>Hàng hoá hư hỏng, không đủ điều kiện xuất kho cần được thông báo ngay cho Leader và trả lại cho bộ phận đóng hàng.</li>
+            <li>Tiến hành lập biên bản, ghi rõ tình trạng đơn hàng và ký xác nhận.</li>
+        </ul>
+        <h4>Bước 3: Quy trình xử lý khi bảng kê không khớp với số liệu hệ thống</h4>
+        <ul>
+            <li>Khi số liệu hàng hóa thực tế không khớp với hệ thống, báo ngay cho Leader và tiến hành kiểm tra lại số lượng hàng hoá trước khi bàn giao.</li>
+            <li>Báo cho người phụ trách ngay lập tức về các bảng kê có vấn đề về việc bàn giao.</li>
+            <li>Yêu cầu ghi rõ mã bảng kê, mã đơn hàng thiếu/treo, thông báo lại với Leader để làm việc với các bộ phận liên quan.</li>
+        </ul>
+    </ul>
+    <h3>II. Bàn giao hàng hóa</h3>
+    <ul>
+        <li>Khi hãng vận chuyển tới nhận hàng, nhân viên bàn giao kéo toàn bộ hàng của hãng vận chuyển đó ra tiến hành bàn giao, tuyệt đối không bàn giao cho nhiều hãng cũng lúc.</li>
+        <li>Những đơn hàng hãng vận chuyển từ chối nhận(chưa sẵn sàng giao hàng, quá cân nặng kích thước, không có thông tin, vùng giao bị chặn...) phải được phân loại.</li>
+        <li>Những đơn hàng hệ thống thông báo huỷ sẽ được phân loại riêng với ký hiệu hàng huỷ tại kho và chuyển vào khu vực chờ nhận hoàn.</li>
+        <li style="color:red">Các đơn có nhãn Cancelled vẫn scan bàn giao bình thường để hệ thống ghi nhận trạng thái huỷ. Không được để các đơn Cancelled treo trên hệ thống quá 12 tiếng.</li>
+        <li>Tiến hành các thủ tục bàn giao: ký nhận, xác nhận với Vendor để tránh các vấn đề khiếu nại về sau.</li>
+    </ul>
+    <h3>III. ĐƠN HÃNG TỪ CHỐI NHẬN BÀN GIAO</h3>
+        <ul>
+            <li>Quét đúng lý do từ chối vào hệ thống theo từng đơn.</li>
+            <li>Tiếp tục bàn giao trong những lần tiếp theo cho tới khi bàn giao được hoặc PDA báo hủy để tiến hành nhập hoàn.</li>
+            <li>Hãng vận chuyển bàn giao lại đúng khu vực và nhân viên bàn giao phải tách riêng các đơn hàng huỷ kèm theo dấu hiệu nhận biết.</li>
+            <li>Khi hãng vận chuyển nhận bàn giao xong bộ phận bàn giao sẽ scan loại bỏ các đơn hàng mà hãng vận chuyển từ chối.</li>
+            <li>Nếu bảng kê hai bên khớp số lượng, tiến hành ký xác nhận cập nhật thông tin bưu tá lên hệ thống và sổ theo dõi.</li>
+            <li>Trường hợp lệch bảng kê giữa hai bên, yêu cầu xác minh tại chỗ và báo cáo người phụ trách.</li>
+            <li>Kéo toàn bộ những đơn hàng đã được phân loại về khu vực hàng chờ bàn giao cần xử lý.</li>
+            <li>Với các đơn Fulfill Now mà shipper không tới lấy thì phải kiểm tra. Nếu đơn hàng:</li>
+            <ul>
+                <li>HỦY:  đưa về khu vực hàng huỷ chờ nhận hoàn.
+                <li><b>KHÔNG HỦY: thì bộ phận bàn giao liên hệ với những bên liên quan để giải quyết dứt điểm.</b></li>
+            </ul>
+            <p style="color:red">Lưu y: Thời hạn bàn giao hàng hóa: Bộ phận bàn giao phải tiến hành bàn giao trong vòng 48h kể từ khi đơn được đóng xong bất kể lý do.</p>
+        </ul>
+</fieldset>
+<fieldset>
+    <legend><h2>QUY TRÌNH TIẾP NHẬN VÀ XỬ LÝ HÀNG HOÀN</h2></legend>
+    <h3>Lưu ý</h3>
+    <b>Đối với hàng hư hỏng: nhập hư hỏng, tiến hành kiểm tra, phân loại theo tiêu chuẩn nhập kho (A, D1, D2, D3) đã ban hành.</b>
+    <h3>I. TỪ HÃNG VẬN CHUYỂN</h3>
+        <ul>
+            <li>Khi tiếp nhận hàng hoàn từ hãng vận chuyển, nhân viên nhận hàng tiến hành nhận bàn giao trên PDA và ký xác nhận.</li>
+            <li>Lập biên bản hiện trạng, chụp hình, quay video và ký xác nhận với hãng nếu:</li>
+            <ul>
+                <li>Hàng hoá không có logo FFM, có dấu hiệu móp méo, hư hỏng, ướt rách.</li>
+                <li>Hàng hóa nghi ngờ không có hàng, tráo đổi hàng, mất hàng.</li>
+                <li>Hàng hóa nguyên đai nguyên kiện nhưng phát hiện tiếng động lạ (bể vỡ bên trong).</li>
+            </ul>
+            <li>Các đơn hàng hệ thống thông báo không tồn tại phải phân loại vào khu vực riêng, chờ liên hệ xử lý.</li>
+            <li>Đối với hàng không đi từ kho FFM, vẫn nhận bình thường. Nếu có vấn đề, phân loại vào khu vực riêng, chờ xử lý.</li>
+            <li>Liệt kê những đơn hàng không có thông tin nhận hoàn và làm việc với các bộ phận liên quan.</li>
+        </ul>
+    <h3>II.	HÀNG HỦY TẠI KHO</h3>
+    <ul>
+        <li>Nhân viên nhận hàng hoàn sẽ tới khu vực chứa hàng 'Cancel' và tiến hành nhận bàn giao với nhân viên bàn giao.</li>
+        <li>Kéo toàn bộ hàng đã được scan về khu vực hàng hoàn và tiến hành các bước tiếp theo.</li>
+        <li>Lưu ý: Khi nhận hàng phải có bộ phận bàn giao và tất cả đơn hàng huỷ khi bàn giao cần được đánh dấu đầy đủ.</li>
+    </ul>
+</fieldset>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <style>
+        img {width: 100%}
+        h2 {color: blue;}
+        h3 {color: red}
+        h4 {color: #8F3A84; font-size: 20px}
+    </style>
+    <meta charset="UTF-8">
+    <title>HANDOVER</title>
+</head>
+<body>
+<fieldset>
+    <legend><h2>QUY TRÌNH BÀN GIAO</h2></legend>
+    <ul>
+    <h3>I. TIẾP NHẬN THÔNG TIN VÀ XỬ LÝ ĐƠN HÀNG</h3>
+    <ul>
+        <li>Nắm bắt thông tin về số lượng đơn hàng bàn giao cho 3PL.</li>
+        <li>Nắm bắt và gửi yêu cầu cho 3PL trong những trường hợp đột biến đề kịp thời bàn giao hàng hóa.</li>
+        <li>Ký nhận và lưu trữ đầy đủ chứng từ sau một đợt bàn giao.</li>
+    </ul>
+    <h3>II. System Procedure: QUY TRÌNH BÀN GIAO TRÊN HỆ THỐNG</h3>
+        <ul>
+            <h4>Bước 1: admin.lixibox.com &rarr; Operation &rarr; Chọn Kho &rarr; Packing &rarr; Requested</h4>
+            <img src="{% static 'IMG/Lx_handover_1.png'%}">
+            <ul>
+                <li>Đơn hàng sau khi đóng gói xong sẽ ở trạng thái <b>Requested</b> chờ bàn giao cho 3PL.</li>
+            </ul>
+            <h4>Bước 2: Khi bàn giao, nhân viên sử dụng App Inventory &rarr; Sent order to shipper &rarr; Scan từng order khi bàn giao hãng vận chuyển.</h4>
+            <li>Đơn hàng sau khi bàn giao sẽ ở trạng thái <b>Shipped</b></li>
+        </ul>
+    </ul>
+</fieldset>
+</body>
+</html>

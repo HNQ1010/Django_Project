@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <style>
+        h1 {color: purple;}
+        h2 {color: blue;}
+        h3 {color: red;}
+        pre {font-family: Time new roman;}
+    </style>
+    <meta charset="UTF-8">
+    <title>Fulfillment Warehouse</title>
+</head>
+<h1 style="text-align: center">WAREHOUSE OVERVIEW</h1>
+<h1>Layout</h1>
+<img src="{% static 'IMG/layout.png'%}" style="width: 100%">
+<h1>Standardization Process.</h1>
+<fieldset>
+    <legend><h2>Stage 1: Inbound Processing</h2></legend>
+    <img src="{% static 'IMG/23rd-March-2.jpg'%}" style="width: 100%" >
+    <p><b>Notice: </b>Pre-receiving is the process when order was finished and handed over to 3PL and has to complete
+    before receiving.</p>
+    <h3>Step 1: Matching information:</h3>
+    <ul>
+        <li>Receive and check receipts.</li>
+        <li>Record information : license, Vendor, time ... </li>
+    </ul>
+    <h3>Step 2: Quality and Quantity check:</h3>
+    <ul>
+        <li>Process in turn and separately for each Vendor.</li>
+        <li>Unload and receive products.</li>
+        <li>Ensure that there're no damaged goods and exact number of products received.</li>
+    </ul>
+    <h3>Step 3: Receive and update on the sys:</h3>
+    <ul>
+        <li>Scan and update order status on the system.</li>
+    </ul>
+    <h3>Step 4: Allocating and putting away of Inventory:</h3>
+        <ul>
+            <li>After checking successfully, the product is barcoded to be easily located within the facility and quickly
+            packed so that there're minimal delays in order processing.</li>
+            <li>Sort, classify exactly the type of products and put away inside warehouse on the corrected positions
+            and WH labels.</li>
+            <li>Current WH labels:</li>
+            <pre>
+                Area    row     bay     level   pos
+                   A   -   01  -   01   -   3   -   A
+            </pre>
+        </ul>
+    <h3>Step 5: Confirm with related Teams:</h3>
+    <ul>
+        <li style="color:red">Sign, store documentations and update information to relevant teams.</li>
+    </ul>
+    <h3>Special Case: Fulfillment Warehouse stock standardization.</h3>
+</fieldset>
+<fieldset>
+    <legend><h2>Stage 2: Outbound Processing</h2></legend>
+    <img src="{% static 'IMG/Screenshot 2021-12-11 222146.jpg'%}" width="600" height="200">
+    <h3>Step 1: Order management</h3>
+    <ul>
+        <li>Order management dictates the product picking, packing and labeling activities per each
+        newly received customer order.</li>
+    </ul>
+    <h3>Step 2: Picking</h3>
+    <ul>
+        <li>Preparing order checklist.</li>
+        <li>Based on order descriptions(item SKUs, product colors, size, number of units,... and location inside
+        warehouse, pick the requested items exactly.</li>
+        <li>On time.(Based on real operations, calculate the employee productivity, performance).</li>
+    </ul>
+    <h3>Step 3: Packing</h3>
+    <ul>
+        <li>Sign and save handover records.</li>
+        <li>Choose suitable materials to achieve the lowest practical dimensional weight in order to optimize
+        dimensional weight, increase handover volume and save costs.</li>
+        <li>Return shipping materials and labels in case customer wishes to exchange or return the item for a refund
+        later.</li>
+        <li>After finishing packing process, stick label to it's package exactly.</li>
+    </ul>
+    <h3>Step 4: Weight Measurement</h3>
+    <ul>
+        <li>Weight the orders or record number of orders and order's dimensional to measure the volumetric weight.</li>
+    </ul>
+    <h3>Step 5: Shipping</h3>
+    <p>After finishing packing process, the order is sent to a transportation channel or shipping node to be 
+    shipped to the customer.</p>
+    <ul>
+        <li>Validate orders, check for errors or duplications, and handle exceptions immediately.</li>
+        <li>Prepare handover documentations.</li>
+        <li>Based on 3PL's information, tailoring picking capabilities and strategies.</li>
+        <ul>
+            <li>Line picking.</li>
+            <li>Cluster picking.</li>
+            <li>Batch picking.</li>
+            <li>Zone picking.</li>
+            <li>Label-based picking.</li>
+            <li>Paper-based picking.</li>
+        </ul>
+        <li>Hand over orders to correct shipper or carrier and ensure on-time information on sys.</li>
+        <li>Sign and save handover records.</li>
+        <li>Keep updating shipping process.</li>
+    </ul>
+</fieldset>
+<fieldset>
+    <legend><h2>Stage 3: Reverse Logistic</h2></legend>
+    <img src="{% static 'IMG/reverse-logisticsflow.jpg'%}">
+    <h3>Step 1: Process the Return</h3>
+    <ul>
+        <li>Starting when the consumer signals they want to return a product.</li>
+        <li>Scheduling return shipments and identifying where the product should go.</li>
+    </ul>
+    <h3>Step 2: Deal with Returns</h3>
+    <ul>
+        <li>Check return authorization and product's conditions.</li>
+        <li>Inspect return products and determine its return category.</li>
+        <li>Sort products into disposition options:</li>
+        <ul>
+            <li>Fix</li>
+            <li>Resell as new</li>
+            <li>Resell as a return</li>
+            <li>Repair, recycle, replacement, ...</li>
+        </ul>
+    </ul>
+    <h3>Step 3: Keep Return moving</h3>
+    <ul>
+        <li>After identifying the type of return products, keep moving it to the correct locations or functions 
+        (repair, recycle, ...) to reduce daily waste.</li>
+    </ul>
+</fieldset>
+<h1>Customer KPIs: Related to Express Companies</h1>
+<fieldset>
+    <legend><h2>1. On-time Shipping</h2></legend>
+    <ul>
+        <li><b>Definition</b>The ratio of orders that were shipped on or before the requested shipping date versus the
+        total number of orders.</li>
+        <li>Formula: </li>
+        <pre>
+            Orders shipped on time or early ÷ Total # of orders shipped
+        </pre>
+        <li><b>Meaning: </b>This KPI tells you how effective you are with getting shipments out on time. If your on-time
+        shipping metric is too low, it means that orders are not being picked, packaged, and shipped in an acceptable of
+        amount time, and you need to address the issue or risk customer dissatisfaction.</li>
+    </ul>
+</fieldset>
+<fieldset>
+    <legend><h2>2. Order Cycle Time</h2></legend>
+    <ul>
+        <li><b>Definition: </b>The average length of time it takes from when a customer places an order until they receive it.</li>
+        <li>Formula:</li>
+        <pre>
+            (Time the order was received by customer – Time the order was placed) ÷ Total number of orders shipped
+        </pre>
+        <li>Meaning: Order cycle time lets you know how effective your warehouse is at fulfilling and shipping customer
+        orders. When your average order cycle time is lengthening, you may need to address other areas, like invoicing
+        times, supplier lead times, and accounts payable or receivable, to resolve issues and lower the amount of time
+        between order and delivery.</li>
+    </ul>
+</fieldset>
+<fieldset>
+    <legend><h2>3. Internal Order Cycle Time</h2></legend>
+    <ul>
+        <li>Definition: The average length of time from when an order is taken until it is shipped.</li>
+        <li>Formula:</li>
+        <pre>
+             (Time the order is ready to ship – Time the order was placed) ÷ Total # of orders
+        </pre>
+        <li>Meaning: The internal order cycle time metric is similar to the order cycle time metric, but without the
+        time that it takes the shipping carrier to deliver the order included. If your average time is growing, then you
+        should look at your picking and packaging processes.</li>
+    </ul>
+</fieldset>
+<fieldset>
+    <legend><h2>4. Perfect Order Percentage</h2></legend>
+    <ul>
+        <li><b>Definition: </b>This KPI is the percentage of orders that move through the fulfillment process with no errors
+        or deviations. It includes taking the order correctly, allocating inventory immediately, delivering undamaged products
+        on time with an accurate invoice.</li>
+        <li>Formula: </li>
+        <pre>
+            (Percent of orders on time) X (Percent of orders shipped complete) X (Percent of orders shipped no damage) X (Percent of orders with correct documentation)
+        </pre>
+        <li>To determine the KPIs included in the above formula uses the following calculations:</li>
+        <ul>
+            <li>Percent of orders on time = Orders on time versus Total orders</li>
+            <li>Percent of orders shipped complete = Orders shipped complete versus Total orders</li>
+            <li>Percent of orders shipped no damage = Orders shipped with no damage versus Total orders</li>
+            <li>Percent of orders with correct documentation = Orders with correct documentation versus Total orders</li>
+        </ul>
+        <li>Meaning: The perfect order percentage KPI can get pretty complicated, but it provides useful information. It 
+        tells you what percentage of orders are being processed accurately and on time. When you see this number decreasing,
+        it’s time to take a look at your processes and who is doing the processing.</li>
+    </ul>
+</fieldset>
+<fieldset>
+    <legend><h2>5. Order Picking Accuracy</h2></legend>
+    <ul>
+        <li><b>Definition: </b>The accuracy of the order-picking process.</li>
+        <li>Formula: </li>
+        <pre>
+            Total # of orders ÷ Perfect order rate
+        </pre>
+        <li>Meaning: The order picking accuracy KPI is important because it lets you know the percentage of orders that are
+        picked for shipping accurately. If your order picking accuracy percentage goes down, then you may have problems with
+        inventory, shipping time, returns, and of course, dissatisfied customers.</li>
+    </ul>
+</fieldset>
+<h1>Operations KPIs: Inside Warehouse</h1>
+<fieldset>
+    <legend><h2>1. Order Fill Rate Percentage</h2></legend>
+    <ul>
+        <li><b>Definition: </b>Order fill rate tracks the percentage of orders successfully delivered on the first attempt.</li>
+        <li>Formula: </li>
+        <pre>
+            Percent of orders delivered on the 1st attempt ÷ Total orders
+        </pre>
+        <li>Meaning: The order fill rate percentage is another in full KPI that should be tracking at a high number. If
+        it isn’t close to 100%, you should investigate why, beginning with inventory management, supply-chain lead time,
+        packaging process, and shipping carriers.</li>
+    </ul>
+</fieldset>
+<fieldset>
+    <legend><h2>2. Line Item Fill Rate Percentage</h2></legend>
+    <ul>
+        <li><b>Definition: </b>Line fill rate percentage is an indicator of how you are stocking products that are in
+        demand from customers.</li>
+        <li>Formula: </li>
+        <pre>
+            Number of customer order lines filled completely ÷ Total #of customer order lines shipped
+        </pre>
+        <li>Meaning: The line item fill rate metric allows you to see if your product demand is being met. A low percentage
+        for this metric may mean that your demand planning and forecasting are not accurate, you have issues with inventory
+        management, problems with vendor management, or inventory shrinkage problems.</li>
+    </ul>
+</fieldset>
+<fieldset>
+    <legend><h2>3. Orders Picked per Hour</h2></legend>
+    <ul>
+        <li><b>Definition: </b>The productivity of each worker over a specific hour.</li>
+        <li>Formula: </li>
+        <pre>
+            Orders picked and shipped ÷ Total hours in picking and shipping
+        </pre>
+        <li>Meaning: The orders picked per hour metric allows you to quantify each worker’s productivity in a certain
+        time frame. When tracked, you can see which employees have an acceptable output and which don’t.</li>
+    </ul>
+</fieldset>
+<h1>Warehouse KPIs</h1>
+<fieldset>
+    <legend><h2>1. Dock to Stock Time</h2></legend>
+    <ul>
+        <li><b>Definition: </b>This metric measures the time from the start of a receipt (incoming inventory) to the time
+        that put-away is complete.</li>
+        <li>Formula: </li>
+        <pre>
+            Time received inventory is put away – Time incoming inventory was received
+        </pre>
+        <li>Meaning: The dock-to-stock cycle begins when your warehouse receives delivery of goods from the supplier and
+        ends when those goods are put away in the warehouse and recorded into the inventory management system. If the 
+        average length of time is too long, or continually increasing, receiving processes will need to be investigated
+        and addressed.</li>
+    </ul>
+</fieldset>
+<fieldset>
+    <legend><h2>2. Inventory Accuracy</h2></legend>
+    <ul>
+        <li><b>Definition: </b>Inventory accuracy allows you to compare stock quantities in your inventory management 
+        system with the actual physical inventory on the shelves.</li>
+        <li>Formula: </li>
+        <pre>
+            Database inventory count ÷ Physical inventory count
+        </pre>
+        <li>Meaning: Your physical inventory should match that listed in your system. However, there’s often a discrepancy
+        in large distribution centers. A high rate of inaccuracy in inventories can lead to unexpected backorders, customer
+        dissatisfaction and, ultimately, higher overall costs.</li>
+    </ul>
+</fieldset>
+<h1>Key Processes</h1>
+<fieldset>
+    <legend><h2>Picking Process</h2></legend>
+    <ul>
+        <li>Order picking goals:</li>
+        <ul>
+            <li>Minimize travel distance: Picking path design.</li>
+            <li>Maximize use of space: layout design.</li>
+            <li>Minimize pick errors: order return process (explore more...).</li>
+            <li>Minimize injuries: safe working environment (arranging, travelling, equipment, ...)</li>
+        </ul>
+    </ul>
+</fieldset>
+<fieldset>
+    <legend><h2>Packing</h2></legend>
+    <h3>Problems</h3>
+    <ul>
+        <li>Materials costs are not the only contributing factor to packaging expenses. In fact, there are several factors
+        that increase packing costs.</li>
+        <ul>
+            <li>Poorly designed materials storage and packing lines.</li>
+            <li>Long packing process times.</li>
+            <li>Paying for box dimensions rather than product dimensions.</li>
+            <li>Ineffective packing materials that allow damage.</li>
+            <li>Inefficient manufacturing models.</li>
+            <li>Failing to optimize packing.</li>
+            <li>Expensive shipping costs.</li>
+        </ul>
+    </ul>
+    <h3>Solutions</h3>
+    <ul>
+        <li>1. Improving Materials: There is a wide variety of packaging materials available and variations within each
+        category.</li>
+        <li>2. Improving Packing Lines: Packaging Lines: Consider the layout of warehouse.</li>
+        <ul>
+            <li>1. Analyze current inventory of product packing.</li>
+            <li>2. Identify similar items that could be grouped together.</li>
+            <li>3. Identify infrequently used packing materials and group them together.</li>
+        </ul>
+        <li>3. Optimize Packaging by Using Smaller Boxes</li>
+        <ul>
+            <li>Maximize packing space: Ship as many products as possible in one packing box.</li>
+            <li>Diversify packaging materials: Rather than using the same three box sizes, evaluate average shipment size
+            and ensure appropriate packaging that doesn’t cost through the dimensional volume rate.</li>
+            <li>Use padded envelopes: Some of products may be small enough to go into large, padded envelopes rather than
+            small boxes.</li>
+            <li>Negotiate shipping rates: Review shipping data to understand shipping profile before entering into
+            negotiations with carrier.</li>
+        </ul>
+        <li>4. Minimize Returns by Ensuring Products are Properly Packaged and Transported: improving poor packaging and
+        transit damage.</li>
+        <li>Rethink, redesign and keep improving packing process.</li>
+    </ul>
+</fieldset>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <style>
+        h1 {color: red;}
+        h2 {color: blue;}
+        h3 {color: purple;}
+        h4 {color: green; font-size: 20px}
+    </style>
+    <meta charset="UTF-8">
+    <title>Warehouse Operation Work Flow</title>
+</head>
+<body>
+    <h1 style="text-align:center"><a href="wms"></a>VENDOR MANAGEMENT</h1>
+    <h2>I. Overview</h2>
+        <ul>
+            <li>The company is using 3 types of warehouse at this time:</li>
+            <ul>
+                <li><b>In-house warehouse</b></li>
+                <ul>
+                    <p>&#9755; SG Packing</p>
+                     <p>&#9755; HAN Packing</p>
+                </ul>
+                <li><b>3PL Fulfillment Vendors</b></li>
+                <ul>
+                    <p>&#9755; BOXME</p>
+                </ul>
+                <li><b>E-commerce Fulfillment Vendors</b></li>
+                <ul>
+                    <p>&#9755; Shoppee</p>
+                </ul>
+            </ul>
+        </ul>
+    <h2>II. Operation Scorecards</h2>
+        <ul>
+            <h3>1. In-house warehouse</h3>
+            <ul>
+                <h4>&#9733; Warehouse Operation</h4>
+                <table>
+                    <tr>
+                        <th>Current Indexes</th>
+                        <th>Expected Scorecard</th>
+                    </tr>
+                    <tr>
+                        <td>
+                            <ul>
+                                <li><b>1. Inbound and Outbound Volume's statistic</b></li>
+                                <ul>
+                                    <p>&#9755; B2C of SG Packing & HAN Packing warehouse.</p>
+                                    <p>&#9755; B2B of SG Packing & HAN Packing warehouse.</p>
+                                </ul>
+                                <li><b>2. Lead Time</b></li>
+                                <ul>
+                                    <p>&#9873; Fulfillment Lead Time(Order confirmed &rarr; Packed): commitment(SLA) &rarr; 1 day</p>
+                                    <ul>
+                                        <p>&#9872; Average Lead Time + percent of meet SLA of SG warehouse</p>
+                                        <p>&#9872; Average Lead Time + percent of meet SLA of HAN warehouse</p>
+                                    </ul>
+                                    <p>&#9873; Transportation Lead Time (Order confirmed &rarr; delivered): Commitment(SLA)</p>
+                                    <ul>
+                                        <p>&#9872;SG</p>
+                                        <ul>
+                                            <p>&#9755; SG &rarr; SG: 2 days</p>
+                                            <p>&#9755;SG &rarr; HAN: 5 days</p>
+                                            <p>&#9755;SG &rarr; South: 4 days</p>
+                                            <p>&#9755;SG &rarr; North: 5 days</p>
+                                        </ul>
+                                        <p>&#9872;HAN</p>
+                                        <ul>
+                                            <p>&#9755;HAN &rarr; HAN: 2 days</p>
+                                            <p>&#9755;HAN &rarr; SG: 5 days</p>
+                                            <p>&#9755;HAN &rarr; North: 4 days</p>
+                                            <p>&#9755;HAN &rarr; South: 5 days</p>
+                                        </ul>
+                                    </ul>
+                                </ul>
+                            </ul>
+                        </td>
+                        <td>
+                            <li>Based on warehouse volume's statistic (inbound, outbound), we will focus on belows indexes and separate it from transportation indexes:</li>
+                            <ul>
+                                <p><b>1. Volume:</b> Number of order handed over volume to 3pl (B2B, B2C).</p>
+                                <p><b>2. Shipment inbound time:</b> Based on average time receiving SM &rarr; indexes</p>
+                                <p><b>3. Backorder's rate:</b> Order waiting for pre-processing (fulfill items/ products from other locations).</p>
+                                <p><b>4. Fulfilled Time:</b> Order places &rarr; packed</p>
+                                <p><b>5. Picking & packing productivity:</b> Headcount's productivity are using for picking, packing activities.</p>
+                                <p><b>6. Order accuracy (picking - packing):</b> based on CS report or different channels to get the results.</p>
+                                <p><b>7. Handover accuracy:</b> The correct percentage of orders handing over to correct transport's Vendors.</p>
+                                <p><b>8. On time Handover (handover at warehouse) percentages:</b> Percentage handed over to 3pl Vendors before COT (cut-off time)&rarr; Create cut off time for each handover cycle in daily operation:</p>
+                                <ul>
+                                    <p>&#9872; Cycle 1 (Morning): 10:30:00 AM - 11:30 AM</p>
+                                    <p>&#9872;Cycle 2 (Afternoon):04:30 PM- 05:30 PM</p>
+                                </ul>
+                                <p><b>9. Return/ exchange quantity:</b> Reflect quantity and reasons that orders is returned to warehouses &rarr; make adjustment on related operations.</p>
+                                <p><b>10. Return/ exchange rate:</b>Reflect quantity and reasons that orders is returned to warehouses &rarr; make adjustment on related operations.</p>
+                                <p><b>11. Return's processing time:</b> For reverse logistic operations. Expected time: 24-48H</p>
+                                <p><b>12. Inventory accuracy:</b> Control warehouse inventory situation &rarr; Setup regular inventory cycle count for each type of warehouse operations: In-house, Fulfillment Vendors, E-commerce Vendors.</p>
+                            </ul>
+                        </td>
+                    </tr>
+                </table>
+                <h4>&#9733; Transportation</h4>
+                <table>
+                    <tr>
+                        <th>Current Indexes</th>
+                        <th>Expected Scorecard</th>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p><b>1. Volume share with Vendors (NJV, GHN):</b> Number of orders handed over to 3pl express's Vendors.</p>
+                            <p><b>2. First time attempt (delivery):</b> from shipped (handed over to 3PL) to 1st delivery to customers.</p>
+                            <p><b>3. Met SLA percentages:</b> Commitment (SLA) &rarr; 98%</p>
+                            <p><b>4. Details of each area (HAN-HAN, SG-SG, ...)</b></p>
+                            <p><b>5. Details issues statistic</b></p>
+                        </td>
+                        <td>
+                            <p>Management team should consider each issue related to fail percent rate at each area and resolve it.</p>
+                            <p><b>1. Volume:</b> Number of orders handed over to each 3PL &rarr; </p>
+                            <p><b>2. First time attempt:</b> from handed over at warehouse to 1st time delivery to customers.</p>
+                            <p><b>3. Delivery time:</b> from handed over at warehouse to successfully delivered to customers.</p>
+                            <p><b>4. On time delivery percentage:</b> percentage of successfully delivered to customers.</p>
+                            <p><b>5. Cost per Unit:</b> cost using for each handed over/ returned order.</p>
+                            <p><b>6. Details issues statistic related to fail rate or severe issues.</b></p>
+                        </td>
+                    </tr>
+                </table>
+            </ul>
+        <ul>
+        </ul>
+            <h3>2. 3PL Fulfillment Vendor</h3>
+            <ul>
+                <table>
+                    <tr>
+                        <th>Current Indexes</th>
+                        <th>Expected Scorecard</th>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p><b>1. Volume share with E-commerce Vendors</b></p>
+                            <p><b>2. Time-to-fill with percent rate</b></p>
+                        </td>
+                        <td>
+                            <p>With 3PL fulfillment services, the Vendor they have to responsible for each of operation processes in fulfill order operations. We'll focus on these indexes:</p>
+                            <ul>
+                                <p><b>1. Volume:</b> Number of orders handed over to 3pl (B2B, B2C).</p>
+                                <p><b>2. Shipment inbound time:</b> Based on time for receiving SM at warehouse &rarr; indexes</p>
+                                <p><b>3. Fulfilled Time:</b> Order places &rarr; packed</p>
+                                <table>
+                                    <tr>
+                                        <th>B2C, B2B</th>
+                                        <th>B2C Now</th>
+                                        <th>B2B Now</th>
+                                    </tr>
+                                    <tr>
+                                        <td>4 - 6 hours</td>
+                                        <td>30 minutes</td>
+                                        <td>60 minutes</td>
+                                    </tr>
+                                </table>
+                                <p><b>4. Order accuracy (picking - packing):</b> based on CS report or different channels to get the results.</p>
+                                <p><b>5. On time Handover:</b> Percentage when handing over on time at warehouse to 3PL &rarr; Compare with Vendor's SLA and our needs in transportation.</p>
+                                <p><b>6. Delivery time:</b> from shipped at warehouse to successfully delivered to customers.</p>
+                                <p><b>7. Return rate:</b>Reflect quantity and reasons that orders is returned to warehouses &rarr; make adjustment on related operations.</p>
+                                <ul>
+                                    <p>&#9872; Reasons</p>
+                                    <p>&#9872; Percentages</p>
+                                </ul>
+                                <p><b>8. Return's processing time:</b> For reverse logistic operations. Expected time: 24-48H</p>
+                                <p><b>9. Inventory accuracy:</b> Control warehouse inventory situation.</p>
+                            </ul>
+                        </td>
+                    </tr>
+                </table>
+            </ul>
+        </ul>
+        <ul>
+            <h3>3. E-commerce Warehouse: Updating</h3>
+        </ul>
+    <h2>III. Inventory Cycle Count</h2>
+    <ul>
+        <h3 style="font-size: 30px">&#9733;3PL Fulfillment</h3>
+        <ul>
+            <h4>Performance review</h4>
+            <ul>
+                <li>Weekly report will sent to PIC &rarr; Duyên</li>
+                <li>Other issues were raised will be resolved immediately via chat groups (Telegram) or setup meeting.</li>
+            </ul>
+            <h4>Inventory Cycle count</h4>
+            <ul>
+                <li>Cycle count: Quarterly, Boxme will send the inventory cycle count report to Lixibox. Other additional cycle count requests will be charged additional fee and <br>
+                    and the timeline is aligned before doing inventory cycle count.</li>
+                <li>Doing inventory cycle count need to avoid peak season (end of the year) or peak day (beginning or the end of month).</li>
+            </ul>
+            <h4>PIC</h4>
+                <li>Boxme</li>
+                <ul>
+                    <li>Customer success: Quang</li>
+                    <li>CS: Tung</li>
+                    <li>Other supports: Han Van Loi (CEO), Loan (CCO)</li>
+                </ul>
+                <li>LXB</li>
+                <ul>
+                    <li>Tram: WH Manager</li>
+                    <li>Duyen: Transportation Leader</li>
+                </ul>
+        </ul>
+        <h3 style="font-size: 30px">&#9733;E-Commerce (SHOPPEE)</h3>
+        <ul>
+            <h4>Performance review</h4>
+            <ul>
+                <li>Get the report from website.</li>
+                <li>Complain via sky chat groups with involving of Thanh (MKP lead) and MKP team members.</li>
+            </ul>
+            <h4>Inventory Cycle count</h4>
+            <ul>
+                <li>Document:</li>
+                <li>Align and get confirm via email then following documentations.</li>
+                <li>Doing inventory cycle count need to avoid peak season (end of the year) or peak day (beginning or the end of month)</li>
+            </ul>
+            <h4>PIC</h4>
+            <li>Shoppee</li>
+            <ul>
+                <li>Huỳnh Tấn Châu: +84931466745</li>
+                <li>Loan: </li>
+            </ul>
+            <li>Lixibox</li>
+            <ul>
+                <li>Tram: WH Manager</li>
+            </ul>
+        </ul>
+        <h3 style="font-size: 30px">&#9733; In-House</h3>
+        <ul>
+            <h4>Performance review</h4>
+            <ul>
+                <li>Weekly report.</li>
+            </ul>
+            <h4>Inventory Cycle count</h4>
+            <ul>
+                <li>Weekly</li>
+                <li>Impacts: Inventory cycle count report was shape by weekly, so if the task is not completed, the report will always be pending and missing many unchecked locaitons.</li>
+            </ul>
+            <h4>PIC</h4>
+            <li>Lixibox</li>
+            <ul>
+                <li>Tram: WH Manager</li>
+            </ul>
+        </ul>
+    </ul>
+</body>
+</html>

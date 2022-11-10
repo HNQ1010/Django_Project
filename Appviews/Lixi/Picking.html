@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <style>
+        h2 {color: blue;}
+        h3 {color: red}
+        h4 {color: #8F3A84; font-size: 20px}
+    </style>
+    <meta charset="UTF-8">
+    <title>PICKING</title>
+</head>
+<body>
+<fieldset>
+    <legend><h2>QUY TRÌNH LẤY HÀNG</h2></legend>
+    <ul>
+    <h3>I. TIẾP NHẬN THÔNG TIN VÀ XỬ LÝ ĐƠN HÀNG</h3>
+    <ul>
+        <li>Nắm bắt thông tin về số lượng đơn hàng, lên kế hoạch đầu mỗi ca làm việc.</li>
+        <li>Đặc biệt lưu ý và xử lý trước đối với các trường hợp quá hạn, khẩn cấp (hàng cần gấp khi có yêu cầu từ các bộ phận liên quan).</li>
+        <li>Nhân viên lấy hàng phải lấy đúng vị trí hệ thống gợi ý, không được lấy hàng ở vị trí không được hệ thống hướng dẫn.</li>
+        <li>Lấy hàng, phân loại các mã hàng, sắp xếp gọn gàng khi đặt vào xe lấy hàng để nhân viên đóng gói tiếp nhận và xử lý dễ dàng, thuận tiện.</li>
+        <li>Tuyệt đối không được để hàng hóa lộn xộn trên xe lấy hàng.</li>
+        <li>Trường hợp không tìm thấy hàng hoá ở vị trí được hệ thống hướng dẫn, báo lại tình trạng cho Leader và tiếp tục lấy các sản phẩm khác để hoàn thành bàng kê.</li>
+        <li>Sau khi lấy hàng xong, đưa hàng hóa lại khu vực chỉ đỉnh để kiểm tra lại số lượng và tình trạng của hàng hóa.</li>
+    </ul>
+    <h3>II. System Procedure: QUY TRÌNH LẤY HÀNG TRÊN HỆ THỐNG</h3>
+        <ul>
+            <h4>Bước 1: Vào admin.lixibox.com &rarr; Ready to Pick</h4>
+            <ul>
+                <li>Đối với những đơn hàng có dấu hiệu cảnh báo (Out of stock): Chọn tất cả những sản phẩm này &rarr; <b>Unpick</b> để chuyển chúng ta cột "Chờ xử lý"<br>
+                    để chờ hàng về hoặc hàng từ kho khác tới</li>
+                <li>Đối với những đơn hàng bình thường (không có dấu hiệu cảnh báo): Chọn tất cả những sản phẩm này &rarr; <b>Request Stock</b> để tạo yêu cầu lấy hàng.</li>
+            </ul>
+            <img src="{% static 'IMG/Lx_pick_1.png'%}">
+            <h4>Bước 2: Nhân viên lấy hàng đăng nhập vào App Inventory trên Mobile &rarr; Pick Products &rarr; Scan QR code&rarr; đi tới vị trí hệ thống gợi ý và lấy hàng</h4>
+            <img src="{% static 'IMG/'%}">
+            <h4>Bước 3: Sau khi lấy hàng xong, nhân viên lấy hàng bàn giao cho nhân viên đóng gói (hoặc QC) để kiểm tra lại số lượng và tình trạng sản phẩm trước khi đóng gói.</h4>
+        </ul>
+    </ul>
+</fieldset>
+</body>
+</html>

@@ -1,0 +1,3580 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <meta charset="UTF-8">
+    <title>Pd Ad3</title>
+</head>
+<body>
+<h1 style="text-align: center">Duplicate Labels</h1>
+<p>'Index' objects are not required to be unique; you can have duplicate row or column labels. This may be a bit confusing at first. If you're familiar with SQL<br>
+, you know that row labels are similar to a primary key on a table, and you would never want duplicates in a SQL table. But one of pandas's roles is to clean messy<br>
+real-world data before it goes to some downstream sys. And real-world data has duplicates, even in fields that are supposed to be unique.</p>
+<h1 style="color:red">Consequences of duplicate labels</h1>
+<ul>
+    <li>Some pandas methods (series.reindex()) just don't work with duplicates present. The output can't be determined, and it raise:</li>
+    <pre>
+        s1 = pd.Series([0,1,2], index=['a', 'b', 'b'])
+        s1.reindex(['a', 'b', 'c'])
+        valueError
+        ...
+    </pre>
+    <li>Other methods, like indexing, can give very surprising results. Typically indexing with a scalar will reduce dimensionality. Slicing a DataFrame with a scalar will<br>
+    return a scalar. But with duplicates, this isn't the case.</li>
+    <pre>
+        df1 = pd.DataFrame([[0,1,2], [3,4,5]], columns=['A', 'A', 'B'], index=['a', 'a', 'b'])
+        df1['B'] # a Series
+        df1['A'] # a DataFrame
+        df1.loc['b', 'B'] # a scalar
+        df1.loc['a', 'A'] # a frame
+    </pre>
+</ul>
+<h1 style="color:red">Duplicate label detection</h1>
+<ul>
+    <li>You can check whether an 'Index' (storing the row or column labels) is unique with Index.is_unique.</li>
+    <pre>
+        df2 = pd.DataFrame({'A': [0,1,2]}, index=['a', 'a', 'b'])
+        df2.index.is_unique # False
+        df2.columns.is_unique # True
+    </pre>
+    <li>Checking whether an index is unique is somewhat expensive for large dataset. pandas does cache this result, so re-checking on the same index is very fast.</li>
+    <li>Index.duplicated() will return a boolean ndarray indicating whether a label is repeated and can be used as boolean filter to drop duplicate rows.</li>
+    <pre>
+        df2.index.duplicated() # [True, True, False]
+        df2[~df2.index.duplicated()] # filter index not duplicated
+        df2.index.drop_duplicates()
+    </pre>
+    <li>If you need additional logic to handle duplicate labels, rather than just dropping the repeats, using groupby() on the index is a common trick.</li>
+    <pre>
+        df2.groupby(level=0).mean()
+    </pre>
+</ul>
+<h1 style="color:red">Disallowing duplicate labels</h1>
+<ul>
+    <li>Handling duplicates is an important feature when reading in raw data. That said, you may want to avoid introducing duplicates as part of a data processing pipeline<br>
+    (from methods like pandas.concat(), rename()). Both Series and DataFrame disallow duplicate labels by calling <b>.set_flag(allows_duplicate_labels=False).</b> (The default<br>
+    is to allow them). If there are duplicate labels, an exception will be raise.</li>
+    <pre>
+        pd.Series([0,1,2], index=['a', 'b', 'b']).set_flag(allows_duplicate_labels=False)
+        DuplicateLabelError
+    </pre>
+    <li>This applies to both row and column labels for a DataFrame. This attribute can be checked or set with 'allows_duplicate_labels', which indicates whether that object can<br>
+    have duplicate labels.</li>
+    <li>DataFrame.set_flags() can be used to return a new DataFrame with attributes like 'allows_duplicate_labels' set to some value.</li>
+    <li>The new DataFrame returned is a view on the same data as the old DataFrame. Or the property can just be set directly on the same object.</li>
+    <pre>
+        df = pd.DataFrame({'A': [0,1,2,3]}, index=['x', 'y', 'X', 'Y']).set_flags(allows_duplicate_labels=False)
+        df.flags.allows_duplicate_labels # False
+        df2 = df.set_flags(allows_duplicate_labels=True)
+        df2.flags.allows_duplicate_labels # True
+        df2.flags.allows_duplicate_labels = False
+        df2.flags.allows_duplicate_labels # False
+    </pre>
+    <li>When processing raw, messy data you might initially read in the messy data(which potentially has duplicate labels), deduplicate, and then disallow duplicates<br>
+    going forward, to ensure that your data pipeline doesn't introduce duplicates.</li>
+    <pre>
+        raw = pd.read_csv(...)
+        deduplicate = raw.groupby(level=0).first() # remove duplicates
+        deduplicate.flags.allows_duplicate_labels = False # disallow going forward
+    </pre>
+    <li>Setting allows_duplicate_labels = True on a Series or DataFrame with duplicate labels or performing an operation that introduces duplicate labels on<br>
+    a Series or DataFrame that disallows duplicates will raise an errors.DuplicateLabelError.</li>
+    <pre>
+        df.renam(str.upper)
+        DuplicateLabelError
+        ...
+    </pre>
+    <li>This error message contains the labels that are duplicated, and the numeric positions of all the duplicates (including the 'original') in the Series or DataFrame.</li>
+    <h2 style="color:blue">Duplicate label propagation</h2>
+    <ul>
+        <li>In general, disallowing duplicates is 'sticky'. It's preserved through operations.</li>
+        <pre>
+            s1 = pd.Series(0, index=['a', 'b']).set_flags(allows_duplicate_labels=False)
+            s1.head().rename({'a': 'b'})
+            DuplicateLabelError
+            ...
+        </pre>
+    </ul>
+</ul>
+<h1 style="text-align: center">Categorical Data</h1>
+<p>Categorical data is a pandas data type corresponding to categorical variables in statistics. A categorical variable takes on a limited, and usually fixed,<br>
+number of possible values(categories, levels in R).</p>
+<p>In contrast to statistical categorical variables, categorical data might have an order (strongly agree, agree, ...), but numerical operations (add, divide, ...)<br>
+are not possible.</p>
+<p>All values of categorical data are either in categories or np.nan. Order is defined by the order of categories, not lexical order of the values. Internally,<br>
+the data structure consists of a categories array and an integer array of codes which point to the real value in the categories array.</p>
+<p>The categorical data type is useful in these cases:</p>
+<ul>
+    <li>A string variable consisting of only a few different values. Converting such a string variable to a categorical variable will save some memory.</li>
+    <li>The lexical order of a variable is not the same as the logical order ('one', ;two', 'three'). By converting to a categorical and specifying an order on the<br>
+    categories, sorting and min/ max will use the logical order instead of the lexical order.</li>
+    <li>As a signal to other Python libraries that this column should be treated as categorical variable (to use suitable statistical methods or plot types).</li>
+</ul>
+<h1 style="color:red">Object creation</h1>
+<ul>
+    <h2 style="color:blue">Series creation</h2>
+    <ul>
+        <li>Categorical Series or columns in a DataFrame can be created in several ways:</li>
+        <pre>
+            s = pd.Series(['a', 'b', 'c', 'a'], dtype='category')
+            s = pd.Series(['a', 'b', 'c', 'a']).astype('category')
+            s = pd.Categorical(['a', 'b', 'c', 'a'], categories=['b', 'c', 'd'], ordered=False)
+            s1 = pd.Series(s) # a will be transfer into NaN value
+            df = pd.DataFrame({'A': ['a', 'b', 'c', 'a']})
+            df['B'] = pd.Series(s)
+            df.dtypes # A: object, B: Category , dtype: Object
+        </pre>
+        <li>Or by using special function, such as cut(), which groups data into discrete bins.</li>
+        <pre>
+            df = pd.DataFrame({'value': np.random.randint(1, 100, 20)})
+            labels = ['{0} - {1}'.format(i, i+9) for i in range(0, 100, 10)]
+            df['group'] = pd.cut(df.value, range(0, 105, 10), right=False, labels=labels) # discrete category
+        </pre>
+    </ul>
+    <h2 style="color:blue">DataFrame creation</h2>
+    <ul>
+        <li>All columns in a DataFrame can be batch converted to categorical either during or after construction.</li>
+        <li>This can be done during construction by specifying 'dtype='category'' in the DataFrame constructor.</li>
+        <li>Note that the categories present in each column differ, the conversion is done column by column, so only labels present in a given column are categories.</li>
+        <pre>
+            df = pd.DataFrame({'A': list('abca'), 'B': list('bccd')}, dtype='category')
+            df['A'] # category of A
+            df['B'] # category of B
+        </pre>
+        <li>Analogously, all columns in an existing DataFrame can be batch converted using DataFrame.astype(). And this conversion is likewise done column by column.</li>
+        <pre>
+            df = pd.DataFrame({'A': list('abcd'), 'B': list('bccd')})
+            df_cat = df.astype('category')
+            df_cat.dtypes
+            df_cat['A']
+            df_cat['B']
+        </pre>
+    </ul>
+    <h2 style="color:blue">Controlling behavior</h2>
+    <ul>
+        <li>With dtype='category', we used the default behavior:</li>
+        <ul>
+            <li>Categories are inferred from the data.</li>
+            <li>Categories are unordered.</li>
+        </ul>
+        <li>To control those behaviors, instead of passing 'category', use an instance of CategoricalDtype.</li>
+        <pre>
+            from pandas.api.type import CategoricalDtype
+            s = pd.Series(['a', 'b', 'c', 'a'], dtype=pd.CategoricalDtype(categories=['b', 'c', 'd'], ordered=True))
+            s.dtype
+        </pre>
+        <li>Similarly, a CategoricalDtype can be used with a DataFrame to ensure that categories are consistent among all columns.</li>
+        <pre>
+            from pandas.api.types import CategoricalDtype
+            df = pd.DataFrame({'A': list('abca'), 'B': list('bccd')}, dtype=pd.CategoricalDtype(categories=list('abcd'), ordered=True))
+            df['A'] # category type
+            df['B'] # category type
+        </pre>
+        <li>To preform table-wise conversion, where all labels in the entire DataFrame are used as categories for each column, the categories parameter<br>
+        can be determined programmatically by categories = pd.unique(df.to_numpy().ravel()).</li>
+        <li>If you are already have codes and categories, you can use the from_codes() constructor to save the factorize step during normal constructor mode.</li>
+        <pre>
+            splitter = np.random.choice([0,1], 5, p=[0.5, 0.5])
+            s = pd.Series(pd.Categorical.from_codes(splitter, categories=['train', 'test']))
+        </pre>
+    </ul>
+    <h2 style="color:blue">Regaining original data</h2>
+    <ul>
+        <li>To get back to the original Series or Numpy array, use Series.astype(original_dtype) or np.asarray(categorical).</li>
+        <pre>
+            s = pd.Series(['a', 'b', 'c', 'a']) # Object
+            s2 = s.astype('category') # category
+            s2.astype(str) # Object
+            np.asarray(s2) # array
+        </pre>
+        <li>In contrast to R's factor function, categorical data is not converting input values to strings; categories will end up the same data type<br>
+        as the original values. And there's currently no way to assign/ change labels at creation time, use 'categories' to change the categories after creation time.</li>
+    </ul>
+</ul>
+<h1 style="color:red">CategoricalDtype</h1>
+<ul>
+    <li>A categorical's type is fully describe by:</li>
+    <ul>
+        <li><b>categories: </b>a sequence of unique values and no missing values.</li>
+        <li><b>ordered: </b>A boolean</li>
+    </ul>
+    <li>This information can be stored in a CategoricalDtype. The categories argument is optional, which implies that the actual categories should be inferred<br>
+    from whatever is present in the data when pandas.Categorical is created. The categories are assumed to be unordered by default.</li>
+    <pre>
+        from pandas.api.types import CategoricalDtype
+        CategoricalDtype(['a', 'b', 'c']) # default ordered = False
+        CategoricalDtype(['a', 'b', 'c'], ordered=True)
+        CategoricalDtype()
+    </pre>
+    <li>A CategoricalDtype can be used in any place pandas expects a dtype. (pd.read_csv(), pd.astype(), or Series constructor).</li>
+    <li>As a convenience, you can use the string 'category' in place of a CategoricalDtype when you want the default behavior of the categories being unordered,<br>
+    and equal to the set values present in the array. In other words, dtype='category' is equivalent to dtype=CategoricalDtype().</li>
+    <h2 style="color:blue">Equality semantics</h2>
+    <ul>
+        <li>Two instances of CategoricalDtype compare equal whenever they have the same categories and order. When comparing two unordered categorical dtype,<br>
+        the order of the categories is not considered.</li>
+        <pre>
+            c1 = CategoricalDtype(['a', 'b', 'c']) # default ordered = False
+            c1 == CategoricalDtype(['b', 'c', 'a']) # True
+            c2 = CategoricalDtype(['a', 'b', 'c'], ordered=True)
+            c2 == CategoricalDtype(['b', 'a', 'c'], ordered=False) # False
+        </pre>
+        <li>And all instances of CategoricalDtype compare equal to the string 'category'.</li>
+        <pre>
+            c1 == 'category' # True
+            c2 == 'category' # True
+        </pre>
+        <li>Since dtype='category' is essentially CategoricalDtype(None, False), and since all instances CategoricalDtype compare equal to 'category', all instances<br>
+        of CategoricalDtype compare equal to a CategoricalDtype(None, Fasle), regardless of category and ordered.</li>
+    </ul>
+</ul>
+<h1 style="color:red">Description</h1>
+<ul>
+    <li>Using describe() on categorical data will produce similar output to a Series or DataFrame of type string.</li>
+    <pre>
+        cat = pd.Categorical(['a', 'c', 'c', np.nan], categories=['b', 'a', 'c'])
+        df = pd.DataFrame({'cat': cat, 's': ['a', 'c', 'c', np.nan]})
+        df.describe()
+        df['cat'].describe()
+    </pre>
+</ul>
+<h1 style="color:red">Working with categories</h1>
+<ul>
+    <li>Categorical data has a 'categories' and 'ordered' property, which list their possible values and whether the ordering matters or not.<br>
+    These properties are exposed as s.cat.categories and s.cat.ordered. If you don't manually specify categories and ordering, they are inferred<br>
+    from the passed arguments.</li>
+    <pre>
+        s = pd.Series(['a', 'b', 'c', 'a'], dtype='category')
+        s.cat.categories
+        s.cat.ordered
+    </pre>
+    <li>Note that categorical data are not automatically ordered. You must explicitly pass ordered=True to indicate an ordered Categorical.</li>
+    <li>The result of unique() is not always the same as Series.cat.categories, because it has couple of guarantees, namely that it returns categories<br>
+    in the order of appearance, and it only includes values that are actually present.</li>
+    <pre>
+        s = pd.Series(list('abcd')).astype(CategoricalDtype(list('abcd')))
+
+        s.cat.categories
+        Out[]: Index(['a', 'b', 'c', 'd'], dtype='object')
+
+        s.unique()
+        Out[]:
+        ['b', 'a', 'c']
+        Categories (4, object): ['a', 'b', 'c', 'd']
+    </pre>
+    <h2 style="color:blue">Renaming categories</h2>
+    <ul>
+        <li>Renaming categories is done by assigning new values to the Series.cat.categories property or by using the rename_categories() method:</li>
+        <pre>
+            s = pd.Series(['a', 'b', 'c', 'a'], dtype='category')
+            s.cat.categories = ['Group %s' % g for g in s.cat.categories]
+            s = s.cat.rename_categories([1,2,3])
+            s = s.cat.rename_categories({1: 'x', 2: 'y', 3: 'z'})
+        </pre>
+        <li>In contrast to R's factor, categorical data can have categories of other types than string.</li>
+        <li>be aware that assigning new categories is an inplace operation, while most other operations under Series.cat per default return a new Series of dtype categories.</li>
+        <li>In other side, .cat.categories must be unique and not be NaN or an ValueError will be raised.</li>
+        <pre>
+            s = pd.Series(['a', 'b', 'c'], dtype='category')
+            s.cat.categories # Index(['a', 'b', 'c'], dtype='object')
+            s.cat.categories = [1, 1, 1] # error
+            s.cat.rename_categories([1,1,1]) # similar above
+            s.cat.categories = [1, 2, np.nan] # error
+            s.cat.rename_categories([1, 2, np.nan]) # similar above
+            s.cat.categories = [1,2,3] # change values of s into [1,2,3], keep category type
+            s.cat.rename_categories([1,2,3]) # similar above
+        </pre>
+    </ul>
+    <h2 style="color:blue">Appending new categories</h2>
+    <ul>
+        <li>Appending categories can be done by using the add_categories() method.</li>
+        <pre>
+            s = s.cat.add_categories([4])
+            s.cat.categories
+            Index(['x', 'y', 'z', 4], dtype='object')
+        </pre>
+    </ul>
+    <h2 style="color:blue">Removing categories</h2>
+    <ul>
+        <li>Removing categories can be done by using the cat.remove_categories() method. Value which are removed are replaced by np.nan.</li>
+        <pre>
+            s = s.cat.remove_categories(['x', 'y'])
+            s.cat.categories
+            Index(['y', 'z'], dtype='object')
+        </pre>
+    </ul>
+    <h2 style="color:blue">Removed unused categories</h2>
+    <ul>
+        <li>Use cat.remove_unused_categories()</li>
+        <pre>
+            s = pd.Series(pd.Categorical(['a', 'b', 'a'], categories=['a', 'b', 'c', 'd']))
+            s.cat.remove_unused_categories()
+            s.cat.categories
+            Index(['a', 'b'], dtype='object')
+        </pre>
+    </ul>
+    <h2 style="color:blue">Setting categories</h2>
+    <ul>
+        <li>If you want to do remove or add new categories in one step(which has some speed advantage), or simply set the categories to a predefined scale,<br>
+        use cat.set_categories().</li>
+        <pre>
+            s = pd.Series(['one', 'two', 'four', '-'], dtype='category')
+            s = s.cat.set_categories(['one', 'two', 'three', 'four'])
+            s.cat.categories
+            Index(['one', 'two', 'three', 'four'], dtype='object')
+        </pre>
+        <li>Be aware that Categorical.set_categories() can not know whether some category is omitted intentionally or because it is misspelled or due to a<br>
+        type difference. This can result in surprising behaviour.</li>
+    </ul>
+</ul>
+<h1 style="color:red">Sorting and order</h1>
+<ul>
+    <li>If categorical data is ordered (s.cat.ordered == True), then the order of the categories has a meaning and certain operations are possible.<br>
+    If the categories is unordered, .min()/ .max() will raise a Type Error.</li>
+    <pre>
+        s = pd.Series(pd.Categorical(['a', 'b', 'c', 'a'], ordered=False)
+        s.sort_values(inplace=True)
+        s.min() # Type Error
+        s.max() # Type Error
+        s1 = pd.Series(['a', 'b', 'c', 'a']).astype(CategoricalDtype(ordered=True))
+        s1.sort_values(inplace=True)
+        s1.min() # a
+        s1.max() # c
+    </pre>
+    <li>You can set categorical dat to be ordered by using cat.as_ordered() or unordered by using cat.as_unordered(). These will by default return a new object.</li>
+    <pre>
+        s.cat.as_ordered()
+        s.min() # 'a'
+        s.max() # 'c'
+        s.cat.as_unordered()
+        s.min() # TypeError
+        s.max() # TypeError
+    </pre>
+    <li>Sorting will use the order defined by categories, not any lexical order present on the data type. This is even True for strings and numeric data.</li>
+    <pre>
+        s = pd.Series([1,2,3,1], dtype='category')
+        s.cat.categories # Int64Index([1, 2, 3], dtype='int64')
+        s.min() # TypeError
+        s.max() # TypeError
+        s = s.cat.as_ordered()
+        s.min() # 1
+        s.max() # 3
+    </pre>
+    <h2 style="color:blue">Reordering</h2>
+    <ul>
+        <li>Reordering the categories is possible via the Categorical.reorder_categories() and the Categorical.set_categories() methods. For <br>
+        Categorical.reorder_categories(), all old categories must be included in the new categories and no new categories are allowed. This will<br>
+        necessarily make the sort order the same as the categories order.</li>
+        <pre>
+            s = pd.Series([1,2,3,1], dtyep='category')
+            s = s.cat.reorder_category([2,3,1], ordered=True)
+            s.cat.categories
+            s.sort_values(inplace=True)
+            s.min() # 2
+            s.max() # 1
+        </pre>
+        <li>Note the difference between assigning new categories and reordering the categories: the first rename categories and therefore the<br>
+        individual values in the Series, bit if the first position was sorted last, the renamed value will still be sorted last. Reordering means<br>
+        that the way values are sorted is different afterwards, but not that individual values in the Series are changed.</li>
+        <li>If the Categorical is not ordered, Series.min() and Series.max() will raise TypeError. Numeric operations like +, -, /, * and operations<br>
+        based on them (Series.median(), which will need to compute the mean between two values if the length of an array is even) do not work and<br>
+        raised a TypeError.</li>
+    </ul>
+    <h2 style="color:blue">Multi column sorting</h2>
+    <ul>
+        <li>A categorical dtyped column will participate in a multi-column sort in a similar manner to other columns. The ordering of the categorical<br>
+        is determined by the categories of that column. And reordering the categories will change the future sort.</li>
+        <pre>
+            dfs = pd.DataFrame({'A': pd.Categorical(list('bbeebbaa'), categories=['e', 'a', 'b'], ordered=True),
+                                'B': [1,2,1,2,2,1,2,1]})
+            dfs.sort_values(['A', 'B']) # category name e stand first
+            dfs['A'] = dfs['A'].cat.reorder_categories(['a', 'b', 'e'])
+            dfs.sort_values(['A', 'B']) # category name a stand first
+        </pre>
+    </ul>
+</ul>
+<h1 style="color:red">Comparisons</h1>
+<ul>
+    <li>Comparing categorical data with other objects is possible in 3 cases:</li>
+    <ul>
+        <li>Comparing equality (== and !=) to a list-like object (list, Series, array, ...) of the same length as the categorical data.</li>
+        <li>All comparisons (==, !=, >, >, and <=) of categorical data to another categorical Series, when ordered==Tur and the categories are the same.</li>
+        <li>All comparisons of a categorical data to a scalar.</li>
+    </ul>
+    <li>All other comparisons, especially 'non-equality' comparisons of two categorical data with different categories or a category with any list-like object, will raise a TypeError.</li>
+    <li>Any 'one-equality' comparisons of category with a Series, np.array, list or category with different category or ordering will raise a TypeError<br>
+    because custom categories ordering could be interpreted in two ways: one with taking into account the ordering and one without.</li>
+    <pre>
+        cat = pd.Series([1,2,3]).astype(CategoricalDtype([3,2,1]), ordered=True))
+        cat_base = pd.Series([2,2,2]).astype(CategoricalDtype([3,2,1]), ordered=True))
+        cat_base2 = pd.Series([2,2,2]).astype(CategoricalDtype(ordered=True))
+        cat > cat_base # boolean vector
+        Out[]:
+        0     True
+        1    False
+        2    False
+        dtype: bool
+        cat > 2 # boolean vector: False, False, True
+        cat == cat_base # boolean vector: False, True, False
+        cat==np.array([1,2,3]) # True, True, True
+        cat == 2 # False, True, False
+
+        try:
+            cat > cat_base2
+        except exception as e:
+            print(str(e))
+        # Type Error cat_base2 has different category
+    </pre>
+    <li>If you want to do a 'non-equality' comparison of a categorical series with a list-like object which is not categorical data, you need to<br>
+    be explicit and convert the categorical data back to the original values.</li>
+    <pre>
+        base = np.array([1,2,3])
+        try:
+            cat > base
+        except TypeError as e:
+
+        np.asarray(cat) > base
+        Out[]: array([False, False, False])
+        np.asarray(cat) == base # True, True, True
+    </pre>
+    <li>When you compare two unordered categories, the order is not considered.</li>
+    <pre>
+        c1 = pd.Categorical(['a', 'b'], categories=['a', 'b'])
+        c2 = pd.Categorical(['a', 'b'], categories=['b', 'a'])
+        c1 == c2 # True, True
+        c1 > c2 # False, False
+    </pre>
+</ul>
+<h1 style="color:red">Operations</h1>
+<ul>
+    <li>Apart from Series.min(), Series.max(), and Series.mode(), the following operations are possible with categorical data.</li>
+    <li>Series methods like Series.value_counts() will use all categories, even if some categories are not present in the data.</li>
+    <pre>
+        s = pd.Series(pd.Categorical(['a', 'b', 'c', 'c'], categories=['c', 'a', 'b', 'd']))
+        s.value_counts()
+        Out[]:
+        c    2
+        a    1
+        b    1
+        d    0
+        dtype: int64
+    </pre>
+    <li>DataFrame methods like DataFrame.sum() also show 'unused' categories.</li>
+    <pre>
+        columns = pd.Categorical(['One', 'One', 'Two'], categories=['One', 'Two', 'Three'], ordered=True)
+        df = pd.DataFrame(data=[[1,2,3], [4,5,6]], columns=pd.MultiIndex.from_products([['A', 'B', 'B'], columns])
+        df.groupby(level=1, axis=1).sum()
+        Out[]:
+           One  Two  Three
+        0    3    3      0
+        1    9    6      0
+    </pre>
+    <li>Groupby also show 'unused' categories:</li>
+    <pre>
+        cats = pd.Categorical(['a', 'b', 'b', 'b', 'c', 'c', 'c'], categories=['a', b', 'c', 'd'])
+        df = pd.DataFrame({'cats': cats, 'values': [1,2,2,2,3,4,5]})
+        df.groupby('cats').mean()
+        cats2 = pd.Categorical(['a', 'a', 'b', 'b'], categories=['a', 'b', 'c'])
+        df2 = pd.DataFrame({'cats': cats2, 'B': ['c', 'd', 'c', 'd'], 'values': [1,2,3,4]})
+        df2.groupby('cats').mean()
+        df2.groupby(['cats', 'b']).mean()
+    </pre>
+    <li>Pivot table</li>
+    <pre>
+        raw_cat = pd.Categorical(['a', 'a', 'b', 'b'], categories=['a', 'b', 'c'])
+        df = pd.DataFrame({'A': raw_cat, 'B': ['c', 'd', 'c', 'd'], 'values': [1,2,3,4]})
+        pd.pivot_table(df, index=['A', 'B'], values='values')
+    </pre>
+</ul>
+<h1 style="color:red">Data munging</h1>
+<ul>
+    <li>The optimized pandas data access methods .loc, .iloc, .at and .iat work as normal. The only difference is the return type (for getting) and that<br>
+    only values already in categories can be assigned.</li>
+    <h2 style="color:blue">Getting</h2>
+    <ul>
+        <li>If the slicing operation returns either a DataFrame or a column of type Series, the category dtype is preserved.</li>
+        <pre>
+            idx = pd.Index(['h', 'i', 'j', 'k', 'l', 'm', 'n'])
+            cats = pd.Series(['a', 'b', 'b', 'b', 'c', 'c', 'c'], index=idx, dtype='category')
+            values = [1,2,2,2,3,4,5]
+            df = pd.DataFrame({'cats': cats, 'values': values}, index=idx)
+            df.iloc[2:4, :]
+            df.iloc[2:4, :].dtypes
+            df.loc['h': 'j', 'cats']
+            df[df['cat'] == 'b']
+        </pre>
+        <li>The category type is not preserved if you take one single row: the resulting Series is of dtype object.</li>
+        <li>Return the single item in category is also return a value, not a category. To get category, you pass in a list with single value.</li>
+        <pre>
+            df.loc['h',:] # return Series with dtype object
+            df.iat[0,0] # return value 'a' with string dtype
+            df.loc[[h], 'cat'] # return Series with dtype category
+        </pre>
+    </ul>
+    <h2 style="color:blue">String and datetime accessor</h2>
+    <ul>
+        <li>The accessor .dt and .str will work if the s.cat.categories are of an appropriate type.</li>
+        <pre>
+            str_s = pd.Series(list('aabb'))
+            str_cat = str_s.astype('category')
+            str_cat.str.contains('a')
+            date_s = pd.Series(pd.date_range('1/1/2015', periods=5))
+            date_cat = date_s.astype('category')
+            date_cat.dt.day
+        </pre>
+        <li>The returned Series(or DataFrame) is of the same type as if you used the .str.method/ .dt.method on a Series of that type (and not of category type).</li>
+        <li>That means, the returned values from methods and properties on the accessors of a Series and the returned values from methods and properties on the <br>
+        accessors of this Series transformed to one of type category will be equal.</li>
+        <pre>
+            ret_s = str_s.str.contains('a')
+            ret_cat = str_cat.str.contains('a')
+            ret_s.dtype == ret_cat.dtype
+            ret_s == ret_cat
+        </pre>
+        <li>The work is done on the categories and then a new Series is constructed. This has some performance implication if you have a Series of type string,<br>
+        where lots of elements are repeated (the number of unique elements in the Series is a lot smaller than the length of the Series). In this case it can be<br>
+        faster to convert the original Series to one of type category and use .str.method or .dt.method on that.</li>
+    </ul>
+    <h2 style="color:blue">Setting</h2>
+    <ul>
+        <li>Setting values in a categorical column (or Series) works as long as the value is included in the categories:</li>
+        <pre>
+            idx = pd.Index({'h', 'i', 'j', 'k', 'l', 'm', 'n'])
+            cats = pd.Categorical(['a'] * len(idx), categories=['a', 'b'])
+            values = [1] * len(idx)
+            df = pd.DataFrame({'cats': cats, 'values': values}, index=idx)
+            df.iloc[2:4, :] = [['b', 2], ['b', 2]]
+            try:
+                df.iloc[2:4, :] = [['c', 3], ['c', 3]]
+            except ValueError as e:
+                print('ValueError: ', str(e))
+        </pre>
+        <li>Setting values by assigning categorical data will also check that the categories match:</li>
+        <pre>
+            df.loc['j': 'k', 'cats'] = pd.Categorical(['a', 'a'], categories=['a', 'b'])
+            try:
+                df.loc['j': 'k', 'cats'] = pd.Categorical(['b', 'b'], categories=['a', 'b', 'c'])
+            except ValueError as e:
+                print('ValueError: ', str(e))
+        </pre>
+        <li>Assigning a Categorical to parts of a column of other types will use the values:</li>
+        <pre>
+            df = pd.DataFrame({'a': [1]*5, 'b': ['a']*5})
+            df.loc[1:2, 'a'] = pd.Categorical(['b', 'b'], categories=['a', 'b']) # use value 'b', not category
+            df.loc[2:3, 'b'] = pd.Categorical(['b', 'b'], categories=['a', 'b']) # use value 'b', not category
+            df.dtypes # object with column A object, and column B object
+        </pre>
+    </ul>
+    <h2 style="color:blue">Merging/ concatenation</h2>
+    <ul>
+        <li>By default, combining Series or DataFrame which contain the same categories results in category dtype, otherwise results will depend on the dtype<br>
+        of the underlying categories. Merges that result in non-categorical dtypes will likely have higher memory usage. Use .astype or union_categoricals to<br>
+        ensure category results.</li>
+        <pre>
+            from pandas.api.types import union_categoricals
+            s1 = pd.Series(['a', 'b'], dtype='category')
+            s2 = pd.Series(['a', 'b', 'a'], dtype='category')
+            pd.concat([s1, s2]) # category dtype
+            s3 = pd.Series(['b', 'c'], dtype='category')
+            pd.concat([s1,s3]) # object
+            in_cats = pd.Series([1,2], dtype='category')
+            float_cats = pd.Series([3.0, 4.0], dtype='category')
+            pd.concat([in_cats, float_cats]) # float64
+            pd.concat([s1, s3]).astype('category')
+            union_categoricals([s1.array, s3.array])
+        </pre>
+        <li>The table below summarizes the result of merging CategoricalDtype:</li>
+        <table border="1" class="dataframe">
+              <thead>
+                <tr style="text-align: right;">
+                  <th>arg1</th>
+                  <th>arg2</th>
+                  <th>identical</th>
+                  <th>result</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>category</td>
+                  <td>category</td>
+                  <td>True</td>
+                  <td>category</td>
+                </tr>
+                <tr>
+                  <td>category (object)</td>
+                  <td>category (object)</td>
+                  <td>False</td>
+                  <td>object (dtype is inferred)</td>
+                </tr>
+                <tr>
+                  <td>category (int)</td>
+                  <td>category (float)</td>
+                  <td>False</td>
+                  <td>float (dtype is inferred)</td>
+                </tr>
+              </tbody>
+        </table>
+    </ul>
+    <h2 style="color:blue">Unioning</h2>
+    <ul>
+        <li>If you want to combine categorical data that do not necessarily have the same categories, the union_categoricals() function will combine<br>
+        a list-like of categoricals. The new categories will be union of the categories being combined.</li>
+        <pre>
+            from pandas.api.types import union_categoricals
+            a = pd.Categorical(['b', 'c'])
+            b = pd.Categorical(['a', 'b'])
+            union_categoricals([a, b])
+        </pre>
+        <li>By default, the resulting categories will be ordered as they appear in the data. If you want the categories to be lexsorted, use sort_categories=True argument.</li>
+        <pre>
+            union_categoricals([a, b], sort_categories=True) # lexical sort
+            Out[]:
+            ['b', 'c', 'a', 'b']
+            Categories (3, object): ['a', 'b', 'c']
+        </pre>
+        <li>union_categoricals() also works with the 'easy' case of combining two categoricals of the same categories and order information.</li>
+        <pre>
+            a = pd.Categorical(['a', 'b'], ordered=True)
+            b = pd.Categorical(['a', 'b', 'a'], ordered=True)
+            union_categoricals([a, b])
+            b1 = pd.Categorical(['a', 'b', 'c'], ordered=True)
+            union_categoricals([a, b1]) # TypeError (categories are ordered and not identical)
+        </pre>
+        <li>Ordered categorical with different  categories or orderings can be combined by using 'ignore_ordered=True' argument.</li>
+        <pre>
+            union_categoricals([a, b], ignore_order=True)
+        </pre>
+        <li>union_categoricals() also works with CategoricalIndex, or Series containing categorical data, but note that the resulting array will always be<br>
+        a plain Categorical.</li>
+        <pre>
+            a = pd.Series(['b', 'c'], dtype='category')
+            b = pd.Series(['a', 'b'], dtype='category')
+            union_categoricals([a, b]) # categorical type
+        </pre>
+        <li style="color:red">union_categoricals() may recode the integer codes for categories when combining categoricals. This is likely what you want<br>
+        but if you are relying on the exact numbering of the categories, be aware:</li>
+        <pre>
+            c1 = pd.Categorical(['b', 'c'])
+            c2 = pd.Categorical(['a', 'b'])
+            c = union_categoricals([c1, c2])
+            c1.codes # [0, 1]
+            c2.codes # [0, 1]
+            c.codes # array[0, 1, 2, 0] 'Int8'
+        </pre>
+    </ul>
+</ul>
+<h1 style="color:red">Getting data in/ out</h1>
+<ul>
+    <li>You can write data that contains category dtypes to a HDFStore.</li>
+    <li>It is possible to write data to and reading data from Stata format files.</li>
+    <li>Writing to a CSV file will convert the data, effectively removing any information about the categorical (categories and ordering). So if you read<br>
+    back the CSV file, you have to convert the relevant columns back to category and assign the right categories and categories ordering.</li>
+    <pre>
+        import io
+        s = pd.Series(pd.Categorical(['a', 'b', 'b', 'a', 'a', 'd']))
+        s.cat.categories = ['very good', 'good', 'bad']
+        s = s.cat.set_categories(['very bad', 'bad', 'medium', 'good', 'very good'])
+        df = pd.DataFrame({'cats': s, 'vals': list(range(1,7))})
+        csv = io.StringIO()
+        df.to_csv(csv)
+        df2 = pd.read_csv(io.StringIO(csv.getvalue()))
+        Out[]:
+        Unnamed: 0     int64
+        cats          object
+        vals           int64
+        dtype: object
+
+        df2['cats'] = df2['cats'].astype('category')
+        df2['cats'].cat.set_categories(['very bad', 'bad', 'medium', 'good', 'very good'], inplace=True)
+    </pre>
+</ul>
+<h1 style="color:red">Missing data</h1>
+<ul>
+    <li>pandas primarily uses the value np.nan to represent missing data. It is by default not included in computations.</li>
+    <li>Missing values should nt be included in the Categorical's categories, only in the values. Instead, it is understood that NaN is different<br>
+    and is always a possibility. When working with the Categorical's codes, missing values will always have a code of -1.</li>
+    <pre>
+        s = pd.Series(['a', 'b', np.nan, 'a'], dtype='category')
+        s.cat.codes
+        Out[]:
+        0    0
+        1    1
+        2   -1
+        3    0
+        dtype: int8
+    </pre>
+    <li>Methods for working with missing data: isna(), fillna(), dropna(), .. all work normally.</li>
+    <pre>
+        s = pd.Series(['a', 'b', np.nan], dtype='category')
+        s.isna()
+        s.fillna('a')
+        s.dropna()
+    </pre>
+</ul>
+<h1 style="color:red">Gotchas</h1>
+<ul>
+    <h2 style="color:blue">Memory usage</h2>
+    <ul>
+        <li>The memory usage of a Categorical s proportional to the number of categories plus the length of the data. In contrast, an object dtype<br>
+        is a constant times the length of the data.</li>
+        <pre>
+            s = pd.Series(['foo', 'bar'] * 1000)
+            s.nbytes # 16000
+            s.astype('category').nbytes # 2016
+        </pre>
+        <li>If the number of categories approaches the length of the data, the Categorical will use nearly the same or more memory than an equivalent<br>
+        object dtype representation.</li>
+        <pre>
+            s = pd.Series(['foo%04d' %i for i in range(2000)])
+            s.nbytes # 16000
+            s.astype('category') # 20000
+        </pre>
+    </ul>
+    <h2 style="color:blue">Categorical is not a Numpy array</h2>
+    <ul>
+        <li>Currently, categorical data and the underlying Categorical is implemented as a Python object and not as a low-level Numpy array dtype. This leads<br>
+        to some problems:</li>
+        <li>Numpy itself doesn't know about the new dtype:</li>
+        <pre>
+            try:
+                nd.dtype('category')
+            except TypeError as e:
+                print('TypeError:' , str(e))
+            TypeError: data type 'category' not understood
+
+            dtype = pd.Categorical(['a']).dtype
+            try:
+                np.dtype(dtype)
+            except TypeError as e:
+                print('TypeError: ', str(e))
+            TypeError: Cannot interpret 'CategoricalDtype(categories=['a'], ordered=False)' as a data type
+        </pre>
+        <li>dtype comparisons work:</li>
+        <pre>
+            dtype == np.str_ # False
+            np.str_ == dtype # False
+        </pre>
+        <li>To check if a Series contains Categorical data, use hasattr(s, 'cat'):</li>
+        <pre>
+            hasattr(pd.Series(['a'], dtype='category'), 'cat') # True
+            hasattr(pd.Series(['a']), 'cat') # False
+        </pre>
+        <li>Using Numpy functions on a Series of type category should not work as Categoricals are not numeric data (even in the case that .categories is numeric).</li>
+    </ul>
+    <h2 style="color:blue">dtype in apply</h2>
+    <ul>
+        <li>pandas currently does not preserve the dtype in apply functions: If you apply along rows you get a Series of object dtype (same as getting a row<br>
+        -> getting one element will return a basic type) and applying along columns will also convert to object. NaN values are unaffected. You can use fillna<br>
+        to handle missing values before applying a function.</li>
+        <pre>
+            df = pd.DataFrame({'a': [1,2,3,4], 'b': ['a', 'b', 'c', 'd'], 'cats': [pd.Categorical([1,2,3,2])})
+            df.apply(lambda row: type(row['cats']), axis=1) # int type
+            df.apply(lambda col: col.dtype, axis=0) # original dtypes
+        </pre>
+    </ul>
+    <h2 style="color:blue">Categorical index</h2>
+    <ul>
+        <li>CategoricalIndex is a type of index that is useful for supporting indexing with duplicates. This is a container around a Categorical and allows<br>
+        efficient indexing and storage of an index with a large number of duplicated elements.</li>
+        <pre>
+            cats = pd.Categorical([1,2,3,4], categories=[4,3,2,1])
+            strings = ['a', 'b', 'c', 'd']
+            values = [4, 2, 3, 1]
+            df = pd.DataFrame({'strings': strings, 'values': values}, index=cats)
+            df.index
+            CategoricalIndex([1, 2, 3, 4], categories=[4, 2, 3, 1], ordered=False, dtype='category')
+            df.sort_index()
+            Out[]:
+              strings  values
+            4       d       1
+            2       b       2
+            3       c       3
+            1       a       4
+        </pre>
+    </ul>
+    <h2 style="color:blue">Side effects</h2>
+    <ul>
+        <li>Constructing a Series from a Categorical will not copy the input Categorical. This means that changes to the Series will in most cases<br>
+        change the original Categorical.</li>
+        <pre>
+            cat = pd.Categorical([1,2,3,10], categories=[1,2,3,4,10])
+            cat  # [1,2,3,10]
+            s = pd.Series(cat, name='cat')
+            s.iloc[0:2] = 10 # still category dtype
+            cat  # [10, 10, 3, 10]
+        </pre>
+        <li>Use copy=True to prevent such a behavior or simply don't reuse Categoricals.</li>
+        <pre>
+            cat = pd.Categorical([1,2,3,10], categories=[1,2,3,4,10])
+            s = pd.Series(cat, name='cat', copy=True)
+        </pre>
+        <li>This also happens in some cases when you supply a Numpy array instead of a Categorical: using an int array will exhibit the same behavior,<br>
+        while using a string array will not.</li>
+    </ul>
+</ul>
+<h1 style="text-align: center">Nullable integer data type</h1>
+<p>In working with missing data, we saw that pandas primarily uses NaN to represent missing data. Because NaN is a float, this forces an array of integers<br>
+with any missing values to become gloating point. In some cases, this may not matter much, but if your integer column is, say, an identifier, casting to float<br>
+can be problematic. Some integers cannot even be represented as floating point numbers.</p>
+<h1 style="color:blue">Construction</h1>
+<ul>
+    <li>pandas can represent integer data with possibly missing values using arrays.IntegerArray. This is an extension types implemented within pandas. Or the<br>
+    string alias 'Int64'.</li>
+    <li>All NA-like values are replaced with pandas.NA. The array can be stored in a DataFrame or Series like any Numpy array.</li>
+    <pre>
+        arr = pd.array([1, 2, None], dtype='Int64')
+        arr = pd.array([1,2,None], dtype=pd.Int64[ns])
+        arr = pd.array([1,2,None], dtype=pd.Iny64Dtype())
+        pd.Series(arr)
+    </pre>
+    <li>You can also pass a list-like object to the Series constructor with the dtype.</li>
+    <pre>
+        s = pd.Series([1,2,3,4,np.nan], dtpye='Int64')
+    </pre>
+    <li>Currently pandas.array() and pandas.Series() use different rules for dtype inference. pandas.array() will infer a nullable-integer dtype.</li>
+    <li>For backwards-compatibility, Series infers these as either integer or float dtype.</li>
+    <li>We recommend explicitly providing the dtype to avoid confusion.</li>
+    <pre>
+        pd.array([1, None]) # Int64
+        pd.array([1,2]) # Int64
+        pd.Series([1, None]) # Float64
+        pd.Series([1,2]) # Int64
+        pd.array([1,None], dtype='Int64') # Int64
+        pd.Series([1,None], dtype='Int64') # Int64
+    </pre>
+</ul>
+<h1 style="color:blue">Operations</h1>
+<ul>
+    <li>Operations involving an integer array will behave similar to Numpy arrays. Missing values will be propagated, and the data will be coerced<br>
+    to another dtype if needed.</li>
+    <pre>
+        s = pd.Series([1,2,None], dtype='Int64')
+        s + 1 # Int64
+        s ==1 # Int64
+        s.iloc[1:3] # Int64
+        s + s.iloc[1:3].astype('Int8') # Int64
+        s + 0.01 # # Float64
+    </pre>
+    <li>These dtype can operate as part of DataFrame, can be merged, reshape and casted. Reduction and groupby operation (sum, mean, ...) work as well.</li>
+    <pre>
+        df = pd.DataFrame({'A': s, 'B': [1,1,3], 'C': list('aab')})
+        pd.concat([df[['A']], df[['B', 'C']]], axis=1)
+        df['A'].astype('float')
+        df.sum()
+        df.groupby('C').mean()
+        df.groupby('B').A.mean()
+    </pre>
+</ul>
+<h1 style="color:blue">Scalar NA value</h1>
+<ul>
+    <li>arrays.IntegerArray uses pandas.NA as its scalar missing value. Slicing a single element that's missing will return pandas.NA.</li>
+    <pre>
+        a = pd.array([1, None], dtype='Int64')
+        a[1] # pd.NA
+    </pre>
+</ul>
+<h1 style="text-align:center">Nullable boolean data type: is currently experimental. API or implementation may change without warning.</h1>
+<h1 style="color:blue">Indexing with NA values</h1>
+<ul>
+    <li>pandas allows indexing with NA values in a boolean array, which are treated as False.</li>
+    <li>If you would prefer to keep the NA values you can manually use 'fillna=True'.</li>
+    <pre>
+        s = pd.Series([1,2,3])
+        mask = pd.array([True, False, pd.NA], dtype='boolean')
+        s[mask] # 1
+        s[mask.fillna(True)] # [1,3]
+    </pre>
+</ul>
+<h1 style="color:blue">Klee logical operations</h1>
+<ul>
+    <li>arrays.BooleanArray implements Kleene Logic (sometimes called three-value logic) for logical operations like & (and), | (or) and ^ (exclusive-or).</li>
+    <ul>
+        <li><b>True & True : True</b></li>
+        <li><b>True & False : False</b></li>
+        <li><b>True & NA : NA</b></li>
+        <li><b>False & False: False</b></li>
+        <li><b>False & NA: False</b></li>
+        <li><b>NA & NA: NA</b></li>
+        <li><b>True | True: True</b></li>
+        <li><b>True | False: False</b></li>
+        <li><b>True | NA: True</b></li>
+        <li><b>False | False: False </b></li>
+        <li><b>False | NA: NA</b></li>
+        <li><b>NA | NA: NA</b></li>
+        <li><b>True ^ True: False</b></li>
+        <li><b>True ^ False: True</b></li>
+        <li><b>True ^ NA: NA</b></li>
+        <li><b>False ^ False: False</b></li>
+        <li><b>False ^ NA: NA</b></li>
+        <li><b>NA ^ NA: NA</b></li>
+    </ul>
+    <li>When an NA is present in an operation, the output value is NA only if the result cannot be determined solely based on the other input. For example,<br>
+    True|NA is True, because both True|True and True| False are True. In that case, we don't actually need to consider the value of NA.</li>
+    <li>On the other hand, True & NA is NA. The result depends on whether the NA really is True or False, since True & True is True, but True & False is False,<br>
+    so we can't determine the output.</li>
+    <li>The differs from how np.nan behaves in logical operations. pandas treated np.nan is always false in the output.</li>
+    <pre>
+        pd.Series([True, False, np.nan], dtype='oject') | True # [True, True, False]
+        pd.Series([True, False, np.nan], dtype='boolean') | True # [True, True, True]
+        pd.Series([True, False, np.nan], dtype='object') & True # [True, False, False]
+        pd.Series([True, False, np.nan], dtype='boolean') & True # [True, False, pd.NA]
+    </pre>
+</ul>
+<h1 style="text-align:center">Table visualization</h1>
+<h1 style="color:blue">Styler Object and HTML</h1>
+<ul>
+    <li>Styling should be performed after the data in DataFrame has been processed. The Styler creates an HTML table and leverages CSS styling language to <br>
+    manipulate many parameters including colors, fonts, borders, background, etc. This allows a lot of flexibility out of the box, and even enables web developers<br>
+    to integrate DataFrames into their exiting user interface designs.</li>
+    <li>The DataFrame.stype attribute is a property that returns a Styler object. It has a _repr_html_ method defined on it so they are rendered automatically in notebook.</li>
+    <pre>
+        import pandas as pd
+        import numpy as np
+
+        df = pd.DataFrame([[38.0, 2.0, 18.0, 22.0, 21, np.nan],[19, 439, 6, 452, 226,232]],
+                          index=pd.Index(['Tumour (Positive)', 'Non-Tumour (Negative)'], name='Actual Label:'),
+                          columns=pd.MultiIndex.from_product([['Decision Tree', 'Regression', 'Random'],['Tumour', 'Non-Tumour']], names=['Model:', 'Predicted:']))
+        df.style
+    </pre>
+    <li>The above output looks very similar to the standard DataFrame HTML representation. But the HTML here has already attached some CSS classes to each cell,<br>
+    even if we haven't yet created any styles. We can view these by calling the .render() method, which returns the raw HTML as string, which is useful for further<br>
+    processing or adding to a file-read on CSS and HTML.</li>
+</ul>
+<h1 style="color:blue">Formatting the Display</h1>
+<ul>
+    <h2 style="color:red">Formatting values</h2>
+    <ul>
+        <li>Before adding styles it is useful to show that the Styler can distinguish the display value from actual value. To control the display value, the text is<br>
+        printed in each cell, and we can use the .format() method to manipulate this according to format spec string or a callable that takes a single value and returns<br>
+        a string. It is possible to define this for the whole table or for individual columns.</li>
+        <li>Additionally, the format function has a precision argument to specifically help formatting floats, as well as decimal and thousands separators to support<br>
+        other locales, an na+rep argument to display missing data, and an escape argument to help displaying sage-HTML or sage_LaTex. The default formatter is configured<br>
+        to adopt pandas' regular display.precision option, controllable using 'with pd.option_context('display.precision', 2)'.</li>
+        <pre>
+            df.style.format(precision=0, na_rep='Missing', thousands=' ',
+                            formatter = {('Decision Tree', 'Tumour'): '{:.2f}',
+                                        ('Regression', 'Non-Tumour'): lambda x: '${:,.1f}.format(x*-1e6)}) # x * (-1e6)
+        </pre>
+    </ul>
+    <h2 style="color:red">Hiding Data</h2>
+    <ul>
+        <li>The index and column headers can be completely hidden, as well sub-selecting rows or columns that one wisher to exclude. Both these options are performed<br>
+        using the same methods.</li>
+        <li>The index can be hidden from rendering by calling .hide_index() without any arguments, which might be useful if your index is integer based. Similarly column<br>
+        headers can be hidden by calling .hide_columns() without any arguments.</li>
+        <li>Specific rows or columns can be hidden from rendering by calling the same .hide_index() or .hide_columns() methods and passing in a eow/ column label, a list-like<br>
+        or a slice of row/ column labels to for the subset argument.</li>
+        <li>Hiding does not change the integer arrangement of CSS classes, (hiding the first two columns of a DataFrame means the column class indexing will start at col2, since<br>
+        col0 and col1 are simply ignored.</li>
+        <li>We can update our styler object to hide some data and format the values.</li>
+        <pre>
+            s = df.style.format('{:.0f}').hide_columns([('Random', 'Tumour'), ('Random', 'Non-Tumour')])
+            s = df.style.format('{:.0f}').hide_columns({'Random': ['Tumour', 'Non-Tumour']}) # similar above
+        </pre>
+    </ul>
+</ul>
+<h1 style="text-align:center">Computational Tools</h1>
+<h1 style="color:blue">Statistical functions</h1>
+<ul>
+    <h2 style="color:red">Percent change</h2>
+    <ul>
+        <li>Series and DataFrame have a method pct_change() to compute the percent change over a given number of periods (using fill_method to fill NA/null<br>
+        values before computing the percent change).</li>
+        <pre>
+            ser = pd.Series(np.random.randn(8))
+            ser.pct_change() # (ser[1] - ser[0])/ ser[0]
+            ser.pct_change(periods=3) # (ser[3] - ser[0])/ ser[0], (ser[4] - ser[1])/ ser[1]
+            df = pd.DataFrame(np.random.randn(10,4))
+            df.pct_change()
+            df.pct_change(periods=3)
+        </pre>
+    <h2 style="color:red">Covariance</h2>
+    <ul>
+        <li>Series.cov() can be used to compute covariance between series(excluding missing values). Analogously, DataFrame.cov() to compute pairwise covariances<br>
+        among the series in the DataFrame, also excluding NA/ null values.</li>
+        <li>Assuming the missing data are missing at random this results in an estimate for the covariance matrix which is unbiased. However for many applications<br>
+        this estimate may not be acceptable because the estimated covariance matrix is not guaranteed to be positive semi-definite. This could lead to estimated<br>
+        correlations having absolute values which are greater than one, and/or a non-invertible covariance matrix.</li>
+        <pre>
+            s1 = pd.Series(np.random.randn(1000))
+            s2 = pd.Series(np.random.randn(1000))
+            s1.cov(s2)
+        </pre>
+        <pre>
+            frame = pd.DataFrame(np.random.randn(1000,5), columns=list('abcde'))
+            frame.cov()
+        </pre>
+    </ul>
+    <h2 style="color:red"></h2>
+    <ul>
+
+    </ul>
+    <h2 style="color:red"></h2>
+    <ul>
+
+    </ul>
+    </ul>
+</ul>
+<h1 style="text-align:center">Groupby : split-apply-combine</h1>
+<p>By 'group by', we are referring to a process involving one or more of the following steps:</p>
+<ul>
+    <li><b>Splitting:</b> the data into groups based on some criteria.</li>
+    <li><b>Applying: </b>a function to each group independently.</li>
+    <li><b>Combining: </b>the results into a data structure.</li>
+</ul>
+<li>Out of these , the split step is the most straightforward. In fact, in may situations we may wish to split the data set into groups and do<br>
+something with those groups. In the apply step, we might wish to do one of the following:</li>
+<ul>
+    <li><b>Aggregation:</b> compute a summary statistic (or statistics) for each group:</li>
+    <ul>
+        <li>Compute group sums or means</li>
+        <li>Compute group sizes / counts</li>
+    </ul>
+    <li><b>Transformation:</b> perform some group-specific computations and return a like-indexed object.</li>
+    <ul>
+        <li>Standardize data (zscore) within a group.</li>
+        <li>Filling NAs within groups with a value derived from each group.</li>
+    </ul>
+    <li><b>Filtration: </b>discard some groups, according to a group-wise computation that evaluates True or False.</li>
+    <ul>
+        <li>Discard data that belongs to groups with only a few members.</li>
+        <li>Filter out data based on the group sum or mean.</li>
+    </ul>
+    <li>Some combination of the above: Groupby will examine the results of the apply step and try to return a sensibly combined result if it doesn't<br>
+    fit into either of the above two categories.</li>
+</ul>
+<p>Since the set of instance methods on pandas data structures are generally rich and expressive, we often simply want to invoke, say a DataFrame function<br>
+on each group. We aim to make operations like this natural an easy to express using pandas. We'll address each area of GroupBy functionality then provide some<br>
+non-trivial examples/ use cases.</p>
+<h1 style="color:blue">Splitting an object into grousp</h1>
+<ul>
+    <li>pandas objects can be split on any of their axes. The abstract definition of grouping is to provide a mapping of labels to group names. To create a<br>
+    Groupby object is later), you may do the following:</li>
+    <pre>
+        df = pd.DataFrame([ ("bird", "Falconiformes", 389.0),
+                            ("bird", "Psittaciformes", 24.0),
+                            ("mammal", "Carnivora", 80.2),
+                            ("mammal", "Primates", np.nan),
+                            ("mammal", "Carnivora", 58)],
+                            index=["falcon", "parrot", "lion", "monkey", "leopard"],
+                            columns=("class", "order", "max_speed"))
+        grouped = df.groupby('class')
+        grouped = df.groupby('order', axis=1)
+        grouped = df.groupby(['class', 'order'])
+    </pre>
+    <li>The mapping can be specified many different ways:</li>
+    <ul>
+        <li>A Python function, to be called on each of the axis labels.</li>
+        <li>A list or Numpy arrays of the same length as the selected axis.</li>
+        <li>A dict or Series, providing a label -> group nam mapping.</li>
+        <li>For DataFrame objects, a string indicating either a column name or an index level name to be used to group.</li>
+        <li>df.groupby('A') is just syntatic sugar for df.groupby(df['A']).</li>
+        <li>A list of any of the above things.</li>
+    </ul>
+    <li>Collectively we refer to the grouping objects as the keys.</li>
+    <li>A string passed to groupby may refer to either a column or an index level. If a string matches both a column name and an index level name, a ValueError will be raised.</li>
+    <pre>
+        df = pd.DataFrame({ "A": ["foo", "bar", "foo", "bar", "foo", "bar", "foo", "foo"],
+                            "B": ["one", "one", "two", "three", "two", "two", "one", "three"],
+                            "C": np.random.randn(8),
+                            "D": np.random.randn(8)})
+        df.groupby('A')
+        df.groupby('B')
+        df.groupby(['A', 'B'])
+        df2 = df.set_index(['A', 'B'])
+        df2.groupby(level=df2.index.names.difference(['B'])).sum()
+    </pre>
+    <li>These will split the DataFrame on its index(rows). We could also split by the columns.</li>
+    <pre>
+        def get_letter_type(letter):
+            if letter.lower() in ('aeiou'):
+                return 'vowel'
+            else:
+                return 'consonant'
+        grouped = df.groupby(get_letter_type, axis=1)
+    </pre>
+    <li>pandas Index object support duplicate values. If a non-unique index is used as the group key in a groupby operation, all values for the same index<br>
+    value will be considered to be in one group and thus the output of aggregation functions will only contain unique index values:</li>
+    <pre>
+        lst = [1,2,3,1,2,3]
+        s = pd.Series([1,2,3,10,20,30], lst)
+        grouped = s.groupby(level=0)
+        grouped.first()
+        grouped.last()
+        grouped.sum()
+    </pre>
+    <li>Note that no splitting occurs until it's needed. Creating Creating the GroupBy object only verifies that you've passed a valid mapping.</li>
+    <li>Many kinds of complicated daa manipulations can b expressed in terms of Groupby operations (though can't be guaranteed to be the most efficient).<br>
+    You can get quite creative with the label mapping functions.</li>
+    <h2 style="color:red">Groupby sorting</h2>
+    <ul>
+        <li>By default the group keys are sorted during the groupby operation. You may however pass sort=False for potential speedups.</li>
+        <li>Note that groupby will preserve the order in which observations are sorted within each group.</li>
+        <pre>
+            df2 = pd.DataFrame({'X': list('BBAA'), 'Y':list(range(1,5))})
+            df2.groupby('X').sum()
+            df2.groupby('X', sort=False).sum()
+            df3 = pd.DataFrame({'X': list('ABAB'), 'Y':[1,4,3,2]})
+            df3.groupby('X').get_group('A')
+            df3.groupby('X').get_group('B')
+        </pre>
+    </ul>
+    <h2 style="color:red">Groupby dropna</h2>
+    <ul>
+        <li>By default NA values are excluded from group keys during the groupby operation. However, in case you want to include NA values in group keys,<br>
+        you could pass dropna=False to achieve it.</li>
+        <pre>
+            df_list = [[1,2,3], [1,None,4], [2,1,3], [1,2,2]]
+            df = pd.DataFrame(df_list, columns=list('ABC'))
+            df.groupby('B', dropna=False).sum() # NA group have values at column A and C
+        </pre>
+        <li>The default setting of dropna argument is True, which means NA are not included in group keys.</li>
+    </ul>
+    <h2 style="color:red">Groupby object attributes</h2>
+    <ul>
+        <li>The groups attribute is a dict whose keys are the computed unique groups and corresponding values beingthe axis labels belonging to each group.</li>
+        <pre>
+            df = pd.DataFrame({ "A": ["foo", "bar", "foo", "bar", "foo", "bar", "foo", "foo"],
+                                "B": ["one", "one", "two", "three", "two", "two", "one", "three"],
+                                "C": np.random.randn(8),
+                                "D": np.random.randn(8)})
+            df.groupby('A').groups() # groups of 'bar' and 'foo'
+            df.groupby(get_lower_letter, axis=1).groups
+            df.groupby(gey_lower_letter, axis=1).groups['consonant']
+            df.groupby(gey_lower_letter, axis=1).groups['vowel']
+        </pre>
+        <li>Calling the standard Python len function on the Groupby object just returns the length of the groups dict, so it is largely just a convenience.</li>
+        <li>Groupby will tab complete columns names (and other attributes).</li>
+        <pre>
+            grouped = df.groupby(['A', 'B'])
+            grouped.groups # key-value pair of the A & B labels and the values
+            len(groups) # number of element in a dict
+        </pre>
+    </ul>
+    <h2 style="color:red">Groupby with MultiINdex</h2>
+    <ul>
+        <li>With hierarchical indexed data, it's quite natural to group by one of the levels of the hierarchical.</li>
+        <pre>
+            arrays = [  ["bar", "bar", "baz", "baz", "foo", "foo", "qux", "qux"],
+                        ["one", "two", "one", "two", "one", "two", "one", "two"]]
+            index = pd.MultiIndex.from_arrays(arrays, names=['first', 'last'])
+            s = pd.Series(np.random.randn(8), indx=index)
+            s.groupby(level=1) # by last index column
+            s.groupby(level=0) # by first index column
+            s.groupby(level='last')
+            s.groupby(level='first')
+            s.groupby(level=[0,1])
+            s.groupby(level=['first', 'last'])
+        </pre>
+    </ul>
+    <h2 style="color:red">Grouping DataFrame withe Index levels and columns</h2>
+    <ul>
+        <li>A DataFrame may be grouped by a combination of columns and index levels by specifying the column names as strings and the index levels as pd.Grouper objects.</li>
+        <pre>
+            arrays = [  ["bar", "bar", "baz", "baz", "foo", "foo", "qux", "qux"],
+                        ["one", "two", "one", "two", "one", "two", "one", "two"]]
+            index = pd.MultiIndex.from_arrays(arrays, names=['first', 'second'])
+            df = pd.DataFrame({'A': [1,1,1,1,2,2,3,3], 'B': np.arange(8)}, index=index)
+            df.groupby([pd.Grouper(level=1), 'A']).sum()
+            df.groupby(['second', 'A']).sum()
+        </pre>
+    </ul>
+    <h2 style="color:red">DataFrame column selection in GroupBy</h2>
+    <ul>
+        <li>Once you have created the Groupby object from a DataFrame, you might want to do something different for each columns. Thus, using [] similar to getting<br>
+        a column from a DataFrame:</li>
+        <pre>
+            df = pd.DataFrame({ "A": ["foo", "bar", "foo", "bar", "foo", "bar", "foo", "foo"],
+                                "B": ["one", "one", "two", "three", "two", "two", "one", "three"],
+                                "C": np.random.randn(8),
+                                "D": np.random.randn(8)})
+            grouped = df.groupby('A')
+            grouped_C = grouped['C']
+            grouped_D = grouped['D']
+        </pre>
+        <li>This is mainly syntactic sugar for the alternative and much more verbose.</li>
+        <pre>
+            df['C'].groupby(df['A'])
+        </pre>
+        <li>Additionally this method avoids recomputing the internal grouping information derived from the passed key.</li>
+    </ul>
+</ul>
+<h1 style="color:blue">Iterating through groups</h1>
+<ul>
+    <li>With the groupby object in hand, iterating through the grouped data is very natural and functions similarly to intertools.groupby():</li>
+    <pre>
+        df = pd.DataFrame({ "A": ["foo", "bar", "foo", "bar", "foo", "bar", "foo", "foo"],
+                            "B": ["one", "one", "two", "three", "two", "two", "one", "three"],
+                            "C": np.random.randn(8),
+                            "D": np.random.randn(8)})
+        grouped = df.groupby('A')
+        for name, group in grouped: # print 'bar' with its group and 'foo' with its group (2 groups)
+            print(name)
+            print(group)
+    </pre>
+    <li>In the case of grouping by multiple keys, the group name will be a tuple:</li>
+    <pre>
+        for name, group in df.groupby(['A', 'B']): # print combinations and group values of column A & B (6 groups)
+            print(name)
+            print(group)
+    </pre>
+</ul>
+<h1 style="color:blue">Selecting a group</h1>
+<ul>
+    <li>A single group can be selected using get_group():</li>
+    <pre>
+        grouped.get_group('bar')
+        grouped.get_group('foo')
+        df.groupby(['A', 'B']).get_group(('bar', 'one'))
+    </pre>
+</ul>
+<h1 style="color:blue">Aggregation</h1>
+<ul>
+    <li>Once the groupby object has been created, several methods are available to perform a computation on the grouped data. These operations are similar<br>
+    to the aggregating API, window API, and resample API.</li>
+    <li>An obvious are is aggregation via the aggregate() or equivalent agg() method:</li>
+    <pre>
+        grouped = df.groupby('A')
+        grouped.agg(np.sum)
+        grouped.aggregate(np.sum)
+    </pre>
+    <li>The result of the aggregation will have the group names as the new index along the grouped axis. In the case of multiple keys, the result is a MultiIndex<br>
+    by default, though this can be changed by using the as_index option.Or you can use reset_index to return just the column form:</li>
+    <pre>
+        df.groupby('A', as_index=False).sum()
+        df.groupby('A').sum().reset_index() # similar above
+    </pre>
+    <li>Another simple aggregation is to compute the size of each group. This is included in 'groupby' as the size method. It returns a Series whose index are<br>
+    the group names and whose values are the sizes of each group.</li>
+    <pre>
+        grouped = df.groupby('A')
+        grouped.size()
+        df.groupby('A').size()
+    </pre>
+    <li>Another aggregation is compute the number of unique values of each groups. This is similar to the value_counts() function, except it only counts unique values.</li>
+    <pre>
+        data = [['foo', 1], ['foo', 2], ['foo', 2], ['bar', 1], ['bar', 1]]
+        df4 = pd.DataFrame(data, columns=['A', 'B'])
+        df4.groupby('A')['B'].nunique() # count B values by groupby A
+        Out[]:
+        A
+        bar    1
+        foo    2
+        Name: B, dtype: int64
+    </pre>
+    <li>Aggregation function will not return the groups that you are aggregating over if they are named columns, when as_index=True, the default. The grouped<br>
+    columns will be indices of the returned objects.</li>
+    <li>Passing as_index=False will return the groups that you are aggregating over, if they are named columns.</li>
+    <li>Aggregating functions are the ones that reduce the dimension of the returned objects.</li>
+    <ul>
+        <li><b>mean(): </b>Compute the mean of groups.</li>
+        <li><b>sum(): </b>computes sum of group values.</li>
+        <li><b>size(): </b>compute group sizes.</li>
+        <li><b>count(): </b>compute count of groups.</li>
+        <li><b>std(): </b>standard deviation of groups.</li>
+        <li><b>var(): </b>Compute variance of groups.</li>
+        <li><b>sem(): </b>Standard error of the mean of the groups.</li>
+        <li><b>describe(): </b>Generates descriptive statistics.</li>
+        <li><b>first(): </b>Compute first of group values.</li>
+        <li><b>last(): </b>Compute last of group values.</li>
+        <li><b>nth(): </b>Take nth values, or a subset if n is the list.</li>
+        <li><b>min(): </b>Compute min of group values.</li>
+        <li><b>max(): </b>Compute max of group values.</li>
+    </ul>
+    <li>The aggregating functions above will exclude NA values. Any function which reduces a Series to a Scalar values is an aggregation function and will<br>
+    work, a trivial example is df.groupby('A').agg(lambda x:1)</li>
+    <h2 style="color:red">Applying multiple function a once</h2>
+    <ul>
+        <li>With grouped Series, you can also pass a list or dict of functions to do aggregation with, outputting a DataFrame.</li>
+        <pre>
+            grouped = df.groupby('A')
+            grouped.agg(['sum', 'min', 'std'])
+            grouped['C'].agg([np.sum, np.min, np.std])
+            grouped['C'].agg(['sum', 'min', 'std']).rename({'sum': 'foo', 'mean': 'bar', 'std': 'baz'}, axis=1)
+            grouped['C'].agg(['sum', 'min', 'std']).rename(columns={'sum': 'foo', 'mean': 'bar', 'std': 'baz'})
+        </pre>
+        <li>pandas does allow you to provide multiple lambdas. In this case, pandas will mangle the name of the (nameless) lambda functions, appending _i to each<br>
+        subsequence lambda.</li>
+        <pre>
+            grouped.agg([lambda x: x.max() - lambda x: x.min(), lambda x: x.median() - lambda x: x.mean()])
+        </pre>
+    </ul>
+    <h2 style="color:red">Named aggregation</h2>
+    <ul>
+        <li>To support column-specific aggregation with control over the output column names, pandas accepts the special syntax in groupby.agg(), known as 'named aggregation':</li>
+        <ul>
+            <li>The keywords are the output column names.</li>
+            <li>The values are tuples whose first element is the column to select and the second element is the aggregation to apply to that column. pandas provides the<br>
+            pandas.NamedAgg namedtuple with the fields ['column', 'aggfunc'] to make it clearer what the arguments are. As usual, the aggregation can be a callable or a string alias.</li>
+        </ul>
+        <pre>
+            animals = pd.DataFrame({'kind': ['cat', 'god', 'cat', 'dog'],
+                                    'height': [9.1, 6.0, 9.5, 34.0],
+                                    'weight': [7.9, 7.5, 9.9, 198.0]})
+            animals.groupby('kind').agg(min_height=pd.NamedAgg(column='height', aggfunc='min'),
+                                        max_height=pd.NamedAgg(column='height', aggfunc='max'),
+                                        average_weight=pd.NamedAgg(column='weight', aggfunc=np.mean))
+            animals.groupby('kind').agg(min_height=('height', 'min'),
+                                        max_height=('height', 'max'),
+                                        average_weight=('weight', 'mean')) # similar above
+        </pre>
+        <li>If your desired output column names are not valid Python keywords, construct a dictionary and unpack the keyword arguments.</li>
+        <pre>
+            animals.groupby('kind').agg(**{'total weight': pd.NamedAgg(column='weight', aggfunc=sum)}) # you can use np.sum or 'sum' as well
+        </pre>
+        <li>Additional keyword arguments are not passed through to the aggregation functions. Only pairs of (column, aggfunc) should be passed as **kwargs.<br>
+        If your aggregation functions requires additional arguments, partially apply them wih functools.partial().</li>
+        <li>Named aggregation is also valid for Series groupby aggregations. In this case there's no column selection, so the values are just the functions.</li>
+        <pre>
+            animals.groupby('kind').height.agg(min_height='min', max_height='max')
+        </pre>
+    </ul>
+    <h2 style="color:red">Applying different functions to DataFrame columns</h2>
+    <ul>
+        <li>By passing a dict to aggregate, you can apply a different aggregation to the columns of a DataFrame.</li>
+        <pre>
+            df = pd.DataFrame({ "A": ["foo", "bar", "foo", "bar", "foo", "bar", "foo", "foo"],
+                                "B": ["one", "one", "two", "three", "two", "two", "one", "three"],
+                                "C": np.random.randn(8),
+                                "D": np.random.randn(8)})
+            grouped = df.groupby('A')
+            grouped.agg({'C': np.sum, 'D': lambda x: np.std(x, ddof=1))})
+            grouped.agg({'C': 'sum', 'D': lambda x: 'std(x, ddof=1)'})
+        </pre>
+    </ul>
+    <h2 style="color:red">Cython-optimized aggregation functions</h2>
+    <ul>
+        <li>Some common aggregations, currently only sum, mean, std and sem, have optimized Cython implementations:</li>
+        <pre>
+            df.groupby('A').sum()
+            df.groupby(['A', 'B']).mean()
+        </pre>
+    </ul>
+    <h2 style="color:red">Aggregations with User-Defined Functions</h2>
+    <ul>
+        <li>Users can also provide their own functions for custom aggregations. When aggregating with a User-Defined Function(UDF), the UDF should not mutate<br>
+        the provided Series.</li>
+        <pre>
+            animals.groupby('kind')[['height']].agg(lambda x: set(x))
+            animals.groupby('kind')[['height']].agg(lambda x: x.astype(int).sum())
+        </pre>
+        <li>The resulting dtype will reflect that of the aggregating function. If the results from different groups have different dtypes, then a common dtype<br>
+        will be determined in the same way as DataFrame construction.</li>
+    </ul>
+</ul>
+<h1 style="color:blue">Transformation</h1>
+<ul>
+    <li>The transform method returns an object that is indexed the same (size) as the one being grouped. The transform function must:</li>
+    <ul>
+        <li>Return a result that is either the same size as the group chunk or broadcastable to the size of the group chunk.</li>
+        <li>Operate column-by-column on the group chunk. The transform is applied to the first group chunk using chunk.apply.</li>
+        <li>Not perform in-place operations on the group chunk. Group chunks should be treated as immutable, and changes to a group chunk may produce unexpected results.<br>
+        For example, when using fillna, inplace must be False.</li>
+        <li>(Optionally) operates on the entire group chunk. If this is supported, a fast path is used starting from the second chunk.</li>
+    </ul>
+    <li>Similar to Aggregations with UDF, the resulting dtype will reflect that of the transformation function. If the results from different groups have different dtypes,<br>
+    then a common dtype will be determined in the same way as DataFrame construction.</li>
+    <pre>
+        index = pd.date_range('10/1/1999', periods=1100)
+        ts = pd.Series(np.random.normal(0.5, 2, 1100), index)
+        ts = ts.rolling(window=100, min_periods=100).mean().dropna()
+        ts.head()
+        ts.tail()
+        transformed = ts.groupby(lambda x: x.year).transform(lambda x: (x-x.mean())) / x.std())
+        grouped = ts.groupby(lambda x: x.year)
+        grouped.mean()
+        grouped.std()
+        grouped_trans = transformed.groupby(lambda x: x.year)
+        grouped_trans.mean()
+        grouped_trans.std()
+    </pre>
+    <li>And visualize compare the original and transformed data sets.</li>
+    <pre>
+        compare = pd.DataFrame({'Original': ts, 'Transformed': transformed})
+        compare.plot()
+    </pre>
+    <li>Transformation functions that have lower dimension outputs are broadcast to match the shape of the input array.</li>
+    <pre>
+        ts.groupby(lambda x: x.year).transform(lambda x: x.max() - x.min())
+        max = ts.groupby(lambda x: x.year).transform('max')
+        min = ts.groupby(lambda x: x.year).transform('min')
+        max - min
+    </pre>
+    <li>Another common data transform is to replace missing data with the group mean.</li>
+    <pre>
+        ts2 = pd.Series(np.random.randn(1000)).rolling(window=100, min_periods=100).mean()
+        data_df = pd.DataFrame(np.random.randn(1000,3), columns=list('ABC'))
+        countries = np.array(['US', 'UK', 'GR', 'JP'])
+        key = countries[np.random.randint(0,4,1000)
+        grouped = data_df.groupby('key')
+        transformed = grouped.transform(lambda x: x.fillna(x.mean()))
+    </pre>
+    <li>We can verify that the group means have not changed in the transformed data and that the transformed data contains no NAs.</li>
+    <pre>
+        grouped_trans = transformed.groupby(key)
+        grouped.mean()
+        grouped_trans.mean()
+        grouped.count()
+        grouped_trans.count()
+        grouped_trans.size()
+    </pre>
+    <li>Some functions automatically transform the input when applied to a Groupby object, but returning an object of the same shape as the original<br>
+    Passing as_index = False will not affect these transformation methods.</li>
+    <pre>
+        grouped.ffill()
+    </pre>
+    <h2 style="color:red">Window and resample operations</h2>
+    <ul>
+        <li>It is possible to use resample(), expanding() and rolling() as methods on 'groupby'.</li>
+        <li>With rolling(n), you can divide the groups into frames with n elements, start from frame with 1 element to frame with n elements.</li>
+        <li>The expanding() method will accumulate a given operation for all the members of each particular group.</li>
+        <li>Suppose you want to use the resample() method to get a daily frequency in each group of your DataFrame and wish to complete the missing<br>
+        values with the ffill() method.</li>
+        <pre>
+            df_re.groupby('A').rolling(4).B.mean()
+            df = df_re.groupby('A').rolling(4).B
+            t = []
+            for i in df_re.groupby('A').rolling(4).B:
+                t.append(i.size)
+            t
+            Out[]:[1, 2, 3, 4, 4, 4, 4, 4, 4, 4, 1, 2, 3, 4, 4, 4, 4, 4, 4, 4]
+
+            df_re.groupby('A').expanding().sum()
+            Out[]:
+                      B
+            A
+            1 0     0.0
+              1     1.0
+              2     3.0
+            ...
+
+            df_re = pd.DataFrame({  "date": pd.date_range(start="2016-01-01", periods=4, freq="W"),
+                                    "group": [1, 1, 2, 2],
+                                    "val": [5, 6, 7, 8]}).set_index("date")
+            df_re.groupby('group').resample('1D').ffill()
+            Out[]:
+                              group  val
+            group date
+            1     2016-01-03      1    5
+                  2016-01-04      1    5
+            ...
+        </pre>
+    </ul>
+</ul>
+<h1 style="color:blue">Filtration</h1>
+<ul>
+    <li>The filter method returns a subset of the original object. Suppose we want to take only elements that belong to groups with a group sum greater than 2.</li>
+    <pre>
+        sf = pd.Series([1,1,2,3,3,3])
+        sf.groupby(sf).filter(lambda x: x.sum() > 2)
+    </pre>
+    <li>The argument of filter must be a function that, applied to the groups as a whole, returns True or False.</li>
+    <li>Another useful operation is filtering out elements that belong to groups with only a couple members.</li>
+    <pre>
+        dff = pd.DataFrame({'A': np.arange(8), 'B': list('aabbbbcc')})
+        dff.groupby('B').filter(lambda x: len(x) > 2) # return group 'b'
+    </pre>
+    <li>Alternatively, instead of dropping the offending groups, we can return a like-indexed objects where the groups that do not pass the filter are filled with NaNs.</li>
+    <pre>
+        dff.groupby('B').filter(lambda x: len(x)>2), dropna=False) # return all groups with offending group's values are NAs
+    </pre>
+    <li>For DataFrame with multiple columns, filters should explicitly specify a column as the filter criterion.</li>
+    <pre>
+        dff['C'] = np.arange(8)
+        dff.groupby('B').filter(lambda x: len(x['C'])>2)
+        Out[]:
+           A  B  C
+        2  2  b  2
+        3  3  b  3
+        4  4  b  4
+        5  5  b  5
+    </pre>
+    <li>Some functions when applied to a groupby object will act as a filter on the input, returning a reduced shape of the original (and potentially eliminating<br>
+    groups), but with the index unchanged. Passing as_index=False will not affect these transformation methods.</li>
+</ul>
+<h1 style="color:blue">Dispatching to instance methods</h1>
+<ul>
+    <li>When doing an aggregation or transformation, you might just want to call an instance method on each data group. This is pretty easy to do by passing lambda functions.</li>
+    <pre>
+        df = pd.DataFrame({ "A": ["foo", "bar", "foo", "bar", "foo", "bar", "foo", "foo"],
+                    "B": ["one", "one", "two", "three", "two", "two", "one", "three"],
+                    "C": np.random.randn(8),
+                    "D": np.random.randn(8)})
+        grouped = df.groupby('A')
+        grouped.agg(lambda x: x.sum()) # sum of each group by 'A' and show elements group of 'B'
+    </pre>
+    <li>But, it's rather verbose and can be untidy if you need to pass additional arguments. Using a bit of meta-programming cleverness, groupby now has the ability<br>
+    to 'dispatch' method calls to the groups.</li>
+    <pre>
+        grouped.sum()
+        grouped.std()
+    </pre>
+    <li>What is actually happening here is that a function wrapper is being generated. When invoked, it takes any passed arguments and invokes the function with any arguments on<br>
+    each group(sum, std above). The results are then combined together much in the style of agg and transform(it actually uses apply to infer the gluing, documented next).<br>
+    This enables some operations to be carried out rather succinctly.</li>
+    <pre>
+        tsdf = pd.DataFrame(np.random.randn(1000,3), index=pd.date_range('1/1/2000', periods=1000), columns=list('ABC'))
+        tsdf.iloc[::2] = np.nan
+        grouped = tsdf.groupby(lambda x: x.year)
+        grouped.fillna(method='pad')
+    </pre>
+    <li>The 'nlargest' and 'nsmallest' methods work on Series style groupbys.</li>
+    <pre>
+        s = pd.Series([9, 8 , 7, 5, 19, 1, 4.2, 3.3])
+        g = pd.Series(list('abababab'))
+        gb = s.groupby(g)
+        gb.nlargest(3) # 3 largest values of each group
+        gb.nsmallest(3) # 3 smallest values of each group
+    </pre>
+</ul>
+<h1 style="color:blue">Flexible appy</h1>
+<ul>
+    <li>Some operations on the gouped data might not fit into either the aggregate or transform categories. Or, you may simply want 'groupby' to infer<br>
+    how to combine the results. For these, use the apply function, which can be substituted for both aggregate and transform in many standard use cases.<br>
+    However, apply can handle some exceptional use cases.</li>
+    <pre>
+        grouped = df.groupby('A')
+        grouped['C'].apply(lambda x: x.descirbe())
+        grouped = df.groupby('A')['C']
+        def f(group):
+            return pd.DataFrame({'original': group,
+                                'demeaned': group - group.mean()})
+        grouped.apply(f)
+    </pre>
+    <li>'apply' on a Series can operate on a returned value from the applied function, that is itself a series, and possibly up-cast the result to a DataFrame. </li>
+    <pre>
+        def f(x):
+            return pd.Series([x, x**2], index=['x', 'x^2'])
+        s = pd.Series(np.random.rand(5))
+        s.apply(f)
+    </pre>
+    <li>'apply' can act as a reducer, transformer, or filter function, depending on exactly what is passed to it. So depending on the path taken, and exactly<br>
+    what you are grouping. Thus the grouped column(s) may be included in the output as well as set the indices.</li>
+    <li>Similar to Aggregations with User-defined functions, the resulting dtype will reflect that of the apply function. If the results from different groups have<br>
+    different dtypes, then a common dtype will be determined in the same way as DataFrame construction.</li>
+</ul>
+<h1 style="color:blue">Numba Accelerated routines</h1>
+<ul>
+    <li>If Numba is installed as an optional dependency, the transform and aggregate methods support engine='numba' and engine_kwargs argument.</li>
+    <li>The function signature must start with values, index exactly as the data belonging to each group will be passed into values, and the group index will be<br>
+    passed into index.</li>
+    <li>When using engine='numba', there will be no 'fall back' behavior internally. The group data and group index will be passed as Numpy arrays to the JITed <br>
+    user defined function, and no alternative execution attempts will be tried.</li>
+</ul>
+<h1 style="color:blue">Other useful features</h1>
+<ul>
+    <h2 style="color:red">Automatic exclusion of 'nuisance' columns</h2>
+    <ul>
+        <pre>
+            df = pd.DataFrame({ "A": ["foo", "bar", "foo", "bar", "foo", "bar", "foo", "foo"],
+                                "B": ["one", "one", "two", "three", "two", "two", "one", "three"],
+                                "C": np.random.randn(8),
+                                "D": np.random.randn(8)})
+        </pre>
+        <li>Suppose we wish to compute the standard deviation grouped by column A. There is a light problem, namely that we don't care about column B.<br>
+        We refer to this as a 'nuisance' column. If the passed aggregation function cant be applied to some columns, the troublesome columns will be <br>
+        (silently) dropped. Thus, this does not pose any problems.</li>
+        <pre>
+            df.groupby('A').std()
+        </pre>
+        <li>Note that df.grouby('A').colname.std() is more efficient than df.groupby('A').std().colname. It filter first then applying the aggregation function.</li>
+        <li>Any object column, also if it contains numerical values such as 'decimal' objects, is considered as a 'nuisance' columns. They are excluded from<br>
+        aggregate functions automatically in groupby.</li>
+        <li>If you do wish to include decimal or object columns in an aggregation with other non-nuisance data types, you must do explicitly.</li>
+        <pre>
+            from decimal import Decimal
+            df_dec = pd.DataFrame({ "id": [1, 2, 1, 2],
+                                    "int_column": [1, 2, 3, 4],
+                                    "dec_column": [ Decimal("0.50"),
+                                                    Decimal("0.15"),
+                                                    Decimal("0.25"),
+                                                    Decimal("0.40")]})
+            df_dec.groupby('id')[['dec_column']].mean()
+            # but it's excluded when combining with standard data types column
+            df_dec.groupby('id')[['int_column', 'dec_column']].sum()
+            Out[]:
+                int_column
+            id
+            1            4
+            2            6
+            # Use dict to include it in result
+            df_dec.groupby('id').agg({'int_column': 'mean', 'dec_column': 'sum'})
+        </pre>
+    </ul>
+    <h2 style="color:red">Handling of (un)observed Categorical values</h2>
+    <ul>
+        <li>When using a Categorical grouper (as a single grouper, or as part of multiple groupers), the observed keyword controls whether to return a cartesian<br>
+        product of all possible groupers values(observed=False) or only those that are observed groupers(observed=True).</li>
+        <pre>
+            pd.Series([1,1,1]).groupby(pd.Categorical(['a', 'a', 'a'], categories=['a', 'b']), observed=False).count()
+            Out[]:
+            a    3
+            b    0
+            dtype: int64
+
+            pd.Series([1,1,1]).groupby(pd.Categorical(['a', 'a', 'a'], categories=['a', 'b']), observed=True).count()
+            Out[]:
+            a    3
+            dtype: int64
+        </pre>
+    </ul>
+    <h2 style="color:red">NA and NaT group handling</h2>
+    <ul>
+        <li>If there are any NaN or NaT values in the grouping key, these will be automatically excluded. In other words, there will never be an<br>
+        'NA group' or 'NaT group'.</li>
+    </ul>
+    <h2 style="color:red">Grouping with ordered factors</h2>
+    <ul>
+        <li>Categorical variables represented as instance of pandas's Categorical class can be used as group keys. If so, the order of the levels will be preserved.</li>
+        <pre>
+            data = pd.Series(np.random.randn(100))
+            factor = pd.qcut(data, [0, 0.25, 0.5, 0.75, 1.0])
+            data.groupby(factor).mean()
+            Out[]:
+            (-2.645, -0.523]   -1.362896
+            (-0.523, 0.0296]   -0.260266
+            (0.0296, 0.654]     0.361802
+            (0.654, 2.21]       1.073801
+            dtype: float64
+        </pre>
+    </ul>
+    <h2 style="color:red">Grouping with a grouper specification</h2>
+    <ul>
+        <li>You may need to specify a bit more data to properly group. You can use the pd.Grouper to provide this local control.</li>
+        <pre>
+            import datetime
+            df = pd.DataFrame({ "Branch": "A A A A A A A B".split(),
+                                "Buyer": "Carl Mark Carl Carl Joe Joe Joe Carl".split(),
+                                "Quantity": [1, 3, 5, 1, 8, 1, 9, 3],
+                                "Date": [   datetime.datetime(2013, 1, 1, 13, 0),
+                                            datetime.datetime(2013, 1, 1, 13, 5),
+                                            datetime.datetime(2013, 10, 1, 20, 0),
+                                            datetime.datetime(2013, 10, 2, 10, 0),
+                                            datetime.datetime(2013, 10, 1, 20, 0),
+                                            datetime.datetime(2013, 10, 2, 10, 0),
+                                            datetime.datetime(2013, 12, 2, 12, 0),
+                                            datetime.datetime(2013, 12, 2, 14, 0)]})
+            df.groupby([pd.Grouper(freq='1M', key='Date'), 'Buyer']).sum() # 1 month
+        </pre>
+        <li>You have an ambiguous specification in that you have a named index and a column that could be potential groupers.</li>
+        <pre>
+            df = df.set_index('Date')
+            pd.offsets.MonthEnd()  # expand to the end of the month(current month if not the end of the month)
+            df['Date'] = df.index + pd.offsets.MonthEnd(2) # expand 2 months
+            df.groupby([pd.Grouper(freq='6M', key='Date), 'Buyer']).mean() # use column 'Date'
+            df.groupby([pd.Grouper(freq='6M', level=0), 'Buyer']).mean() # use index 'Date'
+        </pre>
+    </ul>
+    <h2 style="color:red">Taking the first rows of each group</h2>
+    <ul>
+        <li>Just like for a DataFrame or Series you can call head and tail on a groupby.</li>
+        <pre>
+            df = pd.DataFrame([[1,2], [1,4], [5,6]], columns=['A', 'B'])
+            df.groupby('A').head(1) # head of each group
+            df.groupby('B').tail(1) # tail of each group
+        </pre>
+    </ul>
+    <h2 style="color:red">Taking the nth row of each group</h2>
+    <ul>
+        <li>To select from a DataFrame or Series the nth item, use nth(). This is reduction method, and will return a single row (or no row) per group<br>
+        if you pass an int for n.</li>
+        <pre>
+            df = pd.DataFrame([[1, np.nan], [1,4], [5,6]], columns=['A', 'B'])
+            g = df.groupby('A')
+            g.nth(0) # return the first index of each group
+            g.nth(-1) # return the last index of each group
+        </pre>
+        <li>If you want to select the nth not-null item, use dropna kwarg. For a DataFrame this should be either 'any' or 'all', just like you would pass to dropna.</li>
+        <pre>
+            g.nth(0, dropna=any) # drop na with any appearance, then choose the first index
+            g.first() # same as above
+            g.nth(-1, dropna=any)
+            g.last() # same as above
+            g.B.nth(0, dropna=all) # drop na with all appearances, then choose the first index
+        </pre>
+        <li>As with other methods, passing as_index=False, will achieve a filtration, which returns the grouped row.</li>
+        <li>You can also select multiple rows from each group by specifying multiple nth values as a list of ints.</li>
+        <pre>
+            df = pd.DataFrame([[1, np.nan], [1,4], [5,6]], columns=['A', 'B'])
+            g = df.groupby('A', as_index=False)
+            g.nth(0)
+            g.nth(-1)
+            business_dates = pd.date_range(start='4/1/2014', end='6/30/2014', freq='B')
+            df = pd.DataFrame(np.random.randn(len(business_dates), 2), index=business_dates,columns=['a', 'b'])
+            df.groupby([df.index.year, df.index.month]).nth([0,3,-1]) # get order 0, 3 and last of each groups
+        </pre>
+    </ul>
+    <h2 style="color:red">Enumerate group items</h2>
+    <ul>
+        <li>To see the order (NOT COUNT) in which each row appears within its group, use the 'cumcount' method:</li>
+        <pre>
+            dfg = pd.DataFrame(list('aaabba'), columns=['A'])
+            dfg.groupby('A').cumcount() # order of each element in each groups with ascending = True
+            dfg.groupby('A').cumcount(ascending=False) # with ascending = False
+        </pre>
+    </ul>
+    <h2 style="color:red">Enumerate groups</h2>
+    <ul>
+        <li>To see the ordering of the groups (as opposed to the order of rows within a group given by cumcount) you can use ngroup().</li>
+        <li>Note that the numbers given to the groups match the order in which the groups would be seen when iterating over the groupby object,<br>
+        not the order they are first observed.</li>
+        <pre>
+            dfg.groupby('A').ngroup() # order of the groups with ascending=True
+            dfg.groupby('A').ngroup(ascending=False) # with ascending=False
+        </pre>
+    </ul>
+    <h2 style="color:red">Plotting</h2>
+    <ul>
+        <li>Groupby also works with some plotting with some plotting methods. You can use matplotlib.pyplot or plt.</li>
+    </ul>
+    <h2 style="color:red">Piping function calls</h2>
+    <ul>
+        <li>Similar to the functionality provided by DataFrame and Series, functions that take Groupby objects can be chained together using a pipe<br>
+        method to allow for a cleaner, more readable syntax.</li>
+        <li>Combining .groupby and .pipe is often useful when you need to reuse grouby object.</li>
+        <pre>
+            n = 1000
+            df = pd.DataFrame({ 'Store': np.random.choice(['Store_1', 'Store_2'], n),
+                                'Product': np.random.choice(['Product_1', 'Product_2'], n),
+                                'Revenue': (np.random.random(n)*50).round(2),
+                                'Quantity': np.random.randint(1, 10, size=n)})
+            df.head(2)
+            df.groupby(['Store', 'Product']).pipe(lambda x: x.Revenue.sum() / x.Quantity.sum()).round(2)
+        </pre>
+        <li>Piping can also expressive when you want to deliver a grouped object to some arbitrary function.</li>
+        <pre>
+            def mean(groupby):
+                return groupby.mean()
+            df.groupby(['Store', 'Product']).pipe(mean)
+        </pre>
+        <li>.pipe() will pass the groupby object as a parameter into the function.</li>
+    </ul>
+</ul>
+<h1 style="color:blue">Example</h1>
+<ul>
+    <h2 style="color:red">Regrouping by factor</h2>
+    <ul>
+        <li>Regroup columns of a DataFrame according to their sum, and sum the aggregated ones.</li>
+        <pre>
+            df = pd.DataFrame([[1,0,0], [0,1,0], [1,0,0], [2,3,4]], columns=list('abcd'))
+            df.groupby(df.sum(), axis=1).sum() # applied df.sum() into columns then use groupby and compute sum
+        </pre>
+    </ul>
+    <h2 style="color:red">Multi-column factorization</h2>
+    <ul>
+        <li>By using ngroup(), we can extract information about the groups in a way similar to factorize() bit which applies naturally to multiple columns<br>
+        of mixed type and different sources. This can be useful as an intermediate categorical-like step in processing, when the relationships between the<br>
+        group rows are more important than their content, or as input to an algorithm which only accepts the integer encoding.</li>
+        <pre>
+            dfg = pd.DataFrame({'A': [1,1,2,3,2], 'B': list('aaaba')})
+            dfg.groupby(['A', 'B']).ngroup()
+            dfg.groupby(['A', [0,0,0,1,1]]).ngroup()
+        </pre>
+    </ul>
+    <h2 style="color:red">Groupby by indexes to 'resample' data</h2>
+    <ul>
+        <li>Re-sampling procedures new hypothetical samples (re-samples) from already existing observed data or from a model that generates data.<br>
+        These new samples are similar to the pre-existing samples.</li>
+        <li>In order to re-sample to work on indices that are non-datetimelike, the following procedure can be utilized.</li>
+        <pre>
+            df = pd.DataFrame(np.random.randn(10,2))
+            df.index // 5
+            df.groupby(df.index // 5).std()
+        </pre>
+    </ul>
+    <h2 style="color:red">Returning a Series to propagate names</h2>
+    <ul>
+        <li>Group DataFrame columns, compute a set of metrics and return a named Series. The Series name is used as the name for the column index.<br>
+        This is especially useful in conjunction with reshaping operations such as stacking in which the column index name will be used as the name of<br>
+        inserted column.</li>
+        <pre>
+            df = pd.DataFrame({ "a": [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2],
+                                "b": [0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1],
+                                "c": [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+                                "d": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]})
+            def compute_metrics(x):
+                result = {'b_sum': x['b'].sum, 'c_mean': x['c'].mean()} # column names and values for frame
+                return pd.Series(result, name='metrics')
+            result = df.groupby('a').apply(compute_metrics)
+            result
+            result.stack()
+        </pre>
+    </ul>
+</ul>
+<h1 style="text-align: center">Window Operations</h1>
+<p>pandas contains a compact set of APIs for performing windowing operations - an operation that performs an aggregation over a sliding partition of values.<br>
+The API functions similarly to the groupby API in that Series and DataFrame call the windowing method with necessary parameters and then subsequently call <br>
+the aggregation function.</p>
+<pre>
+    s = pd.Series(range(5))
+    s.rolling(window=2).sum() # divide s into 2-elements-frames with 0 to n frames first part.
+    s.rolling(window=2).sum()
+</pre>
+<p>The widows are comprised by looking back the length of the window from the current observation. The result above can be derived by taking the sum of the<br>
+following windowed partitions of data.</p>
+<pre>
+    for window in s.rolling(2):
+        print(window)
+</pre>
+<h1 style="color:blue">Overview</h1>
+<ul>
+    <li>pandas supports 4 types of windowing operations:</li>
+    <ul>
+        <li>1. Rolling window: generic fixed or variable sliding window over the values.</li>
+        <li>2. Weighted window: Weighted, non-rectangular window supplied by the scipy.signal library</li>
+        <li>3. Expanding window: Accumulating window over the values.</li>
+        <li>4. Exponentially Weighted window: Accumulating and exponentially weighted window over the values.</li>
+    </ul>
+    <table border="1" class="dataframe">
+          <thead>
+            <tr style="text-align: right;">
+              <th>Concept</th>
+              <th>Method</th>
+              <th>Returned Object</th>
+              <th>Supports time-based windows</th>
+              <th>Supports chained groupby</th>
+              <th>Supports table method</th>
+              <th>Supports online operations</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Rolling window</td>
+              <td>rolling</td>
+              <td>Rolling</td>
+              <td>Yes</td>
+              <td>Yes</td>
+              <td>Yes (as of version 1.3)</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td>Weighted window</td>
+              <td>rolling</td>
+              <td>Window</td>
+              <td>No</td>
+              <td>No</td>
+              <td>No</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td>Expanding window</td>
+              <td>expanding</td>
+              <td>Expanding</td>
+              <td>No</td>
+              <td>Yes</td>
+              <td>Yes (as of version 1.3)</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td>Exponentially Weighted window</td>
+              <td>ewm</td>
+              <td>ExponentialMovingWindow</td>
+              <td>No</td>
+              <td>Yes (as of version 1.2)</td>
+              <td>No</td>
+              <td>Yes (as of version 1.3)</td>
+            </tr>
+          </tbody>
+    </table>
+    <li>As noted above, some operations support specifying a window based on a time offset.</li>
+    <pre>
+        s = pd.Series(range(5), index=pd.date_range('2020-01-01', periods=5, freq='1D')
+        s.rolling(window='2D').sum()
+    </pre>
+    <li>Additionally, some methods support chaining a groupby operation with a windowing operation which will first group the dat aby the specified keys<br>
+    and then perform a windowing operation per group.</li>
+    <pre>
+        df = pd.DataFrame({'A': list('ababa'), 'B': range(5)})
+        df.groupby('A').expanding().sum()
+    </pre>
+    <li>Window operations currently only support numeric data(integer and float) and will always return float64 values.</li>
+    <li>Some windowing operations also support the method='table' option in the constructor which performs the windowing operation over an entire<br>
+    DataFrame instead of a single column or row at a time. This can provide a useful performance benefit for a DataFrame with many columns or rows<br>
+    (with the corresponding axis argument) or the ability to utilize other columns during the windowing operation. The method='table' option can only<br>
+    be used if engine='numba' is specified in the corresponding method call.</li>
+    <pre>
+        def weighted_mean(x):
+            arr = np.ones((1, x.shape[1]))
+            arr[:, :2] = (x[:, :2] * x[:, 2]).sum(axis=0) / x[:, 2].sum()
+        df = pd.DataFrame([[1, 2, 0.6], [2, 3, 0.4], [3, 4, 0.2], [4, 5, 0.7]])
+        df.rolling(2, method='table', min_periods=0).apply(weighted_mean, raw=True, engine='numba')
+    </pre>
+    <li>Some windowing operations also support an 'online' method after constructing a windowing object which returns a new object that supports passing<br>
+    in new DataFrame or Series objects to continue the windowing calculation with the new values (online calculations).</li>
+    <li>The methods on this new windowing objects must call the aggregation method first to 'prime' the initial state of the online calculation.<br>
+    Then, new DataFrame or Series objects can be passed in the 'update' argument to continue the windowing calculation.</li>
+    <pre>
+        df = pd.DataFrame([[1,2,0.6], [2,3,0.4], [3,4,0.2], [4,5,0.7]])
+        df.ewm(0.5).mean()
+        online_ewm = df.head(2).ewm(0.5).online()
+        online_ewm.mean()
+        online_ewm.mean(update=df.tail(1))
+    </pre>
+    <li>All window operations support a min_periods argument that dictates the minimum amount of non-np.nan values a window must have. Otherwise, the resulting<br>
+    value is np.nan.min_periods defaults to 1 for time-based windows and window for fixed windows.</li>
+    <pre>
+        s = pd.Series([np.nan, 1, 2, np.nan, np.nan, 3])
+        s.rolling(window=3, min_periods=1).sum() # must have 1 non-na value
+        s.rolling(window=3, min_periods=2).sum() # must have 2 non-na values
+        s.rolling(window=3, min_periods=3).sum() # must have 3 non-na values
+    </pre>
+    <li>With window have non-na values less than min_periods argument values, the aggregation function will return NA.</li>
+    <li>Additionally, all windowing operations supports the aggregation method for returning a result of multiple aggregations applied to a window.</li>
+</ul>
+<h1 style="color:blue">Rolling window</h1>
+<ul>
+    <li>Genetic rolling windows support specifying windows as a fixed number of observations or variable number of observations based on an offset.<br>
+    If a time based offset is provided, the corresponding time based index must be monotonic.</li>
+    <pre>
+        time = ['2020-01-01', '2020-01-03', '2020-01-04', '2020-01-05', '2020-01-29']
+        s = pd.Series(range(5), index=pd.DatetimeIndex(time))
+        s.rolling(window=2).sum() # window with 2 values
+        s.rolling(window='2D').sum() # window with 2 days, the last window just included 1 days
+    </pre>
+    <h2 style="color:red">Centering windows</h2>
+    <ul>
+        <li>By default the labels are set ot the right edge of the window, but a center keyword is available so the labels can be set at the center.</li>
+        <pre>
+            s = pd.Series(range(10))
+            s.rolling(window=5).mean() # (NA ...values)
+            s.rolling(window=5, center=True).mean() # (NA ...values...NA)
+        </pre>
+        <li>This can also apply to datetime-like indices.</li>
+        <pre>
+                df = pd.DataFrame({'A': [0, 1, 2, 3, 4]}, index=pd.date_range('2020', periods=5, freq='1D')
+                df.rolling('2D', center=False).mean() # labels set right
+                df.rolling('2D', center=True).mean() # label set center
+        </pre>
+    </ul>
+    <h2 style="color:red">Rolling window endpoints</h2>
+    <ul>
+        <li>The inclusion of the interval endpoints in rolling window calculations can be specify with the closet parameter:</li>
+        <pre>
+            df = pd.DataFrame({"x": 1}, index=[ pd.Timestamp("20130101 09:00:01"),
+                                                pd.Timestamp("20130101 09:00:02"),
+                                                pd.Timestamp("20130101 09:00:03"),
+                                                pd.Timestamp("20130101 09:00:04"),
+                                                pd.Timestamp("20130101 09:00:06")])
+            df['right'] = df.rolling('2s', closed='right').x.sum()
+            df['left'] = df.rolling('2s', closet='left').x.sum()
+            df['both'] = df.rolling('2s', closet='both').x.sum()
+            df['both'] = df.rolling('2s', closet='neither').x.sum()
+            df
+            Out[]:
+                                 x  right  both  left  neither
+            2013-01-01 09:00:01  1    1.0   1.0   NaN      NaN
+            2013-01-01 09:00:02  1    2.0   2.0   1.0      1.0
+            2013-01-01 09:00:03  1    2.0   3.0   2.0      1.0
+            2013-01-01 09:00:04  1    2.0   3.0   2.0      1.0
+            2013-01-01 09:00:06  1    1.0   2.0   1.0      NaN
+        </pre>
+    </ul>
+    <h2 style="color:red">Custom window rolling</h2>
+    <ul>
+        <li>In addition to accepting an integer or offset as a 'window' argument, rolling also accepts a BasesIndexer subclass that allows a user to<br>
+        define a custom method for calculating window bounds. The BaseIndexer subclass will need to define a get_window_bounds method that returns a<br>
+        tuple of two arrays, the first being the starting indices of the windows and second being the ending indices of the windows. Additionally, <br>
+        num_values, min_periods, center, closed and will automatically be passed to get_window_bounds and the defined method must always accept these arguments.</li>
+        <pre>
+            use_expanding = [True, False, True, False, True]
+            df = pd.DataFrame({'values': range(5)})
+            from pandas.api.indexers import BaseIndexer
+            class CustomIndexer(BaseIndexer):
+                def get_window_bounds(self, num_values, min_periods, center, closed):
+                    start = np.empty(num_values, dtype=np.int64)
+                    end = np.empty(num_values, dtype=np.int64)
+                    for i in range(num_values):
+                        if self.use_expanding[i]:
+                            start[i] = 0
+                            end[i] = i + 1
+                        else:
+                            start[i] = i
+                            end[i] = i + self.window_size
+                    return start, end
+            indexer = CustomIndexer(window_size=1, use_expanding=use_expanding)
+            df.rolling(indexer).sum()
+            Out[]:
+                values
+            0     0.0
+            1     1.0
+            2     3.0
+            3     3.0
+            4    10.0
+        </pre>
+        <li>One subclass of note is the VariableOffsetWindowIndexer that allows rolling operations over a non-fixed offset like a BusinessDay.</li>
+        <pre>
+            from pandas.api.indexers import VariableOffsetWindowIndexer
+            df = pd.DataFrame(range(10), index=pd.date_range('2020', periods=10)
+            offset = pd.offsets.BDay(1)
+            indexer = VariableOffsetWindowIndexer(index=df.index, offset=offset)
+            df.rolling(indexer).sum()
+        </pre>
+    </ul>
+    <h2 style="color:red">Rolling apply</h2>
+    <ul>
+        <li>The apply() function takes an extra func argument and performs generic rolling computations. The func argument should be a single function<br>
+        that produces a single value from an ndarray input. 'raw' specifies whether the windows are cast as Series objects (raw=False) or ndarray object(raw=True).</li>
+        <pre>
+            def mad(x):
+                return np.fabs(x - x.mean()).mean()
+            s = pd.Series(range(10))
+            s.rolling(window=4).apply(mad, raw=True)
+        </pre>
+    </ul>
+    <h2 style="color:red">Binary window functions</h2>
+    <ul>
+        <li>cov() and corr() can compute moving window statistics about two Series or any combination of DataFrame/ Series or DataFrame/ DataFrame.</li>
+        <ul>
+            <li><b>Series/ Series :</b>Compute the statistic for the pairing.</li>
+            <li><b>DataFrame/ Series: </b>Compute the statistics for each column of the DataFrame with the passed Series, thus returning a DataFrame.</li>
+            <li><b>DataFrame/ DataFrame: </b>by default, compute the statistic for matching column names, returning a DataFrame. If the keyword argument pairwise=True<br>
+            is passed then computes the statistic for each pair of columns, returning a DataFrame with a MultiIndex whose values are the dates in question.</li>
+        </ul>
+        <pre>
+            df = pd.DataFrame(np.random.randn(10, 4), index=pd.date_range('2020-01-01', periods=10), columns=list('ABCD'))
+            df = df.cumsum()
+            df2 = df[:4]
+            df2.rolling(window=2).corr(df2['B'])
+        </pre>
+    </ul>
+    <h2 style="color:red">Computing rolling pairwise covariances and correlations</h2>
+    <ul>
+        <li>In financial data analysis and other fields it's common to compute covariance and correlation matrices for collection of time series.<br>
+        Often one is also interested in moving-window covariance and correlation matrices. This can be done by passing the pairwise keyword argument,<br>
+        which in the case of DataFrame inputs will yield a MultiIndexed DataFrame whose index are the dates in question. In the case of a single DataFrame<br>
+        argument the pairwise argument can even be omitted.</li>
+        <li>Missing values are ignored and each entry is computed using the pairwise complete observations.</li>
+        <pre>
+            covs = (df[['b', 'c', 'd']].rolling(window=4).cov(df[['A', 'B', 'C']], pairwise=True)
+            covs
+        </pre>
+    </ul>
+</ul>
+<h1 style="color:blue">Weighted window</h1>
+<ul>
+    <li>The 'win_type' argument in .rolling() generates a weighted windows that are commonly used in filtering and spectral estimation. 'win_type' must be string<br>
+    that corresponds to a scipy.signal window function. Scipy must be installed in order to use these windows, and supplementary arguments that the Scipy window<br>
+    methods take must be specified in the aggregation function.</li>
+    <pre>
+        s = pd.Series(range(10))
+        s.rolling(window=5).mean()
+        s.rolling(window=5, win_type='triang').mean()
+        s.rolling(window=5, win_type='gaussian').mean(std=0.1)
+    </pre>
+</ul>
+<h1 style="color:blue">Expanding window</h1>
+<ul>
+    <li>An expanding window yields the value of an aggregation statistic with all the data available up to that point in time. Since these calculations are<br>
+    a special case of rolling statistics, they are implemented in pandas such that the following two calls are equivalent.</li>
+    <pre>
+        df = pd.DataFrame(range(5))
+        df.rolling(window=len(df), min_periods=1).mean()
+        df.expanding(min_periods=1).mean()
+    </pre>
+</ul>
+<h1 style="color:blue">Exponentially Weighted window</h1>
+<h1 style="text-align: center">Time series/ date functionality</h1>
+<p>pandas contains extensive capabilities and features for working with time series data for all domains. Using the Numpy datetime64 and timedelta64<br>
+dtypes, pandas has consolidated a large number of features from other Python libraries like  scikits.timeseries as well as created a tremendous amount<br>
+of new functionality for manipulating time series data.</p>
+<pre>
+    import datetime
+    dti = pd.to_datetime(['1/1/2018', np.datetime64('2018-01-01'), datetime.datetime(2018, 1, 1)])
+    dti = pd.date_range('2018-01-01', periods=3, freq='H')
+    dti = dti.tz_localize('UTC')
+    dti.tz_convert('US/Pacific')
+    idx = pd.date_range('2018-01-01', periods=5, freq='H')
+    ts = pd.Series(range(len(idx), index=idx))
+    ts.resample('2H').mean()
+    friday = pd.Timestamp('2018-01-05')
+    friday.day_name()
+    saturday = friday + pd.Timedelta('1 day')
+    saturday.day_name()
+    monday = friday + pd.offsets.BDay()
+    monday.day_name()
+</pre>
+<p>pd.offsets.BDay() switch date time into business day. If datetime values between Monday-Thursday, pd.offsets.BDay() will offset 1 day into datetime values.<br>
+If datetime values between Friday-Sunday, pd.offsets.BDay() will switch datetime values into next Monday.</p>
+<h1 style="color:blue">Overview</h1>
+<ul>
+    <li>pandas captures 4 general time related concepts:</li>
+    <ul>
+        <li>Date times: a specific date and time with timezone support. Similar to datetime.datetime from the standard library.</li>
+        <li>Time deltas: An absolute time duration. Similar to datetime.timedelta from the standard library.</li>
+        <li>Time spans: A span of time defined by a point in time and its associated frequency.</li>
+        <li>Date offsets: A relative time duration that respects calendar arithmetic. Similar to dateutil.relativedelta.relativedealta from the dateutil package.</li>
+    </ul>
+    <table border="1" class="dataframe">
+          <thead>
+            <tr style="text-align: right;">
+              <th>Concept</th>
+              <th>Scalar Class</th>
+              <th>Array Class</th>
+              <th>pandas Data Type</th>
+              <th>Primary Creation Method</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Date times</td>
+              <td>Timestamp</td>
+              <td>DatetimeIndex</td>
+              <td>datetime64[ns] or datetime64[ns, tz]</td>
+              <td>to_datetime or date_range</td>
+            </tr>
+            <tr>
+              <td>Time deltas</td>
+              <td>Timedelta</td>
+              <td>TimedeltaIndex</td>
+              <td>timedelta64[ns]</td>
+              <td>to_timedelta or timedelta_range</td>
+            </tr>
+            <tr>
+              <td>Time spans</td>
+              <td>Period</td>
+              <td>PeriodIndex</td>
+              <td>period[freq]</td>
+              <td>Period or period_range</td>
+            </tr>
+            <tr>
+              <td>Date offsets</td>
+              <td>DateOffset</td>
+              <td>None</td>
+              <td>None</td>
+              <td>DateOffset</td>
+            </tr>
+          </tbody>
+    </table>
+    <li>For time series data, it's conventional to represent the time component in the index of a Series or DataFrame, so manipulations can be performed with<br>
+    respect to the time element.</li>
+    <li>Besides, Series and DataFrame can directly also support the time component as data itself.</li>
+    <li>Series and DataFrame have extended data type support and functionality for datetime, timedelta and Period data when passed into those constructors.<br>
+    DateOffset data however will be stored as object data.</li>
+    <li>Lastly, pandas represents null date times, time deltas, and time spans as NaT which is useful for representing missing or null date like values and<br>
+    behaves similar as np.nan does for float data.</li>
+    <pre>
+        pd.Series(range(3), index=pd.date_range('2000', freq='D', periods=3))
+        pd.Series(pd.date_range('2000-01-01', periods=3))
+        pd.Series(pd.period_range('2000-01-01', periods=3, freq='M'))
+        pd.Series([pd.DateOffset(), pd.DateOffset(2)])
+        pd.Series(pd.date_range('2011-01-01', periods=3, freq='M'))
+        pd.Timestamp(pd.NaT)
+        pd.Timedelta(pd.NaT)
+        pd.Period(pd.NaT)
+        pd.NaT == pd.NaT
+    </pre>
+</ul>
+<h1 style="color:blue">Timestamps and time spans</h1>
+<ul>
+    <li>Timestamped data is most basic type of time series data that associates values with points in time. For pandas objects it means using the points in time.</li>
+    <pre>
+        pd.Timestamp(datetime.datetime(2012, 5, 1))
+        pd.Timestamp('2012-05-01')
+        pd.Timestamp(2012, 5, 1)
+    </pre>
+    <li>However, in many cases it is more natural to associate things like change variables with a time span instead. The span represented by Period can be<br>
+    specified explicitly, or inferred from datetime string format.</li>
+    <pre>
+        pd.Period('2011-01')
+        Out[31]: Period('2011-01', 'M')
+        pd.Period('2012-05', freq='D')
+        Out[32]: Period('2012-05-01', 'D')
+    </pre>
+    <li>Timestamp and Period can serve as an index. Lists of Timestamp and Period are automatically coerced to DatetimeIndex and PeriodIndex respectively.</li>
+    <pre>
+        dates = [pd.Timestamp('2012-05-01'), pd.Timestamp('2012-05-02'), pd.Timestamp('2012-05-03')]
+        ts = pd.Series(np.random.randn(3), index=dates)
+        ts = pd.Series(np.random.randn(3), index=[pd.Timestamp('2012-05-01'), pd.Timestamp('2012-05-02'), pd.Timestamp('2012-05-03')])
+        type(ts.index) # DatetimeIndex
+        periods = [pd.Periods('2012-01'), pd.Periods('2012-02'), pd.Periods('2012-03')]
+        ts1 = pd.Series(np.random.randn(3), index=periods)
+        ts1 = pd.Series(np.random.randn(3), index=pd.period_range('2012-01', periods=3, freq='M'))
+        type(ts1.index) # pandas.core.indexes.period.PeriodIndex
+    </pre>
+    <li>pandas allows you to capture both representations and convert between them. Under the hood, pandas represents timestamps using instances of Timestamp<br>
+    and sequences of timestamps using instances of DatetimeIndex. For regular time spans, pandas uses Period objects for scalar values and PeriodIndex for sequences<br>
+    of spans.</li>
+</ul>
+<h1 style="color:blue">Converting to timestamps</h1>
+<ul>
+    <li>To convert a Series or list-like object of date-like objects (strings, epochs, or a mixture), you can use the to_datetime function. When passed a Series, this<br>
+    return a Series (with the same index), while a list-like is converted to a DatetimeIndex.</li>
+    <pre>
+        pd.to_datetime(pd.Series['Jul 31, 2009', '2010-01-10', None])
+        pd.to_datetime(['2005/11/23', '2010.12.31'])
+    </pre>
+    <li>If you use dates which start with the day first, you can pass the dayfirst flag:</li>
+    <pre>
+        pd.to_datetime(['05-01-2-12 10:00'], dayfirst=True)
+        pd.to_datetime(['14-01-2012', '01-14-2012'], dayfirst=True)
+    </pre>
+    <li>If you pass a single string to to_datetime, it returns a single Timestamp. Timestamp can also accept string input, but it doesn't accept string parsing<br>
+    options like dayfirst or format, so use to_datetime if these are required.</li>
+    <li>You can also use the DatetimeIndex constructor directly.</li>
+    <li>The string infer can be passed in or der to set the frequency of the index as the inferred frequency upon creation.</li>
+    <pre>
+        pd.to_datetime('2010/11/12')
+        pd.Timestamp('2010/11/12')
+        pd.DatetimeIndex(['2018-01-01', '2018-01-03', '2018-01-05'])
+        pd.DatetimeIndex(['2018-01-01', '2018-01-03', '2018-01-05'], freq='infer')
+    </pre>
+    <h2 style="color:red">Providing a format argument</h2>
+    <ul>
+        <li>In addition to the required datetime string, a format argument can be passed to ensure specific parsing. This could also potentially speed up<br>
+        the conversion considerably.</li>
+        <pre>
+            pd.to_datetime('2010/11/12', format='%Y%m%d')
+            pd.to_datetime('12-11-2010 00:00', format='%d%m%Y %H:%M')
+        </pre>
+    </ul>
+    <h2 style="color:red">Assembling datetime from multiple DataFrame columns</h2>
+    <ul>
+        <li>You can also pass a DataFrame of integer or string columns to assemble into a Series of Timestamps or pass only the columns that you need to assemble.</li>
+        <pre>
+            df = pd.DataFrame({'year': [2015, 2016], 'month': [2,3], 'day': [4,5], 'hour': [2,3]})
+            pd.to_datetime(df)
+            pd.to_datetime(df[['year', 'month', 'day']])
+        </pre>
+        <li>pd.to_datetime looks for standard designations of the datetime component in the column names, including:</li>
+        <ul>
+            <li>required: year, month, day.</li>
+            <li>optional: hour, minute, second, millisecond, microsecond, nanosecond.</li>
+        </ul>
+    </ul>
+    <h2 style="color:red">Invalid data</h2>
+    <ul>
+        <li>The default behavior, errors='raise' is to raise when unparsable, pass errors='ignore' to return the original input when unparsable.<br>
+        Or errors='coerce' to convert unparsable data to NaT (not a Time).</li>
+        <pre>
+            pd.to_datetime(['2009/07/31', 'asd']) # default 'raise' error
+            pd.to_datetime(['2009/07/31', 'asd'], errors='ignored') # return 'asd' as a result for 'asd' input
+            pd.to_datetime(['2009/07/31', 'asd'], errors='coerce') # return NaT for 'asd'
+        </pre>
+    </ul>
+    <h2 style="color:red">Epoch timestamps</h2>
+    <ul>
+        <li>pandas supports converting integer or float epoch times to Timestamp and DatetimeIndex. The default unit is nanoseconds, since that is how<br>
+        Timestamp objects are stored internally. However, epochs are often stored in another unit which can be specified. These are computed from the <br>
+        starting point specified by the origin parameter.</li>
+        <pre>
+            pd.to_datetime([1349720105, 1349806505, 1349892905, 1349979305, 1350065705], unit="s")
+            pd.to_datetime([1349720105, 1349806505, 1349892905, 1349979305, 1350065705], unit="ms")
+        </pre>
+        <li>The 'unit' parameter use arg (D,s,ms,us,ns) as the options when transfer to datetime data.</li>
+        <li>Constructing a Timestamp or DatetimeIndex with an epoch timestamp with the 'tz' argument specified will raise a ValueError. If you have epochs<br>
+        in wall time in another timezone, you can read the epochs as timezone-naive timestamps and then localize to the appropriate timezone.</li>
+        <pre>
+            pd.Timestamp(1252347200000000000).tz_localize('US/Pacific')
+            pd.to_datetime(1252347200000000000).tz_localize('US/Pacific')
+        </pre>
+        <li>Conversion of float epoch times can lead to inaccurate and unexpected results. The only way to achieve exact precision is to use a fixed-width types.</li>
+        <pre>
+            pd.to_datetime([1490195805.433, 1490195805.433502912], unit="s")
+            pd.to_datetime([1490195805.433, 1490195805.433502912], unit="ns")
+        </pre>
+    </ul>
+    <h2 style="color:red">From timestamps to epoch</h2>
+    <ul>
+        <li>To invert the operation from above, namely, to convert from a Timestamp to a 'unix' epoch:</li>
+        <pre>
+            stamps = pd.date_range('2012-10-08 18:15:05', periods=4, freq='D')
+            (stamps - pd.Timestamp('1970-01-01')) // pd.Timedelta('1s')
+        </pre>
+    </ul>
+    <h2 style="color:red">Using the 'origin' parameter</h2>
+    <ul>
+        <li>Using the 'origin' parameter, one can specify an alternative starting point for creation of a DatetimeIndex.</li>
+        <li>The default is set at origin='unix', which defaults to 1970-01-01 00:00:00. Commonly called 'unix epoch' or POSIX time.</li>
+        <pre>
+            pd.to_datetime([1,2,3], unit='D', origin=pd.Timestamp('1960-01-01')) # 02, 03, 04 of 1960-01
+            pd.to_datetime([1,2,3], unit='D') # 02, 03, 04 of 1970-01
+        </pre>
+    </ul>
+</ul>
+<h1 style="color:blue">Generating ranges of timestamps</h1>
+<ul>
+    <li>To generate an index with timestamps, you can use either the DatetimeIndex or Index constructor and pass in a list of datetime objects.</li>
+    <pre>
+        dates = [datetime.datetime(2012, 5, 1), datetime.datetime(2012, 5, 2), datetime.datetime(2012, 5, 3)]
+        index = pd.DatetimeIndex(dates)
+        index = pd.Index(dates)
+    </pre>
+    <li>In practice this becomes very cumbersome because we often need a very long index with a large number of timestamps. If we need timestamps<br>
+    on a regular frequency, we can use the date_range() and bdate_range() functions to create a DatetimeIndex. The default frequency for date_range<br>
+    is a calendar day while the default for bdate_range is a business day.</li>
+    <pre>
+        start = datetime.datetime(2011, 1, 1)
+        end = datetime.datetime(2012, 1, 1)
+        index = pd.date_range(start, end) # len(index.unique()): 366
+        index_1 = pd.bdate_range(start, end) # len(index_1.unique()): 260
+    </pre>
+    <li>Convenience functions like date_range and bdate_range can utilize a variety of frequency aliases.</li>
+    <pre>
+        pd.date_range(start, periods=1000, freq='M')
+        pd.bdate_range(start, periods=250, freq='BQS') # business quarter
+    </pre>
+    <li>date_range and bdate_range make it easy to generate a range of dates using various combinations of parameters like start, end, periods, and freq.<br>
+    The start and end dates are strictly inclusive, so dates outside of those specified will not be generated.</li>
+    <pre>
+        pd.date_range(start, end, freq='BM')
+        pd.date_range(start, end, freq='W')
+        pd.bdate_range(end=end, periods=20)
+        pd.bdate_range(start=start, periods=20)
+    </pre>
+    <li>Specifying start, end and periods will generate a range of evenly spaced dates from start to end inclusively, with periods number of elements in<br>
+    the resulting DatetimeIndex.</li>
+    <pre>
+        pd.date_range('2018-01-01', '2018-01-05', periods=5)
+        pd.date_range('2018-01-01', '2018-01-05', periods=10)
+    </pre>
+    <h2 style="color:red">Custom frequency ranges</h2>
+    <ul>
+        <li>bdate_range can also generate a range of custom frequency dates by using the weekmask and holidays parameters. These parameters will only<br>
+        be used if a custom frequency string is passed.</li>
+        <pre>
+            weekmask = 'Mon Wed Fri'
+            holidays = [datetime.datetime(2011, 1, 5), datetime.datetime(2011, 3, 14)]
+            pd.bdate_range(start, end, freq='C', weekmask=weekmask, holidays=holidays) # exist of weekmask and exclude holidays
+            pd.bdate_range(start, end, freq='CBMS', weekmask=weekmask)
+        </pre>
+    </ul>
+</ul>
+<h1 style="color:blue">Timestamp limitations</h1>
+<ul>
+    <li>Since pandas represents timestamps in nanosecond resolution, the time span that can ve represented using a 64-bit integer is limited to approximately 584 years.</li>
+    <pre>
+        pd.Timestamp.min
+        pd.Timestamp.max
+    </pre>
+</ul>
+<h1 style="color:blue">Indexing</h1>
+<ul>
+    <li>One of the main uses for DatetimeIndex is as an index for pandas object. The DatetimeIndex class contains many time series related optimizations.</li>
+    <ul>
+        <li>A large range of dates for various offsets are pre-computed and cached under the hood in order to make generating subsequent date ranges very fast.<br>
+        (just have to grab a slice).</li>
+        <li>Fast shifting using the shift method on pandas objects.</li>
+        <li>Unioning o overlapping DatetimeIndex objects with the same frequency is very fast (important for fast data alignment).</li>
+        <li>Quick access to date fields via properties such as year, month, etc.</li>
+        <li>Regularization functions like snap and very fast asof logic.</li>
+    </ul>
+    <li>DatetimeIndex objects have all the basic functionality of regular Index objects, and a smorgasbord of advanced time series specific methods for easy<br>
+    frequency processing.</li>
+    <li>While pandas does not force you to have a sorted date index, some of these methods may have unexpected or incorrect behavior if the dates are unsorted.</li>
+    <li>DatetimeIndex can be used like a regular index and offers all of its intelligent functionality like selection, slicing, etc.</li>
+    <pre>
+        rng = pd.date_range(start, end, freq='BM')
+        ts = pd.Series(np.random.randn(len(rng), index=rng)
+        ts.index
+        ts[:5].index
+        ts[::2].index
+    </pre>
+    <h2 style="color:red">Partial string indexing</h2>
+    <ul>
+        <li>Dates and strings that parse to timestamps can be passed as indexing parameters.</li>
+        <li>To provide convenience for accessing longer time series, you can also pass in the year or year and month as strings. This type of slicing will work<br>
+        on a DataFrame with a DatetimeIndex as well. Since the partial string selection is a form of label slicing, the endpoints will be included. This would<br>
+        included matching times on an included date.</li>
+        <pre>
+            ts['1/31/2011']
+            ts[datetime.datetime(2011, 12, 25):]
+            ts['2011']
+            ts['2011-06']
+            dft = pd.DataFrame(np.random.randn(100000, 1), column=['A'], index=pd.date_range('20130101', periods=100000, freq='T'))
+            dft.loc['2013'] # all rows label included '2013'
+            dft['2013-01': '2013-2'] # till all of '2013-2'
+            dft['2013-01': '2013-2-28'] # till all of '2013-2-28'
+            dft['2013-01': '2013-2-28 00:00:00']
+            dft['2013-1-15': '2013-1-15 12:30:00']
+        </pre>
+        <li>DatetimeIndex partial string indexing also works on a DataFrame with MultiIndex.</li>
+        <pre>
+            dft2 = pd.DataFrame(np.random.randn(20,1), columns=['A'],
+                                index=pd.MultiIndex.from_product([pd.date_range('20130101', periods=10, freq='12H'), ['a', 'b']]))
+            dft2.loc['2013-01-05']
+            idx = pd.IndexSlice
+            dft2 = dft2.swaplevel(0,1).sort_index() # swap indexes
+            dft2.loc[idx[:, '2013-01-05'], :]
+        </pre>
+        <li>Slicing with string indexing also honors UTC offset.</li>
+        <pre>
+            df = pd.DataFrame([0], index=pd.DatetimeIndex(['2019-01-01'], tz='US/Pacific'))
+            df['2019-01-01 12:00:00+04:00':'2019-01-01 13:00:00+04:00']
+        </pre>
+    </ul>
+    <h2 style="color:red">Slice with exact match</h2>
+    <ul>
+        <li>The same string used as an indexing parameter can be treated either as a slice or as an exact match depending on the resolution of the index.<br>
+        If the string is less accurate than the index, it will be treated as a slice, otherwise as an exact match.</li>
+        <li>Consider a Series object with a minute resolution index.</li>
+        <pre>
+            series_minute = pd.Series([1,2,3], index=pd.DatetimeIndex(['2011-12-31 23:59:00', '2012-01-01 00:00:00', '2012-01-01 00:02:00']))
+            series_minute.index.resolution # minute
+        </pre>
+        <li>A timestamp string less accurate than a minute gives a Series object, but a timestamp string with minute resolution(or more accurate), gives<br>
+        a scalar instead, it's not casted to a slice.</li>
+        <pre>
+            series_minute['2011-12-31 23'] # Series
+            series_minute['2011-12-31 23:59'] # scalar
+            series_minute['2011-12-31 23:59:00'] # scalar
+        </pre>
+        <li>If index resolution is second, then the minute-accurate timestamp fives a Series.</li>
+        <pre>
+            series_second = pd.Series([1,2,3], index=pd.DatetimeIndex(['2011-12-31 23:59:59', '2012-01-01 00:00:00', '2012-01-01 00:00:01']))
+            series_second.index.resolution # second
+            series_second['2011-12-31 23:59'] # Series
+            series_second['2011-12-31 23:59:59'] # scalar
+        </pre>
+        <li>If the timestamp string is treated as a slice, it can be used to index DataFrame with .loc[] as well.</li>
+        <pre>
+            dft_minute = pd.DataFrame({'a': [1,2,3], 'b': [4,5,6]}, index=series_minute.index)
+            dft_minute.loc['2011-12-31 23']
+        </pre>
+        <li>If the string is treated as an exact match, the selection in DataFrame's [] will be column-wise, not row-wise. Always use .loc[].</li>
+        <li>Note also that DatetimeIndex resolution can not be less precise than day.</li>
+        <pre>
+            series_monthly = pd.Series([1,2,3], pd.DatetimeIndex(['2011-12', '2012-01', '2012-02']))
+            series_monthly.index.resolution # day
+            series_monthly['2011-12'] # return Series
+            series_monthly['2011-12-01'] # return scalar
+        </pre>
+    </ul>
+    <h2 style="color:red">Exact indexing</h2>
+    <ul>
+        <li>Indexing a DatetimeIndex with a partial string depends on the 'accuracy' of the period, in other words how specific the interval is in relation<br>
+        to the resolution of the index. In contrast, indexing with Timestamp or datetime objects is exact, because the objects have exact meaning. These also<br>
+        follow the semantics of including both endpoints.</li>
+        <li>These Timestamp and datetime objects have exact hours, minutes and seconds, even though they were not explicitly specified.</li>
+        <pre>
+            dft[datetime.datetime(2013, 1, 1): datetime.datetime(2013, 2, 28)]
+            dft[datetime.datetime(2013, 1, 1, 10, 12, 0): datetime.datetime(2013, 2, 28, 10, 12, 0)]
+        </pre>
+    </ul>
+    <h2 style="color:red">Truncating and fancy indexing</h2>
+    <ul>
+        <li>A truncate() convenience function is provided that is similar to slicing. Note that truncate assumes a 0 value for any unspecified date component in<br>
+        a DatetimeIndex in contrast to slicing which returns any partially mathcing dates.</li>
+        <pre>
+            rng2 = pd.date_range('2011-01-01', '2012-01-01', freq='W')
+            ts2 = pd.Series(np.random.randn(len(rng2)), index=rng2)
+            ts2.truncate(before='2011-11', after='2011-12') # exclude '2011-12'
+            ts2['2011-11': '2011-12'] # include 2011-12
+        </pre>
+        <li>Even complicated fancy indexing that breaks the DatetimeIndex frequency regularity will result in a DatetimeIndex, although frequency is lost.</li>
+        <pre>
+            ts[[0,2,6]].index # DatetimeIndex
+        </pre>
+    </ul>
+</ul>
+<h1 style="color:blue">Time/ date components</h1>
+<ul>
+    <li>There are several time/ date properties that one can access from Timestamp or a collection of timestamps like a DatetimeIndex.</li>
+    <ul>
+        <li><b>year: </b>The year of the datetime.</li>
+        <li><b>month: </b>The month of the datetime.</li>
+        <li><b>day: </b>The days of the datetime.</li>
+        <li><b>hour: </b>The hour of the datetime.</li>
+        <li><b>minute: </b>The minute of the datetime.</li>
+        <li><b>second: </b>The second of the datetime.</li>
+        <li><b>microsecond: </b>The microsecond of the datetime.</li>
+        <li><b>nanosecond: </b>The nanosecond of the datetime.</li>
+        <li><b>date: </b>returns datetime.date (does not contain timezone information).</li>
+        <li><b>time: </b>returns datetime.time (does not contain timezone information).</li>
+        <li><b>timetz: </b>returns datetime.time as local time with timezone information.</li>
+        <li><b>dayofyear: </b>the ordinal day of year.</li>
+        <li><b>weekofyear: </b>the week ordinal of the year.</li>
+        <li><b>week: </b>the week ordinal of the year.</li>
+        <li><b>dayofweek: </b>the number of the day of the week with Monday=0 and Sunday=6.</li>
+        <li><b>day_of_week: </b>the number of the day of the week with Monday=0 and Sunday=6.</li>
+        <li><b>weekday: </b>The number of the day of the week with Monday=0, Sunday=6.</li>
+        <li><b>quarter: </b>Quarter of the date: Jan-Mar = 1, April-June=2, July-Sep=3, Oct-Dec=4.</li>
+        <li><b>days_in_month: </b>The number of the days in month of the datetime.</li>
+        <li><b>is_month_start: </b>Logical indicating if first day of month(defined by frequency).</li>
+        <li><b>is_month_end: </b>logical indicating if last day of month(defined by frequency).</li>
+        <li><b>is_quarter_start: </b>logical indicating if first day of quarter (defined by frequency).</li>
+        <li><b>is_quarter_end: </b>logical indicating if last day of quarter(defined by frequency).</li>
+        <li><b>is_year_start: </b>logical indicating if first day of year (defined by frequency).</li>
+        <li><b>is_year_end: </b>logical indicating if last day of year (defined by frequency).</li>
+        <li><b>is_leap_year: </b>logical indicating if the date belongs to a leap year.</li>
+    </ul>
+    <li>Furthermore, if you have a Series with datetime-like values, then you can access these properties via the .dt accessor.</li>
+    <li>You may obtain the year, week and day components of the ISO year from ISO 8601 standard.</li>
+    <pre>
+        idx = pd.date_range(start='2019-12-09', freq='D', periods=4)
+        idx.isocalendar()
+        idx.to_series().dt.isocalendar()
+    </pre>
+    <h2 style="color:red">DateOffset objects</h2>
+    <ul>
+        <li>In the preceding examples, frequency strings ('D', 'W', ...) were used to specify a frequency that defined.</li>
+        <ul>
+            <li>How the date times in DatetimeIndex were spaced when using date_range().</li>
+            <li>The frequency of a Period or PeriodIndex.</li>
+        </ul>
+        <li>These frequency strings map to DateOffset object and its subclasses. A DateOffset is similar to a Timedelta that represents a duration<br>
+        of time but follows specific calendar duration rules. For example, a Timedelta day will always increment datetime by 24 hours, while a DateOffset<br>
+        day will increment datetimes to the same time the next day whether a day represents 23,24 or 25 hours due to daylight savings time. However,<br>
+        all DateOffset subclasses that are an hour or smaller (hour, minute, second, milli, micro, nano) behave like Timedelta and respect absolute time.</li>
+        <li>The basic DateOffset acts similar to dateutil.relativedelta that shifts a date time by the corresponding calendar duration specified. The<br>
+        arithmetic operator (+) or the apply method can be used to perform the shift.</li>
+        <pre>
+            ts = pd.Timestamp('2016-10-30 00:00:00', tz='Europe/Helsinki')
+            ts + pd.Timedelta('1 day') # or days=1, + 24:00
+            ts + pd.DateOffset(days=1) # plus 1 day
+            friday = pd.Timestamp('2018-01-05')
+            friday.day_name()
+            two_business_days = 2 * pd.offsets.BDay()
+            two_business_days.apply(friday)
+            (friday + two_business_days).day_name()
+        </pre>
+        <li>Most DateOffsets have associated frequencies strings, or offset aliases, that can be passed into freq keyword arguments. The available date<br>
+        offsets and associated frequency strings can be found below:</li>
+        <table border="1" class="dataframe">
+              <thead>
+                <tr style="text-align: right;">
+                  <th>Date Offset</th>
+                  <th>Frequency String</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>DateOffset</td>
+                  <td>None</td>
+                  <td>Generic offset class, defaults to absolute 24 hours</td>
+                </tr>
+                <tr>
+                  <td>BDay or BusinessDay</td>
+                  <td>'B'</td>
+                  <td>business day (weekday)</td>
+                </tr>
+                <tr>
+                  <td>CDay or CustomBusinessDay</td>
+                  <td>'C'</td>
+                  <td>custom business day</td>
+                </tr>
+                <tr>
+                  <td>Week</td>
+                  <td>'W'</td>
+                  <td>one week, optionally anchored on a day of the week</td>
+                </tr>
+                <tr>
+                  <td>WeekOfMonth</td>
+                  <td>'WOM'</td>
+                  <td>the x-th day of the y-th week of each month</td>
+                </tr>
+                <tr>
+                  <td>LastWeekOfMonth</td>
+                  <td>'LWOM'</td>
+                  <td>the x-th day of the last week of each month</td>
+                </tr>
+                <tr>
+                  <td>MonthEnd</td>
+                  <td>'M'</td>
+                  <td>calendar month end</td>
+                </tr>
+                <tr>
+                  <td>MonthBegin</td>
+                  <td>'MS'</td>
+                  <td>calendar month begin</td>
+                </tr>
+                <tr>
+                  <td>BMonthEnd or BusinessMonthEnd</td>
+                  <td>'BM'</td>
+                  <td>business month end</td>
+                </tr>
+                <tr>
+                  <td>BMonthBegin or BusinessMonthBegin</td>
+                  <td>'BMS'</td>
+                  <td>business month begin</td>
+                </tr>
+                <tr>
+                  <td>CBMonthEnd or CustomBusinessMonthEnd</td>
+                  <td>'CBM'</td>
+                  <td>custom business month end</td>
+                </tr>
+                <tr>
+                  <td>CBMonthBegin or CustomBusinessMonthBegin</td>
+                  <td>'CBMS'</td>
+                  <td>custom business month begin</td>
+                </tr>
+                <tr>
+                  <td>SemiMonthEnd</td>
+                  <td>'SM'</td>
+                  <td>15th (or other day_of_month) and calendar month end</td>
+                </tr>
+                <tr>
+                  <td>SemiMonthBegin</td>
+                  <td>'SMS'</td>
+                  <td>15th (or other day_of_month) and calendar month begin</td>
+                </tr>
+                <tr>
+                  <td>QuarterEnd</td>
+                  <td>'Q'</td>
+                  <td>calendar quarter end</td>
+                </tr>
+                <tr>
+                  <td>QuarterBegin</td>
+                  <td>'QS'</td>
+                  <td>calendar quarter begin</td>
+                </tr>
+                <tr>
+                  <td>BQuarterEnd</td>
+                  <td>'BQ</td>
+                  <td>business quarter end</td>
+                </tr>
+                <tr>
+                  <td>BQuarterBegin</td>
+                  <td>'BQS'</td>
+                  <td>business quarter begin</td>
+                </tr>
+                <tr>
+                  <td>FY5253Quarter</td>
+                  <td>'REQ'</td>
+                  <td>retail (aka 52-53 week) quarter</td>
+                </tr>
+                <tr>
+                  <td>YearEnd</td>
+                  <td>'A'</td>
+                  <td>calendar year end</td>
+                </tr>
+                <tr>
+                  <td>YearBegin</td>
+                  <td>'AS' or 'BYS'</td>
+                  <td>calendar year begin</td>
+                </tr>
+                <tr>
+                  <td>BYearEnd</td>
+                  <td>'BA'</td>
+                  <td>business year end</td>
+                </tr>
+                <tr>
+                  <td>BYearBegin</td>
+                  <td>'BAS'</td>
+                  <td>business year begin</td>
+                </tr>
+                <tr>
+                  <td>FY5253</td>
+                  <td>'RE'</td>
+                  <td>retail (aka 52-53 week) year</td>
+                </tr>
+                <tr>
+                  <td>Easter</td>
+                  <td>None</td>
+                  <td>Easter holiday</td>
+                </tr>
+                <tr>
+                  <td>BusinessHour</td>
+                  <td>'BH'</td>
+                  <td>business hour</td>
+                </tr>
+                <tr>
+                  <td>CustomBusinessHour</td>
+                  <td>'CBH'</td>
+                  <td>custom business hour</td>
+                </tr>
+                <tr>
+                  <td>Day</td>
+                  <td>'D'</td>
+                  <td>one absolute day</td>
+                </tr>
+                <tr>
+                  <td>Hour</td>
+                  <td>'H'</td>
+                  <td>one hour</td>
+                </tr>
+                <tr>
+                  <td>Minute</td>
+                  <td>'T' or 'min'</td>
+                  <td>one minute</td>
+                </tr>
+                <tr>
+                  <td>Second</td>
+                  <td>'S'</td>
+                  <td>one second</td>
+                </tr>
+                <tr>
+                  <td>Milli</td>
+                  <td>'L' or 'ms'</td>
+                  <td>one millisecond</td>
+                </tr>
+                <tr>
+                  <td>Micro</td>
+                  <td>'U' or 'us'</td>
+                  <td>one microsecond</td>
+                </tr>
+                <tr>
+                  <td>Nano</td>
+                  <td>'N'</td>
+                  <td>one nanosecond</td>
+                </tr>
+              </tbody>
+        </table>
+        <li>DateOssets additionally have rollforward() and rollback() methods for moving a date forward or backward respectively to a valid offset date<br>
+        relative to the offset. For example, business offsets will roll dates that land on the weekends (Saturday and Sunday) forward to Monday since<br>
+        business offsets operate on the weekdays.</li>
+        <pre>
+            ts = pd.Timestamp('2018-01-06 00:00:00')
+            ts.day_name()
+            offset = pd.offsets.BusinessHour(start='09:00')
+            offset.rollforward(ts)
+            ts + offset
+        </pre>
+        <li>These operations preserve time(hour, minute, etc) information by default. To reset time to midnight, use normalize() before and after applying<br>
+        the operation (depending on whether you want the time information included in the operation).</li>
+        <pre>
+            ts = pd.Timestamp('2014-01-01 09:00')
+            day = pd.offsets.Day()
+            day.apply(ts)
+            day.apply(ts).normalize()
+            ts = pd.Timestamp('2014-01-01 22:00')
+            hour = pd.offsets.Hour()
+            hour.apply(ts)
+            hour.apply(ts).normalize()
+            hour.apply(pd.Timestamp('2014-01-01 23:30')).normalize()
+        </pre>
+    </ul>
+    <h2 style="color:red">Parametric offsets</h2>
+    <ul>
+        <li>Some of the offsets can be 'parameterized' when created to result in different behaviours. For example, the week offset for generating weekly<br>
+        data accepts a weekday parameter which results in the generated dates always lying on a particular day of the week.</li>
+        <pre>
+            d = datetime.datetime(2008, 8, 18, 9, 0)
+            datetime.datetime(2008, 8, 18, 9, 0)
+            d + pd.offsets.Week()
+            d + pd.offsets.Week(weekday=4)
+            (d + pd.offsets.Week(weekday=4)).weekday()
+            d - pd.offsets.Week()
+        </pre>
+        <li>The normalize option will be effective for addition and subtraction.</li>
+        <pre>
+            d + pd.offsets.Week(normalize=True)
+            d - pd.offsets.Week(normalize=True)
+        </pre>
+        <li>Another example is parameterizing YearEnd with the specific ending month.</li>
+        <pre>
+            d + pd.offsets.YearEnd()
+            d + pd.offsets.YearEnd(month=6)
+        </pre>
+    </ul>
+    <h2 style="color:red">Using offsets with Series/ DatetimeIndex</h2>
+    <ul>
+        <li>Offsets can be used with either a Series or DatetimeIndex to apply the offset to each element.</li>
+        <pre>
+            rng = pd.date_range('2012-01-01', '2013-01-03')
+            s =pd.Series(rng)
+            rng + pd.DateOffset(months=2)
+            s + pd.DateOffset(months=2)
+            s - pd.DateOffset(months=2)
+        </pre>
+        <li>If the offset class maps directly to a Timedelta (day, hour, minute, second, micro, milli, nano), it can be used exactly like a Timedelta.</li>
+        <pre>
+            s - pd.offsets.Day(2)
+            td = s - pd.Series(pd.date_range('2011-12-29', '2011-12-31')
+            td + pd.offsets.Minute(15)
+        </pre>
+        <li>Note that some offsets (such as BQuarterEnd) do not have a vectorized implementation. They can still be used but may calculate significantly<br>
+        slower and will show a PerformanceWarning.</li>
+    </ul>
+    <h2 style="color:red">Custom business days</h2>
+    <ul>
+        <li>The CDay and CustomBusinessDay class provides a parametric BusinessDay class which can be used to create customized business day calendars which<br>
+        account for local holidays and local weekend conventions.</li>
+        <pre>
+            weekmask_egypt = 'Sun Mon Tue Wed Thu'
+            holidays = ['2012-05-01', datetime.datetime(2013, 5, 1), np.datetime64('2014-05-01')]
+            bday_egypt = pd.offsets.CustomBusinessDay(holidays=holidays, weekmask=weekmask_egypt)
+            dt =datetime.datetime(2013, 4, 30)
+            dt + 2*bday_egypt
+            (dt + 2*bday_egypt).day_name()
+        </pre>
+        <li>Maps to the weekday names:</li>
+        <pre>
+            dts = pd.date_range(dt, periods=5, freq=bday_egypt)
+            pd.Series(dts.weekday, dts).map(pd.Series('Mon Tue Wed Thu Fri Sat Sun'.split()))
+        </pre>
+        <li>Holiday calendars can be used to provide the list of holidays.</li>
+        <pre>
+            from pandas.tseries.holiday import USFederalHolidayCalendar
+            bday_us = pd.offsets.CustomBusinessDay(calendar=USFederalHolidayCalendar())
+            dt = datetime.datetime(2014, 1, 17)
+            dt + bday_us
+        </pre>
+        <li>Monthly offsets that respect a certain holiday calendar can be defined in the usual way.</li>
+        <pre>
+            bmth_us = pd.offsets.CustomBusinessMonthBegin(calendar=USFederalHolidayCalendar())
+            dt = datetime.datetime(2013, 12, 17)
+            dt + bmth_us
+            pd.date_range('20100101', '20120101', freq=bmth_us)
+        </pre>
+        <li>The frequency string 'C' is used to indicate that a CustomBusinessDay DateOffset is used, it is important to note that since CustomBusinessDay<br>
+        is a parameterised type, instances of CustomBusinessDay may differ and this is not detectable from the 'C' frequency string. The user therefore needs<br>
+        to ensure that he 'C' frequency string is used consistently within the user's application.</li>
+    </ul>
+    <h2 style="color:red">Business Hour</h2>
+    <ul>
+        <li>The BusinessHour class provides a business hour representation on BusinessDay allowing to use specific start and end times.</li>
+        <li>By default, BusinessHour uses 9:00 - 17:00 as business hours. Adding BusinessHour will increment Timestamp by hourly frequency. If target Timestamp<br>
+        is out of business hours, move to the next business hour then increment it. If the result exceeds the business hours end, the remaining hours are added<br>
+        to the next business day.</li>
+        <pre>
+            bh = pd.offsets.BusinessHour()
+            pd.Timestamp('2014-08-01 10:00').weekday()
+            pd.Timestamp('2014-08-01 10:00') + bh # 11:00
+            pd.Timestamp('2014-08-01 08:00') + bh # 09:00, always start at 09:00
+            pd.Timestamp('2014-08-01 16:00') + bh # 09:00 of next business day, always end at 16:59:59
+            pd.Timestamp('2014-08-01 16:30') + bh # 09:30 of next business day
+            pd.Timestamp('2014-08-01 10:00') + pd.offsets.BusinessHour(2) # 12:00
+            pd.Timestamp('2014-08-01 10:00') + pd.offsets.BusinessHour(-3) # 15:00 of previous business day
+        </pre>
+        <li>You can also specify start and end time by keywords. The argument must be a str with an hour:minute representation or a datetime.time instance.<br>
+        Specifying seconds, microseconds and nanoseconds as business hour results in ValueError.</li>
+        <pre>
+            bh = pd.offsets.BusinessHour(start='11:00', end=datetime.time(20,0))
+            pd.Timestamp('2014-08-01 13:00') + bh # 14:00
+            pd.Timestamp('2014-08-01 09:00') + bh # 12:00, always start at 11:00
+            pd.Timestamp('2014-08-01 18:00') + bh # 19:00
+        </pre>
+        <li>Passing start time later then end represents midnight business hour. In this case, business hour exceeds midnight and overlap to the next day.<br>
+        Valid business hours are distinguished by whether it started from valid BusinessDay.</li>
+        <pre>
+            bh = pd.offsets.BusinessHour(start='17:00', end='09:00')
+            pd.Timestamp('2014-08-01 17:00') + bh # 18:00
+            pd.Timestamp('2014-08-01 23:00') + bh # 00:00 of next day
+            pd.Timestamp('2014-08-02 04:00') + bh # 08-02 is Saturday but it start from friday, so it's still valid
+            pd.Timestamp('2014-08-04 04:00') + bh # 18:00 because it start from 17:00 08-03(sunday), not a business day, so it start at 17:00 of 08-04
+        </pre>
+        <li>Applying BusinessHour.rollforward and rollback to out of business hours results in the next business hour start or previous day's end. Different<br>
+        from other offset, BusinessHour.rollforward may output different results from apply by definition.</li>
+        <li>This is because one day's business hour end is equal to next day's business hour start. This means there's no gap (0 minutes) between 17:00 previous<br>
+        business day and 09:00 next business day.</li>
+        <pre>
+            pd.offsets.BusinessHour().rollback(pd.Timestamp('2014-08-02 15:00')) # end of previous business day(17:00 08-01)
+            pd.offsets.BusinessHour().rollforward(pd.Timestamp('2014-08-02 15:00')) # start of next business day(09:00 04-08)
+            pd.offsets.Business.Hour().apply(pd.Timestamp('2014-08-02 15:00')) # 08-04 10:00 (08-02 is Saturday)
+            pd.offsets.BusinessHour().rollforward(pd.Timestamp('2014-08-02')) # 08-04 09:00
+            pd.offsets.BusinessHour().apply(pd.Timestamp('2014-08-02')) # 08-04 10:00
+        </pre>
+        <li>BusinessHour regards Saturday and Sunday as holidays. To use arbitrary holidays, you can use CustomBusinessHour offset.</li>
+    </ul>
+    <h2 style="color:red">Custom business hour</h2>
+    <ul>
+        <li>The CustomBusinessHour is a mixture of BusinessHour and CustomBusinessDay which allows you to sepcify arbitrary holidays. CustomBusinessHour works as the<br>
+        same as BusinessHour except that it skips specified custom holidays.</li>
+        <pre>
+            from pandas.tseries.holiday import USFederalHolidayCalendar
+            bhour_us = pd.offsets.CustomBusinessHour(calendar=USFederalHolidayCalendar())
+            dt = datetime.datetime(2014, 1, 17, 15) # Friday
+            dt + bhour_us # Timestamp('2014-01-17 16:00:00')
+            dt + bhour_us * 2 # Timestamp('2014-01-21 09:00:00')
+        </pre>
+        <li>You can use keyword arguments supported by either BusinessHour and CustomBusinessDay.</li>
+        <pre>
+            bhour_mon = pd.offsets.CustomBusinessHour(start='10:00', weekmask='Tue Wed Thu Fri')
+            dt + bhour_mon * 2 # Timestamp('2014-01-21 10:00:00')
+        </pre>
+    </ul>
+    <h2 style="color:red">Offset aliases</h2>
+    <ul>
+        <li>A number of string aliases are given to useful common time series frequencies. We will refer to these aliases as offset aliases.</li>
+        <ul>
+            <li><b>B: </b>business day frequency.</li>
+            <li><b>C: </b>custom business day frequency.</li>
+            <li><b>D:</b>calendar day frequency.</li>
+            <li><b>W: </b>weekly frequency.</li>
+            <li><b>M: </b>month end frequency.</li>
+            <li><b>SM: </b>semi-month end frequency (15th and end of month).</li>
+            <li><b>BM: </b>business month end frequency.</li>
+            <li><b>CBM:</b>custom business month end frequency.</li>
+            <li><b>MS: </b>month start frequency.</li>
+            <li><b>SMS: </b>semi-month start frequency (1st and 15th).</li>
+            <li><b>BMS: </b>business month start frequency.</li>
+            <li><b>CBMS: </b>custom business month start frequency.</li>
+            <li><b>Q: </b>quarter end frequency.</li>
+            <li><b>BQ: </b>business quarter end frequency.</li>
+            <li><b>QS: </b>quarter start frequency.</li>
+            <li><b>BQS: </b>business quarter start frequency.</li>
+            <li><b>A, Y: </b>year end frequency.</li>
+            <li><b>BA, BY: </b>business year end frequency.</li>
+            <li><b>AS, YS: </b>year start frequency.</li>
+            <li><b>BAS, BYS: </b>business year start frequency.</li>
+            <li><b>BH: </b>business hour frequency.</li>
+            <li><b>H: </b>hourly frequency.</li>
+            <li><b>T, min: </b>minutely frequency.</li>
+            <li><b>S: </b>secondly frequency.</li>
+            <li><b>L, ms: </b>milliseconds.</li>
+            <li><b>U, us: </b>microseconds.</li>
+            <li><b>N: </b>nanoseconds.</li>
+        </ul>
+    </ul>
+    <h2 style="color:red">Conbining aliases</h2>
+    <ul>
+        <li>As we have seen previously, the alias and the offset instance are fungible in most functions.</li>
+        <pre>
+            pd.date_range(start, periods=5, freq='B')
+            pd.date_range(start, periods=5, freq=pd.offset.BDay())
+            pd.date_range(start, periods=10, freq='2h20min')
+            pd.date_range(start, periods=10, freq='1D10U')
+        </pre>
+    </ul>
+    <h2 style="color:red">Anchored offsets</h2>
+    <ul>
+        <li>For some frequencies you can specify an anchoring suffix:</li>
+        <table border="1" class="dataframe">
+              <thead>
+                <tr style="text-align: right;">
+                  <th>Alias</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>W-SUN</td>
+                  <td>weekly frequency (Sundays). Same as ‘W’</td>
+                </tr>
+                <tr>
+                  <td>W-MON</td>
+                  <td>weekly frequency (Mondays)</td>
+                </tr>
+                <tr>
+                  <td>W-TUE</td>
+                  <td>weekly frequency (Tuesdays)</td>
+                </tr>
+                <tr>
+                  <td>W-WED</td>
+                  <td>weekly frequency (Wednesdays)</td>
+                </tr>
+                <tr>
+                  <td>W-THU</td>
+                  <td>weekly frequency (Thursdays)</td>
+                </tr>
+                <tr>
+                  <td>W-FRI</td>
+                  <td>weekly frequency (Fridays)</td>
+                </tr>
+                <tr>
+                  <td>W-SAT</td>
+                  <td>weekly frequency (Saturdays)</td>
+                </tr>
+                <tr>
+                  <td>(B)Q(S)-DEC</td>
+                  <td>quarterly frequency, year ends in December. Same as ‘Q’</td>
+                </tr>
+                <tr>
+                  <td>(B)Q(S)-JAN</td>
+                  <td>quarterly frequency, year ends in January</td>
+                </tr>
+                <tr>
+                  <td>(B)Q(S)-FEB</td>
+                  <td>quarterly frequency, year ends in February</td>
+                </tr>
+                <tr>
+                  <td>(B)Q(S)-MAR</td>
+                  <td>quarterly frequency, year ends in March</td>
+                </tr>
+                <tr>
+                  <td>(B)Q(S)-APR</td>
+                  <td>quarterly frequency, year ends in April</td>
+                </tr>
+                <tr>
+                  <td>(B)Q(S)-MAY</td>
+                  <td>quarterly frequency, year ends in May</td>
+                </tr>
+                <tr>
+                  <td>(B)Q(S)-JUN</td>
+                  <td>quarterly frequency, year ends in June</td>
+                </tr>
+                <tr>
+                  <td>(B)Q(S)-JUL</td>
+                  <td>quarterly frequency, year ends in July</td>
+                </tr>
+                <tr>
+                  <td>(B)Q(S)-AUG</td>
+                  <td>quarterly frequency, year ends in August</td>
+                </tr>
+                <tr>
+                  <td>(B)Q(S)-SEP</td>
+                  <td>quarterly frequency, year ends in September</td>
+                </tr>
+                <tr>
+                  <td>(B)Q(S)-OCT</td>
+                  <td>quarterly frequency, year ends in October</td>
+                </tr>
+                <tr>
+                  <td>(B)Q(S)-NOV</td>
+                  <td>quarterly frequency, year ends in November</td>
+                </tr>
+                <tr>
+                  <td>(B)A(S)-DEC</td>
+                  <td>annual frequency, anchored end of December. Same as ‘A’</td>
+                </tr>
+                <tr>
+                  <td>(B)A(S)-JAN</td>
+                  <td>annual frequency, anchored end of January</td>
+                </tr>
+                <tr>
+                  <td>(B)A(S)-FEB</td>
+                  <td>annual frequency, anchored end of February</td>
+                </tr>
+                <tr>
+                  <td>(B)A(S)-MAR</td>
+                  <td>annual frequency, anchored end of March</td>
+                </tr>
+                <tr>
+                  <td>(B)A(S)-APR</td>
+                  <td>annual frequency, anchored end of April</td>
+                </tr>
+                <tr>
+                  <td>(B)A(S)-MAY</td>
+                  <td>annual frequency, anchored end of May</td>
+                </tr>
+                <tr>
+                  <td>(B)A(S)-JUN</td>
+                  <td>annual frequency, anchored end of June</td>
+                </tr>
+                <tr>
+                  <td>(B)A(S)-JUL</td>
+                  <td>annual frequency, anchored end of July</td>
+                </tr>
+                <tr>
+                  <td>(B)A(S)-AUG</td>
+                  <td>annual frequency, anchored end of August</td>
+                </tr>
+                <tr>
+                  <td>(B)A(S)-SEP</td>
+                  <td>annual frequency, anchored end of September</td>
+                </tr>
+                <tr>
+                  <td>(B)A(S)-OCT</td>
+                  <td>annual frequency, anchored end of October</td>
+                </tr>
+                <tr>
+                  <td>(B)A(S)-NOV</td>
+                  <td>annual frequency, anchored end of November</td>
+                </tr>
+              </tbody>
+        </table>
+        <li>These can be used as arguments to date_range, bdate_range, contructors for DatetimeIndex, as well as various other time series-related functions in pandas.</li>
+    </ul>
+    <h2 style="color:red">Anchored offset semantics</h2>
+    <ul>
+        <li>For those offsets that are anchored to the start or end of specific frequency (MonthEnd, MonthBegin, WeekEnd, etc), the following rules apply to rolling<br>
+        forward and backwards.</li>
+        <li>When n is not 0, if the given date is not on an anchor point, it snapped to the next (previous) anchor point, and moved |n| - 1 additional steps forwards or backwards.</li>
+        <pre>
+            pd.Timestamp('2014-01-02') + pd.offset.MonthBegin(n=1) # 2014-02-01 00:00:00
+            pd.Timestamp('2014-01-02') + pd.offsets.MonthEnd(n=1) # 2014-01-31 00:00:00
+            pd.Timestamp('2014-01-02') - pd.offsets.MonthBegin(n=1) # 2014-01-01 00:00:00
+            pd.Timestamp('2014-01-02') - pd.offsets.MonthEnd(n=1) # 2013-12-31 00:00:00
+            pd.Timestamp('2014-01-02') + pd.offsets.MonthBegin(n=4) # 2014-05-01 00:00:00
+            pd.Timestamp('2014-01-02') - pd.offsets.MonthBegin(n=4) # 2013-10-01 00:00:00
+        </pre>
+        <li>If the iven date is on an anchor point, it is moved |n|| points forwards or backwards.</li>
+        <pre>
+            pd.Timestamp('2014-01-01') + pd.offsets.MonthBegin(n=1) # 2014-02-01 00:00:00
+            pd.Timestamp('2014-01-31') + pd.offsets.MonthEnd(n=1) # 2014-02-28 00:00:00
+            pd.Timestamp('2014-01-01') - pd.offsets.MonthBegin(n=1) # 2013-12-01 00:00:00
+            pd.Timestamp('2014-01-31') - pd.offsets.MonthEnd(n=1) # 2013-12-31 00:00:00
+            pd.Timestamp('2014-01-01') + pd.offsets.MonthBegin(n=4) # 2014-05-01 00:00:00
+            pd.Timestamp('2014-01-31') - pd.offsets.MonthBegin(n=4) # 2013-10-01 00:00:00
+        </pre>
+        <li>For the case when n=0, the date is not moved if on an anchor point, otherwise it is rolled forward to the next anchor point.</li>
+        <pre>
+            pd.Timetamp('2014-01-02') + pd.offsets.MonthBegin(n=0) # 2014-02-01 00:00:00
+            pd.Timetamp('2014-01-02') + pd.offsets.MonthEnd(n=0) # 2014-01-31 00:00:00
+            pd.Timetamp('2014-01-01') + pd.offsets.MonthBegin(n=0) # 2014-01-01 00:00:00
+            pd.Timetamp('2014-01-31') + pd.offsets.MonthEnd(n=0) # 2014-01-31 00:00:00
+        </pre>
+    </ul>
+    <h2 style="color:red">Holidays/ holiday calendars</h2>
+    <ul>
+        <li>Holidays and calendars provide a simple way to define holiday rules to be used with CustomBusinessDay or in other analysis that<br>
+        requires a predefined set of holidays. The AbstractHolidayCalendar class provides all the necessary methods to return a list of holidays<br>
+        and only rules need to be defined in a specific holiday calendar class. Furthermore, the start_date and end_date class attributes <br>
+        determine over what date range holidays are generated. These should be overwritten on the AbstractHolidayCalendar class to have the range<br>
+        apply to all calendar subclasses. USFederalHolidayCalendar is the only calendar that exists and primarily serves as an example for developing<br>
+        other calendars.</li>
+        <li>For holidays that occur on fixed dates (US Memorial Day or July 4th) an observance rule determines when that holiday is observed if it falls<br>
+        on the weekend or some other non-observed day. Defined observance rules are.</li>
+        <ul>
+            <li><b>nearest_workday: </b>move Saturday to Friday and Sunday to Monday.</li>
+            <li><b>sunday_to_monday: </b>move Sunday to following Monday.</li>
+            <li><b>next_monday_or_tuesday: </b>move Saturday to Monday and Sunday/ Monday to Tuesday.</li>
+            <li><b>previous_friday: </b>move Saturday and sunday to previous Friday.</li>
+            <li><b>next_monday: </b>move Saturday and Sunday to following Monday.</li>
+        </ul>
+        <pre>
+            from pandas.tseries.holiday import (Holiday, USMemorialDay, AbstractHolidayCalendar, nearest_workday, MO)
+            class ExampleCalendar(AbstractHolidayCalendar):
+                rules = [USMemorialDay, Holiday('July 4th', month=7, day=4, observance=nearest_workday),
+                                        Holiday('Columbus Day', month=10, day=1, offset=pd.DateOffset(weekday=MO(2)))]
+            cal = ExampleCalendar()
+            cal.holidays(datetime.datetime(2012, 1, 1), datetime.datetime(2012, 12, 31))
+        </pre>
+        <li><b>weekday = MO(2) is sam as 2*Week(weekday=2)</b></li>
+        <li>Using this calendar, creating an index or doing offset arithmetic skips weekends and holidays.</li>
+        <pre>
+            pd.date_range(start='7/1/2012', end='7/10/2012', freq=pd.offsets.CDay(calendar=cal)).to_pydatetime()
+            offset = pd.offsets.CustomBusinessDay(calendar=cal)
+            datetime.datetime(2012, 5, 25) + offset
+            datetime.datetime(2012, 7, 3) + offset
+            datetime.datetime(2012, 7, 3) + 2 * offset
+            datetime.datetime(2012, 7, 6) + offset
+        </pre>
+        <li>Ranges are defined by the start_date and end_date class attributes of AbstractHolidayCalendar.</li>
+        <li>These dates can be overwritten by setting the attributes as datetime/ Timestamp/ string.</li>
+        <pre>
+            AbstractHolidayCalendar.start_date
+            AbstractHolidayCalendar.end_date
+            AbstractHolidayCalendar.start_date = datetime.datetime(2012, 1, 1)
+            AbstractHolidayCalendar.end_date = datetime.datetime(2012, 12, 31)
+        </pre>
+        <li>Every calendar class is accessible by name using the get_calendar function which returns a holiday class instance. Any imported calendar class will<br>
+        automatically be available by this function. Also, HolidayCalendarFactory provides an easy interface to create calendars that are combinations of calendars<br>
+        or calendars with additional rules.</li>
+        <pre>
+            from pandas.tseries.holiday import get_calendar, HolidayCalendarFactory, USLaborDay
+            cal = get_calendar('ExampleCalendar')
+            cal.rules
+            new_cal = HolidayCalendarFactory('NewExampleCalendar', cal, USLaborDay)
+            new_cal.rules
+        </pre>
+    </ul>
+</ul>
+<h1 style="color:blue">Time series-related instance methods.</h1>
+<ul>
+    <h2 style="color:red">Shifting/ lagging</h2>
+    <ul>
+        <li>One may want to shift or lag the values in a time series back and forward in time. The method for this is shift(), which is available on all<br>
+        of the pandas object.</li>
+        <li>The shift method accepts an freq argument which can accept a DateOffset class or other timedelta-like object or also an offset alias.</li>
+        <li>When freq is specified, shift method changes all the dates in the index rather than changing the alignment of the data and the index.</li>
+        <pre>
+            ts = pd.Series(range(len(rng)), index=rng)
+            ts = ts[:5]
+            ts.index[0] # 2012-01-01 - sunday
+            ts.shift(1) # shift series values 1 index (values start at 2012-01-02)
+            ts.shift(5, freq='D') # shift 5 days (values start at 2012-01-06)
+            ts.shift(5, freq=pd.offsets.BDay()) # shift 5 and start at the first bday (2012-01-06)
+            ts.shift(5, freq='BM') # shift 5 with datetime is 31-May
+        </pre>
+        <li>Note that when freq is specified, the leading entry is no longer NaN because the data is not being realigned.</li>
+    </ul>
+    <h2 style="color:red">Frequency conversion</h2>
+    <ul>
+        <li>The primary function for changing frequencies is the asfreq() method. For a DatetimeIndex, this is basically just a thin, but convenient wrapper<br>
+        around reindex() which generates a date_range and call reindex.</li>
+        <pre>
+            dr = pd.date_range('1/1/2010', periods=3, freq=3*pd.offsets.BDay())
+            ts = pd.Series(np.random.randn(3), index=dr)
+            ts.asfreq(pd.offsets.BDay())
+            Out[]:
+            2010-01-01    1.494522
+            2010-01-04         NaN
+            2010-01-05         NaN
+            2010-01-06   -0.778425
+            2010-01-07         NaN
+            2010-01-08         NaN
+            2010-01-11   -0.253355
+            Freq: B, dtype: float64
+        </pre>
+        <li>asfreq provides a further convenience so you can specify an interpolation method for any gaps that may appear after the frequency conversion.</li>
+        <pre>
+            ts.asfreq(pd.offsets.BDay(), method='pad') # ffill with NA values
+        </pre>
+    </ul>
+    <h2 style="color:red">Filling foward/ backward</h2>
+    <ul>
+        <li>Related to asfreq and reindex is fillna(). See missing data section.</li>
+    </ul>
+    <h2 style="color:red">Converting to Python datetime</h2>
+    <ul>
+        <li>DatetimeIndex can be convert to an array of Python native datetime.datetime objects using to_pydatetime method.</li>
+    </ul>
+</ul>
+<h1 style="color:blue">Resampling</h1>
+<ul>
+    <li>pandas has simple, powerful and efficient functionality for performing resampling operations during frequency conversion. This extremely common in<br>
+    but not limited to financial applications.</li>
+    <li>resample() is a time-based groupby, followed by a reduction method on each of its groups. The resample method can be used directly from DataFrameGroupBy object.</li>
+    <h2 style="color:red">Basic</h2>
+    <ul>
+        <li>The resample function is very flexible and allows you to specify many different parameters to control the frequency conversion and resampling operation.</li>
+        <li>Any function available via dispatching is available as a method of the returned object, including sum, mean, std, sem, max, min, median, first, last, ohlc.</li>
+        <pre>
+            rng = pd.date_range('1/1/2012', periods=100, freq='S')
+            ts = pd.Series(np.random.randint(0, 500, len(rng)), index=rng)
+            ts.resample('5Min').sum()
+            ts.resample('5Min').mean()
+            ts.resample('5Min').ohlc()
+            ts.resample('5Min').max()
+        </pre>
+        <li>For downsampling, closet can be set to 'left' or 'right' to specify which end of the interval is closed.</li>
+        <pre>
+            ts.resample('5Min', closed='right').mean()
+            Out[]:
+            2011-12-31 23:55:00    308.000000
+            2012-01-01 00:00:00    250.454545
+            ts.resample('5Min', closed='left').mean()
+            Out[]:
+            2012-01-01 00:00:00    250.454545
+        </pre>
+        <li>Parameters like label are used to manipulate the resulting labels. label specifies whether the result is labeled with the beginning or<br>
+        the end of the interval. By default, label='left'.</li>
+        <pre>
+            ts.resample('5Min').mean()
+            rs.resample('5Min', label='right').mean()
+        </pre>
+        <li>The default values for label and closed is 'left' for all frequency offsets except for ['M', 'A', 'Q', 'BM', 'BA', 'BQ', 'W'] which all<br>
+        have a default to 'right'.</li>
+        <li>This might unintendedly lead to looking ahead, where the value for a later time is pulled back to a previous time as in the following<br>
+        example with the BusinessDay frequency.</li>
+        <pre>
+            s = pd.date_range('2000-01-01', '2000-01-05').to_series()
+            s.iloc[2] = pd.NaT
+            s.dt.day_name()
+            s.resample('B').last().dt.day_name() # label='left', closed='left'
+        </pre>
+        <li>Notice how the value for Sunday got pulled back to the previous Friday. To get the behavior where the value for Sunday is pushed to Monday, use instead:</li>
+        <pre>
+            s.resample('B', label='right', closed='right').last.dt.day_name()
+        </pre>
+        <li>The axis parameter can be set to 0 or 1 and allows you to resample the specified axis for a DataFrame.</li>
+        <li>'kind' can be set to 'timestamp' or 'period' to convert the resulting inedx to/ from timestamp and time span representations. By default<br>
+        resample retains the input representation.</li>
+        <li>'convention' can be set to 'start' or 'end' when resampling periods data. It specifies how low frequency periods are converted to higher frequency periods.</li>
+    </ul>
+    <h2 style="color:red">Upsampling</h2>
+    <ul>
+        <li>For upsampling, you can specify a way to upsample and the 'limit' parameter to interpolate over the gaps that are created.</li>
+        <pre>
+            rng = pd.date_range('1/1/2012', periods=100, freq='S')
+            ts = pd.Series(np.random.randint(0, 500, len(rng)), index=rng)
+            ts[:2].resample('250L').asfreq() # get frequency of 2 seconds
+            ts[:2].resample('250L').ffill()
+            ts[:2].resample('250').fill(limit=2)
+        </pre>
+    </ul>
+    <h2 style="color:red">Sparse resampling</h2>
+    <ul>
+        <li>Sparse timeseries are the ones where you have a lot fewer points relative to the amount of time you are looking to resample. Naively upsampling<br>
+        a sparse series can potentially generate lots of intermediate values. When you don't want to use a method to fill these values, fill_method is None,<br>
+        then intermediate values will be filled with NaN.</li>
+        <pre>
+            rng = pd.date_range('2014-1-1', periods=100, freq='D') + pd.Timedelta('1s')
+            ts = pd.Series(range(100), index=rng)
+            ts.resample('3T').sum()
+        </pre>
+        <li>We can instead only resample those groups where we have points as follows:</li>
+        <pre>
+            from functools import partial
+            from pandas.tseries.frequencies import to_offset
+            def round(t, freq):
+                freq = to_offset(freq)
+                return pd.Timestamp((t.value // freq.delta.value) * freq.delta.value)
+            ts.groupby(parital(round, freq='3T')).sum()
+        </pre>
+    </ul>
+    <h2 style="color:red">Aggregation</h2>
+    <ul>
+        <li>Resampling a DataFrame, the default will be to act on all columns with the same function.</li>
+        <pre>
+            df = pd.DataFrame(np.random.randn(1000,3), index=pd.date_range('1/1/2012', feq='S', periods=1000))
+            r = df.resample('3T')
+            r.mean()
+            r['A'].mean()
+            r[['A', 'B']].mean()
+            r['A'].agg([np.sum, np.mean, np.std])
+            r.agg([np.sum, np.mean])
+            r.agg({'A': np.sum, 'B': lambda x: np.std(x, ddof=1)})
+            r.agg({'A': 'sum', 'B': 'std'})
+            r.agg({'A': ['sum', 'mean'], 'B': ['std', 'mean']})
+        </pre>
+        <li>If a DataFrame does not have a datatimelike index, but instead you want to resample based on datetimelike column in the frame, it can<br>
+        pass to the 'on' keyword. or use 'level' with Datetimelike index.</li>
+        <pre>
+            df = pd.DataFrame({'date': pd.date_range('2015-01-01', freq='W', periods=5), 'a': np.arange(5)},
+                                index=pd.MultiIndex.from_arrays([[1,2,3,4,5], pd.date_range('2015-01-01', freq='W', periods=5)], names=['v', 'd']))
+            df.resample('M', on='date').sum()
+            df.resample('M', level='d').sum() # or level=1
+        </pre>
+    </ul>
+    <h2 style="color:red">Iterating through groups</h2>
+    <ul>
+        <li>With the resampler object in hand, iterating through the grouped data is very natural and functions similarly to itertools.groupby().</li>
+        <pre>
+            small = pd.Series(range(6), index=pd.to_datetime([  "2017-01-01T00:00:00",
+                                                                "2017-01-01T00:30:00",
+                                                                "2017-01-01T00:31:00",
+                                                                "2017-01-01T01:00:00",
+                                                                "2017-01-01T03:00:00",
+                                                                "2017-01-01T03:05:00"]))
+            resampled = small.resample('H')
+            for name, group in resampled:
+                print('Group:', name)
+                print('-' * 27)
+                print(group, end = '\n\n')
+        </pre>
+    </ul>
+    <h2 style="color:red">Use origin or offset to adjust the start of the bins</h2>
+    <ul>
+        <li>The bins of the grouping are adjusted based on the beginning of the day of time series starting point. This works well with frequencies<br>
+        that are multiples of a day(like 30D) or that divide a day evenly (like 90s or 1min). This can create inconsitencies with some frequencies<br>
+        that do not meet this criteria. To change this behavior you can specify a fixed Timestamp with the argument origin.</li>
+        <li>When using 'origin' with its default values('start_day'), the result after '2000-10-02 00:00:00' are not identical depending on the start of time series.</li>
+        <pre>
+            start, end = '2000-10-01 23:30:00', '2000-10-02 00:30:00'
+            middle = '2000-10-02 00:00:00'
+            rng = pd.date_range(start, end, freq='7min')
+            ts = pd.Series(np.arange(len(rng)), index=rng)
+            ts.resample('17min', origin='start_day').sum() # start at 00:00:00 of the first day of series
+            ts[middle:end].resample('17min', origin='start_day')
+        </pre>
+        <li>When setting origin to 'epoch', the result after '2000-10-02 00:00:00' are identical depending on the start of time series.</li>
+        <pre>
+            ts.resample('17min', origin='epoch').sum() # 1970-01-01
+            ts[middle:end].resample('17min', origin='epoch').sum()
+        </pre>
+        <li>Or you can use a custom timestamp ofr origin:</li>
+        <pre>
+            ts.resample('17min', origin='2001-01-01').sum()
+            ts.resample('17min', origin=pd.timestamp('2001-01-01')).sum()
+        </pre>
+        <li>And you can just adjust the bins with an offset Timedelta that would be added to the default origin.</li>
+        <pre>
+            ts.resample('17min', origin='start').sum() # at first time of Series
+            ts.resample('17min', offset='23h30min').sum()
+        </pre>
+    </ul>
+    <h2 style="color:red">Backward resample</h2>
+    <ul>
+        <li>Instead of adjusting the beginning of bins, sometimes we need to fic the end of the bins to make a backward resample with a given freq.<br>
+        The backward resample sets closet to 'right' by default since the last value should be considered as the edge point for the last bin.</li>
+        <li>We can set origin to 'end'. The value for a specific Timestamp index stands for the resample result from the current Timestamp minus <br>
+        freq the the current Timestamp with a right close.</li>
+        <pre>
+            ts.resample('17min', origin='end').sum() # calculate based on last time of the Series
+            ts.resample('17min', origin='end_day').sum() # ceiling round of the largest Timestamp
+        </pre>
+        <li>The last bin's right edge follow computation:</li>
+        <pre>
+            ceil_mid = rng.max().ceil('D') # start at next day
+            freq = pd.offsets.Minute(17) # number of intervals
+            bin_res = ceil_mid - freq*((ceil_mid - rng.max()) // freq)
+        </pre>
+    </ul>
+</ul>
+<h1 style="color:blue">Time span representation</h1>
+<ul>
+    <li>Regular intervals of time are represented by Period objects in pandas while sequnces of Period objects are collected in a PeriodIndex, which can be<br>
+    created with the convenience function period_range.</li>
+    <h2 style="color:red">Period</h2>
+    <ul>
+        <li>A Period represent span of time (a day, a month, a quarter, etc). You can specify the span via freq keyword using a frequency alias. Because<br>
+        freq represents a span of Period, it can not be negative like '-3D'.</li>
+        <pre>
+            pd.Period('2012', freq='A-DEC')
+            pd.Period('2012-1-1', freq='D')
+            pd.Period('2012-1-1 19:00', freq='H')
+            pd.Period('2012-1-1 19:00', freq='5H')
+        </pre>
+        <li>Adding and subtracting integers from periods shifts the period by its own frequency. Arithmetic is not allowed between period with different freq.</li>
+        <pre>
+            p = pd.Period('2012', freq='A_DEC')
+            p + 1 # 2013, 'A-DEC'
+            p - 3 # 2009, 'A-DEC'
+
+            p = pd.Period('2012-01', freq='2M')
+            p + 2 # 2012-05, '2M'
+            p - 1 # 2011-11, '2M'
+            p == pd.Period('2012-01', freq='3M') # False
+        </pre>
+        <li>If Period freq is daily or higher (D, H, T, S, L, U, N), offsets and timedelta-like can be added if the result can have the same freq. Otherwise,<br>
+        ValueError will be raised.</li>
+        <pre>
+            p = pd.Period('2014-07-01 09:00', freq='H')
+            p + pd.offsets.Hour(2) # '2014-07-01 11:00', freq='H'
+            p + pd.timedelta(minutes=12) # '2014-07-01 11:00', freq='H'
+            p + np.timedelta(7200, 's') # '2014-07-01 11:00', freq='H'
+            p + pd.offsets.Hour(2) # '2014-07-01 11:00', freq='H'
+            p + pd.offsets.Minute(5) # ValueError , cannot offset 5 minutes with freq 'H'
+        </pre>
+        <li>If Period has other freq, only the same offsets can be added. Otherwise, ValueError will be raised.</li>
+        <pre>
+            p = pd.Period('2014-07', freq='M')
+            p + pd.offsets.MonthEnd(3) # '2014-10', freq='M'
+            p + pd.offsets.MonthBegin(3) # Values Error
+        </pre>
+        <li>Taking the difference of Period instances with the same frequency will return the number of frequency units between them.</li>
+        <pre>
+            pd.Period('2012', freq='A-DEC') - pd.Period('2002', freq='A-DEC')
+            <10 * YearEnds: month=12>
+        </pre>
+    </ul>
+    <h2 style="color:red">PeriodIndex and period_range</h2>
+    <ul>
+        <li>Regular sequences of Period objects can be collected in a PeriodIndex, which can be constructed using the period_range convenience function.</li>
+        <pre>
+            prng = pd.period_range('1/1/2011', '1/1/2012', freq='M')
+            pd.PeriodIndex(['2011-1', '2011-2', '2011-3'], freq='M')
+            pd.period_range(start='2014-01', periods=4, freq='3M')
+        </pre>
+        <li>If start or end are Period objects, they will be used as anchor endpoints for a PeriodIndex with frequency matching that of the PeriodIndex constructor.</li>
+        <pre>
+            pd.period_range(start=pd.Period('2017Q1', freq='Q'), end=pd.Period('2017Q2', freq='Q'), freq='M')
+            Out[]:
+            PeriodIndex(['2017-03', '2017-04', '2017-05', '2017-06'], dtype='period[M]')
+        </pre>
+        <li>Just like a DatetimeIndex, PeriodIndex can also be used to index pandas object and it supports addition and subtraction with same rule as Period.</li>
+        <pre>
+            ps = pd.Series(np.random.randn(len(prng)), prng)
+            idx = pd.period_range('2014-07-01 09:00', periods=5, freq='M')
+            idx + pd.offset.Hour(2)
+            idx = pd.period_range('2014-07', periods=5, freq='M')
+            idx + pd.offsets.MonthEnd(3)
+        </pre>
+        <li>PeriodIndex has it own dtype name period, refer to Period Dtypes.</li>
+    </ul>
+    <h2 style="color:red">Period Dtypes</h2>
+    <ul>
+        <li>PeriodIndex has a custom period dtype. This is pandas extension dtype similar to the timezone aware dtype (datetime64[ns, tz]).</li>
+        <li>The period dtype holds the freq attribute and is represented with period[freq] like period[D] or period[M], using frequency strings.</li>
+        <pre>
+            pi = pd.period_range('2016-01-01', periods=3, freq='M')
+            pi.dtype # period[M]
+        </pre>
+        <li>The period dtype can be used in .astype(). It allows one to change the freq of a PeriodIndex like .asfreq() and convert a DatetimeIndex<br>
+        to PeriodIndex like to_period().</li>
+        <pre>
+            pi.astype('period[D]')
+            pi.astype('datetime64[ns]')
+            dti = pd.date_range('2011-01-01', periods=3, freq='M')
+            dti.astype('period[M]')
+        </pre>
+    </ul>
+    <h2 style="color:red">PeriodIndex partial string indexing</h2>
+    <ul>
+        <li>PeriodIndex now supports partial string slicing with non-monotonic indexes. You can pass in dates and strings to Series and DataFrame<br>
+        with PeriodIndex, in the same manner as DatetimeIndex.</li>
+        <li>With Series:</li>
+        <pre>
+            ps['2011-01']
+            ps[datetime.datetime(2011, 12, 25):]
+            ps['10/31/2011': '12/31/2011']
+            ps['2011']
+        </pre>
+        <li>With DataFrame:</li>
+        <pre>
+            dfp = pd.DataFrame(np.random.randn(600, 1), index=pd.period_range('2013-01-01 09:00', freq='T', periods=600), columns=['A'])
+            dfp.loc['2013-01-01 10H']
+            dfp['2013-01-01 10H': '2013-01-01 11H']
+        </pre>
+    </ul>
+    <h2 style="color:red">Frequency conversion and resampling with PeriodIndex</h2>
+    <ul>
+        <li>The frequency of Period and PeriodIndex can be converted via the asfreq method. Let's start with the fiscal year 2011, ending in December.</li>
+        <pre>
+            p = pd.period('2011', freq='A-DEC')
+            p.asfreq('M', how='start')
+            p.asfreq('M', 's')
+            p.asfreq('M', how='end')
+            p.asfreq('M', 'e')
+        </pre>
+        <li>Converting to a 'super-period' (annual frequency is a super-period of quaterly frequency) automatically returns the super-period that includes the input period.</li>
+        <pre>
+            p = pd.Period('2011-12', freq='M')
+            p.asfreq('A-NOV')
+        </pre>
+        <li>Note that since we converted to an annual frequency that ends the year in November, the monthly period of December 2011 is actually in the 2012 A-NOV period.</li>
+        <li>Period conversions with anchored frequencies are particularly useful for working with various quarterly data common to economics, business and other fields. Many <br>
+        organisations define quarters relative to the month in which their fiscal year starts and ends. Thus, first quarter of 2011 could start in 2010 or a few months into 2011.<br>
+        Via anchored frequencies, pandas works for all quarterly frequencies Q-JAN through Q-DEC.</li>
+        <pre>
+            p = pd.Period('2012Q1', freq='Q-DEC')
+            p.asfreq('D', 's')
+            p.asfreq('D', 'end')
+            p = pd.Period('2011Q4', freq='Q-MAR')
+            p.asfreq('D', 's')
+            p.asfreq('D', 'e')
+        </pre>
+    </ul>
+</ul>
+<h1 style="color:blue">Converting between representations</h1>
+<ul>
+    <li>Timestamped data can be converted to PeriodIndex-ed data using to_period and vice-versa using to_timestamp.</li>
+    <pre>
+        rng = pd.date_range('1/1/2012', periods=5, freq='M')
+        ts = pd.Series(np.random.randn(len(rng)), index=rng)
+        ps = ts.to_period() # get year and month, ignore date
+        ps.to_timestamp() # extend to date
+    </pre>
+    <li>Remember that 's' and 'e' can be used to return the timestamps at the start or end of the period.</li>
+    <pre>
+        ps = ts.to_timestamp('D', 's')
+        ps = ts.to_timestamp('D', 'e')
+    </pre>
+    <li>Converting between period and timestamp enables some convenient arithmetic functions to be used.</li>
+    <pre>
+        prng = pd.period_range('1990Q1', '2000Q4', freq='Q-NOV') # handle Q at last point is November(Nov, Aug, May, Feb)
+        ts = pd.Series(np.random.randn(len(prng)), index=prng)
+        ts.index = (prng.asfreq('M', 'e') + 1).asfreq('H', 's') + 9 # + 1 (Mar, Jun, Sep, Dec), H & s : add hh:mm
+    </pre>
+</ul>
+<h1 style="color:blue">Representing out-of-bounds spans</h1>
+<ul>
+    <li>If you have data that is outside of the Timestamp bounds, then you can use a PeriodIndex and/ or Series of Periods do co computations.</li>
+    <pre>
+        span = pd.period_range('1215-01-01', '1381-01-01', freq='D')
+        s = pd.Series([20121231, 20141130, 99991231])
+        def cov(x):
+            return pd.Period(year=x // 10000, month=x // 100 % 100, day=x //100, freq='D')
+        s.apply(cov)
+        s.apply(cov)[2]
+        span = pd.PeriodIndex(s.apply(conv))
+    </pre>
+</ul>
+<h1 style="color:blue">Time zone handling</h1>
+<ul>
+    <li>pandas provides rich support for working with timestamps in different time zones using the pytz and dateutil libraries or datetime.timezone object<br>
+    from the standard library.</li>
+    <h2 style="color:red">Working with time zones</h2>
+    <ul>
+        <li>By default, pandas objects are time zone unaware.</li>
+        <li>To localize these dates to a time zone (assign a particular time zone to a naive date), you can use the tz_localize method or the tz keyword<br>
+        argument in date_range(), Timestamp, or DatetimeIndex. You can either pass pytz or datetutil time zone objects or Olson time zone database strings.<br>
+        Olson time zone database strings. Olson time zone strings will return pytz time zone objects by default. To return dateutil time zone objects, append<br>
+        dateutil/ before the string.</li>
+        <ul>
+            <li>In pytz you can find a list of common (and less common) time zones using from pytz import common_timezones, all_timezones.</li>
+            <li>dateutil uses the OS time zones so there isn't a fixed list available. For common zones ,the names are the same as pytz.</li>
+        </ul>
+        <pre>
+            import dateutil
+            rng_pytz = pd.date_range('3/6/2012 00:00', periods=3, freq='D', tz='Europe/London')
+            rng_pytz.tz
+            rng_dateutil = pd.date_range('3/6/2012 00:00', periods=3, freq='D')
+            rng_dateutil = rng_dateutil.tz_localize('dateutil/Europe/London')
+            rng_dateutil.tz
+            rng_utc = pd.date_range('3/6/2012 00:00', periods=3, freq='D', tz=dateutil.tz.tzutc())
+            rng_utc.tz
+            rng_itc = pd.date_range('3/6/2012 00:00', periods=3, freq='D', tz=datetime.timezone.utc)
+            rng_utc.tz
+        </pre>
+        <li>Note that the UTC time zone is a special case in dateutil and should be constructed explicitly as an instance of dateutil.tz.tzutc. You can also<br>
+        construct other time zones objects explicitly first.</li>
+        <pre>
+            import pytz
+            tz_pytz = pytz.timezone('Europe/London')
+            rng_pytz = pd.date_range('3/6/2012 00:00', periods=3, freq='D')
+            rng_pytz = rng_pytz.tz_localize(tz_pytz)
+            rng_pytz.tz == tz_pytz
+            tz_datutil = dateutil.tz.gettz('Europe/London')
+            rng_dateutil = pd.date_range('3/6/2012 00:00', periods=3, freq='D', tz=tz.dateutil)
+            rng_dateutil.tz == tz_dateutil
+            rng_pytz.tz_convert('US/Eastern')
+        </pre>
+    </ul>
+</ul>
+</body>
+</html>

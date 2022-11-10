@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <title>Gantt</title>
+</head>
+<body>
+<h1 style="color:blue; text-align:center">Gantt</h1>
+    <p>In a timeline plot, each row of data_frame is represented as a rectangular mark on an x-axis of type data, spanning from x_start to x_end.</p>
+    <p>px.timeline attributes:</p>
+    <ul>
+        <li><b>data_frame(DataFrame or array-like or dict)</b> :This argument needs to be passed for column names (not keyword names) <br>
+            to be used. Array-like and dict are transformed internally to a pd.DataFrame. If missing, data_frame gets constructed under<br>
+            the hood using the other arguments.</li>
+        <li><b>x_start(str, int, Series or array-like)</b> :Values from this is used to position marks along the x axis in cartesian coordinates.</li>
+        <li><b>x_end(str, int, Series or array-like)</b> :Values from this is used to position marks along the x axis in cartesian coordinates.</li>
+        <li><b>y(str, int, Series or array-like)</b> :Value from this is used to position marks along the y axis in cartesian coordinates.</li>
+        <li><b>color(str, int, Series or array-like)</b> :Values from this is used to assign color to marks.</li>
+        <li><b>facet_row(str, int, Series or array-like)</b> :Values from this is used to assign marks to faceted subplots in the vertical directions.</li>
+        <li><b>fact_col(str, int, Series or array-like)</b> :Values from this is used to assign marks to faceted subplots in the horizontal directions.</li>
+        <li><b>facet_col_wrap(int)</b> :Maximum cols of faceted subplots. Ignored if 0 and either facet_row or marginal is set.</li>
+        <li><b>facet_row_spacing(float between 0 and 1)</b> :Spacing between facet rows, in paper unit. Default 0.03 (0.07 when facet facet_col_wrap is set).</li>
+        <li><b>facet_col_spacing(float between 0 and 1)</b> :Spacing between facet cols, in paper unit. Default 0.02.</li>
+        <li><b>hover_name(str, int, Series or array-like)</b> :Value from this appear in bold in hover information.</li>
+        <li><b>hover_data(list of str, int, Series or array-like)</b> :Values from these override the default setting in hover tooltip.</li>
+        <li><b>custom_data(list of str, int, Series or array-like)</b> :Values from these are not user-visible, but they included in events emitted by figures.</li>
+        <li><b>animation_frame(str, int, Series or array-like)</b> :Are use to assign marks to animation frame.</li>
+        <li><b>animation_group(str, int, Series or array-like)</b> :Values from this is used to provide object-constancy across animation frames:<br>
+            rows with matching animation group will be treated as if they describe the same object in each frame.</li>
+        <li><b>category_order(dict with str keys and str values)</b> :By default, the order of categorical values in axes, legend an facets depend on<br>
+            the order in which these values are first encountered in data_frame(and no order is guarantee by default). This parameter is used to force<br>
+            a specific ordering of values per column. The keys of this dict should correspond to column names, and the values should be lists of strings<br>
+            corresponding to the specific display or der desired.</li>
+        <li><b>labels(dict with str keys and str values)</b> :Default {}. By default, column names are used in the figure for axis titles, legends entries<br>
+            and hovers. This parameter allows this to be overridden. The key sof this dict should correspond to column names, and the values should correspond<br>
+            to the desired label to be displayed.</li>
+        <li><b>color_discrete_sequence(list of str)</b> :String should define valid CSS-colors. When color is set and the values in the corresponding column <br>
+            are not numeric, values in that column are assigned colors by cycling through color_discrete_sequence in the order described in category_orders, <br>
+            unless the value of color is a key in color_discrete_map. Various useful color sequences are available in teh plotly.express.colors, specifically<br>
+            plotly.express.colors.qualitative(see visualize color in px.colors.qualitative.swatches().</li>
+        <li><b>color_discrete_map(dict of str keys and str values)</b> :Default {}. String should define valid CSS-colors.Used to override color_discrete_sequence<br>
+            to assign a specific colors to marks corresponding with specific values. Keys should be values in teh column denoted by color. Alternatively,<br>
+            if the values of color are valid colors, the string 'identity' may be passed to cause them to be used directly.</li>
+        <li><b>color_continuous_scale(list of str)</b> :Strings should define valid CSS-colors. This list is used to build a continuous color scale when the column<br>
+            denoted by color contains numeric data. Various useful color scales are available in the plotly.express.colors submodules. See visualize in <br>
+            px.colors.sequential.swatches(), px.colors.diverging.swatches() and px.colors.cyclical.swatches().</li>
+        <li><b>range_color(list of 2 numbers)</b> :If provided, overrides auto-scaling on the continuous color scale.</li>
+        <li><b>color_continuous_midpoint(number)</b> :Default None. If set, computes the bounds of the continuous color scale to have the desired midpoint.<br>
+            Setting this value is recommended when using colors.diverging color scales as the inputs.</li>
+        <li><b>opacity(float between 0 and 1)</b> :Set marks opacity.</li>
+        <li><b>range_x(list of 2 numbers)</b> :Override auto-scaling of x-axis(cartesian coordinates).</li>
+        <li><b>range_y(list of 2 numbers)</b> :Override auto-scaling of y-axis(cartesian coordinates).</li>
+        <li><b>title(str)</b> :The figure title.</li>
+        <li><b>template(str or dict or plotly.go.layout.Template instance)</b> :The figure template name(must be a key in plotly.io.templates) or definition.</li>
+        <li><b>width(int)</b> :The figure width in pixels.</li>
+        <li><b>height(int)</b> :The figure height in pixels.</li>
+    </ul>
+    <h2 style = "color: blue">Gantt Charts and Timelines With px</h2>
+    <li>The px.timeline function by default sets the x-axis to be of type=date, so it can be configured like any time-series chart.</li>
+    <pre>
+        df = pd.DataFrame([ {'Task': 'Job A', 'Start': '2009-01-01', 'Finish': '2009-02-28'},
+                            {'Task': 'Job B', 'Start': '2009-03-05', 'Finish': '2009-04-15'},
+                            {'Task': 'Job C', 'Start': '2009-05-30', 'Finish': '2009-06-31'}])
+        fig = px.timeline(df, x_start = 'Start', x_end = 'Finish', y = 'Task')
+        fig.update_yaxes(autorange = 'reversed') # otherwise tasks are listed from the bottom up.
+        fig.show()
+    </pre>
+    <img src="{% static 'IMG/timeline_1.png'%}">
+    <li>It's also possible to have multiple bar on the same horizontal line. In this case, ignore autorange set.</li>
+    <pre>
+        df = pd.DataFrame([ {'Task': 'Job A', 'Start': '2009-01-01', 'Finish': '2009-02-28', 'resource':'Alex'},
+                            {'Task': 'Job B', 'Start': '2009-03-05', 'Finish': '2009-04-15', 'resource':'Alex'},
+                            {'Task': 'Job C', 'Start': '2009-05-30', 'Finish': '2009-06-31', 'resource':'Max'}])
+        fig = px.timeline(df, x_start = 'Start', x_end = 'Finish', y = 'Resource')
+        fig.show()
+    </pre>
+    <img src="{% static 'IMG/timeline_2.png'%}">
+    <h2 style = "color: blue">Deprecated Figure Factory</h2>
+    <li>Prior to the introduction of plotly.express.timeline() in version 4.9, the recommend way to make Gantt charts was to use the <br>
+        now-deprecated create_gantt() figure factory:</li>
+    <pre>
+        import plotly.figure_factory as ff
+        df = pd.DataFrame([ {'Task': 'Job A', 'Start': '2009-01-01', 'Finish': '2009-02-28'},
+                            {'Task': 'Job B', 'Start': '2009-03-05', 'Finish': '2009-04-15'},
+                            {'Task': 'Job C', 'Start': '2009-05-30', 'Finish': '2009-06-31'}])
+        fig = ff.create_gantt(df)
+        fig.show()
+    </pre>
+    <img src="{% static 'IMG/timeline_3.png'%}">
+    <h2 style = "color: blue">Group Task Together</h2>
+    <pre>
+        df = [dict(Task="Job-1", Start='2017-01-01', Finish='2017-02-02', Resource='Complete'),
+              dict(Task="Job-1", Start='2017-02-15', Finish='2017-03-15', Resource='Incomplete'),
+              dict(Task="Job-2", Start='2017-01-17', Finish='2017-02-17', Resource='Not Started'),
+              dict(Task="Job-2", Start='2017-01-17', Finish='2017-02-17', Resource='Complete'),
+              dict(Task="Job-3", Start='2017-03-10', Finish='2017-03-20', Resource='Not Started'),
+              dict(Task="Job-3", Start='2017-04-01', Finish='2017-04-20', Resource='Not Started'),
+              dict(Task="Job-3", Start='2017-05-18', Finish='2017-06-18', Resource='Not Started'),
+              dict(Task="Job-4", Start='2017-01-14', Finish='2017-03-14', Resource='Complete')]
+
+        colors = {'Not Started': 'rgb(220, 0, 0)',
+                  'Incomplete': (1, 0.9, 0.16),
+                  'Complete': 'rgb(0, 255, 100)'}
+        fig = ff.create_gantt(df, color = colors, index_col = 'Resource', show_colorbar = True, group_tasks = True)
+        fig.show()
+    </pre>
+    <img src="{% static 'IMG/timeline_4.png'%}">
+    <h2 style = "color: blue">Color By Numeric Variable</h2>
+    <pre>
+        df = [dict(Task="Job A", Start='2009-01-01', Finish='2009-02-28', Complete=10),
+              dict(Task="Job B", Start='2008-12-05', Finish='2009-04-15', Complete=60),
+              dict(Task="Job C", Start='2009-02-20', Finish='2009-05-30', Complete=95)]
+        fig = ff.create_gantt(df, colors = 'Viridis', index_col = 'Complete', show_colorbar = True)
+        fig.show()
+    </pre>
+    <img src="{% static 'IMG/timeline_5.png'%}">
+    <h2 style = "color: blue">Dash</h2>
+    <pre>
+        import dash
+        from dash import dcc
+        from dash import html
+        fig = go.Figure()
+        app = dash.Dash()
+        app.layout = html.Div([figure = fig])
+        app.run_server(debug = True)
+    </pre>
+    </ul>
+</body>
+</html>

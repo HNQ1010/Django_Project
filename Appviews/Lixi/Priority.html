@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <style>
+        h1 {color: red;}
+        h2 {color: blue;}
+        h3 {color: purple;}
+        h4 {color: green; font-size: 20px}
+    </style>
+    <meta charset="UTF-8">
+    <title>PRIORITY TASKS</title>
+</head>
+<body>
+    <h1 style="text-align:center">PRIORITY TASKS</a></h1>
+    <ul>
+        <h2>I. Following up B2B orders</h2>
+        <ul>
+            <h3>&#9733; Issues</h3>
+            <ul>
+                <li>B2B orders are not reported and follow up this time.</li>
+                <li>Missing order's schedule and raise issues in case the order's schedule is pending in a long time.</li>
+            </ul>
+            <h3>&#9733; Next Steps</h3>
+            <ul>
+                <p><b>1. PIC: Duyên</b></p>
+                <p><b>2. Steps</b></p>
+                <ul>
+                    <li>Step 1: Work with sale team about the B2B flow and connection with 3PL (BOXME).</li>
+                    <li>Step 2: Setting up the following of order's schedule between sales team and warehouse (transportation).</li>
+                    <ul>
+                        <li>Sale team will follow schedule and push 3PL on order's schedule.</li>
+                        <li>Transportation team will sum of order list to make report about order's status weekly.</li>
+                        <li>Working on 3PL updating features to serve Lixibox operations and assign PIC to work with 3PL on all issues.</li>
+                    </ul>
+                </ul>
+                <p><b>3. Timeline</b></p>
+                <ul>
+                    <li>Week 37 &rarr; Duyen now is in-charge of working channel with 3PL, she collects information of each gaps, bottlenecks on 3PL platform<br>
+                        and continue working with them to improve those updates to fit in with our operations.</li>
+                </ul>
+            </ul>
+        </ul>
+        <h2>II. Identify Compensation Amount of Miss/ Lost Orders In The Past Operations.</h2>
+        <ul>
+            <h3>&#9733; Issues</h3>
+                <ul>
+                    <li>Because of operations in the past, there're number of orders that can't identify the last order's status and didn't record any of COD.</li>
+                    <li>Accountant, transportation, warehouse, marketplace and tech team are tracking the orders by its journey to resolve the problem and identify the last results.</li>
+                    <li>There're 2 cases:</li>
+                    <ul>
+                        <p>&#9755; Wrong Inventory</p>
+                        <p>&#9755; Miss tracking returned and lost orders &rarr; lost compensation from 3PL Vendors.</p>
+                    </ul>
+                </ul>
+            <h3>&#9733; Next Steps</h3>
+                <ul>
+                    <h4>Wrong Inventory</h4>
+                    <ul>
+                        <p><b>1. Person in-charge: Tram</b></p>
+                        <p><b>2. Steps:</b></p>
+                        <ul>
+                            <li>Step 1: Identify current inventory data to collect the results (excess/ miss/ lost items inside warehouse).</li>
+                            <li>Step 2: Find out the reasons and re-check returned order to identify whether products had been updated yet or not.</li>
+                            <li>Step 3: Sum of all quantity of unknown reasons that led to wrong inventory &rarr; identify the last compensation amount.</li>
+                        </ul>
+                        <p><b>3. Timeline</b></p>
+                        <ul>
+                            <li>Deadline: 2022/09/30</li>
+                        </ul>
+                    </ul>
+                    <h4>Miss tracking returned/ lost orders from 3PL</h4>
+                    <ul>
+                        <p><b>1. Person in-charge: Duyen</b></p>
+                        <p><b>2. Steps:</b></p>
+                        <ul>
+                            <li>Step 1: Based on admin.lixibox.com, statistic orders missing confirmation (confirmed lost but haven't process yet) between ours and 3PL.</li>
+                            <li>Step 2: Sum of pending orders and work with 3PL to negotiate compensation (3PL just process orders within 6 months compare with these orders was pending 2 years).</li>
+                            <li>Step 3: Get the results and feedback.</li>
+                        </ul>
+                        <p><b>3. Timeline</b></p>
+                        <ul>
+                            <li>Week 40 (2022/10/03 - 2022/10/08)</li>
+                        </ul>
+                    </ul>
+                </ul>
+        </ul>
+        <h2>III. WMS Built-in Functions/ Features</h2>
+            <ul>
+                <ul>
+                    <li>As I've mentioned before on the previous email about built-in functions/ features to serve our operation and as discussion with Mr.Huy,</li><br>
+                    <p>I'd like to recap the progressing and get confirm from your team about:</p>
+                    <ul>
+                        <p>&#9755; Improve/ update some features that will tighten processes and increase current warehouse productivity.</p>
+                        <p>&#9755; New update on build-in new completed WMS version.</p>
+                    </ul>
+                <h4>&#9733; Improve/ update some features that will tighten and increase current warehouse productivity.</h4>
+                    <ul>
+                        <li style="color:blue"><b>1. Packing Process</b></li>
+                        <table>
+                            <tr>
+                                <th>Old Process</th>
+                                <th>Expected Process</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <p>Reference document: <br>
+                                        <a href="https://drive.google.com/file/d/1KdmtorUqYmEIZ0nkzhrMS1v7IMopcC5a/view?usp=sharing">https://drive.google.com/file/d/1KdmtorUqYmEIZ0nkzhrMS1v7IMopcC5a/view?usp=sharing</a></p>
+                                    <p>At this time, when doing packaging process, staff have to look into product's information, identify them and collect them together. This lead to:</p>
+                                    <ul>
+                                        <li><b>Easily pick wrong products for each order.</b></li>
+                                        <li>Difficulty when PICs are absented, new/ other employees spend long time joining in packaging process.</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <p>The expected process:</p>
+                                    <ul>
+                                        <p>Create input place for confirming product's barcode when packaging orders. This lead to</p>
+                                        <ul>
+                                            <li>When packer pack order, they have to scan to confirm it's right product (with its barcode) &rarr; minimize probability in picking wrong products of packaging orders.</li>
+                                            <li>New/ other employees have no confusion when joining packaging process. They don't have to ask others for information or get confuse when packaging orders.</li>
+                                            <li>When process is updated, the actions are similar &rarr; each employee can obtain the same productivity and we aren't depend on personal experience in packing process.</li>
+                                        </ul>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </table>
+                        <li style="color:blue"><b>2. Handover</b></li>
+                        <table>
+                            <tr>
+                                <th>Old Process</th>
+                                <th>Expected Process</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <p>Reference document:<br>
+                                    <a href="https://drive.google.com/file/d/1NU56I7vnPQDVUv-Ks6XLk3MozoGdqCsz/view?usp=sharing">https://drive.google.com/file/d/1NU56I7vnPQDVUv-Ks6XLk3MozoGdqCsz/view?usp=sharing</a></p>
+                                    <p>At this time, when handing over orders to 3PL, we have to scan one by one order to confirm those orders was<br> handed over to 3PL. This lead to:</p>
+                                    <ul>
+                                        <li>Missing handover list when confirm to 3PL.</li>
+                                        <li>Manual process handing over to 3PL (confirm to change status one by one order).</li>
+                                        <li>Difficulty in controlling handover process to 3PL.</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <p>The expected process:</p>
+                                    <ul>
+                                        <p>Create Handover list before handing over to 3PL. This lead to:</p>
+                                        <ul>
+                                            <li>Identify number of orders will hand over to each 3PL.</li>
+                                            <li>Confirm a list instead of one by one order. </li>
+                                            <li>Control hand over situation before handing over to 3PL.</li>
+                                        </ul>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </table>
+                        <li style="color:blue"><b>3. Re-check B2B and B2C Picking list</b></li>
+                        <table>
+                            <tr>
+                                <th>Old Process</th>
+                                <th>Expected Process</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <p>Reference document:<br>
+                                    <a href="https://drive.google.com/file/d/1skEPA9o13pRhdp3aXMIBan-ZMwOthewZ/view?usp=sharing">https://drive.google.com/file/d/1skEPA9o13pRhdp3aXMIBan-ZMwOthewZ/view?usp=sharing</a></p>
+                                    <p>At this time, when doing re-check process for B2B and B2C orders, staff have to look into each product's information,<br>
+                                        identify that product and confirm picked items for that products. This lead to:</p>
+                                    <ul>
+                                        <li>Spend a long time for re-check process &rarr; if it's B2B order with large number of items, we can spend whole day or a few days to re-check it.</li>
+                                        <li>By looking into product's label for identifying it &rarr; easily pick wrong products to confirm.</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <p>The expected process:</p>
+                                    <p>Create input place for searching re-check products &rarr; after scanning product's barcode &rarr; direct to re-check product. This lead to:</p>
+                                    <ul>
+                                        <li>Reduce re-check time and manual processes by multiple times.</li>
+                                        <li>Increase accuracy in picking right product to re-check.</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </table>
+                        <li style="color:blue"><b>4. B2B Picking List</b></li>
+                        <p><b>Old Process</b></p>
+                        <p>At this time, B2B picking is not shown product's location &rarr; make difficulty when doing picking process for B2B orders.</p>
+                        <p><b>Expected process</b></p>
+                        <p>Printing out B2B picking list with product's location.</p>
+                    </ul>
+                <h4>&#9733; Improve/ update some features that will tighten and increase current warehouse productivity.</h4>
+                    <ul>
+
+                    </ul>
+                </ul>
+            </ul>
+        <h2>IV. 3PL Compensation and Wrong Inventory</h2>
+        <ul>
+            <p>Dear all,<br>
+            As the problem was raised, I'd like to update to you the progressing:</p>
+            <h4>&#9733; Total List</h4>
+            <img src="{% static 'IMG/cps_1.png' %}">
+            <h4>&#9733; Processed orders: Duyen finished negotiating (round 1) with 3PL and get the compensation.</h4>
+            <img src="{% static 'IMG/cps_2.png' %}">
+            <h4>&#9733; Pending orders: At this time, the pending situation is:</h4>
+            <img src="{% static 'IMG/csp_3.png' %}">
+            <ul>
+                <p>&#9755; Solutions:</p>
+                <h5>Warehouse</h5>
+                <ul>
+                    <p><b>PIC: Tram</b></p>
+                    <li>Step 1: Get the total number of items of these pending orders.</li>
+                    <li>Step 2: Do cycle count for these items inside warehouse to identify whether we were received these items yet and send back the last result.</li>
+                </ul>
+                <h5>Transportation:</h5>
+                <ul>
+                    <p><b>PIC: Duyen</b></p>
+                    <li>After getting the compensation for orders that confirmed lost on 3PL system, there're orders that overdue processing time of 3PL.</li>
+                    <li>Continue negotiating with them about how many we can get back for these orders.</li>
+                </ul>
+            </ul>
+        </ul>
+    </ul>
+</body>
+</html>
